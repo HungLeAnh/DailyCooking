@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System;
+using UnityEngine;
 
 public class KitchenObject : MonoBehaviour
 {
@@ -9,6 +11,17 @@ public class KitchenObject : MonoBehaviour
     public KitchenObjectSO GetKitchenObjectSO()
     {
         return kitchenObjectSO;
+    }
+    public KitchenObjectOptionalProcessSO GetKitchenObjectOptionalProcessSO()
+    {
+        if (kitchenObjectSO == null) 
+            return null;
+
+        if (kitchenObjectSO.processSO != null)
+            return kitchenObjectSO.processSO;
+        else
+            return null;
+        
     }
     public void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent)
     {
@@ -37,7 +50,7 @@ public class KitchenObject : MonoBehaviour
         Destroy(gameObject);
     }
 
-/*    public bool TryGetPlate(out PlateKitchenObject plateKitchenObject)
+    public bool TryGetPlate(out PlateKitchenObject plateKitchenObject)
     {
         if (this is PlateKitchenObject)
         {
@@ -49,7 +62,7 @@ public class KitchenObject : MonoBehaviour
             plateKitchenObject = null;
             return false;
         }
-    }*/
+    }
 
     public static KitchenObject SpawnKitchenObject(KitchenObjectSO kitchenObjectSO, IKitchenObjectParent kitchenObjectParent)
     {

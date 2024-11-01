@@ -10,9 +10,15 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
         OnAnyObjectPlacedHere = null;
     }
 
+    public event EventHandler<OnKitchenObjectPlacedHereArgs> OnKitchenObjectPlacedHere;
+    public class OnKitchenObjectPlacedHereArgs: EventArgs
+    {
+        public KitchenObject kitchenObject;
+    }
+
     [SerializeField] private Transform counterTopPoint;
 
-    private KitchenObject kitchenObject;
+    private KitchenObject _kitchenObject;
 
     public Transform GetKitchenObjectFollowTransform()
     {
@@ -20,25 +26,33 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
     }
     public void SetKitchenObject(KitchenObject kitchenObject)
     {
-        this.kitchenObject = kitchenObject;
+        this._kitchenObject = kitchenObject;
 
         if (kitchenObject != null)
         {
-            OnAnyObjectPlacedHere?.Invoke(this, EventArgs.Empty);
+            if (kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
+            {
+                OnAnyObjectPlacedHere?.Invoke(this, EventArgs.Empty);
+            }
+            else
+            {
+
+            }
         }
     }
     public KitchenObject GetKitchenObject()
     {
-        return kitchenObject;
+        return _kitchenObject;
     }
     public void ClearKitchenObject()
     {
-        kitchenObject = null;
+        _kitchenObject = null;
     }
     public bool HasKitchenObject()
     {
-        return kitchenObject != null;
+        return _kitchenObject != null;
     }
+    public virtual void SetOptionKitchenObjectSO(KitchenObjectSO kitchenObjectSO) { }
 
     public virtual void Interact(PlayerStateMachine playerStateMachine)
     {

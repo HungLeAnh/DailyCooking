@@ -2,9 +2,6 @@
 
 public class ClearCounter : BaseCounter
 {
-
-    [SerializeField] private KitchenObjectSO kitchenObjectSO;
-
     public override void Interact(PlayerStateMachine playerStateMachine)
     {
         Debug.Log("ClearCounter.Interact();");
@@ -27,8 +24,8 @@ public class ClearCounter : BaseCounter
             //There is kitchen object here
             if (playerStateMachine.HasKitchenObject())
             {
-/*                //Player is carrying something
-                if (context.GetKitchenObject().TryGetPlate(out PlateKitchenObject plateKitchenObject))
+                //Player is carrying something
+                if (playerStateMachine.GetKitchenObject().TryGetPlate(out PlateKitchenObject plateKitchenObject))
                 {
                     //Player is holding a plate
                     if (plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO()))
@@ -42,12 +39,12 @@ public class ClearCounter : BaseCounter
                     if (GetKitchenObject().TryGetPlate(out plateKitchenObject))
                     {
                         //Counter is holding the plate
-                        if (plateKitchenObject.TryAddIngredient(context.GetKitchenObject().GetKitchenObjectSO()))
+                        if (plateKitchenObject.TryAddIngredient(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
                         {
-                            context.GetKitchenObject().DestroySelf();
+                            playerStateMachine.GetKitchenObject().DestroySelf();
                         }
                     }
-                }*/
+                }
             }
             else
             {

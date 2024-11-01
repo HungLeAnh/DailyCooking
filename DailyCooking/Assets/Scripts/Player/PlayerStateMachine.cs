@@ -161,7 +161,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     {
         Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
 
-        Debug.Log("input Vector: " + inputVector);
+        //Debug.Log("input Vector: " + inputVector);
         Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
 
         float moveDistance = Context.MoveSpeed * Time.deltaTime;
