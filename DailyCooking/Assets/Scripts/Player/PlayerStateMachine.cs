@@ -149,7 +149,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
 
     public virtual void ChangeAnimationState(string animationName)
     {
-        Context.CharacterAnimator.Play(animationName);
+        Context.CharacterAnimator.CrossFade(animationName,0.1f,0,0.1f,0.1f);
     }
     public override void UpdateState()
     {

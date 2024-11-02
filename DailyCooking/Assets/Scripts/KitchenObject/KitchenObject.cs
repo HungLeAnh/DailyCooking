@@ -50,16 +50,16 @@ public class KitchenObject : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public bool TryGetPlate(out PlateKitchenObject plateKitchenObject)
+    public bool TryGetTableware(out TablewareKitchenObject tablewareKitchenObject)
     {
-        if (this is PlateKitchenObject)
+        if (this is TablewareKitchenObject)
         {
-            plateKitchenObject = this as PlateKitchenObject;
+            tablewareKitchenObject = this as TablewareKitchenObject;
             return true;
         }
         else
         {
-            plateKitchenObject = null;
+            tablewareKitchenObject = null;
             return false;
         }
     }

@@ -25,7 +25,7 @@ public class ClearCounter : BaseCounter
             if (playerStateMachine.HasKitchenObject())
             {
                 //Player is carrying something
-                if (playerStateMachine.GetKitchenObject().TryGetPlate(out PlateKitchenObject plateKitchenObject))
+                if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject plateKitchenObject))
                 {
                     //Player is holding a plate
                     if (plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO()))
@@ -36,7 +36,7 @@ public class ClearCounter : BaseCounter
                 else
                 {
                     //Player is not carrying plate
-                    if (GetKitchenObject().TryGetPlate(out plateKitchenObject))
+                    if (GetKitchenObject().TryGetTableware(out plateKitchenObject))
                     {
                         //Counter is holding the plate
                         if (plateKitchenObject.TryAddIngredient(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
