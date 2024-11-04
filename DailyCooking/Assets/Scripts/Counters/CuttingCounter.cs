@@ -2,7 +2,7 @@
 using UnityEngine;
 
 
-public class CuttingCounter : BaseCounter, IHasProgress
+public class CuttingCounter : BaseCounter, IHasProgress, IHasOptionalSO
 {
 
     public static event EventHandler OnAnyCut;
@@ -138,8 +138,9 @@ public class CuttingCounter : BaseCounter, IHasProgress
         }
         return null;
     }    
-    private CuttingRecipeSO GetCuttingRecipeSOWithOutput(KitchenObjectSO outputKitchenObjectSO)
+    private CuttingRecipeSO GetCuttingRecipeSOWithOutput(int outputKitchenObjectSOIndex)
     {
+        var outputKitchenObjectSO = GetKitchenObject().GetKitchenObjectOptionalProcessSO().processListOutput[outputKitchenObjectSOIndex];
         foreach (CuttingRecipeSO cuttingRecipeSO in cuttingRecipeSOArray)
         {
             if (cuttingRecipeSO.output == outputKitchenObjectSO)
@@ -150,13 +151,15 @@ public class CuttingCounter : BaseCounter, IHasProgress
         return null;
     }
 
-    public override void SetOptionKitchenObjectSO(KitchenObjectSO kitchenObjectSO)
+    public void SetOptionKitchenObjectSO(int index)
     {
-        _cuttingRecipeSO = GetCuttingRecipeSOWithOutput(kitchenObjectSO);
+   
+        _cuttingRecipeSO = GetCuttingRecipeSOWithOutput(index);
 
         OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
         {
             progressNormalized = (float)cuttingProgress / _cuttingRecipeSO.cuttingProgressMax
         });
+
     }
 }

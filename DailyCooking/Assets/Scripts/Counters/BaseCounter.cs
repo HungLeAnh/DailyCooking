@@ -3,17 +3,13 @@ using UnityEngine;
 
 public class BaseCounter : MonoBehaviour, IKitchenObjectParent
 {
-    public static event EventHandler OnAnyObjectPlacedHere;
+    public static event EventHandler<KitchenObjectSO> OnAnyObjectPlacedHere;
+    public static event EventHandler<TablewareKitchenObject> OnShowFoodOptionMenu;
 
     public static void ResetStaticData()
     {
         OnAnyObjectPlacedHere = null;
-    }
-
-    public event EventHandler<OnKitchenObjectPlacedHereArgs> OnKitchenObjectPlacedHere;
-    public class OnKitchenObjectPlacedHereArgs: EventArgs
-    {
-        public KitchenObject kitchenObject;
+        OnShowFoodOptionMenu = null;
     }
 
     [SerializeField] private Transform counterTopPoint;
@@ -32,7 +28,7 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
         {
             if (kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
             {
-                OnAnyObjectPlacedHere?.Invoke(this, EventArgs.Empty);
+                OnAnyObjectPlacedHere?.Invoke(this, kitchenObject.GetKitchenObjectSO());
             }
             else
             {
@@ -52,8 +48,6 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
     {
         return _kitchenObject != null;
     }
-    public virtual void SetOptionKitchenObjectSO(KitchenObjectSO kitchenObjectSO) { }
-
     public virtual void Interact(PlayerStateMachine playerStateMachine)
     {
         Debug.Log("BaseCounter.Interact();");
@@ -61,6 +55,14 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
     public virtual void InteractAlternate(PlayerStateMachine playerStateMachine)
     {
         Debug.Log("BaseCounter.InteractAlternate();");
-
     }
+    public void FireOnShowFoodOption(TablewareKitchenObject tablewareObject)
+    {
+        OnShowFoodOptionMenu?.Invoke(this, tablewareObject);
+    }
+}
+public interface IHasOptionalSO
+{
+    public void SetOptionKitchenObjectSO(int index);
+
 }

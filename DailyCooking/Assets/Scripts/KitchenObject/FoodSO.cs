@@ -5,5 +5,6 @@ using UnityEngine;
 public class FoodSO : ScriptableObject
 {
     public List<KitchenObjectSO> kitchenObjectSOList;
+    public Sprite Sprite;
     public string recipeName;
 }

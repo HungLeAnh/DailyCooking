@@ -9,71 +9,58 @@ public class TablewareKitchenObject : KitchenObject
     public event EventHandler<OnIngredientAddedEventArgs> OnIngredientAdded;
     public class OnIngredientAddedEventArgs : EventArgs
     {
+        public FoodSO foodSO;
         public KitchenObjectSO KitchenObjectSO;
     }
 
     [SerializeField] private List<KitchenObjectSO> validKitchenObjectSOList;
     [SerializeField] private List<FoodSO> tablewareFoodSOList;
 
-    private List<KitchenObjectSO> ingredientSOList;
-    private List<FoodSO> possibleFoodList;
+    private List<KitchenObjectSO> _ingredientSOList;
+    private FoodSO _foodSO;
+
+    public List<FoodSO> TablewareFoodSOList { get => tablewareFoodSOList; set => tablewareFoodSOList = value; }
+
     private void Awake()
     {
-        ingredientSOList = new List<KitchenObjectSO>();
-        possibleFoodList = new List<FoodSO>(tablewareFoodSOList);
+        _ingredientSOList = new List<KitchenObjectSO>();
     }
 
     public bool TryAddIngredient(KitchenObjectSO kitchenObjectSO)
     {
+        if (_foodSO == null) 
+            return false;
+
+        Debug.Log("Try add ingredient");
         if (!validKitchenObjectSOList.Contains(kitchenObjectSO))
         {
+            Debug.Log("add invalid object");
             return false;
         }
-        if (ingredientSOList.Contains(kitchenObjectSO))
+        if (_ingredientSOList.Contains(kitchenObjectSO))
         {
             //Already has this type
+            Debug.Log("Already has this type object");
             return false;
         }
         else
         {
-            if (ingredientSOList.Count == 0)
+            _ingredientSOList.Add(kitchenObjectSO);
+            OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
             {
-                foreach(var foodSO in possibleFoodList.ToList())
-                {
-                    if (foodSO.kitchenObjectSOList[0] != kitchenObjectSO)
-                        possibleFoodList.Remove(foodSO);
-                }
-            }
-            else
-            {
-                foreach (var foodSO in possibleFoodList.ToList())
-                {
-                    if (foodSO.kitchenObjectSOList.Count <= ingredientSOList.Count||
-                        foodSO.kitchenObjectSOList[ingredientSOList.Count] != kitchenObjectSO)
-                        possibleFoodList.Remove(foodSO);
-                }
-            }
-
-            if (possibleFoodList.Count > 0)
-            {
-                ingredientSOList.Add(kitchenObjectSO);
-                OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
-                {
-                    KitchenObjectSO = kitchenObjectSO,
-                });
-                return true;
-            }
-            else
-                return false;
-
+                KitchenObjectSO = kitchenObjectSO,
+                foodSO = _foodSO
+            });
+            return true;
         }
     }
     public List<KitchenObjectSO> GetKitchenObjectSOList()
     {
-        return ingredientSOList;
+        return _ingredientSOList;
     }
-    public List<FoodSO> GetPossibleFoodSOList()
+
+    public void SetFoodSO(FoodSO foodSO)
     {
-        return possibleFoodList;
+        _foodSO = foodSO;
     }
 }

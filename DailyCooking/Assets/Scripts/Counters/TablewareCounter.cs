@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TablewareCounter : BaseCounter
+public class TablewareCounter : BaseCounter, IHasOptionalSO
 {
     public event EventHandler OnTablewareSpawned;
     public event EventHandler OnTablewareRemoved;
@@ -13,17 +13,15 @@ public class TablewareCounter : BaseCounter
 
     private int _tablewareSpawnAmount;
     private int _tablewareSpawnAmountMax = 4;
-
-
+    private TablewareKitchenObject _lastTablewareKitchenObject;
     private void Update()
     {
-        _spawnTimer += Time.deltaTime;
-        if (_spawnTimer > _spawnTimerMax)
+        if (_tablewareSpawnAmount < _tablewareSpawnAmountMax)
         {
-            _spawnTimer = 0f;
-
-            if (_tablewareSpawnAmount < _tablewareSpawnAmountMax)
+            _spawnTimer += Time.deltaTime;
+            if (_spawnTimer > _spawnTimerMax)
             {
+                _spawnTimer = 0f;
                 _tablewareSpawnAmount++;
                 OnTablewareSpawned?.Invoke(this, EventArgs.Empty);
             }
@@ -37,76 +35,21 @@ public class TablewareCounter : BaseCounter
             if (_tablewareSpawnAmount > 0)
             {
                 //There is at least one tableware
-                _tablewareSpawnAmount--;
-
-                KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
-
+                _tablewareSpawnAmount--; 
+                TablewareKitchenObject tablewareObject = (TablewareKitchenObject)KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
+                _lastTablewareKitchenObject = tablewareObject;
+                FireOnShowFoodOption(tablewareObject);
                 OnTablewareRemoved?.Invoke(this, EventArgs.Empty);
             }
         }
     }
-}
-public class TablewareCounterVisual : MonoBehaviour
-{
-    [SerializeField] private TablewareCounter _tablewareCounter;
-    [SerializeField] private Transform _tablewareVisualPrefab;
 
-    private List<GameObject> _tablewareVisualGameObjectList;
-
-    private void Awake()
+    public void SetOptionKitchenObjectSO(int index)
     {
-        _tablewareVisualGameObjectList = new List<GameObject>();
-    }
-
-    private void Start()
-    {
-        _tablewareCounter.OnTablewareSpawned += TablewareCounter_OnTablewareSpawned;
-        _tablewareCounter.OnTablewareRemoved += TablewareCounter_OnTablewareRemoved;
-    }
-
-    private void TablewareCounter_OnTablewareRemoved(object sender, System.EventArgs e)
-    {
-        GameObject tablewareGameObject = _tablewareVisualGameObjectList[_tablewareVisualGameObjectList.Count - 1];
-        _tablewareVisualGameObjectList.Remove(tablewareGameObject);
-        Destroy(tablewareGameObject);
-    }
-
-    private void TablewareCounter_OnTablewareSpawned(object sender, System.EventArgs e)
-    {
-        Transform tablewareVisualTransform = Instantiate(_tablewareVisualPrefab, _tablewareCounter.GetKitchenObjectFollowTransform());
-        float tablewareOffsetY = .1f;
-        tablewareVisualTransform.localPosition = new Vector3(0, tablewareOffsetY * _tablewareVisualGameObjectList.Count, 0);
-        _tablewareVisualGameObjectList.Add(tablewareVisualTransform.gameObject);
-    }
-}
-public class FoodCompleteVisual : MonoBehaviour
-{
-    [Serializable]
-    public struct KitchenObjectSO_GameObject
-    {
-        public GameObject GameObject;
-        public KitchenObjectSO kitchenObjectSO;
-    }
-
-    [SerializeField] private TablewareKitchenObject tablewareKitchenObject;
-    [SerializeField] private List<KitchenObjectSO_GameObject> KitchenObjectSO_GameObjectList;
-    private void Start()
-    {
-        tablewareKitchenObject.OnIngredientAdded += TablewareKitchenObject_OnIngredientAdded;
-        foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in KitchenObjectSO_GameObjectList)
-        {
-            kitchenObjectSOGameObject.GameObject.SetActive(false);
-        }
-    }
-
-    private void TablewareKitchenObject_OnIngredientAdded(object sender, TablewareKitchenObject.OnIngredientAddedEventArgs e)
-    {
-        foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in KitchenObjectSO_GameObjectList)
-        {
-            if (kitchenObjectSOGameObject.kitchenObjectSO == e.KitchenObjectSO)
-            {
-                kitchenObjectSOGameObject.GameObject.SetActive(true);
-            }
-        }
+        if (_lastTablewareKitchenObject == null)
+            return;
+        var foodSO = _lastTablewareKitchenObject.TablewareFoodSOList[index];
+        _lastTablewareKitchenObject.SetFoodSO(foodSO);
+        _lastTablewareKitchenObject = null;
     }
 }

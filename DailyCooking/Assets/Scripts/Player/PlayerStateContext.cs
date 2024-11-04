@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 public class PlayerStateContext 
 {
-
+    private bool _idDisableInput;
     private Animator _characterAnimator;
     private float _movespeed;
     private bool _isWalking;
@@ -34,6 +34,7 @@ public class PlayerStateContext
     public Transform PlayerTransform => _playerTransform;
     public LayerMask CounterLayerMask => _counterLayermask;
     //Read and Write
+    public bool IsDisableInput { get => _idDisableInput; set => _idDisableInput = value; }
     public bool IsWalking { get => _isWalking; set => _isWalking = value; }
     public Vector3 LastInteractDir { get => _lastInteractDir; set => _lastInteractDir = value; }
     public BaseCounter SelectedCounter { get => _selectedCounter; set => _selectedCounter = value; }

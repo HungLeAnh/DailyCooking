@@ -137,6 +137,10 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     {
         return _context.KitchenObject != null;
     }
+    public void DisableInput(bool isDisable)
+    {
+        _context.IsDisableInput = isDisable;
+    }
 }
 
 public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerState>
@@ -153,9 +157,12 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     }
     public override void UpdateState()
     {
-        Update();
-        HandleMovement();
-        HandleInteractions();
+        if (Context.IsDisableInput)
+        {
+            Update();
+            HandleMovement();
+            HandleInteractions();
+        }
     }
     private void HandleMovement()
     {
