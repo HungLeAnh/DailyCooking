@@ -11,6 +11,7 @@ public class OptionMenuUI : MonoBehaviour
 {
     [SerializeField] private Transform _menuContainer;
     [SerializeField] private GameObject _itemPrefab;
+    [SerializeField] private TextMeshProUGUI _title;
 
     private IHasOptionalSO _optionalCounter;
 
@@ -19,13 +20,37 @@ public class OptionMenuUI : MonoBehaviour
     {
         BaseCounter.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
         BaseCounter.OnShowFoodOptionMenu += BaseCounter_OnShowFoodOptionMenu;
+        BaseCounter.OnShowOptionalMenu += BaseCounter_OnShowOptionalMenu;
         _itemPrefab.SetActive(false);
         Hide();
+    }
+
+    private void BaseCounter_OnShowOptionalMenu(object sender, BaseCounter.OnShowOptionalMenuArgs e)
+    {
+        Show();
+        _title.text = "Select ingredient to make: ";
+        _optionalCounter = (IHasOptionalSO)sender;
+        if (_optionalCounter == null)
+            return;
+
+        var kitchenObjectSOList = e.optionalList;
+        if (kitchenObjectSOList == null)
+            return;
+
+        for (int i = 0; i < kitchenObjectSOList.Count; i++)
+        {
+            var menuItem = Instantiate(_itemPrefab, _menuContainer).GetComponent<OptionMenuItemUI>();
+            menuItem.gameObject.SetActive(true);
+            menuItem.Setup(i, kitchenObjectSOList[i]);
+            menuItem.OnSelectedOption += MenuItem_OnSelectedFood;
+            _menuItems.Add(menuItem);
+        }
     }
 
     private void BaseCounter_OnAnyObjectPlacedHere(object sender, KitchenObjectSO kitchenObjectSO)
     {
         Show();
+        _title.text = "Select way to process ingredient:";
         _optionalCounter = (IHasOptionalSO)sender;
         if (_optionalCounter == null ) 
             return;
@@ -54,6 +79,7 @@ public class OptionMenuUI : MonoBehaviour
     private void BaseCounter_OnShowFoodOptionMenu(object sender, TablewareKitchenObject tablewareObject)
     {
         Show();
+        _title.text = "Select food to make: ";
         _optionalCounter = (IHasOptionalSO)sender;
         if (_optionalCounter == null)
             return;

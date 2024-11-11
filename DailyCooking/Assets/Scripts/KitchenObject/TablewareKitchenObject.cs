@@ -15,6 +15,8 @@ public class TablewareKitchenObject : KitchenObject
 
     [SerializeField] private List<KitchenObjectSO> validKitchenObjectSOList;
     [SerializeField] private List<FoodSO> tablewareFoodSOList;
+    [SerializeField] private FoodDetailUI foodDetailUI;
+
 
     private List<KitchenObjectSO> _ingredientSOList;
     private FoodSO _foodSO;
@@ -44,7 +46,10 @@ public class TablewareKitchenObject : KitchenObject
             return false;
         }
         else
-        {
+        { 
+            if(!_foodSO.kitchenObjectSOList.Contains(kitchenObjectSO))
+                return false;
+
             _ingredientSOList.Add(kitchenObjectSO);
             OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
             {
@@ -62,5 +67,6 @@ public class TablewareKitchenObject : KitchenObject
     public void SetFoodSO(FoodSO foodSO)
     {
         _foodSO = foodSO;
+        foodDetailUI.InitUI(_foodSO);
     }
 }

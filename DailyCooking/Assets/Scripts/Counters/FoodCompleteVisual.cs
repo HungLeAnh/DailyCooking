@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FoodCompleteVisual : MonoBehaviour
 {
     [Serializable]
     public struct KitchenObjectSO_GameObject
     {
-        public GameObject GameObject;
+        public List<GameObject> GameObjectList;
         public KitchenObjectSO kitchenObjectSO;
     }
     [SerializeField] private FoodSO _foodSO;
@@ -18,7 +19,10 @@ public class FoodCompleteVisual : MonoBehaviour
         tablewareKitchenObject.OnIngredientAdded += TablewareKitchenObject_OnIngredientAdded;
         foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in KitchenObjectSO_GameObjectList)
         {
-            kitchenObjectSOGameObject.GameObject.SetActive(false);
+            foreach (var item in kitchenObjectSOGameObject.GameObjectList)
+            {
+                item.SetActive(false);
+            } 
         }
     }
 
@@ -26,11 +30,15 @@ public class FoodCompleteVisual : MonoBehaviour
     {
         if (e.foodSO != _foodSO)
             return;
+
         foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in KitchenObjectSO_GameObjectList)
         {
             if (kitchenObjectSOGameObject.kitchenObjectSO == e.KitchenObjectSO)
             {
-                kitchenObjectSOGameObject.GameObject.SetActive(true);
+                foreach (var item in kitchenObjectSOGameObject.GameObjectList)
+                {
+                    item.SetActive(true);
+                }
             }
         }
     }

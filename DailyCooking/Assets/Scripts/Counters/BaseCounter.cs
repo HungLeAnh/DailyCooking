@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BaseCounter : MonoBehaviour, IKitchenObjectParent
 {
     public static event EventHandler<KitchenObjectSO> OnAnyObjectPlacedHere;
     public static event EventHandler<TablewareKitchenObject> OnShowFoodOptionMenu;
-
+    public static event EventHandler<OnShowOptionalMenuArgs> OnShowOptionalMenu;
+    public class OnShowOptionalMenuArgs : EventArgs
+    {
+        public List<KitchenObjectSO> optionalList;
+    }
     public static void ResetStaticData()
     {
         OnAnyObjectPlacedHere = null;
@@ -59,6 +64,13 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
     public void FireOnShowFoodOption(TablewareKitchenObject tablewareObject)
     {
         OnShowFoodOptionMenu?.Invoke(this, tablewareObject);
+    }
+    public void FireOnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
+    {
+        OnShowOptionalMenu?.Invoke(this, new OnShowOptionalMenuArgs
+        {
+            optionalList = kitchenObjectSOList
+        });
     }
 }
 public interface IHasOptionalSO

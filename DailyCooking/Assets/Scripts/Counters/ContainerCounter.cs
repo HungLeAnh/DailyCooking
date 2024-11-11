@@ -17,6 +17,17 @@ public class ContainerCounter : BaseCounter
 
             OnPlayreGrabbedObject?.Invoke(this, EventArgs.Empty);
         }
+        else
+        {
+            //Player is carrying something
+            if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
+            {
+                //Player is holding a plate
+                if (tablewareKitchenObject.TryAddIngredient(kitchenObjectSO))
+                {
+                }
+            }
+        }
     }
 
 }
