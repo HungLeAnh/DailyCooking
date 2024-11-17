@@ -9,7 +9,6 @@ public class FoodDetailUI : MonoBehaviour
     [SerializeField] private Image _foodIcon;
     [SerializeField] private Transform _iconTemplate;
 
-    private FoodSO foodSO;
     private List<GameObject> foodIngredientIconGOList = new List<GameObject>();
     private void Awake()
     {
@@ -26,6 +25,7 @@ public class FoodDetailUI : MonoBehaviour
             Destroy(gameObject);
         }
         foodIngredientIconGOList.Clear();
+        _foodIcon.sprite = foodSO.Sprite;
 
         foreach (KitchenObjectSO kitchenObjectSO in foodSO.kitchenObjectSOList)
         {

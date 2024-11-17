@@ -7,6 +7,11 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
     public static event EventHandler<KitchenObjectSO> OnAnyObjectPlacedHere;
     public static event EventHandler<TablewareKitchenObject> OnShowFoodOptionMenu;
     public static event EventHandler<OnShowOptionalMenuArgs> OnShowOptionalMenu;
+    public static event EventHandler<OnShowCombineRecipeArgs> OnShowCombineRecipe;
+    public class OnShowCombineRecipeArgs : EventArgs
+    {
+        public List<KitchenObjectSO> combineRecipeOutputList;
+    }
     public class OnShowOptionalMenuArgs : EventArgs
     {
         public List<KitchenObjectSO> optionalList;
@@ -71,10 +76,20 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
         {
             optionalList = kitchenObjectSOList
         });
+    }   
+    public void FireOnShowCombineRecipe(List<KitchenObjectSO> kitchenObjectSOList)
+    {
+        OnShowCombineRecipe?.Invoke(this, new OnShowCombineRecipeArgs
+        {
+            combineRecipeOutputList = kitchenObjectSOList
+        });
     }
 }
 public interface IHasOptionalSO
 {
     public void SetOptionKitchenObjectSO(int index);
-
+    public virtual List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)
+    {
+        return null;
+    }
 }

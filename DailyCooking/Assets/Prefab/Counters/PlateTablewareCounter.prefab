@@ -415,6 +415,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _tablewareCounter: {fileID: 4613707733294792051}
   _tablewareVisualPrefab: {fileID: 6154266614422445402, guid: 09bd130b37817084ab004c0136ea7897, type: 3}
+  tablewareOffsetX: 0.1
+  tablewareOffsetY: 0.5
+  tablewareRotation: {x: 0, y: 0, z: 90}
 --- !u!1 &8335752877465535745 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1422007882026835853, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}

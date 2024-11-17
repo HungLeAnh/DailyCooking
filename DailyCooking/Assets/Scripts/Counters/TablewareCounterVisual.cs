@@ -5,6 +5,9 @@ public class TablewareCounterVisual : MonoBehaviour
 {
     [SerializeField] private TablewareCounter _tablewareCounter;
     [SerializeField] private Transform _tablewareVisualPrefab;
+    [SerializeField] float tablewareOffsetX = .1f;
+    [SerializeField] float tablewareOffsetY = 0.5f;
+    [SerializeField] Vector3 tablewareRotation = Vector3.zero;
 
     private List<GameObject> _tablewareVisualGameObjectList;
 
@@ -33,8 +36,9 @@ public class TablewareCounterVisual : MonoBehaviour
     private void TablewareCounter_OnTablewareSpawned(object sender, System.EventArgs e)
     {
         Transform tablewareVisualTransform = Instantiate(_tablewareVisualPrefab, _tablewareCounter.GetKitchenObjectFollowTransform());
-        float tablewareOffsetY = .1f;
-        tablewareVisualTransform.localPosition = new Vector3(0, tablewareOffsetY * _tablewareVisualGameObjectList.Count, 0);
+
+        tablewareVisualTransform.localPosition = new Vector3(tablewareOffsetX * _tablewareVisualGameObjectList.Count, tablewareOffsetY, 0);
+        tablewareVisualTransform.Rotate(tablewareRotation);
         _tablewareVisualGameObjectList.Add(tablewareVisualTransform.gameObject);
     }
 }
