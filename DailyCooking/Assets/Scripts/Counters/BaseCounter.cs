@@ -85,11 +85,3 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
         });
     }
 }
-public interface IHasOptionalSO
-{
-    public void SetOptionKitchenObjectSO(int index);
-    public virtual List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)
-    {
-        return null;
-    }
-}

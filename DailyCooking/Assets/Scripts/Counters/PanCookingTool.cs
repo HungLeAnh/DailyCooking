@@ -45,9 +45,9 @@ public class PanCookingTool : CookingTool
         return null;
     }
 
-    public override void SetCookingRecipeSO(KitchenObjectSO kitchenObjectSO)
+    public override void SetCookingRecipeSO()
     {
-        _fryingRecipeSO = GetFryingRecipeSOWithInput(kitchenObjectSO);
+        _fryingRecipeSO = GetFryingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
         CookingTimeMax = _fryingRecipeSO.fryingTimerMax;
     }
 

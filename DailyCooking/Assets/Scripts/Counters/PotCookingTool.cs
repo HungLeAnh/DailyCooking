@@ -53,7 +53,7 @@ public class PotCookingTool : CookingTool,IHasOptionalSO
         return null;
     }
 
-    public override void SetCookingRecipeSO(KitchenObjectSO kitchenObjectSO)
+    public override void SetCookingRecipeSO()
     {
         
     }
