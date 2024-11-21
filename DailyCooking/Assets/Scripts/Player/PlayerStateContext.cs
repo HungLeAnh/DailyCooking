@@ -25,6 +25,7 @@ public class PlayerStateContext
         _playerTransform = playerTransform;
         _counterLayermask = counterLayerMask;
         _kitchenObjectHoldPoint = kitchenObjectHoldPoint;
+        _idDisableInput = false;
     }
 
     //Read only

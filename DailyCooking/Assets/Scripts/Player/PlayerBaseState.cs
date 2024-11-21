@@ -14,7 +14,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     }
     public override void UpdateState()
     {
-        if (Context.IsDisableInput)
+        if(!Context.IsDisableInput)
         {
             Update();
             HandleMovement();

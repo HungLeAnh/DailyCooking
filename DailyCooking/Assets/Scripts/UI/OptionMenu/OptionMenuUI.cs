@@ -121,7 +121,7 @@ public class OptionMenuUI : MonoBehaviour
             Destroy(item.gameObject);
         }
         _menuItems.Clear();
-        PlayerStateMachine.Instance.DisableInput(true);
+        PlayerStateMachine.Instance.DisableInput(false);
 
     }
 }
