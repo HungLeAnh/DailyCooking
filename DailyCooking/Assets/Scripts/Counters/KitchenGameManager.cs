@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class KitchenGameManager : MonoBehaviour
 {
+    private const string PLAYER_DAY = "PlayerDay";
     public static KitchenGameManager Instance { get; private set; }
 
     public event EventHandler OnStateChanged;
@@ -12,30 +13,56 @@ public class KitchenGameManager : MonoBehaviour
 
     public event EventHandler OnGameUnpaused;
 
+    public event EventHandler OnServeFood;
+
     private enum State
     {
         WaitingToStart,
-        CountdownToStart,
+    CountdownToStart,
         GamePlaying,
         GameOver,
-    }
-
+}
+    [SerializeField] private long earnGoalMultiply = 1000;
+    [SerializeField] private long serveGoalMultiply = 10;
+    [SerializeField] private long gamePlayingTimeMultiply = 120;
     private State state;
     private float countdownToStartTimer = 3f;
     private float gamePlayingTimer;
-    [SerializeField] private float gamePlayingTimerMax = 20f;
+    private float gamePlayingTimerMax = 20f;
     private bool isGamePaused = false;
+    private long earnGoal;
+    private long serveGoal;
+    private long earnCount;
+    private long serveCount;
+    private int playerDay = -1;
 
-
+    public long EarnCount => earnCount;
+    public long ServeCount => serveCount;
+    public long EarnGoal { get => earnGoal; set => earnGoal = value; }
+    public long ServeGoal { get => serveGoal; set => serveGoal = value; }
     private void Awake()
     {
         Instance = this;
-        state = State.CountdownToStart;
+        state = State.WaitingToStart;
+
+
+        playerDay = PlayerPrefs.GetInt(PLAYER_DAY,1);
+        CreateDailytask();
+
     }
     private void Start()
     {
         GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
         GameInput.Instance.OnInteractAction += GameInput_OnInteractAction;
+    }
+
+    private void CreateDailytask()
+    {
+        EarnGoal = playerDay * earnGoalMultiply;
+        ServeGoal = playerDay * serveGoalMultiply;
+        gamePlayingTimerMax = ServeGoal * gamePlayingTimeMultiply;
+        earnCount = 0;
+        serveCount = 0;
     }
 
     private void GameInput_OnInteractAction(object sender, EventArgs e)
@@ -44,6 +71,15 @@ public class KitchenGameManager : MonoBehaviour
         {
             state = State.CountdownToStart;
             OnStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+        if (state == State.GameOver)
+        {
+            if (serveGoal <= ServeCount && earnGoal <= earnCount)
+            {
+                playerDay++;
+                PlayerPrefs.SetInt(PLAYER_DAY, playerDay);
+            }
+            Loader.Load(Loader.Scene.GameScene);
         }
     }
 
@@ -118,5 +154,12 @@ public class KitchenGameManager : MonoBehaviour
             Time.timeScale = 1f;
             OnGameUnpaused?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    public void ServeFood(FoodSO waitingRecipeSO)
+    {
+        earnCount += waitingRecipeSO.price;
+        serveCount++;
+        OnServeFood.Invoke(this,EventArgs.Empty);
     }
 }

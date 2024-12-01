@@ -7,4 +7,5 @@ public class FoodSO : ScriptableObject
     public List<KitchenObjectSO> kitchenObjectSOList;
     public Sprite Sprite;
     public string recipeName;
+    public long price;
 }

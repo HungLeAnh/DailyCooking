@@ -84,6 +84,7 @@ public class DeliveryManager : MonoBehaviour
                     successfulRecipesAmount++;
                     OnRecipeCompleted?.Invoke(this, EventArgs.Empty);
                     OnRecipeSuccess?.Invoke(this, EventArgs.Empty);
+                    KitchenGameManager.Instance.ServeFood(waitingRecipeSO);
                     return;
                 }
             }
