@@ -8,7 +8,7 @@ public abstract class MonoStateManager<T> : MonoBehaviour where T : Enum
 {
     protected Dictionary<T,BaseState<T>> _states = new Dictionary<T, BaseState<T>>();
     protected BaseState<T> _currentState;
-    protected bool IsTransitionongState = false;
+    protected bool IsTransitioningState = false;
     private void Start()
     {
         _currentState.EnterState();
@@ -16,11 +16,11 @@ public abstract class MonoStateManager<T> : MonoBehaviour where T : Enum
     private void Update()
     {
         T nextStateKey = _currentState.GetNextState();
-        if (!IsTransitionongState && nextStateKey.Equals(_currentState.StateKey))
+        if (!IsTransitioningState && nextStateKey.Equals(_currentState.StateKey))
         {
             _currentState.UpdateState();
         }
-        else if(!IsTransitionongState)
+        else if(!IsTransitioningState)
         {
             TransitionToState(nextStateKey);
         }
@@ -30,11 +30,11 @@ public abstract class MonoStateManager<T> : MonoBehaviour where T : Enum
     {
         if (_states.Count == 0)
             return;
-        IsTransitionongState = true;
+        IsTransitioningState = true;
         _currentState.ExitState();
         _currentState = _states[nextStateKey];
         _currentState.EnterState();
-        IsTransitionongState = false;
+        IsTransitioningState = false;
     }
 
     private void OnTriggerEnter(Collider other)

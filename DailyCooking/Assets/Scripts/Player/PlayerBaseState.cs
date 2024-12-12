@@ -66,16 +66,18 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         if (canMove)
         {
             Context.PlayerTransform.position += moveDir * moveDistance;
-
         }
 
 
         Context.IsWalking = moveDir != Vector3.zero;
         
         float rotateSpeed = 10f;
-        
-        if(Context.IsWalking)
+
+        if (Context.IsWalking)
+        {
             Context.PlayerTransform.forward = Vector3.Slerp(Context.PlayerTransform.forward, moveDir, rotateSpeed * Time.deltaTime);
+            SoundManager.Instance.PlayFootStepSound(Context.PlayerTransform.position, 1);
+        }
     }
     private void HandleInteractions()
     {

@@ -5,6 +5,8 @@ public class StoveCounter : BaseCounter
 {
     [SerializeField] private CookingTool _cookingTool;
 
+    public CookingTool CookingTool { get => _cookingTool; set => _cookingTool = value; }
+
     private void Start()
     {
         _cookingTool.CurrentState = CookingTool.State.Idle;
