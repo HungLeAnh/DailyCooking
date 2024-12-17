@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DeliveryManager : MonoBehaviour
@@ -47,45 +48,46 @@ public class DeliveryManager : MonoBehaviour
 
     public void DeliverRecipe(TablewareKitchenObject tablewareKitchenObject)
     {
-        for (int i = 0; i < waitingRecipeSOList.Count; i++)
+        foreach (var waitingFood in waitingRecipeSOList.ToList())
         {
-            FoodSO waitingRecipeSO = waitingRecipeSOList[i];
-
-            if (waitingRecipeSO.kitchenObjectSOList.Count == tablewareKitchenObject.GetKitchenObjectSOList().Count)
+            if(waitingFood.recipeName == tablewareKitchenObject.FoodSO.recipeName)
             {
-                //Has the same number of ingredients
-                bool plateContentMathesRecipe = true;
-
-                foreach (KitchenObjectSO recipeKitchenObjectSO in waitingRecipeSO.kitchenObjectSOList)
+                if (waitingFood.kitchenObjectSOList.Count == tablewareKitchenObject.GetKitchenObjectSOList().Count)
                 {
-                    //Cycling through all ingredients in recipe
-                    bool ingredientFound = false;
-                    foreach (KitchenObjectSO plateKitchenObjectSO in tablewareKitchenObject.GetKitchenObjectSOList())
+                    //Has the same number of ingredients
+                    bool plateContentMathesRecipe = true;
+
+                    foreach (KitchenObjectSO recipeKitchenObjectSO in waitingFood.kitchenObjectSOList)
                     {
                         //Cycling through all ingredients in recipe
-                        if (plateKitchenObjectSO == recipeKitchenObjectSO)
+                        bool ingredientFound = false;
+                        foreach (KitchenObjectSO plateKitchenObjectSO in tablewareKitchenObject.GetKitchenObjectSOList())
                         {
-                            ingredientFound = true;
-                            break;
+                            //Cycling through all ingredients in recipe
+                            if (plateKitchenObjectSO == recipeKitchenObjectSO)
+                            {
+                                ingredientFound = true;
+                                break;
+                            }
+                        }
+                        if (!ingredientFound)
+                        {
+                            // This Recipe ingredient was not found on the plate
+                            plateContentMathesRecipe = false;
+
                         }
                     }
-                    if (!ingredientFound)
+
+                    if (plateContentMathesRecipe)
                     {
-                        // This Recipe ingredient was not found on the plate
-                        plateContentMathesRecipe = false;
-
+                        // Player delivered correct recipe 
+                        waitingRecipeSOList.Remove(waitingFood);
+                        successfulRecipesAmount++;
+                        OnRecipeCompleted?.Invoke(this, EventArgs.Empty);
+                        OnRecipeSuccess?.Invoke(this, EventArgs.Empty);
+                        KitchenGameManager.Instance.ServeFood(waitingFood);
+                        return;
                     }
-                }
-
-                if (plateContentMathesRecipe)
-                {
-                    // Player delivered correct recipe 
-                    waitingRecipeSOList.RemoveAt(i);
-                    successfulRecipesAmount++;
-                    OnRecipeCompleted?.Invoke(this, EventArgs.Empty);
-                    OnRecipeSuccess?.Invoke(this, EventArgs.Empty);
-                    KitchenGameManager.Instance.ServeFood(waitingRecipeSO);
-                    return;
                 }
             }
         }

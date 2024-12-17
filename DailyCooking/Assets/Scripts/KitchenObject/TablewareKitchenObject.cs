@@ -21,6 +21,7 @@ public class TablewareKitchenObject : KitchenObject
     private List<KitchenObjectSO> _ingredientSOList;
     private FoodSO _foodSO;
 
+    public FoodSO FoodSO => _foodSO;
     public List<FoodSO> TablewareFoodSOList { get => tablewareFoodSOList; set => tablewareFoodSOList = value; }
 
     private void Awake()

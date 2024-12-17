@@ -57,7 +57,7 @@ public class OptionsUI : MonoBehaviour
         closeButton.onClick.AddListener(() =>
         {
             Hide();
-            onCloseButtonAction();
+            onCloseButtonAction?.Invoke();
         });
         moveUpButton.onClick.AddListener(() => { RebindBinding(GameInput.Binding.Move_Up); });
         moveDownButton.onClick.AddListener(() => { RebindBinding(GameInput.Binding.Move_Down); });
