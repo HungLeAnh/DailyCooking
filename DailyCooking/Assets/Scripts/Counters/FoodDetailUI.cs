@@ -4,9 +4,9 @@ using UnityEngine.UI;
 
 public class FoodDetailUI : MonoBehaviour
 {
+    [SerializeField] private TablewareKitchenObject tablewareKitchenObject;
     [SerializeField] private GameObject _container;
     [SerializeField] private GameObject _ingredientContainer;
-    [SerializeField] private Image _foodIcon;
     [SerializeField] private Transform _iconTemplate;
 
     private List<GameObject> foodIngredientIconGOList = new List<GameObject>();
@@ -15,24 +15,30 @@ public class FoodDetailUI : MonoBehaviour
         _iconTemplate.gameObject.SetActive(false);
         _container.SetActive(false);
     }
-
-    public void InitUI(FoodSO foodSO)
+    private void Start()
     {
-        _container.SetActive(true);
+        tablewareKitchenObject.OnIngredientAdded += TablewareKitchenObject_OnIngredientAdded;
+    }
 
+    private void TablewareKitchenObject_OnIngredientAdded(object sender, TablewareKitchenObject.OnIngredientAddedEventArgs e)
+    {
+        AddIngredientIcon(e.KitchenObjectSO);
+    }
+    private void OnDestroy()
+    {
         foreach (var gameObject in foodIngredientIconGOList)
         {
             Destroy(gameObject);
         }
         foodIngredientIconGOList.Clear();
-        _foodIcon.sprite = foodSO.Sprite;
-
-        foreach (KitchenObjectSO kitchenObjectSO in foodSO.kitchenObjectSOList)
-        {
-            Transform iconTransform = Instantiate(_iconTemplate, _ingredientContainer.transform);
-            iconTransform.gameObject.SetActive(true);
-            iconTransform.GetComponent<FoodIngredientIconUI>().SetKitchenObjectSO(kitchenObjectSO);
-            foodIngredientIconGOList.Add(iconTransform.gameObject);        
-        }
+    }
+    public void AddIngredientIcon(KitchenObjectSO kitchenObjectSO)
+    {
+        _container.SetActive(true);
+        Transform iconTransform = Instantiate(_iconTemplate, _ingredientContainer.transform);
+        iconTransform.gameObject.SetActive(true);
+        iconTransform.GetComponent<FoodIngredientIconUI>().SetKitchenObjectSO(kitchenObjectSO);
+        foodIngredientIconGOList.Add(iconTransform.gameObject);        
+        
     }
 }

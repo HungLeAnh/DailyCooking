@@ -3,7 +3,9 @@ using TMPro;
 
 public class GameOverUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI recipesDeliveredText;
+    [SerializeField] private TextMeshProUGUI _dayText;
+    [SerializeField] private TextMeshProUGUI _earnText;
+    [SerializeField] private TextMeshProUGUI _serveText;
     private void Start()
     {
         KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
@@ -15,7 +17,13 @@ public class GameOverUI : MonoBehaviour
         if (KitchenGameManager.Instance.IsGameOver())
         {
             Show();
-            recipesDeliveredText.text = DeliveryManager.Instance.GetSuccessfulRecipeAmount().ToString();
+            if(KitchenGameManager.Instance.IsTaskComplete())
+                _dayText.text = "Complete";
+            else
+                _dayText.text = "Fail";
+
+            _serveText.text = KitchenGameManager.Instance.ServeCount.ToString();
+            _earnText.text = KitchenGameManager.Instance.EarnCount.ToString();  
 
         }
         else

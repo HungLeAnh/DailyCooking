@@ -6,7 +6,7 @@ public class KitchenGameManager : MonoBehaviour
 {
     private const string PLAYER_DAY = "PlayerDay";
     public static KitchenGameManager Instance { get; private set; }
-
+    
     public event EventHandler OnStateChanged;
 
     public event EventHandler OnGamePaused;
@@ -18,10 +18,11 @@ public class KitchenGameManager : MonoBehaviour
     private enum State
     {
         WaitingToStart,
-    CountdownToStart,
+        CountdownToStart,
         GamePlaying,
         GameOver,
-}
+    }
+    [SerializeField] private DayTaskUI dayTaskUI;
     [SerializeField] private long earnGoalMultiply = 1000;
     [SerializeField] private long serveGoalMultiply = 10;
     [SerializeField] private long gamePlayingTimeMultiply = 120;
@@ -40,6 +41,7 @@ public class KitchenGameManager : MonoBehaviour
     public long ServeCount => serveCount;
     public long EarnGoal { get => earnGoal; set => earnGoal = value; }
     public long ServeGoal { get => serveGoal; set => serveGoal = value; }
+    public int PlayerDay => playerDay;
     private void Awake()
     {
         Instance = this;
@@ -48,12 +50,13 @@ public class KitchenGameManager : MonoBehaviour
 
         playerDay = PlayerPrefs.GetInt(PLAYER_DAY,1);
         CreateDailytask();
-
     }
     private void Start()
     {
         GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
         GameInput.Instance.OnInteractAction += GameInput_OnInteractAction;
+
+        dayTaskUI.Show();
     }
 
     private void CreateDailytask()
@@ -161,5 +164,18 @@ public class KitchenGameManager : MonoBehaviour
         earnCount += waitingRecipeSO.price;
         serveCount++;
         OnServeFood.Invoke(this,EventArgs.Empty);
+
+        if (IsTaskComplete()) 
+        { 
+            state = State.GameOver;
+            OnStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+    public bool IsTaskComplete()
+    {
+        if (earnCount >= earnGoal && serveCount >= serveGoal)
+            return true;
+        else
+            return false;
     }
 }

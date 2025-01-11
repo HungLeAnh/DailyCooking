@@ -5,9 +5,7 @@ using UnityEngine;
 public class BaseCounter : MonoBehaviour, IKitchenObjectParent
 {
     public static event EventHandler<KitchenObjectSO> OnAnyObjectPlacedHere;
-    public static event EventHandler<TablewareKitchenObject> OnShowFoodOptionMenu;
     public static event EventHandler<OnShowOptionalMenuArgs> OnShowOptionalMenu;
-    public static event EventHandler<OnShowCombineRecipeArgs> OnShowCombineRecipe;
     public class OnShowCombineRecipeArgs : EventArgs
     {
         public List<KitchenObjectSO> combineRecipeOutputList;
@@ -19,7 +17,6 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
     public static void ResetStaticData()
     {
         OnAnyObjectPlacedHere = null;
-        OnShowFoodOptionMenu = null;
     }
 
     [SerializeField] private Transform counterTopPoint;
@@ -66,10 +63,7 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
     {
         Debug.Log("BaseCounter.InteractAlternate();");
     }
-    public void FireOnShowFoodOption(TablewareKitchenObject tablewareObject)
-    {
-        OnShowFoodOptionMenu?.Invoke(this, tablewareObject);
-    }
+   
     public void FireOnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
     {
         OnShowOptionalMenu?.Invoke(this, new OnShowOptionalMenuArgs
@@ -77,11 +71,5 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
             optionalList = kitchenObjectSOList
         });
     }   
-    public void FireOnShowCombineRecipe(List<KitchenObjectSO> kitchenObjectSOList)
-    {
-        OnShowCombineRecipe?.Invoke(this, new OnShowCombineRecipeArgs
-        {
-            combineRecipeOutputList = kitchenObjectSOList
-        });
-    }
+
 }

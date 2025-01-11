@@ -9,19 +9,15 @@ public class TablewareKitchenObject : KitchenObject
     public event EventHandler<OnIngredientAddedEventArgs> OnIngredientAdded;
     public class OnIngredientAddedEventArgs : EventArgs
     {
-        public FoodSO foodSO;
         public KitchenObjectSO KitchenObjectSO;
     }
 
     [SerializeField] private List<KitchenObjectSO> validKitchenObjectSOList;
     [SerializeField] private List<FoodSO> tablewareFoodSOList;
-    [SerializeField] private FoodDetailUI foodDetailUI;
 
 
     private List<KitchenObjectSO> _ingredientSOList;
-    private FoodSO _foodSO;
 
-    public FoodSO FoodSO => _foodSO;
     public List<FoodSO> TablewareFoodSOList { get => tablewareFoodSOList; set => tablewareFoodSOList = value; }
 
     private void Awake()
@@ -31,8 +27,6 @@ public class TablewareKitchenObject : KitchenObject
 
     public bool TryAddIngredient(KitchenObjectSO kitchenObjectSO)
     {
-        if (_foodSO == null) 
-            return false;
 
         Debug.Log("Try add ingredient");
         if (!validKitchenObjectSOList.Contains(kitchenObjectSO))
@@ -48,14 +42,11 @@ public class TablewareKitchenObject : KitchenObject
         }
         else
         { 
-            if(!_foodSO.kitchenObjectSOList.Contains(kitchenObjectSO))
-                return false;
-
             _ingredientSOList.Add(kitchenObjectSO);
             OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
             {
                 KitchenObjectSO = kitchenObjectSO,
-                foodSO = _foodSO
+                
             });
             return true;
         }
@@ -65,9 +56,5 @@ public class TablewareKitchenObject : KitchenObject
         return _ingredientSOList;
     }
 
-    public void SetFoodSO(FoodSO foodSO)
-    {
-        _foodSO = foodSO;
-        foodDetailUI.InitUI(_foodSO);
-    }
+    
 }

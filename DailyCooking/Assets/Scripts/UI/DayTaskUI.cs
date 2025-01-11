@@ -4,14 +4,18 @@ using TMPro;
 using UnityEngine;
 public class DayTaskUI : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI _earnGoalText;
-    [SerializeField] TextMeshProUGUI _serveGoalText;
+    [SerializeField] private TextMeshProUGUI _dayText;
+    [SerializeField] private TextMeshProUGUI _earnGoalText;
+    [SerializeField] private TextMeshProUGUI _serveGoalText;
 
     private void Start()
     {
         KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
-        _earnGoalText.text = KitchenGameManager.Instance.EarnGoal.ToString();
-        _serveGoalText.text = KitchenGameManager.Instance.ServeGoal.ToString();
+    }
+
+    private void KitchenGameManager_OnGameInit(object sender, System.EventArgs e)
+    {
+        Show();
 
     }
 
@@ -27,9 +31,11 @@ public class DayTaskUI : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
-    private void Show()
+    public void Show()
     {
         gameObject.SetActive(true);
-
+        _earnGoalText.text = KitchenGameManager.Instance.EarnGoal.ToString();
+        _serveGoalText.text = KitchenGameManager.Instance.ServeGoal.ToString();
+        _dayText.text = "Day " + KitchenGameManager.Instance.PlayerDay;
     }
 }

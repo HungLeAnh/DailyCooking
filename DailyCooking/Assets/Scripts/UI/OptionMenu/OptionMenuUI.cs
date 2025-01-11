@@ -19,12 +19,15 @@ public class OptionMenuUI : MonoBehaviour
     private void Start()
     {
         BaseCounter.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
-        BaseCounter.OnShowFoodOptionMenu += BaseCounter_OnShowFoodOptionMenu;
         BaseCounter.OnShowOptionalMenu += BaseCounter_OnShowOptionalMenu;
         _itemPrefab.SetActive(false);
         Hide();
     }
-
+    private void OnDestroy()
+    {
+        BaseCounter.OnAnyObjectPlacedHere -= BaseCounter_OnAnyObjectPlacedHere;
+        BaseCounter.OnShowOptionalMenu -= BaseCounter_OnShowOptionalMenu;
+    }
     private void BaseCounter_OnShowOptionalMenu(object sender, BaseCounter.OnShowOptionalMenuArgs e)
     {
         Show();
@@ -75,28 +78,6 @@ public class OptionMenuUI : MonoBehaviour
     {
         _optionalCounter.SetOptionKitchenObjectSO(kitchenObjectIndex);
         Hide();
-    }
-    private void BaseCounter_OnShowFoodOptionMenu(object sender, TablewareKitchenObject tablewareObject)
-    {
-        Show();
-        _title.text = "Select food to make: ";
-        _optionalCounter = (IHasOptionalSO)sender;
-        if (_optionalCounter == null)
-            return;
-
-        var foodSOList = tablewareObject.TablewareFoodSOList;
-        if (foodSOList == null)
-            return;
-
-        for (int i=0; i < foodSOList.Count; i++)
-        {
-            var menuItem = Instantiate(_itemPrefab, _menuContainer).GetComponent<OptionMenuItemUI>();
-            menuItem.gameObject.SetActive(true);
-            menuItem.Setup(i, foodSOList[i]);
-            menuItem.OnSelectedOption += MenuItem_OnSelectedFood;
-            _menuItems.Add(menuItem);
-        }
-
     }
 
 

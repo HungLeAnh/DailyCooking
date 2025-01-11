@@ -13,7 +13,6 @@
         {
             if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
             {
-                //Only accepts plate
                 DeliveryManager.Instance.DeliverRecipe(tablewareKitchenObject);
                 playerStateMachine.GetKitchenObject().DestroySelf();
 

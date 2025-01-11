@@ -50,8 +50,7 @@ public class DeliveryManager : MonoBehaviour
     {
         foreach (var waitingFood in waitingRecipeSOList.ToList())
         {
-            if(waitingFood.recipeName == tablewareKitchenObject.FoodSO.recipeName)
-            {
+
                 if (waitingFood.kitchenObjectSOList.Count == tablewareKitchenObject.GetKitchenObjectSOList().Count)
                 {
                     //Has the same number of ingredients
@@ -89,7 +88,7 @@ public class DeliveryManager : MonoBehaviour
                         return;
                     }
                 }
-            }
+            
         }
 
         //No matches found

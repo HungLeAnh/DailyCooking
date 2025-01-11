@@ -28,8 +28,6 @@ public class FoodCompleteVisual : MonoBehaviour
 
     private void TablewareKitchenObject_OnIngredientAdded(object sender, TablewareKitchenObject.OnIngredientAddedEventArgs e)
     {
-        if (e.foodSO != _foodSO)
-            return;
 
         foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in KitchenObjectSO_GameObjectList)
         {

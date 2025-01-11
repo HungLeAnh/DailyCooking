@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TablewareCounter : BaseCounter, IHasOptionalSO
+public class TablewareCounter : BaseCounter
 {
     public event EventHandler OnTablewareSpawned;
     public event EventHandler OnTablewareRemoved;
@@ -13,7 +13,6 @@ public class TablewareCounter : BaseCounter, IHasOptionalSO
 
     private int _tablewareSpawnAmount;
     private int _tablewareSpawnAmountMax = 4;
-    private TablewareKitchenObject _lastTablewareKitchenObject;
     private void Update()
     {
         if (_tablewareSpawnAmount < _tablewareSpawnAmountMax)
@@ -36,20 +35,11 @@ public class TablewareCounter : BaseCounter, IHasOptionalSO
             {
                 //There is at least one tableware
                 _tablewareSpawnAmount--; 
-                TablewareKitchenObject tablewareObject = (TablewareKitchenObject)KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
-                _lastTablewareKitchenObject = tablewareObject;
-                FireOnShowFoodOption(tablewareObject);
+                KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
                 OnTablewareRemoved?.Invoke(this, EventArgs.Empty);
             }
         }
     }
 
-    public void SetOptionKitchenObjectSO(int index)
-    {
-        if (_lastTablewareKitchenObject == null)
-            return;
-        var foodSO = _lastTablewareKitchenObject.TablewareFoodSOList[index];
-        _lastTablewareKitchenObject.SetFoodSO(foodSO);
-        _lastTablewareKitchenObject = null;
-    }
+    
 }
