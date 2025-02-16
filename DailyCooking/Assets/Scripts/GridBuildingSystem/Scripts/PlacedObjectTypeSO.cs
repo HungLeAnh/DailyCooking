@@ -15,12 +15,7 @@ public class PlacedObjectTypeSO : ScriptableObject {
         }
     }
 
-    public enum Dir {
-        Down,
-        Left,
-        Up,
-        Right,
-    }
+
 
     public string nameString;
     public Transform prefab;

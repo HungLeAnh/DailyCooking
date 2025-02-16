@@ -2,7 +2,7 @@
 
 public class SelectedCounterVisual : MonoBehaviour
 {
-    [SerializeField] private BaseCounter baseCounter;
+    [SerializeField] private BaseCounterController baseCounter;
     [SerializeField] private GameObject[] visualGameObjectArray;
 
     private void Start()
@@ -12,14 +12,14 @@ public class SelectedCounterVisual : MonoBehaviour
 
     private void Player_OnSelectedCounterChanged(object sender, PlayerStateMachine.OnSelectedCounterChangedEventArgs e)
     {
-        if (e.selectedCounter == baseCounter)
-        {
-            Show();
-        }
-        else
-        {
-            Hide();
-        }
+        //if (e.selectedCounterView == baseCounter)
+        //{
+        //    Show();
+        //}
+        //else
+        //{
+        //    Hide();
+        //}
     }
     private void Show()
     {

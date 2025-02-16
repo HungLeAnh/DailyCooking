@@ -174,9 +174,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 8604867546424571830}
+  visualGameObjectArray:
+  - {fileID: 5907414921041030500}
   kitchenObjectSOList:
-  - {fileID: 11400000, guid: 173872a3feebe344980d20f67d470122, type: 2}
   - {fileID: 11400000, guid: 8615f37fccba7a649baec0d3c7c7c568, type: 2}
+  - {fileID: 11400000, guid: 173872a3feebe344980d20f67d470122, type: 2}
 --- !u!4 &7440470062158624918 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6913807303263569228, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}

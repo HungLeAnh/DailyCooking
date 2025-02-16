@@ -38,23 +38,23 @@ public class SoundManager : MonoBehaviour
             Debug.Log("on start");
             DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
             DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
-            CuttingCounter.OnAnyCut += CuttingCounter_OnAnyCut;
+            CuttingCounterController.OnAnyCut += CuttingCounter_OnAnyCut;
             PlayerStateMachine.Instance.OnPickedSomething += Player_OnPickedSomething;
-            BaseCounter.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
-            TrashCounter.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
+            BaseCounterController.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
+            TrashCounterController.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
         }
     }
 
     private void TrashCounter_OnAnyObjectTrashed(object sender, System.EventArgs e)
     {
-        TrashCounter trashCounter = sender as TrashCounter;
-        PlaySound(AudioClipRefsSO.objectDrop, trashCounter.transform.position);
+        TrashCounterController trashCounter = sender as TrashCounterController;
+        PlaySound(AudioClipRefsSO.objectDrop, trashCounter.TrashCounterView.transform.position);
     }
 
     private void BaseCounter_OnAnyObjectPlacedHere(object sender, KitchenObjectSO e)
     {
-        BaseCounter baseCounter = sender as BaseCounter;
-        PlaySound(AudioClipRefsSO.objectDrop, baseCounter.transform.position);
+        BaseCounterController baseCounter = sender as BaseCounterController;
+        PlaySound(AudioClipRefsSO.objectDrop, baseCounter.BaseCounterView.transform.position);
     }
 
     private void Player_OnPickedSomething(object sender, System.EventArgs e)
@@ -64,20 +64,20 @@ public class SoundManager : MonoBehaviour
 
     private void CuttingCounter_OnAnyCut(object sender, System.EventArgs e)
     {
-        CuttingCounter cuttingCounter = sender as CuttingCounter;
-        PlaySound(AudioClipRefsSO.chop, cuttingCounter.transform.position);
+        CuttingCounterController cuttingCounter = sender as CuttingCounterController;
+        PlaySound(AudioClipRefsSO.chop, cuttingCounter.BaseCounterView.transform.position);
     }
 
     private void DeliveryManager_OnRecipeFailed(object sender, System.EventArgs e)
     {
-        DeliveryCounter deliveryCounter = DeliveryCounter.Instance;
-        PlaySound(AudioClipRefsSO.deliveryFailed, deliveryCounter.transform.position);
+        DeliveryCounterController deliveryCounter = DeliveryCounterController.Instance;
+        PlaySound(AudioClipRefsSO.deliveryFailed, deliveryCounter.BaseCounterView.transform.position);
     }
 
     private void DeliveryManager_OnRecipeSuccess(object sender, System.EventArgs e)
     {
-        DeliveryCounter deliveryCounter = DeliveryCounter.Instance;
-        PlaySound(AudioClipRefsSO.deliverySuccess, deliveryCounter.transform.position);
+        DeliveryCounterController deliveryCounter = DeliveryCounterController.Instance;
+        PlaySound(AudioClipRefsSO.deliverySuccess, deliveryCounter.BaseCounterView.transform.position);
     }
 
     private void PlaySound(AudioClip audioClip, Vector3 position, float volume = 1f)

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class GameInput : MonoSingleton<GameInput>
+public class GameInput : SimpleSingleton<GameInput>
 {
     private const string PLAYER_PREFS_BINDINGS = "InputBindings";
 

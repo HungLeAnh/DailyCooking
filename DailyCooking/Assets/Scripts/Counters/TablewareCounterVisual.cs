@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class TablewareCounterVisual : MonoBehaviour
 {
-    [SerializeField] private TablewareCounter _tablewareCounter;
+    [SerializeField] private TablewareCounterController _tablewareCounter;
     [SerializeField] private Transform _tablewareVisualPrefab;
     [SerializeField] float tablewareOffsetX = .1f;
     [SerializeField] float tablewareOffsetY = 0.5f;

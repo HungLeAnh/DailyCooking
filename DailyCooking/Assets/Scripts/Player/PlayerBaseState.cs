@@ -76,7 +76,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         if (Context.IsWalking)
         {
             Context.PlayerTransform.forward = Vector3.Slerp(Context.PlayerTransform.forward, moveDir, rotateSpeed * Time.deltaTime);
-            SoundManager.Instance.PlayFootStepSound(Context.PlayerTransform.position, 1);
+            //SoundManager.Instance.PlayFootStepSound(Context.PlayerTransform.position, 1);
         }
     }
     private void HandleInteractions()
@@ -94,7 +94,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         float interactDistance = 2f;
         if (Physics.Raycast(Context.PlayerTransform.position, Context.LastInteractDir, out RaycastHit raycastHit, interactDistance, Context.CounterLayerMask))
         {
-            if (raycastHit.transform.TryGetComponent(out BaseCounter baseCounter))
+            if (raycastHit.transform.TryGetComponent(out BaseCounterView baseCounter))
             {
                 if (baseCounter != Context.SelectedCounter)
                 {
@@ -112,12 +112,13 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         }
 
     }
-    private void SetSelectedCounter(BaseCounter selectedCounter)
+    private void SetSelectedCounter(BaseCounterView selectedCounter)
     {
         Context.SelectedCounter = selectedCounter;
         PlayerStateMachine.Instance.FireOnSelectedCounterChanged(new PlayerStateMachine.OnSelectedCounterChangedEventArgs
         {
-            selectedCounter = selectedCounter
+
+            selectedCounterView = selectedCounter != null ? selectedCounter : null
 
         });
     }

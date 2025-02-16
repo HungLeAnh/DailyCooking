@@ -222,6 +222,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 886707663028080637}
+  visualGameObjectArray:
+  - {fileID: 3819329314662397923}
   cuttingRecipeSOArray:
   - {fileID: 11400000, guid: 1d02dc73db885f346a64d250880b7dd4, type: 2}
   - {fileID: 11400000, guid: a38c3a45a63565442a408863dfe6a113, type: 2}
@@ -230,6 +232,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 03df2848847bcdc4fafa39a849b83e11, type: 2}
   - {fileID: 11400000, guid: 8fb39336a1ea95c41a1b18b41daf020e, type: 2}
   - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
+  progressBarUI: {fileID: 588416869854212033}
 --- !u!1001 &5109503152327724974
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -318,18 +321,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5675344827931844719, guid: b0f3cd4128d6ee745894089f4cde67f0, type: 3}
-      propertyPath: _barImage
-      value: 
-      objectReference: {fileID: 863960394098372247}
-    - target: {fileID: 5675344827931844719, guid: b0f3cd4128d6ee745894089f4cde67f0, type: 3}
-      propertyPath: hasProgressGameObject
-      value: 
-      objectReference: {fileID: 5777116932338227740}
-    - target: {fileID: 5675344827931844719, guid: b0f3cd4128d6ee745894089f4cde67f0, type: 3}
-      propertyPath: _hasProgressGameObject
-      value: 
-      objectReference: {fileID: 5777116932338227740}
+    - target: {fileID: 4980410863618222603, guid: b0f3cd4128d6ee745894089f4cde67f0, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8354435982881308888, guid: b0f3cd4128d6ee745894089f4cde67f0, type: 3}
       propertyPath: m_Name
       value: ProgressBarUI
@@ -339,15 +334,15 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b0f3cd4128d6ee745894089f4cde67f0, type: 3}
---- !u!114 &863960394098372247 stripped
+--- !u!114 &588416869854212033 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5554624360343855417, guid: b0f3cd4128d6ee745894089f4cde67f0, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5675344827931844719, guid: b0f3cd4128d6ee745894089f4cde67f0, type: 3}
   m_PrefabInstance: {fileID: 5109503152327724974}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: e2e509b684f116b4e89120c61caa3c80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &8491427045737552393 stripped

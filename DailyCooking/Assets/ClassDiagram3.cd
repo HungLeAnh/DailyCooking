@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="GameInput">
+    <Position X="13.75" Y="20.75" Width="4.25" />
+    <NestedTypes>
+      <Enum Name="GameInput.Binding" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\Player\GameInput.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAABACCAEAAEAAAACAAAAEAAAABABAAAIAAAAAAAAcA=</HashCode>
+      <FileName>Assets\Scripts\Player\GameInput.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerStateMachine">
+    <Position X="6.75" Y="21.5" Width="5.5" />
+    <NestedTypes>
+      <Class Name="PlayerStateMachine.OnSelectedCounterChangedEventArgs" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\Player\PlayerStateMachine.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Enum Name="PlayerStateMachine.EPlayerState" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\Player\PlayerStateMachine.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>CIAGAEgAEKCBBAAAAAAACAAAABAAAAIAQAABAAAQAOA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerStateMachine.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SimpleSingleton&lt;T&gt;">
+    <Position X="15" Y="17.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAEA=</HashCode>
+      <FileName>Assets\Scripts\Player\SimpleSingleton.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MonoStateManager&lt;T&gt;">
+    <Position X="8" Y="17.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AEQAAAAAACAAABAAAAAAAAAAAAAAAIAAQAABAAAAQBA=</HashCode>
+      <FileName>Assets\Scripts\StateMachine\MonoStateManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerBaseState">
+    <Position X="16" Y="8" Width="4.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAgAAAAAAAAAAAAABAAAAgAAAAAAABCAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerBaseState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerHoldingIdleState">
+    <Position X="7.75" Y="15" Width="4.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAIABAgAAAA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerHoldingIdleState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerHoldingState">
+    <Position X="10.75" Y="11.5" Width="4.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAQAAAAAIAAQAIBBAgAAAA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerHoldingState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerHoldingWalkState">
+    <Position X="13.25" Y="15" Width="5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAIABAgAAAA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerHoldingWalkState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerIdleIdleState">
+    <Position X="19" Y="15" Width="4.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAIABAgAAAA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerIdleIdleState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerIdleState">
+    <Position X="21.75" Y="11.5" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAQAAAAAIAAQAIBBAgAAAA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerIdleState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerIdleWalkState">
+    <Position X="24.25" Y="15" Width="4.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAIABAgAAAA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerIdleWalkState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BaseState&lt;T&gt;">
+    <Position X="16.75" Y="2.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAIAAAAAABQAAAQAAAAQAAEAAIAAQAIBBAgAQgA=</HashCode>
+      <FileName>Assets\Scripts\StateMachine\BaseState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerStateContext">
+    <Position X="19.25" Y="19.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>QYAAQEEAEAABIBAAAQAAIAAgCCIABAAIAAAAAAABIgA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerStateContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

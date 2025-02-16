@@ -32,7 +32,7 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
     public class OnSelectedCounterChangedEventArgs : EventArgs
     {
-        public BaseCounter selectedCounter;
+        public BaseCounterView selectedCounterView;
     }
     public enum EPlayerState
     {
@@ -93,7 +93,7 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     {
         if (_context.SelectedCounter != null)
         {
-            _context.SelectedCounter.InteractAlternate(this);
+            _context.SelectedCounter.FireInteractAlternateEvent(this);
         }
     }
     public void FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs args)
@@ -104,7 +104,7 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     {
         if (_context.SelectedCounter != null)
         {
-            _context.SelectedCounter.Interact(this);
+            _context.SelectedCounter.FireInteractEvent(this);
         }
     }
     

@@ -15,7 +15,7 @@ public class GridBuildingSystem3D : MonoBehaviour {
     private GridXZ<GridObject> grid;
     [SerializeField] private List<PlacedObjectTypeSO> placedObjectTypeSOList = null;
     private PlacedObjectTypeSO placedObjectTypeSO;
-    private PlacedObjectTypeSO.Dir dir;
+    private Dir dir;
 
     private void Awake() {
         Instance = this;

@@ -3,28 +3,18 @@ using UnityEngine.UI;
 
 public class ProgressBarUI : MonoBehaviour
 {
-    [SerializeField] private GameObject _hasProgressGameObject;
     [SerializeField] private Image _barImage;
 
-    private IHasProgress _hasProgress;
-
     private void Start()
-    {
-        _hasProgress = _hasProgressGameObject.GetComponent<IHasProgress>();
-        if (_hasProgress == null)
-        {
-            Debug.Log("error there is no component implement IHasProgress");
-        }
-
-        _hasProgress.OnProgressChanged += HasProgress_OnProgressChanged;
+    { 
         _barImage.fillAmount = 0f;
         Hide();
     }
 
-    private void HasProgress_OnProgressChanged(object sender, IHasProgress.OnProgressChangedEventArgs e)
+    public void OnProgressChanged(float progressNormalized)
     {
-        _barImage.fillAmount = e.progressNormalized;
-        if (e.progressNormalized == 0f || e.progressNormalized == 1f)
+        _barImage.fillAmount = progressNormalized;
+        if (progressNormalized == 0f || progressNormalized == 1f)
         {
             Hide();
         }

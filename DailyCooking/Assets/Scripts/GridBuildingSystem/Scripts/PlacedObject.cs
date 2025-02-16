@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlacedObject : MonoBehaviour {
 
-    public static PlacedObject Create(Vector3 worldPosition, Vector2Int origin, PlacedObjectTypeSO.Dir dir, PlacedObjectTypeSO placedObjectTypeSO) {
+    public static PlacedObject Create(Vector3 worldPosition, Vector2Int origin, Dir dir, PlacedObjectTypeSO placedObjectTypeSO) {
         Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition, Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0));
 
         PlacedObject placedObject = placedObjectTransform.GetComponent<PlacedObject>();
@@ -18,9 +18,9 @@ public class PlacedObject : MonoBehaviour {
 
     private PlacedObjectTypeSO placedObjectTypeSO;
     private Vector2Int origin;
-    private PlacedObjectTypeSO.Dir dir;
+    private Dir dir;
 
-    private void Setup(PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, PlacedObjectTypeSO.Dir dir) {
+    private void Setup(PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir) {
         this.placedObjectTypeSO = placedObjectTypeSO;
         this.origin = origin;
         this.dir = dir;

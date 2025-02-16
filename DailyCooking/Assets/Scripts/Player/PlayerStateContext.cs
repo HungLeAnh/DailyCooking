@@ -12,7 +12,7 @@ public class PlayerStateContext
     private GameInput _gameInput;
     private Transform _playerTransform;
     private LayerMask _counterLayermask;
-    private BaseCounter _selectedCounter;
+    private BaseCounterView _selectedCounter;
     private KitchenObject _kitchenObject;
     private Transform _kitchenObjectHoldPoint;
 
@@ -38,6 +38,6 @@ public class PlayerStateContext
     public bool IsDisableInput { get => _idDisableInput; set => _idDisableInput = value; }
     public bool IsWalking { get => _isWalking; set => _isWalking = value; }
     public Vector3 LastInteractDir { get => _lastInteractDir; set => _lastInteractDir = value; }
-    public BaseCounter SelectedCounter { get => _selectedCounter; set => _selectedCounter = value; }
+    public BaseCounterView SelectedCounter { get => _selectedCounter; set => _selectedCounter = value; }
     public KitchenObject KitchenObject { get => _kitchenObject; set => _kitchenObject = value; }
 }

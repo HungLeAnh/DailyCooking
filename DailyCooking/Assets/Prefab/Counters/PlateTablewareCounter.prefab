@@ -413,7 +413,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a55dd74f98d5b8647863fc23f521fad9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tablewareCounter: {fileID: 4613707733294792051}
   _tablewareVisualPrefab: {fileID: 6154266614422445402, guid: 09bd130b37817084ab004c0136ea7897, type: 3}
   tablewareOffsetX: 0.1
   tablewareOffsetY: 0.5
@@ -436,4 +435,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 3444354065172779232}
+  visualGameObjectArray:
+  - {fileID: 5814564096301845110}
+  - {fileID: 5885395211066086123}
   _tablewareKitchenObjectSO: {fileID: 11400000, guid: e4578b73d42e3f540bcf852eb01b658a, type: 2}

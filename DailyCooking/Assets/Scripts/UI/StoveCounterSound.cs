@@ -2,7 +2,7 @@
 
 public class StoveCounterSound : MonoBehaviour
 {
-    [SerializeField] private StoveCounter stoveCounter;
+    [SerializeField] private StoveCounterView stoveCounter;
     private AudioSource audioSource;
     private float warningSoundTimer;
     private bool playWarningSound;

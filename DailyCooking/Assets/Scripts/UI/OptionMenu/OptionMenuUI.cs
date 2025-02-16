@@ -18,17 +18,17 @@ public class OptionMenuUI : MonoBehaviour
     List<OptionMenuItemUI> _menuItems = new List<OptionMenuItemUI>();
     private void Start()
     {
-        BaseCounter.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
-        BaseCounter.OnShowOptionalMenu += BaseCounter_OnShowOptionalMenu;
+        BaseCounterController.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
+        BaseCounterController.OnShowOptionalMenu += BaseCounter_OnShowOptionalMenu;
         _itemPrefab.SetActive(false);
         Hide();
     }
     private void OnDestroy()
     {
-        BaseCounter.OnAnyObjectPlacedHere -= BaseCounter_OnAnyObjectPlacedHere;
-        BaseCounter.OnShowOptionalMenu -= BaseCounter_OnShowOptionalMenu;
+        BaseCounterController.OnAnyObjectPlacedHere -= BaseCounter_OnAnyObjectPlacedHere;
+        BaseCounterController.OnShowOptionalMenu -= BaseCounter_OnShowOptionalMenu;
     }
-    private void BaseCounter_OnShowOptionalMenu(object sender, BaseCounter.OnShowOptionalMenuArgs e)
+    private void BaseCounter_OnShowOptionalMenu(object sender, BaseCounterController.OnShowOptionalMenuArgs e)
     {
         Show();
         _title.text = "Select ingredient to make: ";
