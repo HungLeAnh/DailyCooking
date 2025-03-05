@@ -33,7 +33,7 @@ public class GridBuildingSystem3D : MonoBehaviour {
         private GridXZ<GridObject> grid;
         private int x;
         private int y;
-        public PlacedObject placedObject;
+        public PlacedObjectView placedObject;
 
         public GridObject(GridXZ<GridObject> grid, int x, int y) {
             this.grid = grid;
@@ -46,7 +46,7 @@ public class GridBuildingSystem3D : MonoBehaviour {
             return x + ", " + y + "\n" + placedObject;
         }
 
-        public void SetPlacedObject(PlacedObject placedObject) {
+        public void SetPlacedObject(PlacedObjectView placedObject) {
             this.placedObject = placedObject;
             grid.TriggerGridObjectChanged(x, y);
         }
@@ -56,7 +56,7 @@ public class GridBuildingSystem3D : MonoBehaviour {
             grid.TriggerGridObjectChanged(x, y);
         }
 
-        public PlacedObject GetPlacedObject() {
+        public PlacedObjectView GetPlacedObject() {
             return placedObject;
         }
 
@@ -88,7 +88,7 @@ public class GridBuildingSystem3D : MonoBehaviour {
                 Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
                 Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) + new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
 
-                PlacedObject placedObject = PlacedObject.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
+                PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
 
                 foreach (Vector2Int gridPosition in gridPositionList) {
                     grid.GetGridObject(gridPosition.x, gridPosition.y).SetPlacedObject(placedObject);
@@ -121,13 +121,14 @@ public class GridBuildingSystem3D : MonoBehaviour {
             Vector3 mousePosition = Vector3.zero;// Mouse3D.GetMouseWorldPosition();
             if (grid.GetGridObject(mousePosition) != null) {
                 // Valid Grid Position
-                PlacedObject placedObject = grid.GetGridObject(mousePosition).GetPlacedObject();
+                PlacedObjectView placedObject = grid.GetGridObject(mousePosition).GetPlacedObject();
                 if (placedObject != null) {
                     // Demolish
                     placedObject.DestroySelf();
 
                     List<Vector2Int> gridPositionList = placedObject.GetGridPositionList();
-                    foreach (Vector2Int gridPosition in gridPositionList) {
+                    foreach (Vector2Int gridPosition in gridPositionList)
+                    {
                         grid.GetGridObject(gridPosition.x, gridPosition.y).ClearPlacedObject();
                     }
                 }

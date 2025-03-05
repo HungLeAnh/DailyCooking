@@ -26,6 +26,8 @@ public class BaseCounterController : IKitchenObjectParent,IObserver
     private BaseCounterModel _baseCounterModel;
 
     public BaseCounterView BaseCounterView { get => _baseCounterView; set => _baseCounterView = value; }
+    public BaseCounterModel BaseCounterModel { get => _baseCounterModel; set => _baseCounterModel = value; }
+
     public BaseCounterController()
     {
 
@@ -33,14 +35,14 @@ public class BaseCounterController : IKitchenObjectParent,IObserver
     public BaseCounterController(BaseCounterView view,BaseCounterModel model)
     {
         _baseCounterView = view;
-        _baseCounterModel = model;
+        BaseCounterModel = model;
 
         ConnectModel();
         ConnectView();
     }
     internal virtual void ConnectModel()
     {
-        _baseCounterModel.Subscribe(EObserverEvent.ModelChange, this);
+        BaseCounterModel.Subscribe(EObserverEvent.ModelChange, this);
     }
 
     internal virtual void ConnectView()
@@ -61,19 +63,19 @@ public class BaseCounterController : IKitchenObjectParent,IObserver
 
     public void OnNotify()
     {
-        _baseCounterView.UpdateView(_baseCounterModel);
+        _baseCounterView.UpdateView(BaseCounterModel);
     }
     public KitchenObject GetKitchenObject()
     {
-        return _baseCounterModel.KitchenObject;
+        return BaseCounterModel.KitchenObject;
     }
     public void ClearKitchenObject()
     {
-        _baseCounterModel.KitchenObject = null;
+        BaseCounterModel.KitchenObject = null;
     }
     public bool HasKitchenObject()
     {
-        return _baseCounterModel.KitchenObject != null;
+        return BaseCounterModel.KitchenObject != null;
     }
     public virtual void Interact(PlayerStateMachine playerStateMachine)
     {
@@ -98,8 +100,8 @@ public class BaseCounterController : IKitchenObjectParent,IObserver
     }
     public void SetKitchenObject(KitchenObject kitchenObject)
     {
-        _baseCounterModel.KitchenObject = kitchenObject;
-        _baseCounterModel.NotifySubscribers(EObserverEvent.ModelChange);
+        BaseCounterModel.KitchenObject = kitchenObject;
+        BaseCounterModel.NotifySubscribers(EObserverEvent.ModelChange);
         if (kitchenObject != null)
         {
             if (kitchenObject.GetKitchenObjectOptionalProcessSO() != null)

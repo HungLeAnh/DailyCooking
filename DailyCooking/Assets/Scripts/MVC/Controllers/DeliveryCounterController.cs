@@ -4,16 +4,14 @@
 public class DeliveryCounterController : BaseCounterController
 {
     public static DeliveryCounterController Instance { get; private set; }
-    private DeliveryCounterModel _model;
-    private DeliveryCounterView _view;
+
     public void Init()
     {
         Instance = this;
     }
     public DeliveryCounterController(DeliveryCounterView view,DeliveryCounterModel model) : base(view,model)
     {
-        _model = model;
-        _view = view;
+        Init();
     }
 
     public override void Interact(PlayerStateMachine playerStateMachine)

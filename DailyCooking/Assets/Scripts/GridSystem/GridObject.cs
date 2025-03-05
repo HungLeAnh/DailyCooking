@@ -3,7 +3,7 @@
     private GridXZ<GridObject> grid;
     private int x;
     private int z;
-    private PlacedObject placedObject;
+    private PlacedObjectView placedObject;
 
     public GridObject(GridXZ<GridObject> grid, int x, int z)
     {
@@ -11,12 +11,12 @@
         this.x = x;
         this.z = z;
     }
-    public void SetPlacedObject(PlacedObject placedObject)
+    public void SetPlacedObject(PlacedObjectView placedObject)
     {
         this.placedObject = placedObject;
         grid.TriggerGridObjectChanged(x,z);
     }
-    public PlacedObject GetPlacedObject(PlacedObject placedObject)
+    public PlacedObjectView GetPlacedObject(PlacedObjectView placedObject)
     {
         return placedObject;
     }

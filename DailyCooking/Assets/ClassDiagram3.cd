@@ -32,6 +32,9 @@
       <HashCode>CIAGAEgAEKCBBAAAAAAACAAAABAAAAIAQAABAAAQAOA=</HashCode>
       <FileName>Assets\Scripts\Player\PlayerStateMachine.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_context" />
+    </ShowAsAssociation>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="SimpleSingleton&lt;T&gt;">
@@ -50,10 +53,20 @@
   </Class>
   <Class Name="PlayerBaseState">
     <Position X="16" Y="8" Width="4.5" />
+    <AssociationLine Name="Context" Type="PlayerStateContext" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="16" Y="9.5" />
+        <Point X="13.062" Y="9.5" />
+        <Point X="13.062" Y="8.661" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAACAAAAAgAAAAAAAAAAAAABAAAAgAAAAAAABCAAAAA=</HashCode>
       <FileName>Assets\Scripts\Player\PlayerBaseState.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="Context" />
+    </ShowAsAssociation>
   </Class>
   <Class Name="PlayerHoldingIdleState">
     <Position X="7.75" Y="15" Width="4.75" />
@@ -84,7 +97,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="PlayerIdleState">
-    <Position X="21.75" Y="11.5" Width="4.25" />
+    <Position X="21.75" Y="11.25" Width="4.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAABAAAAAAAAAQAAAAAIAAQAIBBAgAAAA=</HashCode>
       <FileName>Assets\Scripts\Player\PlayerIdleState.cs</FileName>
@@ -105,7 +118,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="PlayerStateContext">
-    <Position X="19.25" Y="19.5" Width="3.5" />
+    <Position X="11.25" Y="3" Width="3.5" />
     <TypeIdentifier>
       <HashCode>QYAAQEEAEAABIBAAAQAAIAAgCCIABAAIAAAAAAABIgA=</HashCode>
       <FileName>Assets\Scripts\Player\PlayerStateContext.cs</FileName>

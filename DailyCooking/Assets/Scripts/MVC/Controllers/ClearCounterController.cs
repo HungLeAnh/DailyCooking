@@ -4,12 +4,9 @@ using UnityEngine;
 [Serializable]
 public class ClearCounterController : BaseCounterController
 {
-    private ClearCounterModel _model;
-    private ClearCounterView _view;
     public ClearCounterController(ClearCounterView view, ClearCounterModel model) : base(view,model)
     {
-        _model = model;
-        _view = view;
+
     }
 
     public override void Interact(PlayerStateMachine playerStateMachine)

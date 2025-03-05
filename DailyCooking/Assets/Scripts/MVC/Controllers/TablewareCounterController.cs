@@ -12,13 +12,9 @@ public class TablewareCounterController : BaseCounterController
     private int _tablewareSpawnAmount;
     private int _tablewareSpawnAmountMax = 4;
 
-    private TablewareCounterView _view;
-    private TablewareCounterModel _model;
-
     public TablewareCounterController(TablewareCounterView view,TablewareCounterModel model) : base(view,model)
     {
-        _view = view;
-        _model = model;
+
     }
 
     private void Update()
@@ -36,6 +32,7 @@ public class TablewareCounterController : BaseCounterController
     }
     public override void Interact(PlayerStateMachine playerStateMachine)
     {
+        var view = (TablewareCounterView)BaseCounterView;
         if (!playerStateMachine.HasKitchenObject())
         {
             //Player is empty handed
@@ -43,7 +40,7 @@ public class TablewareCounterController : BaseCounterController
             {
                 //There is at least one tableware
                 _tablewareSpawnAmount--; 
-                KitchenObject.SpawnKitchenObject(_view.TablewareKitchenObjectSO, playerStateMachine);
+                KitchenObject.SpawnKitchenObject(view.TablewareKitchenObjectSO, playerStateMachine);
                 OnTablewareRemoved?.Invoke(this, EventArgs.Empty);
             }
         }

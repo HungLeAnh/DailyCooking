@@ -8,30 +8,29 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
     public event EventHandler OnPlayreGrabbedObject;
 
     private PlayerStateMachine _playerStateMachine;
-    private OptionalContainerCounterModel _model;
-    private OptionalContainerCounterView _view;
     public OptionalContainerCounterController(OptionalContainerCounterView view,OptionalContainerCounterModel model) 
         : base(view,model)
     {
-        _model = model;
-        _view = view;
+
     }
 
     public override void Interact(PlayerStateMachine playerStateMachine)
     {
-        if(_playerStateMachine != null)     
+        var view = (OptionalContainerCounterView)BaseCounterView;
+        if (_playerStateMachine != null)     
             return;
         Debug.Log("Interact optional Counter");
         _playerStateMachine = playerStateMachine;
-        FireOnShowOptionMenu(_view.KitchenObjectSOList);
+        FireOnShowOptionMenu(view.KitchenObjectSOList);
     }
 
     public void SetOptionKitchenObjectSO(int index)
     {
+        var view = (OptionalContainerCounterView)BaseCounterView;
         if (!_playerStateMachine.HasKitchenObject())
         {
             //Player is not carrying anything
-            KitchenObject.SpawnKitchenObject(_view.KitchenObjectSOList[index], _playerStateMachine);
+            KitchenObject.SpawnKitchenObject(view.KitchenObjectSOList[index], _playerStateMachine);
 
 
             OnPlayreGrabbedObject?.Invoke(this, EventArgs.Empty);
@@ -42,7 +41,7 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             if (_playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
             {
                 //Player is holding a plate
-                if (tablewareKitchenObject.TryAddIngredient(_view.KitchenObjectSOList[index]))
+                if (tablewareKitchenObject.TryAddIngredient(view.KitchenObjectSOList[index]))
                 {
                 }
             }

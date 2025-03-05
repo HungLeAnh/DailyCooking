@@ -17,13 +17,6 @@
         <Point X="9.438" Y="17.016" />
       </Path>
     </AssociationLine>
-    <AssociationLine Name="placedObjectTypeSO" Type="PlacedObjectTypeSO" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="20.969" Y="13" />
-        <Point X="20.969" Y="6.812" />
-        <Point X="15.5" Y="6.812" />
-      </Path>
-    </AssociationLine>
     <AssociationLine Name="placedObjectTypeSOList" Type="PlacedObjectTypeSO" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="21.688" Y="13" />
@@ -31,14 +24,19 @@
         <Point X="15.5" Y="6.312" />
       </Path>
     </AssociationLine>
+    <AssociationLine Name="placedObjectTypeSO" Type="PlacedObjectTypeSO" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="20.969" Y="13" />
+        <Point X="20.969" Y="6.812" />
+        <Point X="15.5" Y="6.812" />
+      </Path>
+    </AssociationLine>
     <AssociationLine Name="dir" Type="Dir" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="21.375" Y="16.934" />
-        <Point X="21.375" Y="17.309" />
-        <Point X="16.583" Y="17.309" Type="JumpStart" />
-        <Point X="16.417" Y="17.309" Type="JumpEnd" />
-        <Point X="13.812" Y="17.309" />
-        <Point X="13.812" Y="15.312" />
+        <Point X="21.375" Y="17.437" />
+        <Point X="18.812" Y="17.437" />
+        <Point X="18.812" Y="17.062" />
       </Path>
     </AssociationLine>
     <TypeIdentifier>
@@ -76,47 +74,27 @@
       <FileName>Assets\Scripts\GridBuildingSystem\Scripts\PlacedObjectTypeSO.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="PlacedObject">
-    <Position X="12.5" Y="10" Width="3" />
-    <AssociationLine Name="placedObjectTypeSO" Type="PlacedObjectTypeSO" FixedFromPoint="true">
-      <Path>
-        <Point X="13.875" Y="10" />
-        <Point X="13.875" Y="8.531" />
-      </Path>
-      <MemberNameLabel ManuallyPlaced="true">
-        <Position X="0.11" Y="0.404" />
-      </MemberNameLabel>
-    </AssociationLine>
-    <TypeIdentifier>
-      <HashCode>CAAAAAAACCAAAAAEAAAAAAAAASAQAEAAAAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\GridBuildingSystem\Scripts\PlacedObject.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="placedObjectTypeSO" />
-      <Field Name="dir" />
-    </ShowAsAssociation>
-  </Class>
   <Class Name="GridBuildingSystem">
-    <Position X="15.75" Y="13" Width="4" />
+    <Position X="16.75" Y="13" Width="2.75" />
     <AssociationLine Name="placedObjectTypeSOList" Type="PlacedObjectTypeSO" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="18.375" Y="13" />
-        <Point X="18.375" Y="8.062" />
+        <Point X="18.555" Y="13" />
+        <Point X="18.555" Y="8.062" />
         <Point X="15.5" Y="8.062" />
       </Path>
     </AssociationLine>
     <AssociationLine Name="grid" Type="GridXZ&lt;TGridObject&gt;" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="16.5" Y="15.261" />
-        <Point X="16.5" Y="17.698" />
+        <Point X="17.266" Y="15.261" />
+        <Point X="17.266" Y="17.698" />
         <Point X="10.375" Y="17.698" />
         <Point X="10.375" Y="17.016" />
       </Path>
     </AssociationLine>
     <AssociationLine Name="placedObjectTypeSO" Type="PlacedObjectTypeSO" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="19.25" Y="13" />
-        <Point X="19.25" Y="7.562" />
+        <Point X="19.156" Y="13" />
+        <Point X="19.156" Y="7.562" />
         <Point X="15.5" Y="7.562" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true">
@@ -129,8 +107,8 @@
     </TypeIdentifier>
     <ShowAsAssociation>
       <Field Name="grid" />
-      <Field Name="placedObjectTypeSO" />
       <Field Name="dir" />
+      <Field Name="placedObjectTypeSO" />
     </ShowAsAssociation>
     <ShowAsCollectionAssociation>
       <Field Name="placedObjectTypeSOList" />
@@ -138,13 +116,7 @@
   </Class>
   <Class Name="GridObject">
     <Position X="7.75" Y="8.5" Width="3.5" />
-    <AssociationLine Name="grid" Type="GridXZ&lt;TGridObject&gt;" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="9.812" Y="11.209" />
-        <Point X="9.812" Y="11.584" />
-        <Point X="9.812" Y="11.584" />
-        <Point X="9.812" Y="12.25" />
-      </Path>
+    <AssociationLine Name="grid" Type="GridXZ&lt;TGridObject&gt;">
       <MemberNameLabel ManuallyPlaced="true">
         <Position X="0.082" Y="0.322" />
       </MemberNameLabel>
@@ -155,7 +127,6 @@
     </TypeIdentifier>
     <ShowAsAssociation>
       <Field Name="grid" />
-      <Field Name="placedObject" />
     </ShowAsAssociation>
   </Class>
   <Class Name="GridXZ&lt;TGridObject&gt;">
@@ -244,8 +215,53 @@
       <FileName>Assets\Scripts\GridBuildingSystem\Scripts\BuildingSound.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="PlacedObjectView">
+    <Position X="13.25" Y="14.5" Width="2" />
+    <AssociationLine Name="placedObjectController" Type="PlacedObjectController">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.748" Y="0.263" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAQAAAAAAAAAAACAQAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>Assets\Scripts\GridBuildingSystem\Scripts\PlacedObjectView.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="placedObjectController" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="PlacedObjectController">
+    <Position X="13.25" Y="12.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAQAAAAAIEAA=</HashCode>
+      <FileName>Assets\Scripts\GridBuildingSystem\Scripts\PlacedObjectView.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="model" />
+      <Field Name="view" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="PlacedObjectModel">
+    <Position X="12.25" Y="9.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAACAAAAAEAAAAAAAAAQAQAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\GridBuildingSystem\Scripts\PlacedObjectView.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="dir" />
+      <Field Name="placedObjectTypeSO" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="PlacedObjectFactory">
+    <Position X="20.5" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\GridBuildingSystem\Scripts\PlacedObjectView.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Enum Name="Dir" Collapsed="true">
-    <Position X="13" Y="14.75" Width="1.5" />
+    <Position X="18" Y="16.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAACACAAAAAAAI=</HashCode>
       <FileName>Assets\Scripts\GridBuildingSystem\Scripts\Dir.cs</FileName>

@@ -54,13 +54,6 @@
   </Class>
   <Class Name="FoodCompleteVisual" Collapsed="true">
     <Position X="93.75" Y="1.5" Width="1.5" />
-    <NestedTypes>
-      <Struct Name="FoodCompleteVisual.KitchenObjectSO_GameObject" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Assets\Scripts\Counters\FoodCompleteVisual.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Struct>
-    </NestedTypes>
     <TypeIdentifier>
       <HashCode>AAAAAAAAACAAAAAAEgAAAAAAAAAAAAAgAAAAAAEAAAA=</HashCode>
       <FileName>Assets\Scripts\Counters\FoodCompleteVisual.cs</FileName>
@@ -215,6 +208,8 @@
       <Path>
         <Point X="65.781" Y="13.887" />
         <Point X="65.781" Y="31.062" />
+        <Point X="48.333" Y="31.062" Type="JumpStart" />
+        <Point X="48.167" Y="31.062" Type="JumpEnd" />
         <Point X="46.25" Y="31.062" />
       </Path>
     </AssociationLine>
@@ -261,6 +256,8 @@
         <Point X="64" Y="16.312" />
         <Point X="65.206" Y="16.312" />
         <Point X="65.206" Y="30.75" />
+        <Point X="48.333" Y="30.75" Type="JumpStart" />
+        <Point X="48.167" Y="30.75" Type="JumpEnd" />
         <Point X="46.25" Y="30.75" />
       </Path>
     </AssociationLine>
@@ -269,6 +266,8 @@
         <Point X="64" Y="16.75" />
         <Point X="64.864" Y="16.75" />
         <Point X="64.864" Y="30.438" />
+        <Point X="48.333" Y="30.438" Type="JumpStart" />
+        <Point X="48.167" Y="30.438" Type="JumpEnd" />
         <Point X="46.25" Y="30.438" />
       </Path>
     </AssociationLine>
@@ -297,7 +296,7 @@
       </Class>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AIACgAAAAIABAAAAAAAACAgAIwACgAAIQAEAgQAAACQ=</HashCode>
+      <HashCode>AIACgAAAAIABAAAAAAAACAgAIwACgAAIQAEQgQAAACQ=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\BaseCounterController.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -312,14 +311,14 @@
   <Class Name="ContainerCounterController">
     <Position X="24.75" Y="42.25" Width="5.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAIAABAAAAACAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAABAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\ContainerCounterController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CuttingCounterController">
     <Position X="31.25" Y="42.25" Width="5.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAACAABAAAAAgABAAAAIgAgCAAAQCAgBQAAAAA=</HashCode>
+      <HashCode>AAAAAAAACAABAAAAAAABAAAAIgAgCAAAQAAgBQAAAAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CuttingCounterController.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -327,7 +326,7 @@
   <Class Name="DeliveryCounterController">
     <Position X="37.75" Y="42.25" Width="5.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAIAAAAAAAQCACAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAQAACAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\DeliveryCounterController.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -339,24 +338,17 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="StoveCounterController">
-    <Position X="52" Y="42.25" Width="5.75" />
-    <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAAAgAAACAAIQAAAAAAACACAAAAAEA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Controllers\StoveCounterController.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="TablewareCounterController">
     <Position X="58.5" Y="42.25" Width="5.75" />
     <TypeIdentifier>
-      <HashCode>AAQQAAgAAAAAAAAAQgAAAAAAIAAAEAAAACAAAAAAJAA=</HashCode>
+      <HashCode>AAQQAAgAAAAAAAAAQAAAAAAAIAAAEAAAAAAAAAAAJAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\TablewareCounterController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TrashCounterController">
     <Position X="65" Y="42.25" Width="5" />
     <TypeIdentifier>
-      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAIAAAAAACAAQgAQAAAAA=</HashCode>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAIAAAAAAAAAQAAQAAAAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\TrashCounterController.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -486,6 +478,8 @@
       <Path>
         <Point X="60.25" Y="26.434" />
         <Point X="60.25" Y="30.062" />
+        <Point X="48.333" Y="30.062" Type="JumpStart" />
+        <Point X="48.167" Y="30.062" Type="JumpEnd" />
         <Point X="46.25" Y="30.062" />
       </Path>
     </AssociationLine>
@@ -778,6 +772,13 @@
       <FileName>Assets\Scripts\MVC\Models\CounterModel.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="StoveCounterController">
+    <Position X="53" Y="42.75" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAACAAIQAAAAAAAAACAAAAAEA=</HashCode>
+      <FileName>Assets\Scripts\MVC\Controllers\StoveCounterController.cs</FileName>
+    </TypeIdentifier>
   </Class>
   <Interface Name="IHasOptionalSO" Collapsed="true">
     <Position X="90.25" Y="6.75" Width="1.5" />

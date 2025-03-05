@@ -13,17 +13,16 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     public event EventHandler<IHasProgress.OnProgressChangedEventArgs> OnProgressChanged;
     public event EventHandler OnCut;
 
-    private CuttingCounterModel _model;
-    private CuttingCounterView _view;
+
 
     public CuttingCounterController(CuttingCounterView view, CuttingCounterModel model) : base(view,model)
     {
-        _model = model;
-        _view = view;
+
     }
     
     public override void Interact(PlayerStateMachine playerStateMachine)
     {
+        var model = (CuttingCounterModel)BaseCounterModel;
         if (!HasKitchenObject())
         {
             //There is no kitchen object
@@ -38,17 +37,17 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                     if (GetKitchenObject().GetKitchenObjectOptionalProcessSO() != null)
                     {
                         //Show optional recipe menu
-                        _model.CuttingRecipeSO = null;
-                        _model.NotifySubscribers(EObserverEvent.ModelChange);
+                        model.CuttingRecipeSO = null;
+                        model.NotifySubscribers(EObserverEvent.ModelChange);
                     }
                     else
                     {
-                        _model.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
-                        _model.NotifySubscribers(EObserverEvent.ModelChange);
+                        model.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
+                        model.NotifySubscribers(EObserverEvent.ModelChange);
 
                         OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
                         {
-                            progressNormalized = (float)_model.CuttingProgress / _model.CuttingRecipeSO.cuttingProgressMax
+                            progressNormalized = (float)model.CuttingProgress / model.CuttingRecipeSO.cuttingProgressMax
                         });
                     }
                 }
@@ -60,7 +59,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
         }
         else
         {
-            if (_model.CuttingProgress == 0)
+            if (model.CuttingProgress == 0)
             {
                 //There is kitchen object here not process / done process
                 if (playerStateMachine.HasKitchenObject())
@@ -85,32 +84,33 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     }
     public override void InteractAlternate(PlayerStateMachine playerStateMachine)
     {
+        var model = (CuttingCounterModel)BaseCounterModel;
         if (HasKitchenObject() && HasRecipeWithInput(GetKitchenObject().GetKitchenObjectSO()))
         {
             //there is kitchen object here
-            _model.CuttingProgress++;
+            model.CuttingProgress++;
 
             OnCut?.Invoke(this, EventArgs.Empty);
             OnAnyCut?.Invoke(this, EventArgs.Empty);
 
-            if (_model.CuttingRecipeSO == null)
-                _model.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
+            if (model.CuttingRecipeSO == null)
+                model.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
 
             OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
             {
-                progressNormalized = (float)_model.CuttingProgress / _model.CuttingRecipeSO.cuttingProgressMax
+                progressNormalized = (float)model.CuttingProgress / model.CuttingRecipeSO.cuttingProgressMax
             });
 
-            _model.NotifySubscribers(EObserverEvent.ModelChange);
+            model.NotifySubscribers(EObserverEvent.ModelChange);
 
-            if (_model.CuttingProgress >= _model.CuttingRecipeSO.cuttingProgressMax)
+            if (model.CuttingProgress >= model.CuttingRecipeSO.cuttingProgressMax)
             {
 
                 GetKitchenObject().DestroySelf();
-                KitchenObject.SpawnKitchenObject(_model.CuttingRecipeSO.output, this);
-                _model.CuttingProgress = 0;
-                _model.CuttingRecipeSO = null;
-                _model.NotifySubscribers(EObserverEvent.ModelChange);
+                KitchenObject.SpawnKitchenObject(model.CuttingRecipeSO.output, this);
+                model.CuttingProgress = 0;
+                model.CuttingRecipeSO = null;
+                model.NotifySubscribers(EObserverEvent.ModelChange);
             }
         }
     }
@@ -135,7 +135,8 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     }
     private CuttingRecipeSO GetCuttingRecipeSOWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
-        foreach (CuttingRecipeSO cuttingRecipeSO in _view.CuttingRecipeSOArray)
+        var view = (CuttingCounterView)BaseCounterView;
+        foreach (CuttingRecipeSO cuttingRecipeSO in view.CuttingRecipeSOArray)
         {
             if (cuttingRecipeSO.input == inputKitchenObjectSO)
             {
@@ -146,8 +147,10 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     }
     private CuttingRecipeSO GetCuttingRecipeSOWithOutput(int outputKitchenObjectSOIndex)
     {
+        var view = (CuttingCounterView)BaseCounterView;
+
         var outputKitchenObjectSO = GetKitchenObject().GetKitchenObjectOptionalProcessSO().processListOutput[outputKitchenObjectSOIndex];
-        foreach (CuttingRecipeSO cuttingRecipeSO in _view.CuttingRecipeSOArray)
+        foreach (CuttingRecipeSO cuttingRecipeSO in view.CuttingRecipeSOArray)
         {
             if (cuttingRecipeSO.output == outputKitchenObjectSO)
             {
@@ -159,13 +162,14 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
 
     public void SetOptionKitchenObjectSO(int index)
     {
+        var model = (CuttingCounterModel)BaseCounterModel;
 
-        _model.CuttingRecipeSO = GetCuttingRecipeSOWithOutput(index);
+        model.CuttingRecipeSO = GetCuttingRecipeSOWithOutput(index);
 
         OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
         {
-            progressNormalized = (float)_model.CuttingProgress / _model.CuttingRecipeSO.cuttingProgressMax
+            progressNormalized = (float)model.CuttingProgress / model.CuttingRecipeSO.cuttingProgressMax
         });
-        _model.NotifySubscribers(EObserverEvent.ModelChange);
+        model.NotifySubscribers(EObserverEvent.ModelChange);
     }
 }

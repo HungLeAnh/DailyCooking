@@ -86,8 +86,8 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
 
     private void Start()
     {
-        _gameInput.OnInteractAction += GameInput_OnInteractAction;
-        _gameInput.OnInteractAction2 += GameInput_OnInteractAlternateAction;
+        //_gameInput.OnInteractAction += GameInput_OnInteractAction;
+        //_gameInput.OnInteractAction2 += GameInput_OnInteractAlternateAction;
     }
     private void GameInput_OnInteractAlternateAction(object sender, EventArgs e)
     {
