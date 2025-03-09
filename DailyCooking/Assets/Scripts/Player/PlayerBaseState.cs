@@ -8,11 +8,11 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     public PlayerBaseState(PlayerStateContext context,PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
         Context = context;
-        Context.PlayerGameInput.OnStartTouch += PlayerGameInput_OnStartTouch;
+        //Context.PlayerGameInput.OnFingerDown += PlayerGameInput_OnFingerDown;
+        Context.PlayerGameInput.OnTouchPerformed += PlayerGameInput_OnFingerDown;
+
 
     }
-
-
 
     public virtual void ChangeAnimationState(string animationName)
     {
@@ -26,7 +26,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         //    HandleInteractions();
         //}
     }
-    private void HandleMovement()
+    private void HandleMovement() 
     {
         /*//Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
 
@@ -122,14 +122,19 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         */
 
     }
-
-    private void PlayerGameInput_OnStartTouch(object sender, Vector2 pos)
+    private void PlayerGameInput_OnFingerDown(object sender, Finger finger)
     {
-        float interactDistance = 999f;        
-        Ray ray = Camera.main.ScreenPointToRay(pos);
+        if(finger.currentTouch.delta.sqrMagnitude >= 0.1f)
+            return;
+        
+        
+        float interactDistance = 999f;
+        if (!Camera.main.pixelRect.Contains(finger.screenPosition))
+            return;
+        Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, Context.CounterLayerMask))
         {
-            Debug.Log("Touch Position: " + pos);
+            //Debug.Log("Touch Position: " + pos);
             if (raycastHit.transform.TryGetComponent(out BaseCounterView baseCounter))
             {
                 if (baseCounter != Context.SelectedCounter)
@@ -143,7 +148,10 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
                 SetSelectedCounter(null);
             }
         }
-
+        else
+        {
+            SetSelectedCounter(null);
+        }
     }
     private void SetSelectedCounter(BaseCounterView selectedCounter)
     {

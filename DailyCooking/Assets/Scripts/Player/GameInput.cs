@@ -2,9 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch;
 
+[DefaultExecutionOrder(-1)]
 public class GameInput : SimpleSingleton<GameInput>
 {
     private const string PLAYER_PREFS_BINDINGS = "InputBindings";
@@ -178,52 +181,48 @@ public class GameInput : SimpleSingleton<GameInput>
     //        .Start();
     //}
     */
-    public event EventHandler<Vector2> OnStartTouch;
-    public event EventHandler<Vector2> OnEndTouch;
-    public event EventHandler<OnFingerEventArgs> OnFingerDown;
-    public event EventHandler<OnFingerEventArgs> OnFingerMoved;
-    public event EventHandler<OnFingerEventArgs> OnFingerUp;
-    public class OnFingerEventArgs : EventArgs
-    {
-        public Vector2 Position { get; set; }
-        public float Time { get; set; }
-        public bool IsPaused { get; set; }
-    }
+    public event EventHandler<Finger> OnFingerDown;
+    public event EventHandler<Finger> OnFingerMoved;
+    public event EventHandler<Finger> OnFingerUp;
+    public event EventHandler<Finger> OnTouchPerformed;
+    public event EventHandler<Finger> OnDragPerformed;
+    public event EventHandler OnPintchPerformed;
+
+
+    [SerializeField] private float touchTimeThreshold = 0.25f;
+    [SerializeField] private float dragThreshold = 10f;
 
     private PlayerAction playerAction;
+    private bool isTouching = false;
+    private bool isPanning = false;
+    private float timeSinceLastTouch = 0f;
+    private Vector2 lastTouchPosition = Vector2.zero;
 
-    public PlayerAction PlayerAction { get => playerAction;}
+    public PlayerAction PlayerAction { get => playerAction; }
 
     private void Awake()
     {
         playerAction = new PlayerAction();
         playerAction.Player.Enable();
-        playerAction.Camera.Enable();
         EnhancedTouchSupport.Enable();
         TouchSimulation.Enable();
 
-        playerAction.Player.TouchPress.started += PlayerAction_Player_TouchPress_StartTouch;
-        playerAction.Player.TouchPress.canceled += PlayerAction_Player_TouchPress_EndTouch;
-        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown += Touch_OnFingerDown;
-        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove += Touch_OnFingerMoved;
-        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp += Touch_OnFingerUp;
+
+        EnhancedTouch.Touch.onFingerDown += Touch_OnFingerDown;
+        EnhancedTouch.Touch.onFingerMove += Touch_OnFingerMoved;
+        EnhancedTouch.Touch.onFingerUp += Touch_OnFingerUp;
 
     }
-
-
 
     private void OnDestroy()
     {
         playerAction.Player.Disable();
-        playerAction.Camera.Disable();
         EnhancedTouchSupport.Disable();
         TouchSimulation.Disable();
 
-        playerAction.Player.TouchPress.started -= PlayerAction_Player_TouchPress_StartTouch;
-        playerAction.Player.TouchPress.canceled -= PlayerAction_Player_TouchPress_EndTouch;
-        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown -= Touch_OnFingerDown;
-        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove -= Touch_OnFingerMoved;
-        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp -= Touch_OnFingerUp;
+        EnhancedTouch.Touch.onFingerMove -= Touch_OnFingerMoved;
+        EnhancedTouch.Touch.onFingerUp -= Touch_OnFingerUp;
+        EnhancedTouch.Touch.onFingerDown -= Touch_OnFingerDown;
 
 
         playerAction.Dispose();
@@ -231,40 +230,77 @@ public class GameInput : SimpleSingleton<GameInput>
 
     private void Touch_OnFingerUp(Finger finger)
     {
-        OnFingerUp?.Invoke(this, new OnFingerEventArgs
-        {
-            Position = finger.screenPosition,
-            Time = (float)finger.currentTouch.startTime
-        });
+        timeSinceLastTouch = 0f;
+        lastTouchPosition = Vector2.zero;
+        isTouching = false;
+        isPanning = false;
+        OnFingerUp?.Invoke(this, finger);
     }
 
     private void Touch_OnFingerMoved(Finger finger)
     {
-        OnFingerMoved?.Invoke(this, new OnFingerEventArgs { 
-            Position = finger.screenPosition,
-            Time = (float)finger.currentTouch.startTime,
-            IsPaused = finger.currentTouch.phase == UnityEngine.InputSystem.TouchPhase.Stationary?true:false
-        });
+        isPanning = true;
+        OnFingerMoved?.Invoke(this, finger);
     }
 
     private void Touch_OnFingerDown(Finger finger)
     {
-        OnFingerDown?.Invoke(this, new OnFingerEventArgs
+        timeSinceLastTouch = 0f;
+        lastTouchPosition = finger.screenPosition;
+        isTouching = true;
+        OnFingerDown?.Invoke(this, finger);
+    }
+    private void Update()
+    {
+        if (!isTouching)
+            return;
+        if (EnhancedTouch.Touch.activeFingers.Count == 0)
+            return;
+        if(EnhancedTouch.Touch.activeFingers.Count == 2)
         {
-            Position = finger.screenPosition,
-            Time = (float)finger.currentTouch.startTime
-        });
+            OnPintchPerformed?.Invoke(this, EventArgs.Empty);
+        }
+        else
+        {
+            timeSinceLastTouch += Time.deltaTime;
+            if (timeSinceLastTouch > touchTimeThreshold)
+                isPanning = true;
+
+            CheckMove();
+            CheckTouch();
+
+        }
     }
-    private void PlayerAction_Player_TouchPress_StartTouch(InputAction.CallbackContext context)
+
+    private void CheckMove()
     {
-        OnStartTouch?.Invoke(this, playerAction.Player.TouchPosition.ReadValue<Vector2>());
+
+        float distance = Vector2.Distance(lastTouchPosition, EnhancedTouch.Touch.activeFingers[0].screenPosition);
+        if (distance > dragThreshold)
+        {
+            OnDragPerformed?.Invoke(this, EnhancedTouch.Touch.activeFingers[0]);
+        }
     }
-    private void PlayerAction_Player_TouchPress_EndTouch(InputAction.CallbackContext context)
+
+    private void CheckTouch()
     {
-        OnEndTouch?.Invoke(this, playerAction.Player.TouchPosition.ReadValue<Vector2>());
+        if (isPanning)
+            return;
+        if (IsMouseOverUI())
+            return;
+        if (timeSinceLastTouch > touchTimeThreshold)
+            return;
+        
+
+        float distance = Vector2.Distance(lastTouchPosition, EnhancedTouch.Touch.activeFingers[0].screenPosition);
+        if (distance > dragThreshold)
+            return;
+        OnTouchPerformed?.Invoke(this, EnhancedTouch.Touch.activeFingers[0]);
     }
-    public Vector2 GetTouchPosition()
+
+    private bool IsMouseOverUI()
     {
-        return playerAction.Player.TouchPosition.ReadValue<Vector2>();
+        return EventSystem.current.IsPointerOverGameObject();
     }
+
 }
