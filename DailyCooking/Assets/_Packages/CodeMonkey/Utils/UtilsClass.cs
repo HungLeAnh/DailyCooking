@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace CodeMonkey.Utils {
 
@@ -234,7 +235,17 @@ namespace CodeMonkey.Utils {
         // Get Mouse Position in World with Z = 0f
         public static Vector3 GetMouseWorldPosition3D()
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray ray = Camera.main.ScreenPointToRay(GetScreenMousePosition());
+            if(Physics.Raycast(ray,out RaycastHit raycastHit,999f))
+            {
+                return raycastHit.point;
+            }
+            else
+                return Vector3.zero;
+        }        
+        public static Vector3 GetTouchWorldPosition3D()
+        {
+            Ray ray = Camera.main.ScreenPointToRay(GetScreenTouchPosition());
             if(Physics.Raycast(ray,out RaycastHit raycastHit,999f))
             {
                 return raycastHit.point;
@@ -243,17 +254,17 @@ namespace CodeMonkey.Utils {
                 return Vector3.zero;
         }
         public static Vector3 GetMouseWorldPosition() {
-            Vector3 vec = GetMouseWorldPositionWithZ(Input.mousePosition, Camera.main);
+            Vector3 vec = GetMouseWorldPositionWithZ(GetScreenMousePosition(), Camera.main);
             vec.z = 0f;
             return vec;
         }
 
         public static Vector3 GetMouseWorldPositionWithZ() {
-            return GetMouseWorldPositionWithZ(Input.mousePosition, Camera.main);
+            return GetMouseWorldPositionWithZ(GetScreenMousePosition(), Camera.main);
         }
 
         public static Vector3 GetMouseWorldPositionWithZ(Camera worldCamera) {
-            return GetMouseWorldPositionWithZ(Input.mousePosition, worldCamera);
+            return GetMouseWorldPositionWithZ(GetScreenMousePosition(), worldCamera);
         }
 
         public static Vector3 GetMouseWorldPositionWithZ(Vector3 screenPosition, Camera worldCamera) {
@@ -274,7 +285,7 @@ namespace CodeMonkey.Utils {
                 return true;
             } else {
                 PointerEventData pe = new PointerEventData(EventSystem.current);
-                pe.position =  Input.mousePosition;
+                pe.position =  GetScreenMousePosition();
                 List<RaycastResult> hits = new List<RaycastResult>();
                 EventSystem.current.RaycastAll( pe, hits );
                 return hits.Count > 0;
@@ -555,18 +566,18 @@ namespace CodeMonkey.Utils {
         }
 
         public static Vector3 GetWorldPositionFromUIZeroZ() {
-            Vector3 vec = GetWorldPositionFromUI(Input.mousePosition, Camera.main);
+            Vector3 vec = GetWorldPositionFromUI(GetScreenMousePosition(), Camera.main);
             vec.z = 0f;
             return vec;
         }
 
         // Get World Position from UI Position
         public static Vector3 GetWorldPositionFromUI() {
-            return GetWorldPositionFromUI(Input.mousePosition, Camera.main);
+            return GetWorldPositionFromUI(GetScreenMousePosition(), Camera.main);
         }
 
         public static Vector3 GetWorldPositionFromUI(Camera worldCamera) {
-            return GetWorldPositionFromUI(Input.mousePosition, worldCamera);
+            return GetWorldPositionFromUI(GetScreenMousePosition(), worldCamera);
         }
 
         public static Vector3 GetWorldPositionFromUI(Vector3 screenPosition, Camera worldCamera) {
@@ -575,11 +586,11 @@ namespace CodeMonkey.Utils {
         }
     
         public static Vector3 GetWorldPositionFromUI_Perspective() {
-            return GetWorldPositionFromUI_Perspective(Input.mousePosition, Camera.main);
+            return GetWorldPositionFromUI_Perspective(GetScreenMousePosition(), Camera.main);
         }
 
         public static Vector3 GetWorldPositionFromUI_Perspective(Camera worldCamera) {
-            return GetWorldPositionFromUI_Perspective(Input.mousePosition, worldCamera);
+            return GetWorldPositionFromUI_Perspective(GetScreenMousePosition(), worldCamera);
         }
 
         public static Vector3 GetWorldPositionFromUI_Perspective(Vector3 screenPosition, Camera worldCamera) {
@@ -1567,7 +1578,16 @@ namespace CodeMonkey.Utils {
             return list;
         }
 
-
+        public static Vector2 GetScreenMousePosition()
+        {
+            Vector2 mousePosition =  Mouse.current.position.ReadValue();
+            return new Vector3(mousePosition.x,mousePosition.y,Camera.main.nearClipPlane);
+        }        
+        public static Vector2 GetScreenTouchPosition()
+        {
+            Vector2 touchPosition = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[0].screenPosition;
+            return new Vector3(touchPosition.x, touchPosition.y,Camera.main.nearClipPlane);
+        }
     }
 
 }
