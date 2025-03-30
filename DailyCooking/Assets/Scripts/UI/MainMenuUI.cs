@@ -17,7 +17,7 @@ public class MainMenuUI : MonoBehaviour
         });
         optionsButton.onClick.AddListener(() => {
             Hide();
-            OptionsUI.Instance.Show(Show);
+            UIOptionsPopup.Instance.Show(Show);
         });
         quitButton.onClick.AddListener(() =>
         {

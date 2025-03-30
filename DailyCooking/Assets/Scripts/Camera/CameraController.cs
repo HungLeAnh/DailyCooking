@@ -31,7 +31,7 @@ public class CameraController : MonoBehaviour
         GameInput.Instance.OnFingerDown += OnPanStarted;
         GameInput.Instance.OnFingerUp += OnPanCanceled;
         GameInput.Instance.OnDragPerformed += OnPanMoved;
-        GameInput.Instance.OnPintchPerformed += HandleZoomMobile;
+        GameInput.Instance.OnPintchPerformed += HandleZoom;
 
     }
 
@@ -72,7 +72,31 @@ public class CameraController : MonoBehaviour
     }
 
     #region Zoom
-    private void HandleZoomMobile(object sender, EventArgs e)
+    private void HandleZoom(object sender, EventArgs e)
+    {
+        HandleZoomMobile();
+
+        //if (EnhancedTouch.Touch.activeTouches.Count == 2)
+        //{
+        //    HandleZoomMobile();
+        //}
+        //else
+        //{
+        //    HandleZoomDesktop();
+        //}
+
+    }
+
+    private void HandleZoomDesktop()
+    {
+        float scrollValue = Mouse.current.scroll.ReadValue().magnitude;
+        _cam.m_Lens.FieldOfView = Mathf.Clamp(
+            _cam.m_Lens.FieldOfView - scrollValue * zoomSpeed,
+            zoomBounds.x,
+            zoomBounds.y);
+    }
+
+    private void HandleZoomMobile()
     {
         EnhancedTouch.Touch firstTouch = EnhancedTouch.Touch.activeTouches[0];
         EnhancedTouch.Touch secondTouch = EnhancedTouch.Touch.activeTouches[1];
@@ -89,7 +113,6 @@ public class CameraController : MonoBehaviour
             _cam.m_Lens.FieldOfView - difference * zoomSpeed,
             zoomBounds.x,
             zoomBounds.y);
-
     }
 
     #endregion

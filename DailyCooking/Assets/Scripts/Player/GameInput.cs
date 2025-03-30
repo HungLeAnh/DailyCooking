@@ -189,7 +189,7 @@ public class GameInput : SimpleSingleton<GameInput>
     public event EventHandler OnPintchPerformed;
 
 
-    [SerializeField] private float touchTimeThreshold = 0.25f;
+    [SerializeField] private float touchTimeThreshold = 0.1f;
     [SerializeField] private float dragThreshold = 10f;
 
     private PlayerAction playerAction;
@@ -252,6 +252,8 @@ public class GameInput : SimpleSingleton<GameInput>
     }
     private void Update()
     {
+        if (IsMouseOverUI())
+            return;
         if (!isTouching)
             return;
         if (EnhancedTouch.Touch.activeFingers.Count == 0)
@@ -274,7 +276,6 @@ public class GameInput : SimpleSingleton<GameInput>
 
     private void CheckMove()
     {
-
         float distance = Vector2.Distance(lastTouchPosition, EnhancedTouch.Touch.activeFingers[0].screenPosition);
         if (distance > dragThreshold)
         {
@@ -286,8 +287,6 @@ public class GameInput : SimpleSingleton<GameInput>
     {
         if (isPanning)
             return;
-        if (IsMouseOverUI())
-            return;
         if (timeSinceLastTouch > touchTimeThreshold)
             return;
         
@@ -298,7 +297,7 @@ public class GameInput : SimpleSingleton<GameInput>
         OnTouchPerformed?.Invoke(this, EnhancedTouch.Touch.activeFingers[0]);
     }
 
-    private bool IsMouseOverUI()
+    public bool IsMouseOverUI()
     {
         return EventSystem.current.IsPointerOverGameObject();
     }

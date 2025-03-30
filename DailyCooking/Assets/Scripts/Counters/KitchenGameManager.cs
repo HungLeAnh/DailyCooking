@@ -22,7 +22,6 @@ public class KitchenGameManager : MonoBehaviour
         GamePlaying,
         GameOver,
     }
-    [SerializeField] private DayTaskUI dayTaskUI;
     [SerializeField] private long earnGoalMultiply = 1000;
     [SerializeField] private long serveGoalMultiply = 10;
     [SerializeField] private long gamePlayingTimeMultiply = 120;
@@ -56,7 +55,7 @@ public class KitchenGameManager : MonoBehaviour
         //GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
         //GameInput.Instance.OnInteractAction += GameInput_OnInteractAction;
 
-        dayTaskUI.Show();
+        //dayTaskUI.Show();
     }
 
     private void CreateDailytask()

@@ -1,9 +1,17 @@
-﻿public class GridObject
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+[Serializable]
+public class GridObject
 {
+    [JsonIgnore]
     private GridXZ<GridObject> grid;
+    [JsonIgnore]
+    private PlacedObjectView placedObject;
+
     private int x;
     private int z;
-    private PlacedObjectView placedObject;
 
     public GridObject(GridXZ<GridObject> grid, int x, int z)
     {
@@ -16,7 +24,7 @@
         this.placedObject = placedObject;
         grid.TriggerGridObjectChanged(x,z);
     }
-    public PlacedObjectView GetPlacedObject(PlacedObjectView placedObject)
+    public PlacedObjectView GetPlacedObject()
     {
         return placedObject;
     }
@@ -35,4 +43,5 @@
     {
         return x + ", " + z;
     }
+
 }

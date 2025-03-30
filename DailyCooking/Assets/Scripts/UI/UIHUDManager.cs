@@ -1,0 +1,70 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public enum UIHUDElements
+{
+    Settings,
+    Pause,
+    Shop,
+    Inventory,
+}
+[Serializable]
+struct SerializableKeyValuePair<T1, T2>
+{
+    public T1 Key;
+    public T2 Value;
+    public SerializableKeyValuePair(T1 key, T2 value)
+    {
+        Key = key;
+        Value = value;
+    }
+}
+public class UIHUDManager : SimpleSingleton<UIHUDManager>
+{
+    [Header("HUD Elements")]
+    [SerializeField] private List<SerializableKeyValuePair<UIHUDElements, GameObject>> uiHUDElementList = new List<SerializableKeyValuePair<UIHUDElements, GameObject>>();
+    private Dictionary<UIHUDElements, GameObject> uiHUDElementDictionary = new Dictionary<UIHUDElements, GameObject>();
+
+    private void Start()
+    {
+        foreach (var item in uiHUDElementList)
+        {
+            uiHUDElementDictionary.TryAdd(item.Key, item.Value);
+        }
+    }
+
+    public void ShowElement(UIHUDElements element)
+    {
+        if (uiHUDElementDictionary.TryGetValue(element, out GameObject value))
+        {
+            value.SetActive(true);
+        }
+    }    
+    public void HideElement(UIHUDElements element)
+    {
+        if (uiHUDElementDictionary.TryGetValue(element, out GameObject value))
+        {
+            value.SetActive(false);
+        }
+    }
+    #region Click
+    public void OnSettingsClicked()
+    {
+        
+    }
+    public void OnPauseClicked()
+    {
+
+    }
+    public void OnShopClicked()
+    {
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIShopPopup.ToString());
+    }
+    public void OnInventoryClicked()
+    {
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup.ToString());
+    }
+    #endregion
+}

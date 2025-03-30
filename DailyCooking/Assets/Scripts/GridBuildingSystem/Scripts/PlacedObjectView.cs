@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[Serializable]
 public class PlacedObjectView : MonoBehaviour,IPointerClickHandler
 {
     private PlacedObjectController placedObjectController;
@@ -21,6 +23,10 @@ public class PlacedObjectView : MonoBehaviour,IPointerClickHandler
     {
         return placedObjectController.GetGridPositionList();
     }
+    public PlacedObjectModel GetModel()
+    {
+        return placedObjectController.GetModel();
+    }
     public void OnPointerClick(PointerEventData eventData)
     {
         // Handle the click event
@@ -30,7 +36,7 @@ public class PlacedObjectView : MonoBehaviour,IPointerClickHandler
         placedObjectController.HandleClick();
     }
 }
-
+[Serializable]
 public class PlacedObjectController
 {
     private PlacedObjectModel model;
@@ -53,13 +59,20 @@ public class PlacedObjectController
 
         // Perform actions such as selecting the object, showing a menu, etc.
     }
-}
 
+    internal PlacedObjectModel GetModel()
+    {
+        return model;
+    }
+}
+[Serializable]
 public class PlacedObjectModel
 {
     private PlacedObjectTypeSO placedObjectTypeSO;
     private Vector2Int origin;
     private Dir dir;
+    public Vector2Int Origin => origin; 
+    public Dir Dir => dir;
 
     public PlacedObjectModel(PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir)
     {
@@ -67,6 +80,7 @@ public class PlacedObjectModel
         this.origin = origin;
         this.dir = dir;
     }
+
 
     public List<Vector2Int> GetGridPositionList()
     {
@@ -77,12 +91,17 @@ public class PlacedObjectModel
     {
         return placedObjectTypeSO.nameString;
     }
+
+    internal string GetPlacedObjectTypeSOGuid()
+    {
+        return placedObjectTypeSO.Guid;
+    }
 }
 public static class PlacedObjectFactory
 {
     public static PlacedObjectView Create(Vector3 worldPosition, Vector2Int origin, Dir dir, PlacedObjectTypeSO placedObjectTypeSO)
     {
-        Transform placedObjectTransform = Object.Instantiate(placedObjectTypeSO.prefab, worldPosition, Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0));
+        Transform placedObjectTransform = UnityEngine.Object.Instantiate(placedObjectTypeSO.prefab, worldPosition, Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0)).transform;
         PlacedObjectView placedObjectView = placedObjectTransform.GetComponent<PlacedObjectView>();
 
         PlacedObjectModel model = new PlacedObjectModel(placedObjectTypeSO, origin, dir);

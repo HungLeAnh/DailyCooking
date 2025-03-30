@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55710310a502bb94d8b2559c9c644038, type: 3}
+  m_Name: PopupDatabase
+  m_EditorClassIdentifier: 
+  popups:
+  - popupName: UIDayTaskPopup
+    popupPrefab: {fileID: 5070651827575695774, guid: 8d8286be87669e049816bbc3c2db467d, type: 3}
+  - popupName: UIGameOverPopup
+    popupPrefab: {fileID: 4350887729108919098, guid: 1bcf5f2e04f8a26449a9c4b292d80cda, type: 3}
+  - popupName: UIGamePausePopup
+    popupPrefab: {fileID: 9144695854695188043, guid: c92719d591a359b40bfe586448793e62, type: 3}
+  - popupName: UIGameStartCountdownPopup
+    popupPrefab: {fileID: 1616495961750675635, guid: e2e1cc0fdcbad3f4b82c4fb36168838e, type: 3}
+  - popupName: UIInventoryPopup
+    popupPrefab: {fileID: 1519377447044410457, guid: 98721dd553c4a994f897e2460ec6a5e6, type: 3}
+  - popupName: UIOptionMenuPopup
+    popupPrefab: {fileID: 8182451573929665765, guid: fa89928515aa5394283dfedcd92121ed, type: 3}
+  - popupName: UIOptionsPopup
+    popupPrefab: {fileID: 7599986913560296245, guid: 760811d20cb3ee44bac11bc642381230, type: 3}
+  - popupName: UIShopPopup
+    popupPrefab: {fileID: 7599986913560296245, guid: 24e832df0f0a3df4084163225af9d01d, type: 3}

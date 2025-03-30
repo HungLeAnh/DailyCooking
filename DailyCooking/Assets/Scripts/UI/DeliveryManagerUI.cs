@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class DeliveryManagerUI : MonoBehaviour
+public class DeliveryManagerUI : UIPopup
 {
     [SerializeField] private Transform container;
     [SerializeField] private Transform recipeTemplate;

@@ -34,7 +34,7 @@ public class BuildingGhost : MonoBehaviour {
         PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem3D.Instance.GetPlacedObjectTypeSO();
 
         if (placedObjectTypeSO != null) {
-            visual = Instantiate(placedObjectTypeSO.visual, Vector3.zero, Quaternion.identity);
+            visual = Instantiate(placedObjectTypeSO.visual, Vector3.zero, Quaternion.identity).transform;
             visual.parent = transform;
             visual.localPosition = Vector3.zero;
             visual.localEulerAngles = Vector3.zero;

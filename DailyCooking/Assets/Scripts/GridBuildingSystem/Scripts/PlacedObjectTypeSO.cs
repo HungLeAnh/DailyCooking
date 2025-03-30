@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu()]
-public class PlacedObjectTypeSO : ScriptableObject {
+[Serializable]
+public class PlacedObjectTypeSO : SerializableScriptableObject 
+{
 
     public static Dir GetNextDir(Dir dir) {
         switch (dir) {
@@ -18,8 +21,9 @@ public class PlacedObjectTypeSO : ScriptableObject {
 
 
     public string nameString;
-    public Transform prefab;
-    public Transform visual;
+    public GameObject prefab;
+    public GameObject visual;
+    public Sprite icon;
     public int width;
     public int height;
 
