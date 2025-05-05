@@ -7,10 +7,21 @@ using Newtonsoft.Json.Serialization;
 using System.Reflection;
 using System;
 using Newtonsoft.Json.Linq;
+
+public enum GameState
+{
+    MainMenu,
+    InGame,
+    StartDay
+}
+[DefaultExecutionOrder(-1)]
 public class GameManager : PersistentSingleton<GameManager>
 {
+    public event EventHandler OnStateChange;
+    [SerializeField] private GameObject playerPrefab;
     private GameData gameData;
     private FileDataHandler dataHandler;
+    private GameState gameState;
 
     [Header("Settings")]
     [SerializeField] private string fileName = "GameData";
@@ -19,7 +30,7 @@ public class GameManager : PersistentSingleton<GameManager>
     private List<IDataPersistence> dataPersistenceObjects = new List<IDataPersistence>();
 
     public GameData GameData => gameData;
-
+    public GameState GameState => gameState;
     protected override void Awake()
     {
         base.Awake();
@@ -28,65 +39,82 @@ public class GameManager : PersistentSingleton<GameManager>
             fileName,
             useEncryption
         );
+        SwitchState(GameState.MainMenu);
     }
     private void Start()
     {
         LoadGame();
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup.ToString());
     }
+
+    public void InitializePlayer()
+    {
+        Vector3 placePosition = GridBuildingSystem.Instance.GetFirstEmptyGridPos();
+
+        GameObject playerGameObject = UnityEngine.Object.Instantiate(playerPrefab, placePosition, Quaternion.identity);
+    }
+
     public void NewGame()
     {
         gameData = new GameData();
-        LoadAllObjects(); // Initialize with default values
     }
 
     public void LoadGame()
     {
         gameData = dataHandler.Load();
         if (gameData == null) NewGame();
-        LoadAllObjects();
     }
 
     public void SaveGame()
     {
-        SaveAllObjects();
         dataHandler.Save(gameData);
     }
 
-    private void LoadAllObjects()
+    public void SwitchState(GameState newState)
     {
-        foreach (IDataPersistence obj in dataPersistenceObjects)
-        {
-            obj.LoadData(gameData);
-        }
-    }
-
-    private void SaveAllObjects()
-    {
-        foreach (IDataPersistence obj in dataPersistenceObjects)
-        {
-            obj.SaveData(ref gameData);
-        }
-    }
-
-    public void RegisterPersistenceObject(IDataPersistence obj)
-    {
-        if (!dataPersistenceObjects.Contains(obj))
-        {
-            dataPersistenceObjects.Add(obj);
-        }
+        gameState = newState;
+        OnStateChange?.Invoke(this,EventArgs.Empty);
     }
 }
 [System.Serializable]
 public class GameData
 {
     // Add all saveable properties
-    public int currentLevel;
-    public InventoryData inventoryData;
-    public GridData gridData;
+    public PlayerData playerData = new PlayerData();
+    public InventoryData inventoryData = new InventoryData();
+    public GridData gridData = new GridData();
+    public TutorialData tutorialData = new TutorialData();
 
     public void SaveGridData(GridXZ<GridObject> grid)
     {
-        gridData = new GridData(grid);
+        gridData.SaveGridData(grid);
+    }
+    public void AddInventoryData(InventoryItemSO item)
+    {
+        inventoryData.Add(item);
+    }
+
+    public void UpdatePlayedDay(int playerDay)
+    {
+        playerData.daysPlayed = playerDay;
+    }
+}
+[Serializable]
+public class PlayerData
+{
+    public int level=1;
+    public int experience=0;
+    public int gems=0;
+    public int coins = 1000;
+    public int daysPlayed=1;
+    public PlayerData(){}
+    public PlayerData(int level, int experience, int currency, int gems, int coins, int daysPlayed)
+    {
+        this.level = level;
+        this.experience = experience;
+        this.gems = gems;
+        this.coins = coins;
+        this.daysPlayed = daysPlayed;
     }
 }
 
@@ -112,7 +140,11 @@ public class FileDataHandler
         settings = new JsonSerializerSettings
         {
             ContractResolver = new CustomContractResolver(),
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            Error = (sender, args) =>
+            {
+                args.ErrorContext.Handled = true;
+            }
         };
         settings.Converters.Add(new UniversalUnityConverter());
     }
@@ -124,8 +156,16 @@ public class FileDataHandler
 
         string data = File.ReadAllText(fullPath);
         if (useEncryption) data = XOREncryption(data);
-        GameData gameData = JsonConvert.DeserializeObject<GameData>(data,settings);
-        return gameData;
+        try
+        {
+            GameData gameData = JsonConvert.DeserializeObject<GameData>(data,settings);
+            return gameData;
+
+        }
+        catch 
+        {
+            return null;
+        }
     }
 
     public void Save(GameData data)
@@ -150,109 +190,35 @@ public class FileDataHandler
         return sb.ToString();
     }
 }
-public class CustomContractResolver : DefaultContractResolver
+public enum ShopItemType
 {
-    protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
-    {
-        JsonProperty property = base.CreateProperty(member, memberSerialization);
-
-        // Exclude Unity-specific properties like "rigidbody"
-        if (member.DeclaringType.Namespace == "UnityEngine")
-        {
-            property.ShouldSerialize = instance => false;
-        }
-        // Exclude properties like magnitude and normalized
-        if (member.Name == "magnitude" || member.Name == "normalized")
-            property.ShouldSerialize = instance => false;
-
-        return property;
-    }
+    Item,
+    Currency,
+        
+    None
 }
-public class UniversalUnityConverter : JsonConverter
+public enum ShopItemCategory
 {
-    public override bool CanConvert(Type objectType)
-    {
-        return objectType == typeof(Vector3) ||
-               objectType == typeof(Vector3Int) ||
-               objectType == typeof(Vector2) ||
-               objectType == typeof(Vector2Int) ||
-               objectType == typeof(Quaternion) ||
-               objectType == typeof(Color);
-        // Extend with other Unity types
-    }
+    Counters,
 
-    public override void WriteJson(JsonWriter writer, object value, Newtonsoft.Json.JsonSerializer serializer)
-    {
-        JObject obj = new JObject();
+    None
+}
+[Serializable]
+public class ConfigShopItem
+{
+    [SerializeField] private int id;
+    [SerializeField] private string name;
+    [SerializeField] private ShopItemType type;
+    [SerializeField] private int price;
+    [SerializeField] private string reward;
+    [SerializeField] private ShopItemCategory category;
+    [SerializeField] private int unlockLevel;
 
-        switch (value)
-        {
-            case Vector3 vector3:
-                obj["x"] = vector3.x;
-                obj["y"] = vector3.y;
-                obj["z"] = vector3.z;
-                break;            
-
-            case Vector3Int  vector3Int:
-                obj["x"] = vector3Int.x;
-                obj["y"] = vector3Int.y;
-                obj["z"] = vector3Int.z;
-                break;
-
-            case Vector2 vector2:
-                obj["x"] = vector2.x;
-                obj["y"] = vector2.y;
-                break;
-
-            case Vector2Int vector2Int:
-                obj["x"] = vector2Int.x;
-                obj["y"] = vector2Int.y;
-                break;
-
-            case Quaternion quaternion:
-                obj["x"] = quaternion.x;
-                obj["y"] = quaternion.y;
-                obj["z"] = quaternion.z;
-                obj["w"] = quaternion.w;
-                break;
-
-            case Color color:
-                obj["r"] = color.r;
-                obj["g"] = color.g;
-                obj["b"] = color.b;
-                obj["a"] = color.a;
-                break;
-
-            // Add more Unity types here (e.g., Rect, Bounds)
-            default:
-                throw new JsonSerializationException($"Unsupported Unity type: {value.GetType()}");
-        }
-
-        obj.WriteTo(writer);
-    }
-
-    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
-    {
-        JObject obj = JObject.Load(reader);
-
-        if (objectType == typeof(Vector3))
-            return new Vector3((float)obj["x"], (float)obj["y"], (float)obj["z"]);   
-        
-        if (objectType == typeof(Vector3Int))
-            return new Vector3((int)obj["x"], (int)obj["y"], (int)obj["z"]);
-
-        if (objectType == typeof(Vector2))
-            return new Vector2((float)obj["x"], (float)obj["y"]);
-
-        if(objectType == typeof(Vector2Int))
-            return new Vector2Int((int)obj["x"], (int)obj["y"]);
-
-        if (objectType == typeof(Quaternion))
-            return new Quaternion((float)obj["x"], (float)obj["y"], (float)obj["z"], (float)obj["w"]);
-
-        if (objectType == typeof(Color))
-            return new Color((float)obj["r"], (float)obj["g"], (float)obj["b"], (float)obj["a"]);
-        
-        throw new JsonSerializationException($"Unsupported Unity type: {objectType}");
-    }
+    public ShopItemCategory Category { get => category; set => category = value; }
+    public string Reward { get => reward; set => reward = value; }
+    public int Price { get => price; set => price = value; }
+    public ShopItemType Type { get => type; set => type = value; }
+    public string Name { get => name; set => name = value; }
+    public int Id { get => id; set => id = value; }
+    public int UnlockLevel { get => unlockLevel; set => unlockLevel = value; }
 }

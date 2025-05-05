@@ -8,7 +8,8 @@ using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch;
 
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] private CinemachineVirtualCamera _cam = null;
+    [SerializeField] private Camera _camera = null;
+    [SerializeField] private CinemachineVirtualCamera _virtualCamera = null;
     [SerializeField] private float panSpeed = 0.1f;
     [SerializeField] private float minimumDistance = 0.2f;
     [SerializeField, Range(0,1)] private float directionThreshold = 0.3f;
@@ -17,12 +18,17 @@ public class CameraController : MonoBehaviour
 
 
     [SerializeField] private float zoomSpeed = 1f;
-    [SerializeField] Vector2 zoomBounds = new(5f, 20f);
+    [SerializeField] private Vector2 zoomBounds = new(5f, 20f);
+    private Vector2 panBounds = Vector2.zero;
 
     private float _lastPinchDistance;
     private void Awake()
     { 
         lastTouchPosition = Vector2.zero;
+
+        panBounds = new Vector2Int(GameDefine.GridSize, GameDefine.GridSize);
+
+        ClampCameraPosition();
         EnhancedTouchSupport.Enable();
     }
 
@@ -37,6 +43,12 @@ public class CameraController : MonoBehaviour
 
     private void OnPanMoved(object sender, Finger e)
     {
+        panBounds = GridBuildingSystem.Instance.GetGridSize();
+        if (panBounds == Vector2Int.zero)
+        {
+            panBounds = new Vector2Int(GameDefine.GridSize, GameDefine.GridSize);
+        }
+
         if (lastTouchPosition == Vector2.zero)
         {
             lastTouchPosition = e.currentTouch.screenPosition;
@@ -47,17 +59,30 @@ public class CameraController : MonoBehaviour
         if (Vector2.Distance(newTouchPos, lastTouchPosition) < minimumDistance)
             return;
 
-        var newTouchWorldPos = Camera.main.ScreenToWorldPoint(
+        var newTouchWorldPos = _camera.ScreenToWorldPoint(
             new Vector3(newTouchPos.x, newTouchPos.y, Camera.main.nearClipPlane));
-        var lastTouchWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(lastTouchPosition.x, lastTouchPosition.y, Camera.main.nearClipPlane));
+        var lastTouchWorldPos = _camera.ScreenToWorldPoint(new Vector3(lastTouchPosition.x, lastTouchPosition.y, Camera.main.nearClipPlane));
         Vector3 delta = newTouchWorldPos - lastTouchWorldPos;
         delta.y = 0;
-        _cam.transform.position -= new Vector3(delta.normalized.x, 0, delta.normalized.z) * panSpeed;
+        _virtualCamera.transform.position -= new Vector3(delta.normalized.x, 0, delta.normalized.z) * panSpeed;
+        if (panBounds == Vector2.zero)
+        {
+            return;
+        }
 
+        ClampCameraPosition();
         lastTouchPosition = newTouchPos;
-
-
     }
+
+    private void ClampCameraPosition()
+    {
+        _virtualCamera.transform.position = new Vector3(
+            Mathf.Clamp(_virtualCamera.transform.position.x, 3, panBounds.x),
+            _virtualCamera.transform.position.y,
+            Mathf.Clamp(_virtualCamera.transform.position.z, -3, panBounds.y)
+        );
+    }
+
     private void OnPanStarted(object sender, Finger e)
     {
         isPanning = true;
@@ -90,8 +115,8 @@ public class CameraController : MonoBehaviour
     private void HandleZoomDesktop()
     {
         float scrollValue = Mouse.current.scroll.ReadValue().magnitude;
-        _cam.m_Lens.FieldOfView = Mathf.Clamp(
-            _cam.m_Lens.FieldOfView - scrollValue * zoomSpeed,
+        _virtualCamera.m_Lens.FieldOfView = Mathf.Clamp(
+            _virtualCamera.m_Lens.FieldOfView - scrollValue * zoomSpeed,
             zoomBounds.x,
             zoomBounds.y);
     }
@@ -109,8 +134,8 @@ public class CameraController : MonoBehaviour
         float currentDistance = Vector2.Distance(touch0Current, touch1Current);
         float previousDistance = Vector2.Distance(touch0Previous, touch1Previous);
         float difference = currentDistance - previousDistance;
-        _cam.m_Lens.FieldOfView = Mathf.Clamp(
-            _cam.m_Lens.FieldOfView - difference * zoomSpeed,
+        _virtualCamera.m_Lens.FieldOfView = Mathf.Clamp(
+            _virtualCamera.m_Lens.FieldOfView - difference * zoomSpeed,
             zoomBounds.x,
             zoomBounds.y);
     }

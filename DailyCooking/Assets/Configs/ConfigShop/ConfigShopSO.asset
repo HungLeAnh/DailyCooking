@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57b5e0664295b9c4c9174fbfd770d3de, type: 3}
+  m_Name: ConfigShopSO
+  m_EditorClassIdentifier: 
+  shopItems:
+  - id: 1
+    name: BowlTablewareCounter
+    type: 0
+    price: 1000
+    reward: 1_1
+    category: 0
+  - id: 2
+    name: BunContainerCounter
+    type: 0
+    price: 1000
+    reward: 2_1
+    category: 0
+  - id: 3
+    name: CarrotContainerCounter
+    type: 0
+    price: 1000
+    reward: 3_1
+    category: 0
+  - id: 4
+    name: ChesseContainerCounter
+    type: 0
+    price: 1000
+    reward: 4_1
+    category: 0
+  - id: 5
+    name: ClearCounter
+    type: 0
+    price: 1000
+    reward: 5_1
+    category: 0
+  - id: 6
+    name: CuttingCounter
+    type: 0
+    price: 1000
+    reward: 6_1
+    category: 0
+  - id: 7
+    name: DeliverCounter
+    type: 0
+    price: 1000
+    reward: 7_1
+    category: 0
+  - id: 8
+    name: FridgeContainerCounter
+    type: 0
+    price: 1000
+    reward: 8_1
+    category: 0
+  - id: 9
+    name: LettuceContainerCounter
+    type: 0
+    price: 1000
+    reward: 9_1
+    category: 0
+  - id: 10
+    name: OnionContainerCounter
+    type: 0
+    price: 1000
+    reward: 10_1
+    category: 0
+  - id: 11
+    name: PlateTablewareCounter
+    type: 0
+    price: 1000
+    reward: 11_1
+    category: 0
+  - id: 12
+    name: PotatoContainerCounter
+    type: 0
+    price: 1000
+    reward: 12_1
+    category: 0
+  - id: 13
+    name: StovePanCounter
+    type: 0
+    price: 1000
+    reward: 13_1
+    category: 0
+  - id: 14
+    name: StovePotCounter
+    type: 0
+    price: 1000
+    reward: 14_1
+    category: 0
+  - id: 15
+    name: TomatoContainerCounter
+    type: 0
+    price: 1000
+    reward: 15_1
+    category: 0
+  - id: 16
+    name: TrashBinCounter
+    type: 0
+    price: 1000
+    reward: 16_1
+    category: 0

@@ -97,7 +97,7 @@ public class UIInventoryItem : MonoBehaviour
         {
             _imgSelected.gameObject.SetActive(true);
             ItemSelected.Invoke(placedObjectTypeSO);        
-            Debug.LogError("SelectItem:  "+placedObjectTypeSO.name);
+            //Debug.LogError("SelectItem:  "+placedObjectTypeSO.name);
 
         }
         else

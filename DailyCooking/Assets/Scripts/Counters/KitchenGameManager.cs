@@ -47,7 +47,7 @@ public class KitchenGameManager : MonoBehaviour
         state = State.WaitingToStart;
 
 
-        playerDay = PlayerPrefs.GetInt(PLAYER_DAY,1);
+        playerDay = GameManager.Instance.GameData.playerData.daysPlayed;
         CreateDailytask();
     }
     private void Start()
@@ -79,7 +79,9 @@ public class KitchenGameManager : MonoBehaviour
             if (serveGoal <= ServeCount && earnGoal <= earnCount)
             {
                 playerDay++;
-                PlayerPrefs.SetInt(PLAYER_DAY, playerDay);
+                
+                GameManager.Instance.GameData.UpdatePlayedDay(playerDay);
+                GameManager.Instance.SaveGame();    
             }
             Loader.Load(Loader.Scene.GameScene);
         }

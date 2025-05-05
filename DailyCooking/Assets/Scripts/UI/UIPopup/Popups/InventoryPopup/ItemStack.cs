@@ -4,24 +4,28 @@ using UnityEngine;
 [Serializable]
 public class ItemStack
 {
-    [SerializeField] private ItemSO _item;
+    private InventoryItemSO item;
+    private int amount;
 
-    public ItemSO Item => _item;
-
-    public int Amount;
+    public InventoryItemSO Item => item;
+    public int Amount
+    {
+        get => amount;
+        set => amount = value;
+    }
     public ItemStack()
     {
-        _item = null;
-        Amount = 0;
+        item = null;
+        amount = 0;
     }
     public ItemStack(ItemStack itemStack)
     {
-        _item = itemStack.Item;
-        Amount = itemStack.Amount;
+        item = itemStack.Item;
+        amount = itemStack.Amount;
     }
-    public ItemStack(ItemSO item, int amount)
+    public ItemStack(InventoryItemSO item, int amount)
     {
-        _item = item;
-        Amount = amount;
+        this.item = item;
+        this.amount = amount;
     }
 }

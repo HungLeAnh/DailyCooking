@@ -19,7 +19,7 @@ public class PlacedObjectTypeSO : SerializableScriptableObject
     }
 
 
-
+    public string id;
     public string nameString;
     public GameObject prefab;
     public GameObject visual;

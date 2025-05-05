@@ -5,7 +5,7 @@ public class UIInventoryInspector : MonoBehaviour
     [SerializeField] private UIInspectorDescription _inspectorDescription = default;
     [SerializeField] private UIInspectorIngredients _recipeIngredients = default;
 
-    public void FillInspector(ItemSO itemToInspect, bool[] availabilityArray = null)
+    public void FillInspector(InventoryItemSO itemToInspect, bool[] availabilityArray = null)
     {
 
         _inspectorDescription.FillDescription(itemToInspect);

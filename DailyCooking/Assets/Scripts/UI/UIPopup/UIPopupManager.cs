@@ -2,15 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum UIPopupType
-{
-    UIInventoryPopup,
-    UIPausePopup,
-    UIGameOverPopup,
-    UISettingsPopup,
-    UIShopPopup,
-    None
-}
 public class UIPopupManager : PersistentSingleton<UIPopupManager>
 {
 

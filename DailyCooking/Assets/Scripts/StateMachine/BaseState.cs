@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class BaseState<T> : MonoBehaviour where T : Enum 
+public abstract class BaseState<T> where T : Enum 
 {
     protected Dictionary<T, BaseState<T>> _subStates = new Dictionary<T, BaseState<T>>();
     protected BaseState<T> _currentSubState;
@@ -19,7 +19,7 @@ public abstract class BaseState<T> : MonoBehaviour where T : Enum
     public abstract void UpdateState();
     public abstract T GetNextState();
 
-    private void Update()
+    public void UpdateSubState()
     {
         if(_currentSubState == null)
             return;
@@ -43,8 +43,7 @@ public abstract class BaseState<T> : MonoBehaviour where T : Enum
         _currentSubState = _subStates[nextStateKey];
         _currentSubState.EnterState();
         IsTransitionongState = false;
-
-    }    
+    }
     public virtual void IntializeStates()
     {
 

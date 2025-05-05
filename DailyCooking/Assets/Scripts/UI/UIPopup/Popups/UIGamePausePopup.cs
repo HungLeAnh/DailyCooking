@@ -23,7 +23,7 @@ public class UIGamePausePopup : UIPopup
         optionsButton.onClick.AddListener(() =>
         {
             Hide();
-            UIOptionsPopup.Instance.Show(Show);
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup.ToString());
         });
     }
 
@@ -47,12 +47,12 @@ public class UIGamePausePopup : UIPopup
 
     private void Show()
     {
-        gameObject.SetActive(true);
+        base.ShowPopup();
         resumeButton.Select();
     }
 
     private void Hide()
     {
-        gameObject.SetActive(false);
+        base.HidePopup();
     }
 }

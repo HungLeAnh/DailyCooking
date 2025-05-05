@@ -7,8 +7,8 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch;
 
-[DefaultExecutionOrder(-1)]
-public class GameInput : SimpleSingleton<GameInput>
+
+public class GameInput : PersistentSingleton<GameInput>
 {
     private const string PLAYER_PREFS_BINDINGS = "InputBindings";
     /*
@@ -200,8 +200,9 @@ public class GameInput : SimpleSingleton<GameInput>
 
     public PlayerAction PlayerAction { get => playerAction; }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         playerAction = new PlayerAction();
         playerAction.Player.Enable();
         EnhancedTouchSupport.Enable();
@@ -216,7 +217,7 @@ public class GameInput : SimpleSingleton<GameInput>
 
     private void OnDestroy()
     {
-        playerAction.Player.Disable();
+        playerAction?.Player.Disable();
         EnhancedTouchSupport.Disable();
         TouchSimulation.Disable();
 

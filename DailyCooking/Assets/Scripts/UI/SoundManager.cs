@@ -1,29 +1,17 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SoundManager : MonoBehaviour
+public class SoundManager : PersistentSingleton<SoundManager>   
 {
     private const string PLAYER_SOUND_EFFECTS_VOLUME = "SoundEffectVolume";
-
-    public static SoundManager Instance { get; private set; }
-
 
     [SerializeField] private AudioClipRefsSO AudioClipRefsSO;
     private float footstepTimer;
     private float footstepTimerMax = 0.1f;
     private float volume = 1f;
-    private void Awake()
+    protected override void Awake()
     {
-        if(Instance != null)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
+        base.Awake();
         volume = PlayerPrefs.GetFloat(PLAYER_SOUND_EFFECTS_VOLUME, 1f);
     }
     private void Start()
@@ -35,13 +23,12 @@ public class SoundManager : MonoBehaviour
     {
         if (KitchenGameManager.Instance != null)
         {
-            Debug.Log("on start");
             DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
             DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
-            CuttingCounterController.OnAnyCut += CuttingCounter_OnAnyCut;
-            PlayerStateMachine.Instance.OnPickedSomething += Player_OnPickedSomething;
-            BaseCounterController.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
-            TrashCounterController.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
+            //CuttingCounterController.OnAnyCut += CuttingCounter_OnAnyCut;
+            //PlayerStateMachine.Instance.OnPickedSomething += Player_OnPickedSomething;
+            //BaseCounterController.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
+            //TrashCounterController.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
         }
     }
 

@@ -15,10 +15,13 @@ public static class Loader
     public static void Load(Scene targetScene)
     {
         Loader.targetScene = targetScene;
-        SceneManager.LoadScene(Loader.Scene.LoadingScene.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UILoadingPopup.ToString());
     }
     public static void LoaderCallback()
     {
         SceneManager.LoadScene(targetScene.ToString());
+        if(targetScene == Scene.MainMenuScene)
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup.ToString());
+
     }
 }

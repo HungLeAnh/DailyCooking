@@ -2,6 +2,9 @@ using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerState>, IKitchenObjectParent
@@ -27,6 +30,8 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
         }
     }
 
+    public PlayerStateContext Context { get => _context; set => _context = value; }
+
     public event EventHandler OnPickedSomething;
 
     public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
@@ -47,20 +52,22 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     [SerializeField]
     private float moveSpeed = 7f;
     [SerializeField]
-    private GameInput _gameInput;
-    [SerializeField]
     private LayerMask countersLayerMask;
     [SerializeField] 
     private Transform kitchenObjectHoldPoint;
     [SerializeField] 
     private Animator _characterAnimator;
+    [SerializeField]
+    private PlacedObjectView placedObjectView;
 
     private PlayerStateContext _context;
 
+
+
     public void IntializeStates()
     {
-        _context = new PlayerStateContext(_characterAnimator,_gameInput,moveSpeed,
-                                            transform,countersLayerMask, kitchenObjectHoldPoint);
+        Context = new PlayerStateContext(_characterAnimator,moveSpeed,
+            placedObjectView,transform,countersLayerMask, kitchenObjectHoldPoint);
 
         _states.Add(EPlayerState.Idle, new PlayerIdleState(_context, EPlayerState.Idle));
         _states.Add(EPlayerState.Holding,new PlayerHoldingState(_context,EPlayerState.Holding));
@@ -91,22 +98,22 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     }
     private void GameInput_OnInteractAlternateAction(object sender, EventArgs e)
     {
-        if (_context.SelectedCounter != null)
+        if (Context.SelectedCounter != null)
         {
-            _context.SelectedCounter.FireInteractAlternateEvent(this);
+            Context.SelectedCounter.FireInteractAlternateEvent(this);
         }
     }
     public void FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs args)
     {
         OnSelectedCounterChanged?.Invoke(this,args);
     }
-    private void GameInput_OnInteractAction(object sender, EventArgs e)
-    {
-        if (_context.SelectedCounter != null)
-        {
-            _context.SelectedCounter.FireInteractEvent(this);
-        }
-    }
+    //private void GameInput_OnInteractAction(object sender, EventArgs e)
+    //{
+    //    if (Context.SelectedCounter != null)
+    //    {
+    //        Context.SelectedCounter.FireInteractEvent(this);
+    //    }
+    //}
     
     public Transform GetKitchenObjectFollowTransform()
     {
@@ -115,7 +122,7 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
 
     public void SetKitchenObject(KitchenObject kitchenObject)
     {
-        _context.KitchenObject = kitchenObject;
+        Context.KitchenObject = kitchenObject;
 
         if (kitchenObject != null)
         {
@@ -125,20 +132,27 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
 
     public KitchenObject GetKitchenObject()
     {
-        return _context.KitchenObject;
+        return Context.KitchenObject;
     }
 
     public void ClearKitchenObject()
     {
-        _context.KitchenObject = null;
+        Context.KitchenObject = null;
     }
 
     public bool HasKitchenObject()
     {
-        return _context.KitchenObject != null;
+        return Context.KitchenObject != null;
     }
     public void DisableInput(bool isDisable)
     {
-        _context.IsDisableInput = isDisable;
+        Context.IsDisableInput = isDisable;
+    }
+    public void SetPlayerPath(List<int2> pathList)
+    {
+        pathList.Reverse();
+        var state = _currentState as PlayerBaseState;
+        state.MoveTowardsTarget(pathList);
+
     }
 }

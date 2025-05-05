@@ -34,6 +34,7 @@ public class PlaceObjectSetup
             Debug.Log(sprite.name);
         }
 
+        int count = 0;
         // Find all prefabs in the specified folder
         string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { prefabFolderPath });
         foreach (string prefabGuid in prefabGuids)
@@ -41,10 +42,12 @@ public class PlaceObjectSetup
             string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 
-            if (prefab != null)
+            if (prefab != null && !prefab.name.Contains("base",System.StringComparison.OrdinalIgnoreCase))
             {
+                count++;
                 // Create a new ScriptableObject
                 PlacedObjectTypeSO placedObjectTypeSO = ScriptableObject.CreateInstance<PlacedObjectTypeSO>();
+                placedObjectTypeSO.id = count.ToString();
                 placedObjectTypeSO.nameString = prefab.name + "PlaceObjectSO";
                 placedObjectTypeSO.prefab = prefab;
                 placedObjectTypeSO.icon = sprites.FirstOrDefault(x => x.name == prefab.name);

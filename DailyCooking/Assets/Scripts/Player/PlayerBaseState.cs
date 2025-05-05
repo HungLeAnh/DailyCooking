@@ -1,5 +1,7 @@
-﻿using UnityEngine;
-using UnityEngine.InputSystem;
+﻿using System;
+using System.Collections.Generic;
+using Unity.Mathematics;
+using UnityEngine;
 using UnityEngine.InputSystem.EnhancedTouch;
 
 public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerState>
@@ -11,117 +13,92 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         //Context.PlayerGameInput.OnFingerDown += PlayerGameInput_OnFingerDown;
         Context.PlayerGameInput.OnTouchPerformed += PlayerGameInput_OnFingerDown;
 
-
     }
 
     public virtual void ChangeAnimationState(string animationName)
     {
         Context.CharacterAnimator.CrossFade(animationName,0.1f,0,0.1f,0.1f);
     }
-    public override void UpdateState()
+    public void UpdatePlayerPosition()
     {
-        //if(!Context.IsDisableInput)
-        //{
-        //    HandleMovement();
-        //    HandleInteractions();
-        //}
-    }
-    private void HandleMovement() 
-    {
-        /*//Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
-
-        ////Debug.Log("input Vector: " + inputVector);
-        //Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
-
-        //float moveDistance = Context.MoveSpeed * Time.deltaTime;
-        //float playerRadius = 0.7f;
-        //float playerHeight = 2f;
-        //bool canMove = !Physics.CapsuleCast(Context.PlayerTransform.position, Context.PlayerTransform.position + Vector3.up * playerHeight, playerRadius, moveDir, moveDistance);
-
-        //if (!canMove)
-        //{
-        //    //try to move on X
-        //    Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
-        //    canMove = (moveDir.x < -.5f || moveDir.x > .5f) && !Physics.CapsuleCast(Context.PlayerTransform.position, Context.PlayerTransform.position + Vector3.up * playerHeight, playerRadius, moveDirX, moveDistance);
-        //    if (canMove)
-        //    {
-        //        moveDir = moveDirX;
-
-        //    }
-        //    else
-        //    {
-        //        //can't move on X
-        //        //try to move on Z
-        //        Vector3 moveDirZ = new Vector3(0, 0, moveDir.z).normalized;
-        //        canMove = (moveDir.z < -.5f || moveDir.z > .5f) && !Physics.CapsuleCast(Context.PlayerTransform.position, Context.PlayerTransform.position + Vector3.up * playerHeight, playerRadius, moveDirZ, moveDistance);
-        //        if (canMove)
-        //        {
-        //            //can move on Z
-        //            moveDir = moveDirZ;
-        //        }
-        //        else
-        //        {
-        //            //can't move at all
-        //        }
-        //    }
-
-
-        //}
-
-        //if (canMove)
-        //{
-        //    Context.PlayerTransform.position += moveDir * moveDistance;
-        //}
-
-
-        //Context.IsWalking = moveDir != Vector3.zero;
-        
-        //float rotateSpeed = 10f;
-
-        //if (Context.IsWalking)
-        //{
-        //    Context.PlayerTransform.forward = Vector3.Slerp(Context.PlayerTransform.forward, moveDir, rotateSpeed * Time.deltaTime);
-        //    //SoundManager.Instance.PlayFootStepSound(Context.PlayerTransform.position, 1);
-        //}*/
-        
-
-    }
-    private void HandleInteractions()
-    {
-        /*//Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
-
-
-        //Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
-
-        //if (moveDir != Vector3.zero)
-        //{
-        //    Context.LastInteractDir = moveDir;
-        //}
-        
-         
-
-        float interactDistance = 2f;
-        if (Physics.Raycast(Context.PlayerTransform.position, Context.LastInteractDir, out RaycastHit raycastHit, interactDistance, Context.CounterLayerMask))
+        if (Context.IsWalking && Context.PathList.Count > 0)
         {
-            if (raycastHit.transform.TryGetComponent(out BaseCounterView baseCounter))
+            // Calculate the step size
+            float step = Context.MoveSpeed * Time.deltaTime;
+            var nextTarget = GridBuildingSystem.Instance.GridPositionToWorldPosition(Context.PathList[Context.WayPointIndex]);
+
+            // Move the character towards the target
+            Context.PlayerTransform.position = Vector3.MoveTowards(Context.PlayerTransform.position, nextTarget, step);
+
+            // Optionally, rotate the character to face the target
+            Vector3 targetDirection = nextTarget - Context.PlayerTransform.position;
+            Vector3 newDirection = Vector3.RotateTowards(Context.PlayerTransform.forward, targetDirection, step, 0.0f);
+            Context.PlayerTransform.rotation = Quaternion.LookRotation(newDirection);
+
+            if (Vector3.Distance(Context.PlayerTransform.position, nextTarget) < 0.05f)
             {
-                if (baseCounter != Context.SelectedCounter)
+                //Debug.Log($"Next waypoint {Context.WayPointIndex}:{Context.PathList[Context.WayPointIndex]}");
+                Context.WayPointIndex++;
+                if (Context.WayPointIndex >= Context.PathList.Count)
                 {
-                    SetSelectedCounter(baseCounter);
+                    Context.IsWalking = false;
+                    //Debug.Log("Arrived");
                 }
             }
-            else
-            {
-                SetSelectedCounter(null);
-            }
         }
-        else
-        {
-            SetSelectedCounter(null);
-        }
-        */
-
     }
+    public void StopMove()
+    {
+        Context.IsWalking = false;
+    }
+
+    public void MoveTowardsTarget(int2 target, float speed = 0)
+    {
+
+        Context.IsWalking = true;
+        Context.WayPointIndex = 0;
+        Context.PathList.Clear();
+        Context.PathList = new List<int2>() { target };
+        Context.EndPosition = GridBuildingSystem.Instance.GridPositionToWorldPosition(target);
+
+        if (speed != 0)
+            Context.MoveSpeed = speed;
+    }
+
+    public void MoveTowardsTarget(List<int2> target, float speed = 0)
+    {
+        Context.IsWalking = true;
+        Context.WayPointIndex = 0;
+        Context.PathList.Clear();
+        Context.PathList = target;
+        
+        Context.EndPosition = GridBuildingSystem.Instance.GridPositionToWorldPosition(target[target.Count - 1]);
+
+        if (speed != 0)
+            Context.MoveSpeed = speed;
+    }
+    public override void UpdateState()
+    {
+        if (!Context.IsDisableInput && Context.IsWalking)
+        {
+            UpdatePlayerPosition();
+            //Debug.Log("Distance: "+ Vector2.Distance(Context.PlayerTransform.position, Context.EndPosition));
+            if (Vector3.Distance(Context.PlayerTransform.position, Context.EndPosition) > 0.05f)
+                return;
+            Debug.Log("OnReachDestination");
+            OnReachDestination();
+
+        }
+    }
+
+    private void OnReachDestination()
+    {
+        if (Context.SelectedCounter != null)
+        {
+            Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
+        }
+    }
+
     private void PlayerGameInput_OnFingerDown(object sender, Finger finger)
     {
         if(finger.currentTouch.delta.sqrMagnitude >= 0.1f)
@@ -141,6 +118,13 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
                 {
                     //Debug.LogError("Selected Counter: " + baseCounter.name);
                     SetSelectedCounter(baseCounter);
+                    if (baseCounter.gameObject.TryGetComponent(out PlacedObjectView placedObjectView))
+                    {
+                        int2 counterOrigin = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
+                        int2 playerPos = GridBuildingSystem.Instance.WorldPositionToGridPos(Context.PlayerTransform.position.x, Context.PlayerTransform.position.z);
+                        //Debug.Log("Counter Origin: " + counterOrigin);
+                        GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
+                    }
                 }
             }
             else
@@ -158,10 +142,10 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         Context.SelectedCounter = selectedCounter;
         PlayerStateMachine.Instance.FireOnSelectedCounterChanged(new PlayerStateMachine.OnSelectedCounterChangedEventArgs
         {
-
             selectedCounterView = selectedCounter != null ? selectedCounter : null
 
         });
+
     }
 
 }

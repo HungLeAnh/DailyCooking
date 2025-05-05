@@ -56,5 +56,6 @@ public class PlayerHoldingState : PlayerBaseState
     public override void UpdateState()
     {
         base.UpdateState();
+        base.UpdateSubState();
     }
 }

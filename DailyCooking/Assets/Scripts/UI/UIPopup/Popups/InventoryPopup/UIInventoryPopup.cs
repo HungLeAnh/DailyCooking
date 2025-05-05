@@ -28,18 +28,18 @@ public class UIInventoryPopup : UIPopup
     [SerializeField] private GameObject _contentParent = default;
     [SerializeField] private List<InventoryTab> _tabTypesList = new List<InventoryTab>();
     [SerializeField] private UIInventoryTabs _tabsPanel = default;
-    [SerializeField] private List<PlacedObjectTypeSO> placedObjectTypeSOList;
 
     private InventoryTab _selectedTab = default;
     private int selectedItemId = -1;
     private List<UIInventoryItem> _listItem = new List<UIInventoryItem>();
     private void Start()
     {
-        for (int i = 0; i < placedObjectTypeSOList.Count; i++)
+        foreach (var prefabSO in GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects)
         {
             var item = Instantiate(_itemPrefab, _contentParent.transform);
             item.ItemSelected += InspectItem;
-            item.SetItem(placedObjectTypeSOList[i],false);
+            item.SetItem(prefabSO,false);
+            item.gameObject.SetActive(true);
             _listItem.Add(item);
         }
     }
@@ -245,7 +245,8 @@ public class UIInventoryPopup : UIPopup
     //    FillInventory(tabType.TabType);
     //}
 
-    public void CloseInventory()
+    public void SaveGrid()
     {
+        GridBuildingSystem.Instance.SaveGrid();
     }
 }
