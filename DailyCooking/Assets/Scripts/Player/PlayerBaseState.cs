@@ -85,7 +85,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
             //Debug.Log("Distance: "+ Vector2.Distance(Context.PlayerTransform.position, Context.EndPosition));
             if (Vector3.Distance(Context.PlayerTransform.position, Context.EndPosition) > 0.05f)
                 return;
-            Debug.Log("OnReachDestination");
+            //Debug.Log("OnReachDestination");
             OnReachDestination();
 
         }
@@ -101,7 +101,9 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
 
     private void PlayerGameInput_OnFingerDown(object sender, Finger finger)
     {
-        if(finger.currentTouch.delta.sqrMagnitude >= 0.1f)
+        if(!KitchenGameManager.Instance.IsGamePlaying())
+            return;
+        if (finger.currentTouch.delta.sqrMagnitude >= 0.1f)
             return;
         
         
@@ -126,6 +128,13 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
                         GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
                     }
                 }
+                else
+                {
+                    if (Context.SelectedCounter != null)
+                    {
+                        Context.SelectedCounter.FireInteractAlternateEvent(PlayerStateMachine.Instance);
+                    }
+                }
             }
             else
             {
@@ -140,7 +149,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     private void SetSelectedCounter(BaseCounterView selectedCounter)
     {
         Context.SelectedCounter = selectedCounter;
-        PlayerStateMachine.Instance.FireOnSelectedCounterChanged(new PlayerStateMachine.OnSelectedCounterChangedEventArgs
+        CounterModules.Instance.FireOnSelectedCounterChanged(new CounterModules.OnSelectedCounterChangedEventArgs
         {
             selectedCounterView = selectedCounter != null ? selectedCounter : null
 

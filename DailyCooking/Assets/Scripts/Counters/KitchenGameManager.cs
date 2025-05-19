@@ -15,8 +15,9 @@ public class KitchenGameManager : MonoBehaviour
 
     public event EventHandler OnServeFood;
 
-    private enum State
+    public enum State
     {
+        Editing,
         WaitingToStart,
         CountdownToStart,
         GamePlaying,
@@ -25,6 +26,8 @@ public class KitchenGameManager : MonoBehaviour
     [SerializeField] private long earnGoalMultiply = 1000;
     [SerializeField] private long serveGoalMultiply = 10;
     [SerializeField] private long gamePlayingTimeMultiply = 120;
+    [SerializeField] private GameObject kitchenManagerUI;
+
     private State state;
     private float countdownToStartTimer = 3f;
     private float gamePlayingTimer;
@@ -44,20 +47,13 @@ public class KitchenGameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        state = State.WaitingToStart;
+        state = State.Editing;
 
 
         playerDay = GameManager.Instance.GameData.playerData.daysPlayed;
         CreateDailytask();
+        kitchenManagerUI.SetActive(false);
     }
-    private void Start()
-    {
-        //GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
-        //GameInput.Instance.OnInteractAction += GameInput_OnInteractAction;
-
-        //dayTaskUI.Show();
-    }
-
     private void CreateDailytask()
     {
         EarnGoal = playerDay * earnGoalMultiply;
@@ -67,13 +63,27 @@ public class KitchenGameManager : MonoBehaviour
         serveCount = 0;
     }
 
-    private void GameInput_OnInteractAction(object sender, EventArgs e)
+    public void StartGame()
     {
-        if (state == State.WaitingToStart)
-        {
-            state = State.CountdownToStart;
-            OnStateChanged?.Invoke(this, EventArgs.Empty);
-        }
+        GameManager.Instance.InitializePlayer();
+        CounterModules.Instance.Initialize();
+        kitchenManagerUI.SetActive(true);
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup.ToString());
+        countdownToStartTimer = 3f;
+    }
+    public void EndGame()
+    {
+        GameInput_OnInteractAction();
+        kitchenManagerUI.SetActive(false);
+
+    }
+    public void ChangeState(State newState)
+    {
+        state = newState;
+        OnStateChanged?.Invoke(this, EventArgs.Empty);
+    }
+    private void GameInput_OnInteractAction()
+    {
         if (state == State.GameOver)
         {
             if (serveGoal <= ServeCount && earnGoal <= earnCount)
@@ -83,7 +93,7 @@ public class KitchenGameManager : MonoBehaviour
                 GameManager.Instance.GameData.UpdatePlayedDay(playerDay);
                 GameManager.Instance.SaveGame();    
             }
-            Loader.Load(Loader.Scene.GameScene);
+            state = State.Editing;
         }
     }
 
@@ -104,19 +114,16 @@ public class KitchenGameManager : MonoBehaviour
                 countdownToStartTimer -= Time.deltaTime;
                 if (countdownToStartTimer < 0f)
                 {
-                    state = State.GamePlaying;
+                    ChangeState(State.GamePlaying);
                     gamePlayingTimer = gamePlayingTimerMax;
-                    OnStateChanged?.Invoke(this, EventArgs.Empty);
-
                 }
                 break;
             case State.GamePlaying:
                 gamePlayingTimer -= Time.deltaTime;
                 if (gamePlayingTimer < 0f)
                 {
-                    state = State.GameOver;
-                    OnStateChanged?.Invoke(this, EventArgs.Empty);
-
+                    ChangeState(State.GameOver);
+                    UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameOverPopup.ToString());
                 }
                 break;
             case State.GameOver:
@@ -179,4 +186,5 @@ public class KitchenGameManager : MonoBehaviour
         else
             return false;
     }
+
 }

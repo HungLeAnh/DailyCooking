@@ -9,14 +9,6 @@
         </TypeIdentifier>
       </Class>
     </NestedTypes>
-    <AssociationLine Name="grid" Type="GridXZ&lt;TGridObject&gt;" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="22.188" Y="16.934" />
-        <Point X="22.188" Y="23.681" />
-        <Point X="9.25" Y="23.681" />
-        <Point X="9.25" Y="17.208" />
-      </Path>
-    </AssociationLine>
     <AssociationLine Name="placedObjectTypeSOList" Type="PlacedObjectTypeSO" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="21.688" Y="13" />
@@ -69,7 +61,7 @@
   <Class Name="PlacedObjectTypeSO">
     <Position X="12.25" Y="5.5" Width="3.25" />
     <TypeIdentifier>
-      <HashCode>gIAAAAAAAAAAgAQAQAAAAAIAAAAQAAAAAQAAAAAAAgA=</HashCode>
+      <HashCode>gIAAAAAAAAAAgAQAQAAAAAIAAAAQAAAAAQACAAAAAgA=</HashCode>
       <FileName>Assets\Scripts\GridBuildingSystem\Scripts\PlacedObjectTypeSO.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -83,14 +75,6 @@
         <Lollipop Position="0.2" />
       </Struct>
     </NestedTypes>
-    <AssociationLine Name="grid" Type="GridXZ&lt;TGridObject&gt;" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="17.688" Y="21.616" />
-        <Point X="17.688" Y="22.363" />
-        <Point X="10.438" Y="22.363" />
-        <Point X="10.438" Y="17.208" />
-      </Path>
-    </AssociationLine>
     <AssociationLine Name="placedObjectTypeSO" Type="PlacedObjectTypeSO" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="18.25" Y="13" />
@@ -102,7 +86,7 @@
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>BAQAAgQAACMAFCAAgEQAQAIAFQBIAIABACCBiAgBCMk=</HashCode>
+      <HashCode>AAQIIoQBgCMAVCoAgGQAQAJgFQAoAMAhRDiBiBkBAMk=</HashCode>
       <FileName>Assets\Scripts\GridSystem\GridBuildingSystem.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -136,7 +120,7 @@
       </Class>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AACAAAAAABAIAIQAQgQAQIBAAEAAAAQAAAABAkAAAAA=</HashCode>
+      <HashCode>AACAAAAAADAIAIQAQgQAQIBAAEAAAAQABAADAkIAAAA=</HashCode>
       <FileName>Assets\Scripts\GridSystem\Grid\GridXZ.cs</FileName>
     </TypeIdentifier>
   </Class>

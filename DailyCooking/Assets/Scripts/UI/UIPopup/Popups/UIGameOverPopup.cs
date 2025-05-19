@@ -6,17 +6,21 @@ public class UIGameOverPopup : UIPopup
     [SerializeField] private TextMeshProUGUI _dayText;
     [SerializeField] private TextMeshProUGUI _earnText;
     [SerializeField] private TextMeshProUGUI _serveText;
-    private void Start()
+
+    public override void HidePopup(object param = null)
     {
-        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+        base.HidePopup(param);
         Hide();
     }
-
-    private void KitchenGameManager_OnStateChanged(object sender, System.EventArgs e)
+    public override void ShowPopup()
+    {
+        base.ShowPopup();
+        Show();
+    }
+    private void KitchenGameManager_OnStateChanged()
     {
         if (KitchenGameManager.Instance.IsGameOver())
         {
-            Show();
             if(KitchenGameManager.Instance.IsTaskComplete())
                 _dayText.text = "Complete";
             else
@@ -26,12 +30,14 @@ public class UIGameOverPopup : UIPopup
             _earnText.text = KitchenGameManager.Instance.EarnCount.ToString();  
 
         }
-        else
-        {
-            Hide();
-        }
     }
-
+    public void OnClick()
+    {
+        Hide();
+        KitchenGameManager.Instance.ChangeState(KitchenGameManager.State.Editing);
+        KitchenGameManager.Instance.EndGame();
+        UIHUDManager.Instance.ShowAllUIElement();
+    }
     private void Hide()
     {
         gameObject.SetActive(false);
@@ -39,6 +45,6 @@ public class UIGameOverPopup : UIPopup
     private void Show()
     {
         gameObject.SetActive(true);
-
+        KitchenGameManager_OnStateChanged();
     }
 }

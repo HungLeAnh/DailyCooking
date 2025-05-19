@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -8,23 +9,17 @@ public class UIDayTaskPopup : UIPopup
     [SerializeField] private TextMeshProUGUI _earnGoalText;
     [SerializeField] private TextMeshProUGUI _serveGoalText;
 
-    private void Start()
+    public override void ShowPopup()
     {
-        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
-    }
-
-    private void KitchenGameManager_OnGameInit(object sender, System.EventArgs e)
-    {
+        base.ShowPopup();
         Show();
-
     }
-
-    private void KitchenGameManager_OnStateChanged(object sender, System.EventArgs e)
+    public void OnCick()
     {
-        if (KitchenGameManager.Instance.IsCountdownToStartActive())
-        {
-            Hide();
-        }
+        Hide();
+        KitchenGameManager.Instance.ChangeState(KitchenGameManager.State.CountdownToStart);
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameStartCountdownPopup.ToString());
+
     }
 
     private void Hide()

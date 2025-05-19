@@ -8,6 +8,7 @@ using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch;
 
 public class CameraController : MonoBehaviour
 {
+    [SerializeField] private float _initCameraAngle;
     [SerializeField] private Camera _camera = null;
     [SerializeField] private CinemachineVirtualCamera _virtualCamera = null;
     [SerializeField] private float panSpeed = 0.1f;
@@ -15,12 +16,12 @@ public class CameraController : MonoBehaviour
     [SerializeField, Range(0,1)] private float directionThreshold = 0.3f;
     private Vector2 lastTouchPosition;
     private bool isPanning = false;
-
+    private bool isRotating = false;
 
     [SerializeField] private float zoomSpeed = 1f;
     [SerializeField] private Vector2 zoomBounds = new(5f, 20f);
     private Vector2 panBounds = Vector2.zero;
-
+    private Quaternion targetQuaternion;
     private float _lastPinchDistance;
     private void Awake()
     { 
@@ -29,20 +30,54 @@ public class CameraController : MonoBehaviour
         panBounds = new Vector2Int(GameDefine.GridSize, GameDefine.GridSize);
 
         ClampCameraPosition();
-        EnhancedTouchSupport.Enable();
     }
 
     private void Start()
     {
+        isPanning = false;
         GameInput.Instance.OnFingerDown += OnPanStarted;
         GameInput.Instance.OnFingerUp += OnPanCanceled;
         GameInput.Instance.OnDragPerformed += OnPanMoved;
         GameInput.Instance.OnPintchPerformed += HandleZoom;
 
+        GridBuildingSystem.Instance.OnBuildingStart += OnBuildingStart;
+        GridBuildingSystem.Instance.OnBuildingEnd += OnBuildingEnd;
+        
+    }
+    private void Update()
+    {
+        if (isRotating)
+        {
+            _virtualCamera.transform.rotation = Quaternion.Lerp(_virtualCamera.transform.rotation,
+                                                targetQuaternion, Time.deltaTime * 15f);
+            if (_virtualCamera.transform.rotation == targetQuaternion)
+                isRotating = false;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        GameInput.Instance.OnFingerDown -= OnPanStarted;
+        GameInput.Instance.OnFingerUp -= OnPanCanceled;
+        GameInput.Instance.OnDragPerformed -= OnPanMoved;
+        GameInput.Instance.OnPintchPerformed -= HandleZoom;
+    }
+    private void OnBuildingEnd(object sender, EventArgs e)
+    {
+        isRotating = true;
+        targetQuaternion = Quaternion.Euler(_initCameraAngle, 0, 0);
+    }
+    private void OnBuildingStart(object sender, EventArgs e)
+    {
+        isRotating = true;
+        targetQuaternion = Quaternion.Euler(90, 0, 0);
     }
 
     private void OnPanMoved(object sender, Finger e)
     {
+        if(!isPanning)
+            return;
+        
         panBounds = GridBuildingSystem.Instance.GetGridSize();
         if (panBounds == Vector2Int.zero)
         {
@@ -85,8 +120,16 @@ public class CameraController : MonoBehaviour
 
     private void OnPanStarted(object sender, Finger e)
     {
-        isPanning = true;
-        lastTouchPosition = e.screenPosition;
+        if (GameInput.Instance.IsTouchOverBuildingGhost(e))
+        {
+            isPanning = false;
+
+        }
+        else
+        {
+            isPanning = true;
+            lastTouchPosition = e.screenPosition;
+        }
         //Debug.LogError(lastTouchPosition);
     }
 

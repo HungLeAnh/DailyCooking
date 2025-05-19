@@ -4,15 +4,11 @@ using UnityEngine;
 [Serializable]
 public class ItemStack
 {
-    private InventoryItemSO item;
+    private InventoryItemData item;
     private int amount;
 
-    public InventoryItemSO Item => item;
-    public int Amount
-    {
-        get => amount;
-        set => amount = value;
-    }
+    public InventoryItemData Item { get => item; set => item = value; }
+    public int Amount { get => amount; set => amount = value;}
     public ItemStack()
     {
         item = null;
@@ -23,9 +19,10 @@ public class ItemStack
         item = itemStack.Item;
         amount = itemStack.Amount;
     }
-    public ItemStack(InventoryItemSO item, int amount)
+    public ItemStack(InventoryItemData item, int amount)
     {
         this.item = item;
         this.amount = amount;
     }
+
 }

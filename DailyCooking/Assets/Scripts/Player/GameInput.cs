@@ -191,6 +191,7 @@ public class GameInput : PersistentSingleton<GameInput>
 
     [SerializeField] private float touchTimeThreshold = 0.1f;
     [SerializeField] private float dragThreshold = 10f;
+    [SerializeField] private LayerMask buildingGhostLayerMask;
 
     private PlayerAction playerAction;
     private bool isTouching = false;
@@ -218,15 +219,15 @@ public class GameInput : PersistentSingleton<GameInput>
     private void OnDestroy()
     {
         playerAction?.Player.Disable();
-        EnhancedTouchSupport.Disable();
-        TouchSimulation.Disable();
+        playerAction?.Dispose();
+        //EnhancedTouchSupport.Enable();
+        //EnhancedTouch.Touch.onFingerMove -= Touch_OnFingerMoved;
+        //EnhancedTouch.Touch.onFingerUp -= Touch_OnFingerUp;
+        //EnhancedTouch.Touch.onFingerDown -= Touch_OnFingerDown;
 
-        EnhancedTouch.Touch.onFingerMove -= Touch_OnFingerMoved;
-        EnhancedTouch.Touch.onFingerUp -= Touch_OnFingerUp;
-        EnhancedTouch.Touch.onFingerDown -= Touch_OnFingerDown;
+        //EnhancedTouchSupport.Disable();
+        //TouchSimulation.Disable();
 
-
-        playerAction.Dispose();
     }
 
     private void Touch_OnFingerUp(Finger finger)
@@ -246,6 +247,8 @@ public class GameInput : PersistentSingleton<GameInput>
 
     private void Touch_OnFingerDown(Finger finger)
     {
+        if (IsMouseOverUI())
+            return;
         timeSinceLastTouch = 0f;
         lastTouchPosition = finger.screenPosition;
         isTouching = true;
@@ -259,7 +262,7 @@ public class GameInput : PersistentSingleton<GameInput>
             return;
         if (EnhancedTouch.Touch.activeFingers.Count == 0)
             return;
-        if(EnhancedTouch.Touch.activeFingers.Count == 2)
+        if (EnhancedTouch.Touch.activeFingers.Count == 2)
         {
             OnPintchPerformed?.Invoke(this, EventArgs.Empty);
         }
@@ -290,7 +293,7 @@ public class GameInput : PersistentSingleton<GameInput>
             return;
         if (timeSinceLastTouch > touchTimeThreshold)
             return;
-        
+
 
         float distance = Vector2.Distance(lastTouchPosition, EnhancedTouch.Touch.activeFingers[0].screenPosition);
         if (distance > dragThreshold)
@@ -302,5 +305,27 @@ public class GameInput : PersistentSingleton<GameInput>
     {
         return EventSystem.current.IsPointerOverGameObject();
     }
+    public bool IsTouchOverBuildingGhost(Finger finger)
+    {
+        bool isTouchOverBuildingGhost = false;
+        if (finger != null)
+        {
+            float interactDistance = 999f;
+            Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
+            if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayerMask))
+            {
+                //Debug.Log("Touch Position: " + pos);
+                if (raycastHit.transform.GetComponentInParent<BuildingGhost>() != null)
+                {
+                    isTouchOverBuildingGhost = true;
+                }
+                else
+                {
+                    isTouchOverBuildingGhost = false;
+                }
+            }
 
+        }
+        return isTouchOverBuildingGhost || EventSystem.current.IsPointerOverGameObject();
+    }
 }

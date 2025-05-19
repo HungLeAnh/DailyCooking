@@ -26,6 +26,8 @@ public class PlacedObjectTypeSO : SerializableScriptableObject
     public Sprite icon;
     public int width;
     public int height;
+    [Tooltip("The type of item")]
+    public ItemType itemType = default;
 
 
     public int GetRotationAngle(Dir dir) {

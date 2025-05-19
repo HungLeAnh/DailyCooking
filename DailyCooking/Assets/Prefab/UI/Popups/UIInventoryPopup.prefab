@@ -124,9 +124,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _itemPrefab: {fileID: 3460521221052634623}
   _contentParent: {fileID: 3339322694199904491}
-  _tabTypesList:
-  - _tabIcon: {fileID: 0}
-    _tabType: 0
+  inventoryTabDatabase: {fileID: 11400000, guid: 802ce9dcac427054ea9c89da59312ff3, type: 2}
   _tabsPanel: {fileID: 5306480503384309117}
 --- !u!1 &2315470406892150396
 GameObject:
@@ -195,7 +193,7 @@ MonoBehaviour:
     m_Bottom: 0
   m_ChildAlignment: 0
   m_Spacing: 5
-  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
@@ -214,8 +212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6008742fc13edc418aee12576ad8589, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instantiatedGameObjects:
-  - {fileID: 5838631950228114404}
+  tabPrefab: {fileID: 9154175427696461798}
 --- !u!114 &5218456013183209136
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1055,8 +1052,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 6758438726279086962}
-        m_TargetAssemblyTypeName: UIPopup, Scripts
-        m_MethodName: HidePopup
+        m_TargetAssemblyTypeName: UIInventoryPopup, Scripts
+        m_MethodName: ClosePopup
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1220,7 +1217,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1530865245888752491, guid: 382c5a3b64cf2264e84af4c320f10d57, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 1530865245888752491, guid: 382c5a3b64cf2264e84af4c320f10d57, type: 3}
       propertyPath: m_SizeDelta.y
@@ -1288,17 +1285,11 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1530865245888752491, guid: 382c5a3b64cf2264e84af4c320f10d57, type: 3}
   m_PrefabInstance: {fileID: 216322485967710658}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5838631950228114404 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5910540155019534886, guid: 382c5a3b64cf2264e84af4c320f10d57, type: 3}
+--- !u!1 &9154175427696461798 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8938134717488557604, guid: 382c5a3b64cf2264e84af4c320f10d57, type: 3}
   m_PrefabInstance: {fileID: 216322485967710658}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8dc3a5a16a23645468f351001774eb9a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &4378744533079651734
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1310,10 +1301,6 @@ PrefabInstance:
     - target: {fileID: 1862079546200547442, guid: 0e289643568ae8d449cbbbe7764731df, type: 3}
       propertyPath: m_Name
       value: InventoryItem
-      objectReference: {fileID: 0}
-    - target: {fileID: 1862079546200547442, guid: 0e289643568ae8d449cbbbe7764731df, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9188839870597996403, guid: 0e289643568ae8d449cbbbe7764731df, type: 3}
       propertyPath: m_Pivot.x

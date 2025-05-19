@@ -13,200 +13,142 @@ public enum InventoryTabType
     Recipe,
     Counter,
 }
-public enum ItemInventoryType
-{
-    Recipe,
-    Utensil,
-    Ingredient,
-    Customisation,
-    Dish,
-}
 
 public class UIInventoryPopup : UIPopup
 {
+    public class Param
+    {
+        public bool isPlacingObject;
+    }
+
     [SerializeField] private UIInventoryItem _itemPrefab = default;
     [SerializeField] private GameObject _contentParent = default;
-    [SerializeField] private List<InventoryTab> _tabTypesList = new List<InventoryTab>();
+    [SerializeField] private InventoryTabDatabase inventoryTabDatabase = default;
     [SerializeField] private UIInventoryTabs _tabsPanel = default;
 
-    private InventoryTab _selectedTab = default;
+    private InventoryTab _selectedTab;
     private int selectedItemId = -1;
     private List<UIInventoryItem> _listItem = new List<UIInventoryItem>();
-    private void Start()
+    private bool isPlacingObject = false;
+    public override void SetupPopup()
     {
-        foreach (var prefabSO in GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects)
+        base.SetupPopup();
+
+        //foreach (var prefabSO in GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects)
+        foreach (var prefabSO in GameManager.Instance.GameData.inventoryData.Items)
         {
-            var item = Instantiate(_itemPrefab, _contentParent.transform);
-            item.ItemSelected += InspectItem;
-            item.SetItem(prefabSO,false);
-            item.gameObject.SetActive(true);
-            _listItem.Add(item);
+            CreateInventoryItem(prefabSO);
         }
+        _tabsPanel.Setup(inventoryTabDatabase.TabTypesList);
+        _tabsPanel.SetTabs(inventoryTabDatabase.TabTypesList[0]);
+        _selectedTab = inventoryTabDatabase.TabTypesList[0];
+        FillInventory(_selectedTab.TabType);        
+        GridBuildingSystem.Instance.OnObjectPlaced += GridBuildingSystem_OnObjectPlaced;
+        GridBuildingSystem.Instance.OnReturnPlaceObjectToInventory += GridBuildingSystem_OnReturnPlaceObjectToInventory;
     }
-    private void OnEnable()
+
+    public override void ShowPopup()
     {
+        base.ShowPopup();
 
-        //_tabsPanel.TabChanged += OnChangeTab;
-
+        _tabsPanel.TabChanged += OnChangeTab;
         for (int i = 0; i < _listItem.Count; i++)
         {
-            _listItem[i].ItemSelected += InspectItem;
+            _listItem[i].ItemSelected += PlacingItem;
         }
         //sub switch tab here
-
+        FillInventory(_selectedTab.TabType);
+        GridBuildingSystem.Instance.FireOnBuildingStartEvent();
     }
 
-    private void OnDisable()
+    public override void HidePopup(object param = null)
     {
-        //_tabsPanel.TabChanged -= OnChangeTab;
+        base.HidePopup(param);
+
+        Param paramData = param as Param;
+        if (paramData != null)
+        {
+            isPlacingObject = paramData.isPlacingObject;
+        }
+
+        _tabsPanel.TabChanged -= OnChangeTab;
 
         for (int i = 0; i < _listItem.Count; i++)
         {
-            _listItem[i].ItemSelected -= InspectItem;
+            _listItem[i].ItemSelected -= PlacingItem;
         }
 
         //unsub switch tab here
+        if (!isPlacingObject)
+            GridBuildingSystem.Instance.FireOnBuildingEndEvent();
     }
 
-    //private void OnSwitchTab(float orientation)
-    //{
-    //    Debug.Log("OnSwitchTab");
-    //    if (orientation != 0)
-    //    {
-    //        bool isLeft = orientation < 0;
-    //        int initialIndex = _tabTypesList.FindIndex(o => o == _selectedTab);
-    //        if (initialIndex != -1)
-    //        {
-    //            if (isLeft)
-    //            {
-    //                initialIndex--;
-    //            }
-    //            else
-    //            {
-    //                initialIndex++;
-    //            }
-
-    //            initialIndex = Mathf.Clamp(initialIndex, 0, _tabTypesList.Count - 1);
-    //        }
-
-    //        OnChangeTab(_tabTypesList[initialIndex]);
-    //    }
-    //}
-
-    //public void FillInventory(InventoryTabType _selectedTabType = InventoryTabType.CookingItem, bool isNearPot = false)
-    //{
-
-    //    if ((_tabTypesList.Exists(o => o.TabType == _selectedTabType)))
-    //    {
-    //        _selectedTab = _tabTypesList.Find(o => o.TabType == _selectedTabType);
-    //    }
-    //    else
-    //    {
-    //        if (_tabTypesList != null)
-    //        {
-    //            if (_tabTypesList.Count > 0)
-    //            {
-    //                _selectedTab = _tabTypesList[0];
-    //            }
-    //        }
-    //    }
-
-    //    if (_selectedTab != null)
-    //    {
-    //        SetTabs(_tabTypesList, _selectedTab);
-    //        List<ItemStack> listItemsToShow = new List<ItemStack>();
-    //        listItemsToShow = _currentInventory.Items.FindAll(o => o.Item.ItemType.TabType == _selectedTab);
-
-    //        FillInvetoryItems(listItemsToShow);
-    //    }
-    //    else
-    //    {
-    //        Debug.LogError("There's no selected tab");
-    //    }
-    //}
-
-    void SetTabs(List<InventoryTab> typesList, InventoryTab selectedType)
+    public void FillInventory(InventoryTabType _selectedTabType = InventoryTabType.Counter)
     {
-        _tabsPanel.SetTabs(typesList, selectedType);
+        _selectedTab = inventoryTabDatabase.GetTabByType(_selectedTabType);
+        if (_selectedTab == null)
+        {
+            _selectedTab = inventoryTabDatabase.TabTypesList[0];
+        }
+
+        if (_selectedTab != null)
+        {
+            List<ItemStack> listItemsToShow = new List<ItemStack>();
+            listItemsToShow = GameManager.Instance.GameData.inventoryData.Items.FindAll(o => o.Item.TabType == _selectedTab.TabType);
+
+            FillInvetoryItems(listItemsToShow);
+        }
+        else
+        {
+            Debug.LogError("There's no selected tab");
+        }
     }
 
-    //void FillInvetoryItems(List<ItemStack> listItemsToShow)
-    //{
-    //    if (_listItem == null)
-    //        _listItem = new List<UIInventoryItem>();
+    void FillInvetoryItems(List<ItemStack> listItemsToShow)
+    {
+        if (_listItem == null)
+            _listItem = new List<UIInventoryItem>();
 
-    //    int maxCount = Mathf.Max(listItemsToShow.Count, _listItem.Count);
+        int maxCount = Mathf.Max(listItemsToShow.Count, _listItem.Count);
+        int diffCount = Mathf.Abs(listItemsToShow.Count - _listItem.Count);
+        selectedItemId = -1;
+        if( diffCount > 0 && _listItem.Count < listItemsToShow.Count)
+        {
+            for (int i = 0; i < diffCount; i++)
+            {
+                CreateInventoryItem(null);
+            }
+        }
+        for (int i = 0; i < maxCount; i++)
+        {
+            if (i < listItemsToShow.Count)
+            {
+                _listItem[i].SetItem(listItemsToShow[i], false);
 
-    //    for (int i = 0; i < maxCount; i++)
-    //    {
-    //        if (i < listItemsToShow.Count)
-    //        {
-    //            bool isSelected = selectedItemId == i;
-    //            _listItem[i].SetItem(listItemsToShow[i], isSelected);
+            }
+            else 
+            {
+                _listItem[i].SetInactiveItem();
+            }
 
-    //        }
-    //        else if (i < _listItem.Count)
-    //        {
-    //            _listItem[i].SetInactiveItem();
-    //        }
-
-    //    }
+        }
 
 
-    //    if (selectedItemId >= 0)
-    //    {
-    //        UnselectItem(selectedItemId);
-    //        selectedItemId = -1;
-    //    }
-    //    if (_listItem.Count > 0)
-    //    {
-    //        _listItem[0].SelectFirstElement();
-    //    }
-    //}
+        if (selectedItemId >= 0)
+        {
+            UnselectItem(selectedItemId);
+        }
+    }
+    private void CreateInventoryItem(ItemStack prefabSO)
+    {
+        var item = Instantiate(_itemPrefab, _contentParent.transform);
+        item.ItemSelected += PlacingItem;
+        item.SetItem(prefabSO, false);
+        item.gameObject.SetActive(true);
+        _listItem.Add(item);
+    }
 
-    //void UpdateItemInInventory(ItemStack itemToUpdate, bool removeItem)
-    //{
-    //    if (_listItem == null)
-    //        _listItem = new List<UIInventoryItem>();
-
-    //    if (removeItem)
-    //    {
-    //        if (_listItem.Exists(o => o.currentItem == itemToUpdate))
-    //        {
-
-    //            int index = _listItem.FindIndex(o => o.currentItem == itemToUpdate);
-    //            _listItem[index].SetInactiveItem();
-    //        }
-    //    }
-    //    else
-    //    {
-    //        int index = 0;
-
-    //        //if the item has already been created
-    //        if (_listItem.Exists(o => o.currentItem == itemToUpdate))
-    //        {
-    //            index = _listItem.FindIndex(o => o.currentItem == itemToUpdate);
-    //        }
-    //        //if the item needs to be created
-    //        else
-    //        {
-    //            //if the new item needs to be instantiated
-    //            if (_currentInventory.Items.Count > _listItem.Count)
-    //            {
-    //                UIInventoryItem instantiatedPrefab = Instantiate(_itemPrefab, _contentParent.transform) as UIInventoryItem;
-    //                _listItem.Add(instantiatedPrefab);
-    //            }
-
-    //            //find the last instantiated game object not used
-    //            index = _currentInventory.Items.Count;
-    //        }
-
-    //        bool isSelected = selectedItemId == index;
-    //        _listItem[index].SetItem(itemToUpdate, isSelected);
-    //    }
-    //}
-
-    public void InspectItem(PlacedObjectTypeSO itemToInspect)
+    public void PlacingItem(PlacedObjectTypeSO itemToInspect)
     {
         if (_listItem.Exists(o => o.PlacedObjectTypeSO == itemToInspect))
         {
@@ -224,7 +166,13 @@ public class UIInventoryPopup : UIPopup
             //check if interactable
 
         }
-        GridBuildingSystem.Instance.SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO);
+
+        GameManager.Instance.GameData.RemoveInventoryData(itemToInspect.Guid);
+        GameManager.Instance.SaveGame();
+
+        GridBuildingSystem.Instance.SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
+        isPlacingObject = true;
+        HidePopup();
     }
 
     void UnselectItem(int itemIndex)
@@ -235,18 +183,38 @@ public class UIInventoryPopup : UIPopup
         }
     }
 
-    //void UpdateInventory()
-    //{
-    //    FillInventory(_selectedTab.TabType);
-    //}
+    void OnChangeTab(InventoryTab inventoryTab)
+    {
+        FillInventory(inventoryTab.TabType);
+        _tabsPanel.SetTabs(inventoryTab);
+    }
+    private void GridBuildingSystem_OnObjectPlaced(object sender, EventArgs e)
+    {
+        if (selectedItemId >= 0 && selectedItemId < _listItem.Count)
+        {
+            if (selectedItemId >= 0)
+            {
+                UnselectItem(selectedItemId);
+                selectedItemId = -1;
+            }
 
-    //void OnChangeTab(InventoryTabSO tabType)
-    //{
-    //    FillInventory(tabType.TabType);
-    //}
+        }
+
+        FillInventory(_selectedTab.TabType);
+    }
+    private void GridBuildingSystem_OnReturnPlaceObjectToInventory(object sender, PlacedObjectTypeSO e)
+    {
+        FillInventory(_selectedTab.TabType);
+
+    }
 
     public void SaveGrid()
     {
         GridBuildingSystem.Instance.SaveGrid();
+    }
+    public void ClosePopup()
+    {
+        isPlacingObject = false;
+        HidePopup();
     }
 }

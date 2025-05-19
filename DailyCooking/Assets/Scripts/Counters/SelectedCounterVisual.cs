@@ -7,19 +7,19 @@ public class SelectedCounterVisual : MonoBehaviour
 
     private void Start()
     {
-        PlayerStateMachine.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
+        CounterModules.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
     }
 
-    private void Player_OnSelectedCounterChanged(object sender, PlayerStateMachine.OnSelectedCounterChangedEventArgs e)
+    private void Player_OnSelectedCounterChanged(object sender, CounterModules.OnSelectedCounterChangedEventArgs e)
     {
-        //if (e.selectedCounterView == baseCounter)
-        //{
-        //    Show();
-        //}
-        //else
-        //{
-        //    Hide();
-        //}
+        if (e.selectedCounterView == baseCounter.BaseCounterView)
+        {
+            Show();
+        }
+        else
+        {
+            Hide();
+        }
     }
     private void Show()
     {

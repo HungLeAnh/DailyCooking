@@ -12,6 +12,7 @@ public class CuttingCounterView : BaseCounterView
     }
     internal override void UpdateView(object cuttingCounterModel)
     {
+        base.UpdateView(cuttingCounterModel);
         CuttingCounterModel model = (CuttingCounterModel)cuttingCounterModel;
         progressBarUI.OnProgressChanged(model.ProgressNormalized);
     }

@@ -53,6 +53,8 @@ public class PlaceObjectSetup
                 placedObjectTypeSO.icon = sprites.FirstOrDefault(x => x.name == prefab.name);
                 placedObjectTypeSO.width = 1;
                 placedObjectTypeSO.height = 1;
+                placedObjectTypeSO.itemType = new ItemType();
+                placedObjectTypeSO.itemType.TabType = InventoryTabType.Counter;
 
                 // Save the ScriptableObject asset
                 string assetPath = $"{scriptableObjectFolderPath}/{prefab.name}.asset";

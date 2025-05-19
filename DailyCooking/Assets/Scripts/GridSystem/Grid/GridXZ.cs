@@ -59,35 +59,73 @@ public class GridXZ<TGridObject> {
         {
             return;
         }
-        for (int x = 0; x < gridData.GridArrayData.GetLength(0); x++)
+        for (int i = 0; i < gridData.GridArrayData.Count; i++)
         {
-            for (int z = 0; z < gridData.GridArrayData.GetLength(1); z++)
+            PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(gridData.GridArrayData[i].PlacedObjectTypeSOGuid);
+            List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(gridData.GridArrayData[i].Origin, gridData.GridArrayData[i].Dir);
+            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(gridData.GridArrayData[i].Dir);
+            Vector3 placedObjectWorldPosition = this.GetWorldPosition(gridData.GridArrayData[i].Origin) +
+                new Vector3(rotationOffset.x, 0, rotationOffset.y) * this.GetCellSize();
+            PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, gridData.GridArrayData[i].Origin, gridData.GridArrayData[i].Dir, placedObjectTypeSO);
+
+            foreach (var gridPosition in gridPositionList)
             {
-                if(gridData.GridArrayData[x, z] == null) continue;
+                var gridObject = this.GetGridObject(gridPosition.x, gridPosition.y) as GridObject;
+                gridObject.SetPlacedObject(placedObject);
 
-                if (gridData.GridArrayData[x,z].Origin.x == x && gridData.GridArrayData[x,z].Origin.y == z)
-                {
-                    PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(gridData.GridArrayData[x, z].PlacedObjectTypeSOGuid);
-                    List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(new Vector2Int(x, z), gridData.GridArrayData[x,z].Dir);
-                    Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(gridData.GridArrayData[x, z].Dir);
-                    Vector3 placedObjectWorldPosition = this.GetWorldPosition(x, z) +
-                        new Vector3(rotationOffset.x, 0, rotationOffset.y) * this.GetCellSize();
-                    PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, new Vector2Int(x, z), gridData.GridArrayData[x, z].Dir, placedObjectTypeSO);
-
-                    foreach (var gridPosition in gridPositionList)
-                    {
-                        var gridObject = this.GetGridObject(gridPosition.x, gridPosition.y) as GridObject;
-                        gridObject.SetPlacedObject(placedObject);
-
-                    }
-                }
             }
         }
+        /*//for (int x = 0; x < gridData.GridArrayData.GetLength(0); x++)
+        //{
+        //    for (int z = 0; z < gridData.GridArrayData.GetLength(1); z++)
+        //    {
+        //        if(gridData.GridArrayData[x, z] == null) continue;
+
+        //        if (gridData.GridArrayData[x,z].Origin.x == x && gridData.GridArrayData[x,z].Origin.y == z)
+        //        {
+        //            PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(gridData.GridArrayData[x, z].PlacedObjectTypeSOGuid);
+        //            List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(new Vector2Int(x, z), gridData.GridArrayData[x,z].Dir);
+        //            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(gridData.GridArrayData[x, z].Dir);
+        //            Vector3 placedObjectWorldPosition = this.GetWorldPosition(x, z) +
+        //                new Vector3(rotationOffset.x, 0, rotationOffset.y) * this.GetCellSize();
+        //            PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, new Vector2Int(x, z), gridData.GridArrayData[x, z].Dir, placedObjectTypeSO);
+
+        //            foreach (var gridPosition in gridPositionList)
+        //            {
+        //                var gridObject = this.GetGridObject(gridPosition.x, gridPosition.y) as GridObject;
+        //                gridObject.SetPlacedObject(placedObject);
+
+        //            }
+        //        }
+        //    }
+        //}*/
         ShowDebug();
+    }
+    public void AddGridObjectData(List<GridObjectData> gridObjectDataList)
+    {
+        if (gridObjectDataList == null) return;
+        if (gridObjectDataList.Count <= 0) return;
+
+        for (int i = 0; i < gridObjectDataList.Count; i++)
+        {
+            PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(gridObjectDataList[i].PlacedObjectTypeSOGuid);
+            List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(gridObjectDataList[i].Origin, gridObjectDataList[i].Dir);
+            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(gridObjectDataList[i].Dir);
+            Vector3 placedObjectWorldPosition = this.GetWorldPosition(gridObjectDataList[i].Origin) +
+                new Vector3(rotationOffset.x, 0, rotationOffset.y) * this.GetCellSize();
+            PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, gridObjectDataList[i].Origin, gridObjectDataList[i].Dir, placedObjectTypeSO);
+
+            foreach (var gridPosition in gridPositionList)
+            {
+                var gridObject = this.GetGridObject(gridPosition.x, gridPosition.y) as GridObject;
+                gridObject.SetPlacedObject(placedObject);
+
+            }
+        }
     }
     private void ShowDebug()
     {
-        bool showDebug = true;
+        bool showDebug = false;
         if (showDebug)
         {
             TextMesh[,] debugTextArray = new TextMesh[width, height];
@@ -131,17 +169,25 @@ public class GridXZ<TGridObject> {
     public Vector3 GetWorldPosition(int x, int z) 
     {
         return new Vector3(x, 0, z) * cellSize + originPosition;
+    }    
+    public Vector3 GetWorldPosition(Vector2Int position) 
+    {
+        return new Vector3(position.x, 0, position.y) * cellSize + originPosition;
     }
 
     public void GetXZ(Vector3 worldPosition, out int x, out int z) 
     {
         x = Mathf.FloorToInt((worldPosition - originPosition).x / cellSize);
         z = Mathf.FloorToInt((worldPosition - originPosition).z / cellSize);
-        if (x < 0 || x >= width || z < 0 || z >= height)
-        { 
+        if (x < 0)
+            x = 0;       
+        if (x >= width)
+            x = width-1;       
+        if (z < 0)
             z = 0;
-            x = 0;
-        } 
+        if (z >= height)
+            z = height-1;
+        
     }
 
     public void SetGridObject(int x, int z, TGridObject value) 
@@ -229,12 +275,12 @@ public class GridData
     private int height;
     private float cellSize;
     private Vector3 originPosition;
-    private GridObjectData[,] gridArrayData;
+    private List<GridObjectData> gridArrayData;
     public int Width { get => width; set => width = value; }
     public int Height { get => height; set => height = value; }
     public float CellSize { get => cellSize; set => cellSize = value; }
     public Vector3 OriginPosition { get => originPosition; set => originPosition = value; }
-    public GridObjectData[,] GridArrayData { get => gridArrayData; set => gridArrayData = value; }
+    public List<GridObjectData> GridArrayData { get => gridArrayData; set => gridArrayData = value; }
     public GridData() { }
     public void SaveGridData(GridXZ<GridObject> grid)
     {
@@ -243,7 +289,7 @@ public class GridData
         height = grid.GetHeight();
         cellSize = grid.GetCellSize();
         originPosition = grid.GetOriginPosition();
-        GridArrayData = new GridObjectData[width, height];
+        GridArrayData = new List<GridObjectData>();
         for (int x = 0; x < width; x++)
         {
             for (int z = 0; z < height; z++)
@@ -253,7 +299,7 @@ public class GridData
 
                 var model = gridObject.GetPlacedObject()?.GetModel();
                 if (model == null) continue;
-                GridArrayData[x, z] = new GridObjectData(model.GetPlacedObjectTypeSOGuid(), model.Origin, model.Dir);
+                GridArrayData.Add(new GridObjectData(model.GetPlacedObjectTypeSOGuid(), model.Origin, model.Dir));
             }
         }
     }

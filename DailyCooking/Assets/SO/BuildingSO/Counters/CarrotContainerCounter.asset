@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e7747bdf78fa6141a2f81d16ff91e5f, type: 3}
   m_Name: CarrotContainerCounter
   m_EditorClassIdentifier: 
-  _guid: 
+  _guid: edc8e469bd7837345a2ae859c4eb2be1
   id: 3
   nameString: CarrotContainerCounterPlaceObjectSO
   prefab: {fileID: 3100983049372934743, guid: 2974a2a79fce7bb4ca5672fc7eed3ac3, type: 3}
@@ -20,3 +20,6 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 6b46ddddca0cc5f4baa7b91327bceba7, type: 3}
   width: 1
   height: 1
+  itemType:
+    _typeColor: {r: 0, g: 0, b: 0, a: 0}
+    _tabType: 3

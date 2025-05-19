@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e7747bdf78fa6141a2f81d16ff91e5f, type: 3}
   m_Name: PotatoContainerCounter
   m_EditorClassIdentifier: 
-  _guid: 
+  _guid: 37d52cb21125dd446a5bc3575a9ca3c1
   id: 12
   nameString: PotatoContainerCounterPlaceObjectSO
   prefab: {fileID: 3100983049372934743, guid: f732dec2d0bfcec4eabf88a877505049, type: 3}
@@ -20,3 +20,6 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 9767a068bf408a141aa26f0993086eee, type: 3}
   width: 1
   height: 1
+  itemType:
+    _typeColor: {r: 0, g: 0, b: 0, a: 0}
+    _tabType: 3

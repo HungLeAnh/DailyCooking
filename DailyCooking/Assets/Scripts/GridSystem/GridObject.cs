@@ -28,17 +28,16 @@ public class GridObject
     {
         return placedObject;
     }
-    public void ClearTransform()
-    {
-        placedObject = null;
-        grid.TriggerGridObjectChanged(x, z);
 
-    }
     public bool CanBuild()
     {
         return placedObject == null;
     }
-
+    public void ClearPlacedObject()
+    {
+        placedObject = null;
+        grid.TriggerGridObjectChanged(x, z);
+    }
     public override string ToString()
     {
         return x + ", " + z;

@@ -245,13 +245,17 @@ namespace CodeMonkey.Utils {
         }        
         public static Vector3 GetTouchWorldPosition3D()
         {
-            Ray ray = Camera.main.ScreenPointToRay(GetScreenTouchPosition());
+            var touch = GetScreenTouchPosition();
+            if (touch == -Vector3.one) 
+                return -Vector3.one;
+
+            Ray ray = Camera.main.ScreenPointToRay(touch);
             if(Physics.Raycast(ray,out RaycastHit raycastHit,999f))
             {
                 return raycastHit.point;
             }
             else
-                return Vector3.zero;
+                return -Vector3.one;
         }
         public static Vector3 GetMouseWorldPosition() {
             Vector3 vec = GetMouseWorldPositionWithZ(GetScreenMousePosition(), Camera.main);
@@ -1583,10 +1587,14 @@ namespace CodeMonkey.Utils {
             Vector2 mousePosition =  Mouse.current.position.ReadValue();
             return new Vector3(mousePosition.x,mousePosition.y,Camera.main.nearClipPlane);
         }        
-        public static Vector2 GetScreenTouchPosition()
+        public static Vector3 GetScreenTouchPosition()
         {
+            if(UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count == 0)
+            {
+                return -Vector3.one;
+            }
             Vector2 touchPosition = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[0].screenPosition;
-            return new Vector3(touchPosition.x, touchPosition.y,Camera.main.nearClipPlane);
+            return new Vector3(touchPosition.x, touchPosition.y, Camera.main.nearClipPlane);
         }
     }
 

@@ -82,7 +82,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
             }
         }
     }
-    public override void InteractAlternate(PlayerStateMachine playerStateMachine)
+    public override void ProcessKitchenObject(PlayerStateMachine playerStateMachine)
     {
         var model = (CuttingCounterModel)BaseCounterModel;
         if (HasKitchenObject() && HasRecipeWithInput(GetKitchenObject().GetKitchenObjectSO()))

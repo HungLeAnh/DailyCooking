@@ -53,7 +53,9 @@ public class UIShopItem : MonoBehaviour
 
     private void OnClickButtonBuy()
     {
-
+        //GameManager.Instance.GameData.playerData.coins -= configShopItem.Price;
+        GameManager.Instance.GameData.AddInventoryData(InventoryItemData.CreateInventoryItem(configShopItem.Id.ToString()));
+        GameManager.Instance.SaveGame();
     }
 
     private void GetReward(Dictionary<string, int> parsedData)
@@ -66,6 +68,11 @@ public class UIShopItem : MonoBehaviour
 
                 var placedObject = GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects
                     .Find(x => x.id == parsedDataList[0].Key);
+                if (placedObject == null)
+                {
+                    gameObject.SetActive(false);
+                    break;
+                }
 
                 SetIcon(placedObject.icon);
 

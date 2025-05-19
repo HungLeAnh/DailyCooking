@@ -9,6 +9,7 @@ public enum UIHUDElements
     Pause,
     Shop,
     Inventory,
+    Play,
 }
 [Serializable]
 struct SerializableKeyValuePair<T1, T2>
@@ -21,13 +22,13 @@ struct SerializableKeyValuePair<T1, T2>
         Value = value;
     }
 }
-public class UIHUDManager : SimpleSingleton<UIHUDManager>
+public class UIHUDManager : PersistentSingleton<UIHUDManager>
 {
     [Header("HUD Elements")]
     [SerializeField] private List<SerializableKeyValuePair<UIHUDElements, GameObject>> uiHUDElementList = new List<SerializableKeyValuePair<UIHUDElements, GameObject>>();
     private Dictionary<UIHUDElements, GameObject> uiHUDElementDictionary = new Dictionary<UIHUDElements, GameObject>();
 
-    private void Start()
+    protected override void Awake()
     {
         foreach (var item in uiHUDElementList)
         {
@@ -65,6 +66,27 @@ public class UIHUDManager : SimpleSingleton<UIHUDManager>
     public void OnInventoryClicked()
     {
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup.ToString());
+    }
+    public void OnPlayClicked()
+    {
+        HideAllUIElement();
+        KitchenGameManager.Instance.StartGame();
+
+    }
+
+    public void HideAllUIElement()
+    {
+        foreach (var item in uiHUDElementDictionary)
+        {
+            item.Value.SetActive(false);
+        }
+    }
+    public void ShowAllUIElement()
+    {
+        foreach (var item in uiHUDElementDictionary)
+        {
+            item.Value.SetActive(true);
+        }
     }
     #endregion
 }

@@ -17,7 +17,7 @@ public class InventoryData
         _items.Clear();
     }
 
-    public void Add(InventoryItemSO item, int count = 1)
+    public void Add(InventoryItemData item, int count = 1)
     {
         if (count <= 0)
             return;
@@ -25,7 +25,7 @@ public class InventoryData
         for (int i = 0; i < _items.Count; i++)
         {
             ItemStack currentItemStack = _items[i];
-            if (item == currentItemStack.Item)
+            if (item.PlacedObjectTypeSOGuid == currentItemStack.Item.PlacedObjectTypeSOGuid)
             {
                 currentItemStack.Amount += count;
                 return;
@@ -34,8 +34,25 @@ public class InventoryData
 
         _items.Add(new ItemStack(item, count));
     }
+    public void Add(string id, int count = 1)
+    {
+        if (count <= 0)
+            return;
 
-    public void Remove(InventoryItemSO item, int count = 1)
+        for (int i = 0; i < _items.Count; i++)
+        {
+            ItemStack currentItemStack = _items[i];
+            if (id == currentItemStack.Item.PlacedObjectTypeSOGuid)
+            {
+                currentItemStack.Amount += count;
+                return;
+            }
+        }
+
+        _items.Add(new ItemStack(InventoryItemData.CreateInventoryItem(id,true), count));
+    }
+
+    public void Remove(InventoryItemData item, int count = 1)
     {
         if (count <= 0)
             return;
@@ -44,7 +61,27 @@ public class InventoryData
         {
             ItemStack currentItemStack = _items[i];
 
-            if (currentItemStack.Item == item)
+            if (currentItemStack.Item.PlacedObjectTypeSOGuid == item.PlacedObjectTypeSOGuid)
+            {
+                currentItemStack.Amount -= count;
+
+                if (currentItemStack.Amount <= 0)
+                    _items.Remove(currentItemStack);
+
+                return;
+            }
+        }
+    }    
+    public void Remove(string id, int count = 1)
+    {
+        if (count <= 0)
+            return;
+
+        for (int i = 0; i < _items.Count; i++)
+        {
+            ItemStack currentItemStack = _items[i];
+
+            if (currentItemStack.Item.PlacedObjectTypeSOGuid == id)
             {
                 currentItemStack.Amount -= count;
 
@@ -56,11 +93,11 @@ public class InventoryData
         }
     }
 
-    public bool Contains(InventoryItemSO item)
+    public bool Contains(InventoryItemData item)
     {
         for (int i = 0; i < _items.Count; i++)
         {
-            if (item == _items[i].Item)
+            if (item.PlacedObjectTypeSOGuid == _items[i].Item.PlacedObjectTypeSOGuid)
             {
                 return true;
             }
@@ -69,12 +106,12 @@ public class InventoryData
         return false;
     }
 
-    public int Count(InventoryItemSO item)
+    public int Count(InventoryItemData item)
     {
         for (int i = 0; i < _items.Count; i++)
         {
             ItemStack currentItemStack = _items[i];
-            if (item == currentItemStack.Item)
+            if (item.PlacedObjectTypeSOGuid == currentItemStack.Item.PlacedObjectTypeSOGuid)
             {
                 return currentItemStack.Amount;
             }
@@ -83,30 +120,6 @@ public class InventoryData
         return 0;
     }
 
-    public bool[] IngredientsAvailability(List<ItemStack> ingredients)
-    {
-        if (ingredients == null)
-            return null;
-        bool[] availabilityArray = new bool[ingredients.Count];
-
-        for (int i = 0; i < ingredients.Count; i++)
-        {
-            availabilityArray[i] = _items.Exists(o => o.Item == ingredients[i].Item && o.Amount >= ingredients[i].Amount);
-
-        }
-        return availabilityArray;
-
-
-    }
-    public bool hasIngredients(List<ItemStack> ingredients)
-    {
-
-        bool hasIngredients = !ingredients.Exists(j => !_items.Exists(o => o.Item == j.Item && o.Amount >= j.Amount));
-
-        return hasIngredients;
-
-
-    }
     public int GetNumberOfItems()
     {
         int numberOfItems = 0;

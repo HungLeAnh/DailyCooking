@@ -7,19 +7,31 @@ public class BaseCounterView : MonoBehaviour
 {
     public event EventHandler<PlayerStateMachine> OnInteract;
     public event EventHandler<PlayerStateMachine> OnInteractAlternate;
+    public event EventHandler<PlayerStateMachine> OnRestartGame;
     [SerializeField] private Transform counterTopPoint;
     [SerializeField] private GameObject[] visualGameObjectArray;
 
     public Transform CounterTopPoint { get => counterTopPoint; set => counterTopPoint = value; }
-    private void Start()
-    {
-        PlayerStateMachine.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
-    }
     public virtual object CreateControllerFromView()
     {
         return new BaseCounterController(this, new BaseCounterModel());
     }
-    private void Player_OnSelectedCounterChanged(object sender, PlayerStateMachine.OnSelectedCounterChangedEventArgs e)
+    private void Start()
+    {
+        CounterModules.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
+        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+    }
+
+    private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
+    {
+        if (KitchenGameManager.Instance.IsGameOver())
+        {
+            Hide();
+            OnRestartGame?.Invoke(this, PlayerStateMachine.Instance);
+        }
+    }
+
+    private void Player_OnSelectedCounterChanged(object sender, CounterModules.OnSelectedCounterChangedEventArgs e)
     {
         if (e.selectedCounterView == this)
         {

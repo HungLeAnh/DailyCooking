@@ -55,6 +55,7 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
 
     private void ShowFirstTimeTutorial()
     {
+        UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].StartTutorial();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].OnTutorialClosed += TutorialManager_OnTutorialClosed;
 
@@ -68,6 +69,7 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
                 GridBuildingSystem.Instance.UnlockGrid();
                 GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime = true;
                 GameManager.Instance.SaveGame();
+                UIHUDManager.Instance.ShowAllUIElement();
                 break;
             case TutorialType.GameMechanic:
                 break;

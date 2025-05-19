@@ -3,8 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CounterModules : PersistentSingleton<CounterModules>
+public class CounterModules : SimpleSingleton<CounterModules>
 {
+    public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
+    public class OnSelectedCounterChangedEventArgs : EventArgs
+    {
+        public BaseCounterView selectedCounterView;
+    }
+
     [SerializeReference] private List<BaseCounterController> baseCounterControllers = new List<BaseCounterController>();
     
     public void Initialize()
@@ -16,5 +22,19 @@ public class CounterModules : PersistentSingleton<CounterModules>
             var controller = counterView.CreateControllerFromView();
             baseCounterControllers.Add(controller as BaseCounterController);
         }
+    }
+    public void DestroyCounter(BaseCounterView baseCounterView)
+    {
+       var controller =  baseCounterControllers.Find(x => x.BaseCounterView == baseCounterView);
+        if(controller != null)
+        {
+            baseCounterControllers.Remove(controller);
+            controller.BaseCounterModel.Unsubscribe(Observer.EObserverEvent.ModelChange, controller);
+            GridBuildingSystem.Instance.DestroyPlaceObject(baseCounterView.GetComponent<PlacedObjectView>());
+        }
+    }
+    public void FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs args)
+    {
+        OnSelectedCounterChanged?.Invoke(this, args);
     }
 }

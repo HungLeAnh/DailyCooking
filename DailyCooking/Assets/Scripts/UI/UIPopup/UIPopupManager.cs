@@ -11,21 +11,21 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>
     private Dictionary<string,UIPopup> uiPopupDictionary = new Dictionary<string,UIPopup>();
     private List<UIPopup> visiblePopupList = new List<UIPopup>();
 
-    public void HidePopup(string popupName)
+    public void HidePopup(string popupName,object param = null)
     {
         if (!uiPopupDictionary.ContainsKey(popupName))
         {
             Debug.LogWarning($"Popup '{popupName}' not found in the dictionary.");
             return;
         }
-        HideUIPopup(popupName);
+        HideUIPopup(popupName,param);
     }
 
-    private void HideUIPopup(string popupName)
+    private void HideUIPopup(string popupName, object param)
     {
         if(uiPopupDictionary.TryGetValue(popupName, out var value))
         {
-            value.HidePopup();
+            value.HidePopup(param);
             if(visiblePopupList.Contains(value))
                 visiblePopupList.Remove(value);
         }

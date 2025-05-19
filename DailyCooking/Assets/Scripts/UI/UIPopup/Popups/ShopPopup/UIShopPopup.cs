@@ -14,7 +14,7 @@ public class UIShopPopup : UIPopup
         base.SetupPopup();
         Initialize();
     }
-    public override void HidePopup()
+    public override void HidePopup(object param)
     {
         base.HidePopup();   
 

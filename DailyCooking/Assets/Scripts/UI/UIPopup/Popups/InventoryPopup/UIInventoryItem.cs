@@ -20,60 +20,47 @@ public class UIInventoryItem : MonoBehaviour
     bool _isSelected = false;
     public PlacedObjectTypeSO PlacedObjectTypeSO { get => placedObjectTypeSO; set => placedObjectTypeSO = value; }
 
-    public void SetItem(PlacedObjectTypeSO placedObject, bool isSelected)
-    {
-        _isSelected = isSelected;
-        _itemPreviewImage.gameObject.SetActive(true);
-        _itemCount.gameObject.SetActive(true);
-        _bgImage.gameObject.SetActive(true);
-        _imgSelected.gameObject.SetActive(true);
-        _itemButton.gameObject.SetActive(true);
-        _bgInactiveImage.gameObject.SetActive(false);
-
-        PlacedObjectTypeSO = placedObject;
-
-        _imgSelected.gameObject.SetActive(isSelected);
-
-        _itemPreviewImage.sprite = placedObject.icon;
-
-
-    }
     public void SetItem(ItemStack itemStack, bool isSelected)
     {
-        _isSelected = isSelected;
-        _itemPreviewImage.gameObject.SetActive(true);
-        _itemCount.gameObject.SetActive(true);
-        _bgImage.gameObject.SetActive(true);
-        _imgSelected.gameObject.SetActive(true);
-        _itemButton.gameObject.SetActive(true);
-        _bgInactiveImage.gameObject.SetActive(false);
+        if (itemStack == null) return;
+        if (GridBuildingSystem.Instance.PlaceObjectTypeSODictionary.TryGetValue(itemStack.Item.PlacedObjectTypeSOGuid, out PlacedObjectTypeSO placedObject))
+        {
+            placedObjectTypeSO = placedObject;
+            currentItem = itemStack;
+            _isSelected = isSelected;
 
-        currentItem = itemStack;
+            gameObject.SetActive(true);
+            _itemPreviewImage.gameObject.SetActive(true);
+            _itemCount.gameObject.SetActive(true);
+            //_bgImage.gameObject.SetActive(true);
+            _imgSelected.gameObject.SetActive(true);
+            _itemButton.gameObject.SetActive(true);
+            _bgInactiveImage.gameObject.SetActive(false);
 
-        _imgSelected.gameObject.SetActive(isSelected);
+            _imgSelected.gameObject.SetActive(isSelected);
 
-        _itemPreviewImage.sprite = itemStack.Item.PreviewImage;
+            _itemPreviewImage.sprite = placedObject.icon;
 
-        _itemCount.text = itemStack.Amount.ToString();
-        _bgImage.color = itemStack.Item.ItemType.TypeColor;
+            _itemCount.text = itemStack.Amount.ToString();
+            //_bgImage.color = itemStack.Item.ItemType.TypeColor;
+        }
+        else
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     public void SetInactiveItem()
     {
         currentItem = null;
-        _itemPreviewImage.gameObject.SetActive(false);
-        _itemCount.gameObject.SetActive(false);
-        _bgImage.gameObject.SetActive(false);
-        _imgSelected.gameObject.SetActive(false);
-        _itemButton.gameObject.SetActive(false);
-        _bgInactiveImage.gameObject.SetActive(true);
-    }
-
-    public void SelectFirstElement()
-    {
-        _isSelected = true;
-        _itemButton.Select();
-        SelectItem();
+        gameObject.SetActive(false);
+        _isSelected = false;
+        //_itemPreviewImage.gameObject.SetActive(false);
+        //_itemCount.gameObject.SetActive(false);
+        //_bgImage.gameObject.SetActive(false);
+        //_imgSelected.gameObject.SetActive(false);
+        //_itemButton.gameObject.SetActive(false);
+        //_bgInactiveImage.gameObject.SetActive(true);
     }
 
     private void OnEnable()
@@ -81,8 +68,19 @@ public class UIInventoryItem : MonoBehaviour
         if (_isSelected)
         { SelectItem(); }
     }
+    public void OnItemClick()
+    {
+        _isSelected = !_isSelected;
+        if (_isSelected)
+        { 
+            SelectItem(); 
+        }
+        else
+        {
+            UnselectItem();
+        }
+    }
 
-   
     public void SelectItem()
     {
         _isSelected = true;

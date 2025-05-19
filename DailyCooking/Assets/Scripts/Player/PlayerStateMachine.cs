@@ -18,12 +18,6 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
             if (_instance == null)
             {
                 _instance = FindObjectOfType<PlayerStateMachine>();
-
-                if (_instance == null)
-                {
-                    GameObject gameObject = new GameObject(nameof(PlayerStateMachine));
-                    _instance = gameObject.AddComponent<PlayerStateMachine>();
-                }
             }
             return _instance;
 
@@ -34,11 +28,6 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
 
     public event EventHandler OnPickedSomething;
 
-    public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
-    public class OnSelectedCounterChangedEventArgs : EventArgs
-    {
-        public BaseCounterView selectedCounterView;
-    }
     public enum EPlayerState
     {
         Idle, 
@@ -103,10 +92,7 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
             Context.SelectedCounter.FireInteractAlternateEvent(this);
         }
     }
-    public void FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs args)
-    {
-        OnSelectedCounterChanged?.Invoke(this,args);
-    }
+
     //private void GameInput_OnInteractAction(object sender, EventArgs e)
     //{
     //    if (Context.SelectedCounter != null)

@@ -10,14 +10,27 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using System.Linq;
+using UnityEngine.InputSystem.EnhancedTouch;
+using Newtonsoft.Json;
 
 public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 {    
     private const int MOVE_STRAIGHT_COST = 10;
     private const int MOVE_DIAGONAL_COST = 14;
-    private const float GRID_OFFSET = 0.1f;
-    public event EventHandler OnSelectedChanged;
+    private const float GRID_OFFSET = 0.01f;
+
+
+    public event EventHandler OnBuildingStart;
+    public event EventHandler OnBuildingEnd;
+    public event EventHandler<OnSelectedChangedArgs> OnSelectedChanged;
+    public class OnSelectedChangedArgs : EventArgs
+    {
+        public PlacedObjectTypeSO placedObjectTypeSO;
+        public Vector3 position;
+    }
     public event EventHandler OnObjectPlaced;
+    public event EventHandler<PlacedObjectTypeSO> OnReturnPlaceObjectToInventory;
+
     [SerializeField] private float cellSize = 2f;
     [SerializeField] private PlacedObjectDatabase placedObjectDatabase;
 
@@ -27,14 +40,19 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     
     [Header("Counter")]
     [SerializeField] private Transform counterContainer;
-    
+    [SerializeField] private LayerMask counterLayerMask;
+
     [Header("Floor")]
     [SerializeField] private Transform floorContainer;
     [SerializeField] private GameObject floorPrefab;
 
     [Header("Wall")]
     [SerializeField] private Transform wallContainer;
-    [SerializeField] private GameObject wallPrefab;
+    [SerializeField] private GameObject wallPrefab;    
+    
+    [Header("Pillar")]
+    [SerializeField] private Transform pillarContainer;
+    [SerializeField] private GameObject pillarPrefab;
 
     [Header("Road")]
     [SerializeField] private Transform roadContainer;
@@ -44,9 +62,10 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     private GridXZ<GridObject> grid;
     private Dir dir = Dir.Down;
     private PlacedObjectTypeSO placedObjectTypeSO;
-    private bool isTouchDown;
-    private bool isTouchUp;
     private NativeArray<PathNodeStruct> pathNodeArray;
+    private List<GridWall> gridWallList = new List<GridWall>(); 
+    private bool isEditing = false;
+
 
     private Dictionary<string, PlacedObjectTypeSO> placedObjectTypeSODictionary = new Dictionary<string, PlacedObjectTypeSO>();
     public PlacedObjectTypeSO PlacedObjectTypeSO => placedObjectTypeSO;
@@ -76,14 +95,43 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         InitRoad();
         InitializePathfindingNodeArray();
         InitWallAndFloor();
+        InitPillar();
         InitGridGuide();
-        GameManager.Instance.InitializePlayer();
-        CounterModules.Instance.Initialize();
 
-        GameInput.Instance.OnTouchPerformed += GameInput_OnTouchPerformed;
+        GameInput.Instance.OnFingerDown += GameInput_OnFingerDown;
         GameInput.Instance.OnFingerUp += GameInput_OnFingerUp;
     }
 
+    private void GameInput_OnFingerUp(object sender, Finger e)
+    {
+
+    }
+    private void GameInput_OnFingerDown(object sender, Finger e)
+    {
+        if (!isEditing || placedObjectTypeSO!=null)
+            return;
+        float maxDistance = 999f;
+        Ray ray = Camera.main.ScreenPointToRay(e.screenPosition);
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance, counterLayerMask))
+        {
+            if (raycastHit.transform.TryGetComponent<PlacedObjectView>(out PlacedObjectView targetPlaceObjectView))
+            {
+                SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO,raycastHit.transform.position);
+                DestroyPlaceObject(targetPlaceObjectView);
+                UIPopupManager.Instance.HidePopup(UIPopupType.UIInventoryPopup.ToString(),
+                    new UIInventoryPopup.Param { isPlacingObject = true});
+            }
+        }
+    }
+    public void DestroyPlaceObject(PlacedObjectView placedObjectView)
+    {
+        placedObjectView.DestroySelf();
+        List<Vector2Int> gridPositionList = placedObjectView.GetGridPositionList();
+        foreach (Vector2Int gridPosition in gridPositionList)
+        {
+            grid.GetGridObject(gridPosition.x, gridPosition.y).ClearPlacedObject();
+        }
+    }
     private void InitRoad()
     {
         GameObject cornerRoad = Instantiate(roadCornerPrefab, grid.GetWorldPosition(0, 0), Quaternion.identity);
@@ -103,6 +151,31 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             road.transform.rotation = Quaternion.Euler(0, 270, 0);
 
         }
+    }    
+    private void InitPillar()
+    {
+        if(grid.GetWidth() == 0 || grid.GetHeight() == 0)
+            return;
+        GameObject botLeftPillar = Instantiate(pillarPrefab, grid.GetWorldPosition(0, 0), Quaternion.identity);
+        botLeftPillar.transform.SetParent(roadContainer);
+        botLeftPillar.transform.rotation = Quaternion.Euler(0, 0, 0);
+        gridWallList.Add(botLeftPillar.GetComponent<GridWall>());
+
+        GameObject botRightPillar = Instantiate(pillarPrefab, grid.GetWorldPosition(0,grid.GetHeight() ), Quaternion.identity);
+        botRightPillar.transform.SetParent(roadContainer);  
+        botRightPillar.transform.rotation = Quaternion.Euler(0, 90, 0);
+        gridWallList.Add(botRightPillar.GetComponent<GridWall>());
+
+        GameObject topLeftPillar = Instantiate(pillarPrefab, grid.GetWorldPosition(grid.GetWidth(), 0), Quaternion.identity);
+        topLeftPillar.transform.SetParent(roadContainer);
+        topLeftPillar.transform.rotation = Quaternion.Euler(0, 270, 0);
+        gridWallList.Add(topLeftPillar.GetComponent<GridWall>());
+
+        GameObject topRightPillar = Instantiate(pillarPrefab, grid.GetWorldPosition(grid.GetWidth(),grid.GetHeight()), Quaternion.identity);
+        topRightPillar.transform.SetParent(roadContainer);
+        topRightPillar.transform.rotation = Quaternion.Euler(0, 180, 0);
+        gridWallList.Add(topRightPillar.GetComponent<GridWall>());
+
     }
 
     private void InitGridGuide()
@@ -119,48 +192,67 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
                 GameObject floor = Instantiate(floorPrefab, grid.GetWorldPosition(x, z), Quaternion.identity);
                 floor.transform.SetParent(floorContainer);
+                floor.transform.localPosition = new Vector3(floor.transform.localPosition.x, 0f, floor.transform.localPosition.z); ;
 
                 if (x == 0 || z == 0 || x == grid.GetWidth() - 1 || z == grid.GetHeight() - 1)
                 {
                     GameObject wall = Instantiate(wallPrefab, grid.GetWorldPosition(x, z) +
-                        new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2), Quaternion.identity);
+                        new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2) , Quaternion.identity);
                     wall.transform.SetParent(wallContainer);
+                    gridWallList.Add(wall.GetComponent<GridWall>());
                     if (x == 0) // Left border (facing right)
                     {
+                        wall.transform.localPosition += new Vector3(-0.25f, 0, 0);
                         wall.transform.rotation = Quaternion.Euler(0, 270, 0);
                     }
                     else if (x == grid.GetWidth() - 1) // Right border (facing left)
                     {
+                        wall.transform.localPosition -= new Vector3(-0.25f, 0, 0);
                         wall.transform.rotation = Quaternion.Euler(0, 90, 0);
+
                     }
                     if (z == 0) // Bottom border (facing down)
                     {
+                        wall.transform.localPosition -= new Vector3(0, 0, 0.25f);
                         wall.transform.rotation = Quaternion.Euler(0, 180, 0);
+
                     }
                     else if (z == grid.GetHeight() - 1) // Top border (facing up)
                     {
+                        wall.transform.localPosition += new Vector3(0, 0, 0.25f);
                         wall.transform.rotation = Quaternion.Euler(0, 0, 0);
+
                     }
 
-                    if (x == 0)
+                    if (x == 0)// Bottom corner
                     {
-                        if (z == 0|| z == grid.GetHeight() - 1) // Bottom left corner
+                        if (z == 0|| z == grid.GetHeight() - 1) 
                         {
                             GameObject blcwall = Instantiate(wallPrefab, grid.GetWorldPosition(x, z) +
                                                 new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2), Quaternion.identity);
                             blcwall.transform.SetParent(wallContainer);
+                            blcwall.transform.localPosition -= new Vector3(0.25f, 0, 0);
                             blcwall.transform.rotation = Quaternion.Euler(0, 270, 0);
+                            gridWallList.Add(blcwall.GetComponent<GridWall>());
+
+                            wall.transform.localPosition += new Vector3(0.25f, 0, 0);
+
                         }
- 
+
                     }
-                    else if (x == grid.GetWidth() - 1) // Bottom right corner
+                    else if (x == grid.GetWidth() - 1) // Top  corner
                     {
-                        if (z == 0 || z == grid.GetHeight() - 1) // Bottom left corner
+                        if (z == 0 || z == grid.GetHeight() - 1) 
                         {
                             GameObject brcwall = Instantiate(wallPrefab, grid.GetWorldPosition(x, z) +
                                                 new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2), Quaternion.identity);
                             brcwall.transform.SetParent(wallContainer);
+                            brcwall.transform.localPosition += new Vector3(0.25f, 0, 0);
                             brcwall.transform.rotation = Quaternion.Euler(0, 90, 0);
+                            gridWallList.Add(brcwall.GetComponent<GridWall>());
+
+                            wall.transform.localPosition += new Vector3(-0.25f, 0, 0);
+
                         }
                     }
 
@@ -171,7 +263,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
     private void InitializePathfindingNodeArray()
     {
-        pathNodeArray = new NativeArray<PathNodeStruct>(grid.GetWidth() * grid.GetHeight(), Allocator.TempJob);
+        pathNodeArray = new NativeArray<PathNodeStruct>(grid.GetWidth() * grid.GetHeight(), Allocator.Persistent);
         for (int x = 0; x < grid.GetWidth(); x++)
         {
             for (int y = 0; y < grid.GetHeight(); y++)
@@ -195,7 +287,8 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         GameManager.Instance.GameData.SaveGridData(grid);
         ResizePathNodeArray();
         InitWallAndFloor();
-        if(!GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime)
+        InitPillar();
+        if (!GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime)
         {
             InitDefaultCounters();
             GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime = true;
@@ -203,7 +296,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             GameManager.Instance.SaveGame();
         }
     }
-
     public void ResizePathNodeArray()
     {
         int newSize = grid.GetWidth() * grid.GetHeight();
@@ -232,7 +324,12 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     private void InitDefaultCounters()
     {
-
+        List<GridObjectData> gridObjectDataList = JsonConvert.DeserializeObject<List<GridObjectData>>(GameDefine.GridArrayDataInit,GameManager.Instance.DataHandler.Settings);
+        foreach (GridObjectData gridObject in gridObjectDataList)
+        {
+            GameManager.Instance.GameData.gridData.GridArrayData.Add(gridObject);
+        }
+        grid.AddGridObjectData(gridObjectDataList);
     }
     public void SetActiveGridGuide(bool isActive)
     {
@@ -241,101 +338,100 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         gridGuideMaterial.SetFloat("_GridHeight", grid.GetHeight() + GRID_OFFSET);
         gridGuideMaterial.SetVector("_CellSize", new Vector2(grid.GetCellSize(), grid.GetCellSize()));
     }
-    private void GameInput_OnTouchPerformed(object sender, UnityEngine.InputSystem.EnhancedTouch.Finger e)
+    public void RotateBuildingObject()
     {
-        isTouchDown = true;
+        dir = PlacedObjectTypeSO.GetNextDir(dir);
     }
-    private void GameInput_OnFingerUp(object sender, UnityEngine.InputSystem.EnhancedTouch.Finger e)
+    public void PlaceBuildingObject(Vector3 interactPos)
     {
-        isTouchUp = true;
-    }
-    private bool CheckTouchInput()
-    {
-        if (isTouchDown)
+        if (placedObjectTypeSO == null) return;
+
+        Debug.LogError($"{interactPos}: ({Mathf.RoundToInt(interactPos.x)}," +
+            $"{Mathf.RoundToInt(interactPos.y)},{Mathf.RoundToInt(interactPos.z)})");
+
+        grid.GetXZ(new Vector3(Mathf.RoundToInt(interactPos.x),
+                                Mathf.RoundToInt(interactPos.y),
+                                Mathf.RoundToInt(interactPos.z)), out int x, out int z);
+
+        Vector2Int placedObjectOrigin = new Vector2Int(x, z);
+        placedObjectOrigin = grid.ValidateGridPosition(placedObjectOrigin);
+        Debug.LogError($"placedObjectOrigin : {placedObjectOrigin}");
+        if (placedObjectOrigin == Vector2Int.zero && (interactPos.x < 0 || interactPos.z < 0))
         {
-            return true;
+            UtilsClass.CreateWorldTextPopup("Can't build here!", interactPos);
+            return;
         }
-        return false;
-    }
-    private void Update()
-    {
-        if (Mouse.current.leftButton.wasPressedThisFrame ||
-            CheckTouchInput())
+        List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(placedObjectOrigin, dir);
+
+
+        bool canBuild = true;
+
+        foreach (var gridPosition in gridPositionList)
         {
-            var interactPos = CheckTouchInput() ? UtilsClass.GetTouchWorldPosition3D() : UtilsClass.GetMouseWorldPosition3D();
-            isTouchDown = false;
-            if (GameInput.Instance.IsMouseOverUI()) return;
-            if (placedObjectTypeSO == null) return;
-
-            Debug.LogError($"{interactPos}: ({Mathf.RoundToInt(interactPos.x)},{Mathf.RoundToInt(interactPos.y)},{Mathf.RoundToInt(interactPos.z)})");
-
-            grid.GetXZ(new Vector3(Mathf.RoundToInt(interactPos.x),
-                                    Mathf.RoundToInt(interactPos.y),
-                                    Mathf.RoundToInt(interactPos.z)), out int x, out int z);
-
-            Vector2Int placedObjectOrigin = new Vector2Int(x, z);
-            placedObjectOrigin = grid.ValidateGridPosition(placedObjectOrigin);
-            Debug.LogError($"placedObjectOrigin : {placedObjectOrigin}");
-            if (placedObjectOrigin == Vector2Int.zero && (interactPos.x < 0|| interactPos.z<0)) 
+            var gridObject = grid.GetGridObject(gridPosition.x, gridPosition.y);
+            if (gridObject == null || !gridObject.CanBuild())
             {
-                UtilsClass.CreateWorldTextPopup("Can't build here!", interactPos);
-                return;
+                canBuild = false;
+                break;
             }
-            List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(placedObjectOrigin, dir);
+        }
 
-            
-            bool canBuild = true;
+        if (canBuild)
+        {
+            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
+            Vector3 placedObjectWorldPosition = grid.GetWorldPosition(x, z) +
+                new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
+            PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, new Vector2Int(x, z), dir, placedObjectTypeSO);
 
             foreach (var gridPosition in gridPositionList)
             {
-                var gridObject = grid.GetGridObject(gridPosition.x, gridPosition.y);
-                if (gridObject == null || !gridObject.CanBuild())
-                {
-                    canBuild = false; 
-                    break;
-                }
-            }
+                grid.GetGridObject(gridPosition.x, gridPosition.y).SetPlacedObject(placedObject);
 
-            if (canBuild)
-            {
-                Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-                Vector3 placedObjectWorldPosition = grid.GetWorldPosition(x, z) + 
-                    new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
-                PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, new Vector2Int(x,z) , dir, placedObjectTypeSO);
-
-                foreach (var gridPosition in gridPositionList)
-                {
-                    grid.GetGridObject(gridPosition.x, gridPosition.y).SetPlacedObject(placedObject);
-
-                }
-                OnObjectPlaced?.Invoke(this, EventArgs.Empty);
-                //DeselectObjectType();
-                GameManager.Instance.GameData.SaveGridData(grid);
             }
-            else
-            {
-                UtilsClass.CreateWorldTextPopup("Can't build here!", interactPos);
-            }
+            OnObjectPlaced?.Invoke(this, EventArgs.Empty);
+            
+            GameManager.Instance.GameData.SaveGridData(grid);
+            GameManager.Instance.SaveGame();
+            DeselectObjectType();
         }
-        if (Keyboard.current.rKey.wasPressedThisFrame)
+        else
         {
-            dir = PlacedObjectTypeSO.GetNextDir(dir);
-
+            UtilsClass.CreateWorldTextPopup("Can't build here!", interactPos);
         }
-
     }
     private void DeselectObjectType()
     {
-        placedObjectTypeSO = null; 
-        RefreshSelectedObjectType();
+        placedObjectTypeSO = null;
+        dir = Dir.Down;
+        RefreshSelectedObjectType(-Vector3.one);
+
     }
-    private void RefreshSelectedObjectType()
+    private void RefreshSelectedObjectType(Vector3 targetPosition)
     {
-        OnSelectedChanged?.Invoke(this, EventArgs.Empty);
+        OnSelectedChanged?.Invoke(this, new OnSelectedChangedArgs { placedObjectTypeSO = placedObjectTypeSO,
+                                            position = targetPosition});
+
+    }
+    public void FireOnBuildingStartEvent()
+    {
+        OnBuildingStart?.Invoke(this, EventArgs.Empty);
+        SetActiveGridGuide(true);
+        ShowWallShadow(true);
+        isEditing = true;
+    }
+    public void FireOnBuildingEndEvent()
+    {
+        OnBuildingEnd?.Invoke(this, EventArgs.Empty);
+        SetActiveGridGuide(false);
+        ShowWallShadow(false);
+        isEditing = false;
     }
     public Vector3 GetMouseWorldSnappedPosition()
     {
-        Vector3 interactPosition = CheckTouchInput() ? UtilsClass.GetTouchWorldPosition3D() : UtilsClass.GetMouseWorldPosition3D();
+        Vector3 interactPosition = UtilsClass.GetTouchWorldPosition3D();
+        if(interactPosition == -Vector3.one)
+            return -Vector3.one;
+        
         grid.GetXZ(interactPosition, out int x, out int z);
 
         if (placedObjectTypeSO != null)
@@ -346,7 +442,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         }
         else
         {
-            return interactPosition;
+            return -Vector3.one;
         }
     }
 
@@ -361,10 +457,36 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             return Quaternion.identity;
         }
     }
-    public void SetPlacedObjectTypeSO(PlacedObjectTypeSO placedObjectTypeSO)
+
+    public void SetPlacedObjectTypeSO(PlacedObjectTypeSO placedObjectTypeSO,Vector3 objectPosition)
     {
+        if(this.placedObjectTypeSO != null)
+        {
+            GameManager.Instance.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);
+            GameManager.Instance.GameData.SaveGridData(grid);
+            GameManager.Instance.SaveGame();
+            OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
+        }
         this.placedObjectTypeSO = placedObjectTypeSO;
-    }   
+        RefreshSelectedObjectType(objectPosition);
+    }
+
+    private void ShowWallShadow(bool isShow)
+    {
+        foreach (var wall in gridWallList)
+        {
+            if (isShow)
+            {
+                wall.OnGridEdit();
+            }
+            else
+            {
+                wall.OnExitGridEdit();
+            }
+            
+        }
+    }
+
     public PlacedObjectTypeSO GetPlacedObjectTypeSOByGuid(string Guid)
     {
         if (placedObjectTypeSODictionary.TryGetValue(Guid,out PlacedObjectTypeSO placedObjectSO))
@@ -376,9 +498,13 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             return null;
         }
     }
+    public PlacedObjectTypeSO GetPlacedObjectTypeSOById(string id)
+    {
+        return PlacedObjectDatabase.PlacedObjects.Find(x => x.id == id);
+    }
     public void FindPath(int2 startPos,int2 endPos)
     {
-        Debug.Log($"FindPath: startPos:{startPos} - endPos:{endPos}");
+        //Debug.Log($"FindPath: startPos:{startPos} - endPos:{endPos}");
         var pathList = new NativeList<int2>(Allocator.Persistent);
         FindPathJob findPathJob = new FindPathJob
         {

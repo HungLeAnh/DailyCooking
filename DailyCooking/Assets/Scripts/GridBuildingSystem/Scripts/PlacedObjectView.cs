@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 [Serializable]
-public class PlacedObjectView : MonoBehaviour,IPointerClickHandler
+public class PlacedObjectView : MonoBehaviour
 {
     private PlacedObjectController placedObjectController;
 
@@ -27,13 +27,13 @@ public class PlacedObjectView : MonoBehaviour,IPointerClickHandler
     {
         return placedObjectController.GetModel();
     }
-    public void OnPointerClick(PointerEventData eventData)
+    public void OnTouch()
     {
         // Handle the click event
         Debug.Log("PlacedObjectView clicked!");
 
         // You can call a method on the controller or perform other actions here
-        placedObjectController.HandleClick();
+        placedObjectController.HandleTouch();
     }
 }
 [Serializable]
@@ -52,7 +52,7 @@ public class PlacedObjectController
     {
         return model.GetGridPositionList();
     }
-    public void HandleClick()
+    public void HandleTouch()
     {
         // Handle the click event
         Debug.Log("PlacedObjectController.HandleClick() called!");
@@ -73,14 +73,18 @@ public class PlacedObjectModel
     private Dir dir;
     public Vector2Int Origin => origin; 
     public Dir Dir => dir;
-
+    public PlacedObjectTypeSO PlacedObjectTypeSO => placedObjectTypeSO;
     public PlacedObjectModel(PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir)
     {
         this.placedObjectTypeSO = placedObjectTypeSO;
         this.origin = origin;
         this.dir = dir;
     }
-
+    public void UpdateDirAndOrigin(Vector2Int origin, Dir dir)
+    {
+        this.origin = origin;
+        this.dir = dir;
+    }
 
     public List<Vector2Int> GetGridPositionList()
     {

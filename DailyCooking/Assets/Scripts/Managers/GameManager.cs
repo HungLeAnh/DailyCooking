@@ -29,6 +29,8 @@ public class GameManager : PersistentSingleton<GameManager>
 
     private List<IDataPersistence> dataPersistenceObjects = new List<IDataPersistence>();
 
+    public FileDataHandler DataHandler => dataHandler;
+
     public GameData GameData => gameData;
     public GameState GameState => gameState;
     protected override void Awake()
@@ -89,11 +91,22 @@ public class GameData
     {
         gridData.SaveGridData(grid);
     }
-    public void AddInventoryData(InventoryItemSO item)
+    public void AddInventoryData(InventoryItemData item)
     {
         inventoryData.Add(item);
+    }    
+    public void AddInventoryData(string guid)
+    {
+        inventoryData.Add(guid);
     }
-
+    public void RemoveInventoryData(InventoryItemData item)
+    {
+        inventoryData.Remove(item);
+    }    
+    public void RemoveInventoryData(string id)
+    {
+        inventoryData.Remove(id);
+    }
     public void UpdatePlayedDay(int playerDay)
     {
         playerData.daysPlayed = playerDay;
@@ -131,6 +144,7 @@ public class FileDataHandler
     private bool useEncryption;
     private JsonSerializerSettings settings;
     private readonly string encryptionKey = "your-secure-key";
+    public JsonSerializerSettings Settings => settings;
 
     public FileDataHandler(string dirPath, string fileName, bool useEncryption)
     {
@@ -221,4 +235,5 @@ public class ConfigShopItem
     public string Name { get => name; set => name = value; }
     public int Id { get => id; set => id = value; }
     public int UnlockLevel { get => unlockLevel; set => unlockLevel = value; }
+
 }

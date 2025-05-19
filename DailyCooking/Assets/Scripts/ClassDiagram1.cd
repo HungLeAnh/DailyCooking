@@ -83,7 +83,7 @@
       </Enum>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>gAQgJAIShGAAAAAAAFKAoAAHEBAAAACHQASEAQCAJEQ=</HashCode>
+      <HashCode>gAQgJAIShGAAAAAAAFKAoAAHEBAAAACHQASEAQCAIEQ=</HashCode>
       <FileName>Assets\Scripts\Counters\KitchenGameManager.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -428,13 +428,6 @@
       <FileName>Assets\Scripts\MVC\Models\CounterModels\TrashCounterModel.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="CounterModules" Collapsed="true">
-    <Position X="93.75" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAACAAAQAAAAAAAAAAAAAACAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Modules\CounterModules.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="BaseCounterView">
     <Position X="43.75" Y="19.5" Width="6.25" />
     <TypeIdentifier>
@@ -529,28 +522,28 @@
     <Position X="20" Y="18.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAABAAAAAAAAAAAAg=</HashCode>
-      <FileName>Assets\Scripts\SO\BurningRecipeSO.cs</FileName>
+      <FileName>Assets\Scripts\SO\RecipeSO\BurningRecipeSO.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CuttingRecipeSO">
     <Position X="53.25" Y="17" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAABAABAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\SO\CuttingRecipeSO.cs</FileName>
+      <FileName>Assets\Scripts\SO\RecipeSO\CuttingRecipeSO.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FryingRecipeSO" Collapsed="true">
     <Position X="16" Y="21.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAABAQAAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\SO\FryingRecipeSO.cs</FileName>
+      <FileName>Assets\Scripts\SO\RecipeSO\FryingRecipeSO.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="KitchenObjectOptionalProcessSO">
     <Position X="43" Y="32.25" Width="3.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAABAAA=</HashCode>
-      <FileName>Assets\Scripts\SO\KitchenObjectOptionalProcessSO.cs</FileName>
+      <FileName>Assets\Scripts\SO\KitchenObjectSO\KitchenObjectOptionalProcessSO.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="KitchenObjectSO">
@@ -563,7 +556,7 @@
     </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAIAAAAAAEAQAAAAIAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\SO\KitchenObjectSO.cs</FileName>
+      <FileName>Assets\Scripts\SO\KitchenObjectSO\KitchenObjectSO.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Field Name="processSO" />
@@ -642,7 +635,7 @@
   <Class Name="MusicManager" Collapsed="true">
     <Position X="85" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAIAAAAAAAAGAAAQAAIAAACAEA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAIAAAAAAAAGAAAAAAIAAACAEA=</HashCode>
       <FileName>Assets\Scripts\UI\MusicManager.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -663,7 +656,7 @@
   <Class Name="SoundManager" Collapsed="true">
     <Position X="85" Y="5.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAgQCAKABEAAACBAIAAgCAAAAKAAIQAAAAYAGAEA=</HashCode>
+      <HashCode>AAAAAgQCAKABEAAACBAIAAgCAAAAKAAIAAAAAYAGAEA=</HashCode>
       <FileName>Assets\Scripts\UI\SoundManager.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -752,6 +745,13 @@
     <TypeIdentifier>
       <HashCode>AAQAAAAAAAAAAAAAAAAAACAAIQAAAAAAAAACAAAAAEA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\StoveCounterController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CounterModules" Collapsed="true">
+    <Position X="93.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAgAAAAAAAAAAAACAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\MVC\Modules\CounterModules.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Interface Name="IHasOptionalSO">

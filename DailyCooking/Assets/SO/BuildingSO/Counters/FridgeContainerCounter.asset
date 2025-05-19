@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e7747bdf78fa6141a2f81d16ff91e5f, type: 3}
   m_Name: FridgeContainerCounter
   m_EditorClassIdentifier: 
-  _guid: 
+  _guid: e796b6381a3503c48aeb31e64942efa8
   id: 8
   nameString: FridgeContainerCounterPlaceObjectSO
   prefab: {fileID: 3100983049372934743, guid: 69e9f7b378e1f6b4881d278e44394000, type: 3}
@@ -20,3 +20,6 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: af49bf542ce59514e9220473a72fe7b0, type: 3}
   width: 1
   height: 1
+  itemType:
+    _typeColor: {r: 0, g: 0, b: 0, a: 0}
+    _tabType: 3

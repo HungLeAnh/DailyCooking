@@ -7,32 +7,28 @@ public class UIGameStartCountdownPopup : UIPopup
 
     [SerializeField] private TextMeshProUGUI countdownText;
 
-    private Animator animator;
+    [SerializeField] private Animator animator;
     private int previousCountdownNumber;
+    private bool isShowed = false;
 
-    private void Awake()
+    public override void ShowPopup()
     {
-        animator = GetComponent<Animator>();
+        base.ShowPopup();
+        Show();
     }
-    private void Start()
+    public override void HidePopup(object param = null)
     {
-        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+        base.HidePopup(param);
         Hide();
     }
-
-    private void KitchenGameManager_OnStateChanged(object sender, System.EventArgs e)
-    {
-        if (KitchenGameManager.Instance.IsCountdownToStartActive())
-        {
-            Show();
-        }
-        else
-        {
-            Hide();
-        }
-    }
     private void Update()
-    {
+    {       
+        if (!isShowed || !KitchenGameManager.Instance.IsCountdownToStartActive())
+        {
+            HidePopup();
+            return;
+        }   
+
         int countdownNumber = Mathf.CeilToInt(KitchenGameManager.Instance.GetCountdownToStartTimer());
         countdownText.text = countdownNumber.ToString();
         if (previousCountdownNumber != countdownNumber)
@@ -41,15 +37,17 @@ public class UIGameStartCountdownPopup : UIPopup
             animator.SetTrigger(NUMBER_POPUP);
             SoundManager.Instance.PlayCountdownSound();
         }
+ 
     }
 
     private void Hide()
     {
         gameObject.SetActive(false);
+        isShowed = false;
     }
     private void Show()
     {
         gameObject.SetActive(true);
-
+        isShowed = true;
     }
 }

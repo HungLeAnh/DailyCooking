@@ -40,21 +40,31 @@ public class BaseCounterController : IKitchenObjectParent,IObserver
         ConnectModel();
         ConnectView();
     }
-    internal virtual void ConnectModel()
+    public virtual void ConnectModel()
     {
         BaseCounterModel.Subscribe(EObserverEvent.ModelChange, this);
     }
 
-    internal virtual void ConnectView()
+    public virtual void ConnectView()
     {
         _baseCounterView.OnInteract += BaseCounterView_OnInteract;
-        _baseCounterView.OnInteractAlternate += BaseCounterView_OnInteractAlternate;
+        _baseCounterView.OnInteractAlternate += BaseCounterView_OnProcessKitchenObject;
+        _baseCounterView.OnRestartGame += BaseCounterView_OnRestartGame;
     }
 
-    private void BaseCounterView_OnInteractAlternate(object sender, PlayerStateMachine e)
+    private void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)
     {
-        InteractAlternate(e);
-}
+        if(BaseCounterModel.KitchenObject != null)
+            BaseCounterModel.KitchenObject.DestroySelf();
+
+        ClearKitchenObject();
+        BaseCounterModel.NotifySubscribers(EObserverEvent.ModelChange);
+    }
+
+    private void BaseCounterView_OnProcessKitchenObject(object sender, PlayerStateMachine e)
+    {
+        ProcessKitchenObject(e);
+    }
 
     private void BaseCounterView_OnInteract(object sender, PlayerStateMachine e)
     {
@@ -81,9 +91,9 @@ public class BaseCounterController : IKitchenObjectParent,IObserver
     {
         Debug.Log("BaseCounter.Interact();");
     }
-    public virtual void InteractAlternate(PlayerStateMachine playerStateMachine)
+    public virtual void ProcessKitchenObject(PlayerStateMachine playerStateMachine)
     {
-        Debug.Log("BaseCounter.InteractAlternate();");
+        Debug.Log("BaseCounter.ProcessKitchenObject();");
     }
 
     public void FireOnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
