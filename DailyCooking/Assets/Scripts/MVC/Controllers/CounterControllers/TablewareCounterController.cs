@@ -16,7 +16,11 @@ public class TablewareCounterController : BaseCounterController
     {
 
     }
-
+    protected override void BaseCounterView_OnUpdate()
+    {
+        base.BaseCounterView_OnUpdate();
+        Update();
+    }
     private void Update()
     {
         if (_tablewareSpawnAmount < _tablewareSpawnAmountMax)

@@ -25,7 +25,7 @@ public class KitchenGameManager : MonoBehaviour
     }
     [SerializeField] private long earnGoalMultiply = 1000;
     [SerializeField] private long serveGoalMultiply = 10;
-    [SerializeField] private long gamePlayingTimeMultiply = 120;
+    [SerializeField] private long gamePlayingTimeMultiply = 60;
     [SerializeField] private GameObject kitchenManagerUI;
 
     private State state;
@@ -73,6 +73,7 @@ public class KitchenGameManager : MonoBehaviour
     }
     public void EndGame()
     {
+        GameManager.Instance.DestroyPlayer();
         GameInput_OnInteractAction();
         kitchenManagerUI.SetActive(false);
 

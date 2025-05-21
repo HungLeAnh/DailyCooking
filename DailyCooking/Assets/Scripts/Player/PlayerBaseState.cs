@@ -7,14 +7,21 @@ using UnityEngine.InputSystem.EnhancedTouch;
 public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerState>
 {
     protected PlayerStateContext Context;
-    public PlayerBaseState(PlayerStateContext context,PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
+    public PlayerBaseState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
-        Context = context;
+        Context = PlayerStateMachine.Instance.Context;
         //Context.PlayerGameInput.OnFingerDown += PlayerGameInput_OnFingerDown;
         Context.PlayerGameInput.OnTouchPerformed += PlayerGameInput_OnFingerDown;
+        Context.PlayerGameInput.OnFingerUp += PlayerGameInput_OnFingerUp;
 
     }
-
+    public override void Dispose()
+    {
+        base.Dispose();
+        Context.PlayerGameInput.OnTouchPerformed -= PlayerGameInput_OnFingerDown;
+        Context.PlayerGameInput.OnFingerUp -= PlayerGameInput_OnFingerUp;
+        Context = null;
+    }
     public virtual void ChangeAnimationState(string animationName)
     {
         Context.CharacterAnimator.CrossFade(animationName,0.1f,0,0.1f,0.1f);
@@ -93,20 +100,26 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
 
     private void OnReachDestination()
     {
+        Context.IsReachedDestination = true;
         if (Context.SelectedCounter != null)
         {
             Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
         }
     }
-
+    private void PlayerGameInput_OnFingerUp(object sender, Finger e)
+    {
+        Context.IsTouching = false;
+    }
     private void PlayerGameInput_OnFingerDown(object sender, Finger finger)
     {
+        if (Context.IsTouching)
+            return;
         if(!KitchenGameManager.Instance.IsGamePlaying())
             return;
         if (finger.currentTouch.delta.sqrMagnitude >= 0.1f)
             return;
-        
-        
+
+        Context.IsTouching = true;
         float interactDistance = 999f;
         if (!Camera.main.pixelRect.Contains(finger.screenPosition))
             return;
@@ -125,16 +138,43 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
                         int2 counterOrigin = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
                         int2 playerPos = GridBuildingSystem.Instance.WorldPositionToGridPos(Context.PlayerTransform.position.x, Context.PlayerTransform.position.z);
                         //Debug.Log("Counter Origin: " + counterOrigin);
+                        Context.IsReachedDestination = false;
                         GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
+
                     }
                 }
-                else
+                else if (baseCounter == Context.SelectedCounter)
                 {
-                    if (Context.SelectedCounter != null)
+                    if (Context.SelectedCounter != null && 
+                        CounterModules.Instance.TryGetCounterController(Context.SelectedCounter,
+                                                out BaseCounterController baseCounterController))
                     {
-                        Context.SelectedCounter.FireInteractAlternateEvent(PlayerStateMachine.Instance);
+                        IHasProgress progress = baseCounterController as IHasProgress;
+                        if (progress == null)
+                        {
+                            if (Context.IsReachedDestination)
+                            {
+                                SetSelectedCounter(baseCounter);
+                                Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
+                            }
+                        }
+                        else
+                        {
+
+                            if (progress.IsDone())
+                            {
+                                Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
+
+                            }
+                            else
+                            {
+
+                                Context.SelectedCounter.FireInteractAlternateEvent(PlayerStateMachine.Instance);
+                            }
+                        }
                     }
                 }
+
             }
             else
             {

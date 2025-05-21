@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class DeliveryManager : MonoBehaviour
+public class DeliveryManager : SimpleSingleton<DeliveryManager>
 {
 
     public event EventHandler OnRecipeSpawned;
@@ -12,10 +12,6 @@ public class DeliveryManager : MonoBehaviour
     public event EventHandler OnRecipeFailed;
 
     [SerializeField] private List<FoodSO> FoodSOList;
-
-    public static DeliveryManager Instance { get; private set; }
-
-
 
     private List<FoodSO> waitingRecipeSOList;
     private float spawnRecipeTimer;
@@ -26,7 +22,6 @@ public class DeliveryManager : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
         waitingRecipeSOList = new List<FoodSO>();
     }
     private void Update()

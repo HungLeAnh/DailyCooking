@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 public class BaseCounterView : MonoBehaviour
 {
+    public Action OnUpdate;
     public event EventHandler<PlayerStateMachine> OnInteract;
     public event EventHandler<PlayerStateMachine> OnInteractAlternate;
     public event EventHandler<PlayerStateMachine> OnRestartGame;
@@ -20,6 +21,10 @@ public class BaseCounterView : MonoBehaviour
     {
         CounterModules.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
         KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+    }
+    private void Update()
+    {
+        OnUpdate?.Invoke();
     }
 
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)

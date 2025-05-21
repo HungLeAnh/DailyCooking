@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class CounterModules : SimpleSingleton<CounterModules>
@@ -36,5 +37,22 @@ public class CounterModules : SimpleSingleton<CounterModules>
     public void FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs args)
     {
         OnSelectedCounterChanged?.Invoke(this, args);
+    }
+    public BaseCounterController GetCounterController(BaseCounterView baseCounterView)
+    {
+        return baseCounterControllers.Find(x => x.BaseCounterView == baseCounterView);
+    }
+    public bool TryGetCounterController(BaseCounterView baseCounterView, out BaseCounterController baseCounterController)
+    {
+        baseCounterController = baseCounterControllers.Find(x => x.BaseCounterView == baseCounterView);
+        if(baseCounterController != null)
+        {
+            return true;
+        }
+        else
+        {
+            baseCounterController = null;
+            return false;
+        }
     }
 }

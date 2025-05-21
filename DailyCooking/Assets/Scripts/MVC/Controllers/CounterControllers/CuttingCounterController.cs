@@ -172,4 +172,25 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
         });
         model.NotifySubscribers(EObserverEvent.ModelChange);
     }
+
+    public bool IsDone()
+    {
+        var model = (CuttingCounterModel)BaseCounterModel;
+        if(model.CuttingProgress == 0 && 
+            model.CuttingRecipeSO == null &&
+            model.KitchenObject != null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public int GetProgress()
+    {
+        var model = (CuttingCounterModel)BaseCounterModel;
+        return model.CuttingProgress;
+    }
 }

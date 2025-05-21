@@ -5,9 +5,8 @@ using System.Collections.Generic;
 
 public class PlayerHoldingIdleState : PlayerHoldingState
 {
-    public PlayerHoldingIdleState(PlayerStateContext context, PlayerStateMachine.EPlayerState stateKey) : base(context, stateKey)
+    public PlayerHoldingIdleState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
-        Context = context;
     }
 
     public override void EnterState()

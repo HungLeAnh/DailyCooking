@@ -5,9 +5,8 @@ using UnityEngine;
 
 public class PlayerIdleIdleState : PlayerIdleState
 {
-    public PlayerIdleIdleState(PlayerStateContext context, PlayerStateMachine.EPlayerState stateKey) : base(context, stateKey)
+    public PlayerIdleIdleState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
-        Context = context;
     }
 
     public override void EnterState()

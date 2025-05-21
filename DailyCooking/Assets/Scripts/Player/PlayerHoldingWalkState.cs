@@ -4,9 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 public class PlayerHoldingWalkState : PlayerHoldingState
 {
-    public PlayerHoldingWalkState(PlayerStateContext context, PlayerStateMachine.EPlayerState stateKey) : base(context, stateKey)
+    public PlayerHoldingWalkState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
-        Context = context;
     }
 
     public override void EnterState()

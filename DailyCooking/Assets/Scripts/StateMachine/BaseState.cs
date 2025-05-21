@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class BaseState<T> where T : Enum 
+public abstract class BaseState<T> : IDisposable where T : Enum 
 {
     protected Dictionary<T, BaseState<T>> _subStates = new Dictionary<T, BaseState<T>>();
     protected BaseState<T> _currentSubState;
@@ -60,5 +60,14 @@ public abstract class BaseState<T> where T : Enum
     public virtual void OnTriggerStay(Collider other)
     {
         _currentSubState.OnTriggerStay(other);
+    }
+
+    public virtual void Dispose()
+    {
+        foreach(var state in _subStates)
+        {
+            state.Value.Dispose();
+        }
+        _subStates.Clear();
     }
 }

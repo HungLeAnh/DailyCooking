@@ -138,4 +138,9 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     {
         return CurrentState == CookingTool.State.Cooked;   
     }
+
+    public int GetProgress()
+    {
+        throw new NotImplementedException();
+    }
 }

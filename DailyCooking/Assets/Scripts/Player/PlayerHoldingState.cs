@@ -5,9 +5,8 @@ using System.Collections.Generic;
 
 public class PlayerHoldingState : PlayerBaseState
 {
-    public PlayerHoldingState(PlayerStateContext context, PlayerStateMachine.EPlayerState stateKey) : base(context, stateKey)
+    public PlayerHoldingState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
-        Context = context;
 
     }
 
@@ -33,8 +32,8 @@ public class PlayerHoldingState : PlayerBaseState
     {
         if (!_isInited)
         {
-            _subStates.Add(PlayerStateMachine.EPlayerState.Holding_Idle, new PlayerHoldingIdleState(Context, PlayerStateMachine.EPlayerState.Holding_Idle));
-            _subStates.Add(PlayerStateMachine.EPlayerState.Holding_Walking, new PlayerHoldingWalkState(Context, PlayerStateMachine.EPlayerState.Holding_Walking));
+            _subStates.Add(PlayerStateMachine.EPlayerState.Holding_Idle, new PlayerHoldingIdleState(PlayerStateMachine.EPlayerState.Holding_Idle));
+            _subStates.Add(PlayerStateMachine.EPlayerState.Holding_Walking, new PlayerHoldingWalkState(PlayerStateMachine.EPlayerState.Holding_Walking));
             _isInited = true;
         }
         _currentSubState = _subStates[PlayerStateMachine.EPlayerState.Holding_Idle];

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class BaseCounterController : IKitchenObjectParent,IObserver
+public class BaseCounterController : IKitchenObjectParent, IObserver
 {
     public static event EventHandler<KitchenObjectSO> OnAnyObjectPlacedHere;
     public static event EventHandler<OnShowOptionalMenuArgs> OnShowOptionalMenu;
@@ -50,6 +50,12 @@ public class BaseCounterController : IKitchenObjectParent,IObserver
         _baseCounterView.OnInteract += BaseCounterView_OnInteract;
         _baseCounterView.OnInteractAlternate += BaseCounterView_OnProcessKitchenObject;
         _baseCounterView.OnRestartGame += BaseCounterView_OnRestartGame;
+        _baseCounterView.OnUpdate += BaseCounterView_OnUpdate;
+    }
+    
+    protected virtual void BaseCounterView_OnUpdate()
+    {
+
     }
 
     private void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)

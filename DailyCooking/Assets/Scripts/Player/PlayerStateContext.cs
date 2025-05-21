@@ -20,7 +20,8 @@ public class PlayerStateContext
     private Vector3 endPosition;
     private List<int2> _pathList;
     private int _wayPointIndex;
-
+    private bool isTouching;
+    private bool isReachedDestination;
     public PlayerStateContext(Animator animator, 
         float moveSpeed,
         PlacedObjectView placedObjectView,
@@ -53,4 +54,6 @@ public class PlayerStateContext
     public Vector3 EndPosition { get => endPosition; set => endPosition = value; }
     public List<int2> PathList { get => _pathList; set => _pathList = value; }
     public int WayPointIndex { get => _wayPointIndex; set => _wayPointIndex = value; }
+    public bool IsTouching { get => isTouching; set => isTouching = value; }
+    public bool IsReachedDestination { get => isReachedDestination; set => isReachedDestination = value; }
 }

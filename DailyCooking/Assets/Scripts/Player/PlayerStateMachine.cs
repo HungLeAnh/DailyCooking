@@ -56,10 +56,10 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     public void IntializeStates()
     {
         Context = new PlayerStateContext(_characterAnimator,moveSpeed,
-            placedObjectView,transform,countersLayerMask, kitchenObjectHoldPoint);
+            placedObjectView,Instance.transform,countersLayerMask, Instance.kitchenObjectHoldPoint);
 
-        _states.Add(EPlayerState.Idle, new PlayerIdleState(_context, EPlayerState.Idle));
-        _states.Add(EPlayerState.Holding,new PlayerHoldingState(_context,EPlayerState.Holding));
+        _states.Add(EPlayerState.Idle, new PlayerIdleState(EPlayerState.Idle));
+        _states.Add(EPlayerState.Holding,new PlayerHoldingState(EPlayerState.Holding));
         foreach (var key in _states.Keys)
         {
             _states[key].IntializeStates();
@@ -79,28 +79,18 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
         }
         IntializeStates();
     }
-
-    private void Start()
+    private void OnDestroy()
     {
-        //_gameInput.OnInteractAction += GameInput_OnInteractAction;
-        //_gameInput.OnInteractAction2 += GameInput_OnInteractAlternateAction;
-    }
-    private void GameInput_OnInteractAlternateAction(object sender, EventArgs e)
-    {
-        if (Context.SelectedCounter != null)
+        Context = null;
+        foreach (var state in _states)
         {
-            Context.SelectedCounter.FireInteractAlternateEvent(this);
+            state.Value.Dispose();
         }
+        _states.Clear();
+        _currentState = null;
     }
 
-    //private void GameInput_OnInteractAction(object sender, EventArgs e)
-    //{
-    //    if (Context.SelectedCounter != null)
-    //    {
-    //        Context.SelectedCounter.FireInteractEvent(this);
-    //    }
-    //}
-    
+
     public Transform GetKitchenObjectFollowTransform()
     {
         return kitchenObjectHoldPoint;

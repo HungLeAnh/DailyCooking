@@ -7,8 +7,6 @@ public interface IHasProgress
     {
         public float progressNormalized;
     }
-    public virtual bool IsDone() 
-    {
-        return false;
-    }
+    public abstract bool IsDone();
+    public abstract int GetProgress();
 }

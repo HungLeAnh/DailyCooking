@@ -28,7 +28,7 @@ public class GameManager : PersistentSingleton<GameManager>
     [SerializeField] private bool useEncryption = false;
 
     private List<IDataPersistence> dataPersistenceObjects = new List<IDataPersistence>();
-
+    private GameObject playerGameObject;
     public FileDataHandler DataHandler => dataHandler;
 
     public GameData GameData => gameData;
@@ -53,9 +53,13 @@ public class GameManager : PersistentSingleton<GameManager>
     {
         Vector3 placePosition = GridBuildingSystem.Instance.GetFirstEmptyGridPos();
 
-        GameObject playerGameObject = UnityEngine.Object.Instantiate(playerPrefab, placePosition, Quaternion.identity);
+        playerGameObject = Instantiate(playerPrefab, placePosition, Quaternion.identity);
     }
 
+    public void DestroyPlayer()
+    {
+        Destroy(playerGameObject);
+    }
     public void NewGame()
     {
         gameData = new GameData();
