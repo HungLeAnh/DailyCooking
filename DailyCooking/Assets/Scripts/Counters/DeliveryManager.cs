@@ -19,11 +19,78 @@ public class DeliveryManager : SimpleSingleton<DeliveryManager>
     private int waitingRecipesMax = 4;
     private int successfulRecipesAmount;
 
-
+    private List<FoodSO> unlockFoodList;
+    private List<KitchenObjectSO> unlockIngredient;
     private void Awake()
     {
         waitingRecipeSOList = new List<FoodSO>();
+        unlockFoodList = new List<FoodSO>();
+        unlockIngredient = new List<KitchenObjectSO>();
     }
+    public void Init()
+    {
+        foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
+        {
+            AddUnlockIngredient(counterController);
+        }
+
+    }
+
+    public void AddUnlockIngredient(BaseCounterController counterController)
+    {
+        KitchenObjectSO kitchenObjectSO = counterController.BaseCounterView.GetContainerKitchenObjectType();
+        if (kitchenObjectSO != null)
+        {
+            if(!unlockIngredient.Contains(kitchenObjectSO))
+                unlockIngredient.Add(kitchenObjectSO);
+        }        
+        GetUnlockFood();
+
+    }
+
+    private void GetUnlockFood()
+    {
+        foreach(var foodSO in FoodSOList)
+        {
+            bool isUnlocked = true;
+            foreach (var ingredient in foodSO.kitchenObjectSOList)
+            {
+                isUnlocked = isUnlocked && IsIngredientUnlocked(ingredient);
+                if(!isUnlocked)
+                {
+                    break;
+                }
+            }
+            if (isUnlocked)
+            {
+                if (!unlockFoodList.Contains(foodSO))
+                    unlockFoodList.Add(foodSO);
+            }
+        }
+    }
+
+    private bool IsIngredientUnlocked(KitchenObjectSO ingredient)
+    {
+        foreach(var unlockIngredient in unlockIngredient)
+        {
+            if (unlockIngredient == ingredient)
+            {
+                return true;
+            }
+            else
+            {
+                var cuttingRecipeSO = KitchenGameManager.Instance.CuttingRecipeSOList.Find(x => x.input == unlockIngredient &&
+                                                                       x.output == ingredient);
+                var fryingRecipeSO = KitchenGameManager.Instance.FryingRecipeSOList.Find(x => x.input == unlockIngredient &&
+                                                                       x.output == ingredient);
+                if (cuttingRecipeSO != null || fryingRecipeSO != null)
+                    return true;
+            }
+
+        }
+        return false;
+    }
+
     private void Update()
     {
         spawnRecipeTimer -= Time.deltaTime;
@@ -33,7 +100,7 @@ public class DeliveryManager : SimpleSingleton<DeliveryManager>
 
             if (KitchenGameManager.Instance.IsGamePlaying() && waitingRecipeSOList.Count < waitingRecipesMax)
             {
-                FoodSO waitingRecipeSO = FoodSOList[UnityEngine.Random.Range(0, FoodSOList.Count)];
+                FoodSO waitingRecipeSO = unlockFoodList[UnityEngine.Random.Range(0, unlockFoodList.Count)];
 
                 waitingRecipeSOList.Add(waitingRecipeSO);
                 OnRecipeSpawned?.Invoke(this, EventArgs.Empty);

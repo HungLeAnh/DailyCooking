@@ -10,5 +10,8 @@ public class ContainerCounterView : BaseCounterView
     {
         return new ContainerCounterController(this,new ContainerCounterModel());
     }
-    
+    public override KitchenObjectSO GetContainerKitchenObjectType()
+    {
+        return kitchenObjectSO;
+    }
 }

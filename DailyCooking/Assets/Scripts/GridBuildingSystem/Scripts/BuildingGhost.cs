@@ -148,6 +148,7 @@ public class BuildingGhost : MonoBehaviour
     public void OnClickCancel()
     {
         visual.gameObject.GetComponent<PlacedObjectView>().DestroySelf();
+
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup.ToString());
         ShowCanvas(false);
         GridBuildingSystem.Instance.SetPlacedObjectTypeSO(null,-Vector3.one);

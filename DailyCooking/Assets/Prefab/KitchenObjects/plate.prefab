@@ -121,6 +121,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1939925319464464249}
   - {fileID: 7922743563314071950}
   - {fileID: 7132141371091273176}
   - {fileID: 3281522048840740107}
@@ -140,7 +141,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2143516488132797380, guid: e19c270275daa5c4cb162d3aa1420b91, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2421269877471860197, guid: e19c270275daa5c4cb162d3aa1420b91, type: 3}
       propertyPath: m_LocalPosition.x
@@ -262,6 +263,72 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 301d852ca02cb68468eaaabd929983b2, type: 3}
   m_PrefabInstance: {fileID: 4277298280080709347}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &4283464122896972444
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4737182407281673896}
+    m_Modifications:
+    - target: {fileID: 2143516488132797380, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_Name
+      value: SimpleSalad
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.12
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5528338711477411110, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: tablewareKitchenObject
+      value: 
+      objectReference: {fileID: 8121191103929895968}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+--- !u!4 &1939925319464464249 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+  m_PrefabInstance: {fileID: 4283464122896972444}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4854986956575281213
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -273,6 +340,10 @@ PrefabInstance:
     - target: {fileID: 2143516488132797380, guid: 5ae59c44bd99e2d4a8a1d37894caf381, type: 3}
       propertyPath: m_Name
       value: VegetableHamburgerFull
+      objectReference: {fileID: 0}
+    - target: {fileID: 2143516488132797380, guid: 5ae59c44bd99e2d4a8a1d37894caf381, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2421269877471860197, guid: 5ae59c44bd99e2d4a8a1d37894caf381, type: 3}
       propertyPath: m_LocalPosition.x
@@ -342,7 +413,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2143516488132797380, guid: 4d533ef3816414a4cb93848636a02d44, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2364183451712471817, guid: 4d533ef3816414a4cb93848636a02d44, type: 3}
       propertyPath: m_SizeDelta.x
@@ -492,11 +563,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2273084929310679199, guid: 89afe0938e303f94b97e34ba5b109ae7, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 60
+      value: 36
       objectReference: {fileID: 0}
     - target: {fileID: 2273084929310679199, guid: 89afe0938e303f94b97e34ba5b109ae7, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -170
+      value: -60
       objectReference: {fileID: 0}
     - target: {fileID: 2714646881204500297, guid: 89afe0938e303f94b97e34ba5b109ae7, type: 3}
       propertyPath: tablewareKitchenObject

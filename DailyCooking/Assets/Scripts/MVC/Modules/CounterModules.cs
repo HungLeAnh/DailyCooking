@@ -13,7 +13,9 @@ public class CounterModules : SimpleSingleton<CounterModules>
     }
 
     [SerializeReference] private List<BaseCounterController> baseCounterControllers = new List<BaseCounterController>();
-    
+
+    public List<BaseCounterController> BaseCounterControllers { get => baseCounterControllers; set => baseCounterControllers = value; }
+
     public void Initialize()
     {
         var counterViews = GridBuildingSystem.Instance.Container.GetComponentsInChildren<BaseCounterView>();
@@ -24,7 +26,13 @@ public class CounterModules : SimpleSingleton<CounterModules>
             baseCounterControllers.Add(controller as BaseCounterController);
         }
     }
-    public void DestroyCounter(BaseCounterView baseCounterView)
+    public void AddNewCounterController(BaseCounterView baseCounterView)
+    {
+        var controller = baseCounterView.CreateControllerFromView();
+        baseCounterControllers.Add(controller as BaseCounterController);
+        DeliveryManager.Instance.AddUnlockIngredient(controller as BaseCounterController);
+    }
+    public void DestroyCounter(BaseCounterView baseCounterView  )
     {
        var controller =  baseCounterControllers.Find(x => x.BaseCounterView == baseCounterView);
         if(controller != null)

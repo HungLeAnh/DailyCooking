@@ -2,8 +2,14 @@
 using Observer;
 using System;
 using System.Collections.Generic;
+using Unity.Entities;
 using UnityEngine;
-public class BaseCounterView : MonoBehaviour
+
+public interface IContainerCounter
+{
+    public abstract KitchenObjectSO GetContainerKitchenObjectType();
+}
+public class BaseCounterView : MonoBehaviour, IContainerCounter
 {
     public Action OnUpdate;
     public event EventHandler<PlayerStateMachine> OnInteract;
@@ -76,5 +82,10 @@ public class BaseCounterView : MonoBehaviour
     internal virtual void UpdateView(object baseCounterModel)
     {
 
+    }
+
+    public virtual KitchenObjectSO GetContainerKitchenObjectType()
+    {
+        return null;
     }
 }

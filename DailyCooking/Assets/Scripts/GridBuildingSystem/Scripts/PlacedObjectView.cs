@@ -109,8 +109,10 @@ public static class PlacedObjectFactory
         PlacedObjectView placedObjectView = placedObjectTransform.GetComponent<PlacedObjectView>();
         PlacedObjectModel model = new PlacedObjectModel(placedObjectTypeSO, origin, dir);
         PlacedObjectController controller = new PlacedObjectController(model, placedObjectView);
-
         placedObjectView.Initialize(controller);
+
+        var counterView = placedObjectView.GetComponent<BaseCounterView>();
+        CounterModules.Instance.AddNewCounterController(counterView);
 
         return placedObjectView;
     }

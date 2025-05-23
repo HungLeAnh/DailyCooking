@@ -97,6 +97,8 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         InitWallAndFloor();
         InitPillar();
         InitGridGuide();
+        CounterModules.Instance.Initialize();
+        DeliveryManager.Instance.Init();
 
         GameInput.Instance.OnFingerDown += GameInput_OnFingerDown;
         GameInput.Instance.OnFingerUp += GameInput_OnFingerUp;
@@ -117,7 +119,9 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             if (raycastHit.transform.TryGetComponent<PlacedObjectView>(out PlacedObjectView targetPlaceObjectView))
             {
                 SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO,raycastHit.transform.position);
-                DestroyPlaceObject(targetPlaceObjectView);
+                var counterView = targetPlaceObjectView.GetComponent<BaseCounterView>();
+                CounterModules.Instance.DestroyCounter(counterView);
+                
                 UIPopupManager.Instance.HidePopup(UIPopupType.UIInventoryPopup.ToString(),
                     new UIInventoryPopup.Param { isPlacingObject = true});
             }
@@ -125,12 +129,12 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     public void DestroyPlaceObject(PlacedObjectView placedObjectView)
     {
-        placedObjectView.DestroySelf();
         List<Vector2Int> gridPositionList = placedObjectView.GetGridPositionList();
         foreach (Vector2Int gridPosition in gridPositionList)
         {
             grid.GetGridObject(gridPosition.x, gridPosition.y).ClearPlacedObject();
         }
+        placedObjectView.DestroySelf();
     }
     private void InitRoad()
     {

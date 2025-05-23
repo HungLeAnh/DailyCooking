@@ -27,6 +27,8 @@ public class KitchenGameManager : MonoBehaviour
     [SerializeField] private long serveGoalMultiply = 10;
     [SerializeField] private long gamePlayingTimeMultiply = 60;
     [SerializeField] private GameObject kitchenManagerUI;
+    [SerializeField] private List<CuttingRecipeSO> cuttingRecipeSOList;
+    [SerializeField] private List<FryingRecipeSO> fryingRecipeSOList;
 
     private State state;
     private float countdownToStartTimer = 3f;
@@ -44,6 +46,10 @@ public class KitchenGameManager : MonoBehaviour
     public long EarnGoal { get => earnGoal; set => earnGoal = value; }
     public long ServeGoal { get => serveGoal; set => serveGoal = value; }
     public int PlayerDay => playerDay;
+
+    public List<CuttingRecipeSO> CuttingRecipeSOList { get => cuttingRecipeSOList; set => cuttingRecipeSOList = value; }
+    public List<FryingRecipeSO> FryingRecipeSOList { get => fryingRecipeSOList; set => fryingRecipeSOList = value; }
+
     private void Awake()
     {
         Instance = this;
@@ -66,7 +72,6 @@ public class KitchenGameManager : MonoBehaviour
     public void StartGame()
     {
         GameManager.Instance.InitializePlayer();
-        CounterModules.Instance.Initialize();
         kitchenManagerUI.SetActive(true);
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup.ToString());
         countdownToStartTimer = 3f;

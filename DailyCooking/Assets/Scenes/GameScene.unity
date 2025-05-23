@@ -284,6 +284,17 @@ MonoBehaviour:
   serveGoalMultiply: 2
   gamePlayingTimeMultiply: 60
   kitchenManagerUI: {fileID: 11184467}
+  cuttingRecipeSOList:
+  - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
+  - {fileID: 11400000, guid: 03df2848847bcdc4fafa39a849b83e11, type: 2}
+  - {fileID: 11400000, guid: 8fb39336a1ea95c41a1b18b41daf020e, type: 2}
+  - {fileID: 11400000, guid: 82b52adef9815c6428fb367a3965fe0a, type: 2}
+  - {fileID: 11400000, guid: d92c3ca9c36cd9f4db431a6e4e3cdc8b, type: 2}
+  - {fileID: 11400000, guid: a38c3a45a63565442a408863dfe6a113, type: 2}
+  - {fileID: 11400000, guid: 1d02dc73db885f346a64d250880b7dd4, type: 2}
+  fryingRecipeSOList:
+  - {fileID: 11400000, guid: 03a4633e975251e4bbcc10c49aa23b19, type: 2}
+  - {fileID: 11400000, guid: 561cb208a595885409b71715b3d7984f, type: 2}
 --- !u!1 &140795779
 GameObject:
   m_ObjectHideFlags: 0
@@ -2363,6 +2374,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 49395a9a760952f409a3cfa5c1bf3c3b, type: 2}
   - {fileID: 11400000, guid: 76925b9fc7bd54e49915c59dfbb69df2, type: 2}
   - {fileID: 11400000, guid: 27c3a1f72918bc74ca53c23f48556f98, type: 2}
+  - {fileID: 11400000, guid: b9df040063576f745893f915f0232c86, type: 2}
 --- !u!4 &1656926244
 Transform:
   m_ObjectHideFlags: 0
