@@ -47,9 +47,9 @@ public class UIInventoryPopup : UIPopup
         GridBuildingSystem.Instance.OnReturnPlaceObjectToInventory += GridBuildingSystem_OnReturnPlaceObjectToInventory;
     }
 
-    public override void ShowPopup()
+    public override void ShowPopup(object param = null)
     {
-        base.ShowPopup();
+        base.ShowPopup(param);
 
         _tabsPanel.TabChanged += OnChangeTab;
         for (int i = 0; i < _listItem.Count; i++)

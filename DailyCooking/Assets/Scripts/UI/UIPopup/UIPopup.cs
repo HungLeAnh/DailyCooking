@@ -2,7 +2,8 @@
 
 public class UIPopup : MonoBehaviour
 {
-    private object _param;
+    protected object _closeParam;
+    protected object _openParam;
     public virtual void SetupPopup()
     {
         //Debug.Log("SetPopup");
@@ -12,12 +13,13 @@ public class UIPopup : MonoBehaviour
     {
         //Debug.Log("HidePopup");
         gameObject.SetActive(false);
-        _param = param;
+        _closeParam = param;
     }
 
-    public virtual void ShowPopup()
+    public virtual void ShowPopup(object param = null)
     {
         //Debug.Log("ShowPopup");
         gameObject.SetActive(true);
+        _openParam = param;
     }
 }

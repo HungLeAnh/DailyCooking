@@ -11,9 +11,9 @@ public class UIGameStartCountdownPopup : UIPopup
     private int previousCountdownNumber;
     private bool isShowed = false;
 
-    public override void ShowPopup()
+    public override void ShowPopup(object param = null)
     {
-        base.ShowPopup();
+        base.ShowPopup(param);
         Show();
     }
     public override void HidePopup(object param = null)

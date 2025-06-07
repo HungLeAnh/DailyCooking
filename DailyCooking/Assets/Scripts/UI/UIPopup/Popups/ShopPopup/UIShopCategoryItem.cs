@@ -13,7 +13,9 @@ public class UIShopCategoryItem : MonoBehaviour
     private ShopItemCategory itemCategory;
 
     public void SetCategory(IGrouping<ShopItemCategory, ConfigShopItem> category)
-    {
+    {        
+        _itemPrefab.SetActive(false);   
+
         itemCategory = category.Key;
         categoryTitle.text = itemCategory.ToString();
         foreach (var item in category)

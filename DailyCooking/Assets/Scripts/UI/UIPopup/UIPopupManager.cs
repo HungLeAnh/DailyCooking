@@ -35,21 +35,21 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>
         }
     }
 
-    public void ShowPopup(string popupName)
+    public void ShowPopup(string popupName,object param = null)
     {
         if (!uiPopupDictionary.ContainsKey(popupName))
         {
             CreatePopup(popupName);
         }
 
-        ShowUIPopup(popupName);
+        ShowUIPopup(popupName,param);
     }
 
-    private void ShowUIPopup(string popupName)
+    private void ShowUIPopup(string popupName, object param)
     {
         if(uiPopupDictionary.TryGetValue(popupName, out var value))
         {
-            value.ShowPopup();
+            value.ShowPopup(param);
             if (!visiblePopupList.Contains(value))
                 visiblePopupList.Add(value);
             

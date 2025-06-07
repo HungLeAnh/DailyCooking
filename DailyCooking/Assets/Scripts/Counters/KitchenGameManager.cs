@@ -94,18 +94,16 @@ public class KitchenGameManager : MonoBehaviour
         {
             if (serveGoal <= ServeCount && earnGoal <= earnCount)
             {
+                //Win game
+
                 playerDay++;
                 
                 GameManager.Instance.GameData.UpdatePlayedDay(playerDay);
+                GameManager.Instance.GameData.UpdatePlayerResources((int)earnCount);
                 GameManager.Instance.SaveGame();    
             }
             state = State.Editing;
         }
-    }
-
-    private void GameInput_OnPauseAction(object sender, EventArgs e)
-    {
-        TogglePauseGame();
     }
 
 
@@ -165,6 +163,7 @@ public class KitchenGameManager : MonoBehaviour
         {
             Time.timeScale = 0f;
             OnGamePaused?.Invoke(this, EventArgs.Empty);
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGamePausePopup.ToString());
         }
         else
         {

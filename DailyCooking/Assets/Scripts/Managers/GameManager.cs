@@ -85,6 +85,7 @@ public class GameManager : PersistentSingleton<GameManager>
 [System.Serializable]
 public class GameData
 {
+    [JsonIgnore] public Action OnResourceChange;
     // Add all saveable properties
     public PlayerData playerData = new PlayerData();
     public InventoryData inventoryData = new InventoryData();
@@ -114,6 +115,11 @@ public class GameData
     public void UpdatePlayedDay(int playerDay)
     {
         playerData.daysPlayed = playerDay;
+    }
+    public void UpdatePlayerResources(int addCoins)
+    {
+        playerData.coins += addCoins;
+        OnResourceChange?.Invoke();
     }
 }
 [Serializable]

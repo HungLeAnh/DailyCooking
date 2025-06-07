@@ -7,52 +7,39 @@ public class UIGamePausePopup : UIPopup
 
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button mainMenuButton;
-    [SerializeField] private Button optionsButton;
 
-    private void Awake()
+    public override void ShowPopup(object param = null)
     {
-        resumeButton.onClick.AddListener(() =>
-        {
-            KitchenGameManager.Instance.TogglePauseGame();
-        });
-
-        mainMenuButton.onClick.AddListener(() =>
-        {
-            Loader.Load(Loader.Scene.MainMenuScene);
-        });
-        optionsButton.onClick.AddListener(() =>
-        {
-            Hide();
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup.ToString());
-        });
-    }
-
-    private void Start()
-    {
-        KitchenGameManager.Instance.OnGamePaused += KitchenGameManager_OnGamePaused;
-        KitchenGameManager.Instance.OnGameUnpaused += KitchenGameManager_OnGameUnpaused;
-
-        Hide();
-    }
-
-    private void KitchenGameManager_OnGameUnpaused(object sender, System.EventArgs e)
-    {
-        Hide();
-    }
-
-    private void KitchenGameManager_OnGamePaused(object sender, System.EventArgs e)
-    {
+        base.ShowPopup(param);
         Show();
+    }
+
+    public override void HidePopup(object param = null)
+    {
+        base.HidePopup(param);
+        Hide();
     }
 
     private void Show()
     {
         base.ShowPopup();
-        resumeButton.Select();
     }
 
     private void Hide()
     {
         base.HidePopup();
+    }
+    public void OnResumeClick()
+    {
+        KitchenGameManager.Instance.TogglePauseGame();
+        HidePopup();
+    }
+    public void OnMainMenuClick()
+    {
+        HidePopup();
+        KitchenGameManager.Instance.TogglePauseGame();
+        KitchenGameManager.Instance.ChangeState(KitchenGameManager.State.Editing);
+        KitchenGameManager.Instance.EndGame();
+        UIHUDManager.Instance.ShowAllUIElement();
     }
 }

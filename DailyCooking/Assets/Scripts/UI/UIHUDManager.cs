@@ -10,6 +10,7 @@ public enum UIHUDElements
     Shop,
     Inventory,
     Play,
+    Coin
 }
 [Serializable]
 struct SerializableKeyValuePair<T1, T2>
@@ -53,7 +54,7 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     #region Click
     public void OnSettingsClicked()
     {
-        
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup.ToString());
     }
     public void OnPauseClicked()
     {

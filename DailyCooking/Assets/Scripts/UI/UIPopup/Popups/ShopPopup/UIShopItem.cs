@@ -53,7 +53,16 @@ public class UIShopItem : MonoBehaviour
 
     private void OnClickButtonBuy()
     {
-        //GameManager.Instance.GameData.playerData.coins -= configShopItem.Price;
+        if(configShopItem.Price > GameManager.Instance.GameData.playerData.coins)
+        {
+            Debug.Log("Not enough coins to buy this item.");
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup.ToString(), 
+                new UIGameNotiPopup.Param {Title = "warning", 
+                                            Message = "Not enough coins to buy this item."
+                });
+            return;
+        }
+        GameManager.Instance.GameData.UpdatePlayerResources(-configShopItem.Price);
         GameManager.Instance.GameData.AddInventoryData(InventoryItemData.CreateInventoryItem(configShopItem.Id.ToString()));
         GameManager.Instance.SaveGame();
     }

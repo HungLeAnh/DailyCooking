@@ -12,9 +12,9 @@ public class UIGameOverPopup : UIPopup
         base.HidePopup(param);
         Hide();
     }
-    public override void ShowPopup()
+    public override void ShowPopup(object param = null)
     {
-        base.ShowPopup();
+        base.ShowPopup(param);
         Show();
     }
     private void KitchenGameManager_OnStateChanged()

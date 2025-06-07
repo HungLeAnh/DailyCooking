@@ -9,14 +9,19 @@ public class UIDayTaskPopup : UIPopup
     [SerializeField] private TextMeshProUGUI _earnGoalText;
     [SerializeField] private TextMeshProUGUI _serveGoalText;
 
-    public override void ShowPopup()
+    public override void ShowPopup(object param = null)
     {
-        base.ShowPopup();
+        base.ShowPopup(param);
         Show();
+    }
+    public override void HidePopup(object param = null)
+    {
+        base.HidePopup(param);
+        Hide();
     }
     public void OnCick()
     {
-        Hide();
+        HidePopup();
         KitchenGameManager.Instance.ChangeState(KitchenGameManager.State.CountdownToStart);
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameStartCountdownPopup.ToString());
 

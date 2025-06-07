@@ -6,9 +6,9 @@ public class UILoadingPopup : UIPopup
 {
     [SerializeField] private LoaderCallBack _loadingCallback;
 
-    public override void ShowPopup()
+    public override void ShowPopup(object param = null)
     {
-        base.ShowPopup();
+        base.ShowPopup(param);
         _loadingCallback.UpdateCallBack();
     }
 }

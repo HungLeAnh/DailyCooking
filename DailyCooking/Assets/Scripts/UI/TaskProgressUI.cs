@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,8 +12,22 @@ public class TaskProgressUI : MonoBehaviour
 
     private void Start()
     {
+        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+
+    }
+
+    private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
+    {
+        if (KitchenGameManager.Instance.IsGamePlaying())
+        {
+            OnGameStart();
+        }
+    }
+
+    private void OnGameStart()
+    {
         _earnProgressBar.fillAmount = 0;
-        _earnProgresstext.text = "0/" + KitchenGameManager.Instance.EarnGoal;        
+        _earnProgresstext.text = "0/" + KitchenGameManager.Instance.EarnGoal;
         _serveProgressBar.fillAmount = 0;
         _serveProgresstext.text = "0/" + KitchenGameManager.Instance.ServeGoal;
 

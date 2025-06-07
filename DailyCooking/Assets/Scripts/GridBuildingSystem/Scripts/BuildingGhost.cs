@@ -32,6 +32,8 @@ public class BuildingGhost : MonoBehaviour
     {
         this.placedObjectTypeSO = args.placedObjectTypeSO;
         RefreshVisual(args.position);
+        targetQuaternion = GridBuildingSystem.Instance.GetPlacedObjectRotation();
+        isRotating = true;
     }
     private void OnPanCanceled(object sender, Finger e)
     {
@@ -81,8 +83,8 @@ public class BuildingGhost : MonoBehaviour
     {
         if (isDragging == false)
             return;
-
         Vector3 targetPosition = GridBuildingSystem.Instance.GetMouseWorldSnappedPosition();
+        //Debug.Log("Dragging Building Ghost target pos: "+ targetPosition);
         if (targetPosition == -Vector3.one)
             return;
 
@@ -114,6 +116,7 @@ public class BuildingGhost : MonoBehaviour
             {
                 visualContainer.position = Vector3.zero;
             }
+
         }
         else
         {
@@ -141,9 +144,20 @@ public class BuildingGhost : MonoBehaviour
     }
     public void OnClickConfirm()
     {
-        GridBuildingSystem.Instance.PlaceBuildingObject(visualContainer.position);
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup.ToString());
-        ShowCanvas(false);
+        if (GridBuildingSystem.Instance.TryPlaceBuildingObject(visualContainer.position))
+        {
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup.ToString());
+            ShowCanvas(false);
+        }
+        else
+        {
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup.ToString(),
+               new UIGameNotiPopup.Param
+               {
+                   Title = "warning",
+                   Message = "Can't build here!"
+               });
+        }
     }
     public void OnClickCancel()
     {

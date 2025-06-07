@@ -12,6 +12,7 @@ using Unity.Mathematics;
 using System.Linq;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Newtonsoft.Json;
+using System.IO;
 
 public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 {    
@@ -74,6 +75,11 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
     public Transform Container { get => counterContainer; set => counterContainer = value; }
 
+    private void OnDestroy()
+    {
+        if (pathNodeArray.IsCreated)
+            pathNodeArray.Dispose();
+    }
     private void Awake()
     {
         foreach (var placedObject in placedObjectDatabase.PlacedObjects)
@@ -118,10 +124,10 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         {
             if (raycastHit.transform.TryGetComponent<PlacedObjectView>(out PlacedObjectView targetPlaceObjectView))
             {
+                dir = targetPlaceObjectView.GetModel().Dir;
                 SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO,raycastHit.transform.position);
                 var counterView = targetPlaceObjectView.GetComponent<BaseCounterView>();
                 CounterModules.Instance.DestroyCounter(counterView);
-                
                 UIPopupManager.Instance.HidePopup(UIPopupType.UIInventoryPopup.ToString(),
                     new UIInventoryPopup.Param { isPlacingObject = true});
             }
@@ -306,7 +312,8 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         NativeArray<PathNodeStruct> newArray = new NativeArray<PathNodeStruct>(newSize, Allocator.TempJob);
         int copyLength = Mathf.Min(pathNodeArray.Length, newSize);
         NativeArray<PathNodeStruct>.Copy(pathNodeArray, newArray, copyLength);
-        pathNodeArray.Dispose();
+        if (pathNodeArray.IsCreated)
+            pathNodeArray.Dispose();
         pathNodeArray = newArray; 
 
         for (int x = 0; x < grid.GetWidth(); x++)
@@ -331,6 +338,8 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         List<GridObjectData> gridObjectDataList = JsonConvert.DeserializeObject<List<GridObjectData>>(GameDefine.GridArrayDataInit,GameManager.Instance.DataHandler.Settings);
         foreach (GridObjectData gridObject in gridObjectDataList)
         {
+            if (GameManager.Instance.GameData.gridData.GridArrayData.Contains(gridObject))
+                continue;
             GameManager.Instance.GameData.gridData.GridArrayData.Add(gridObject);
         }
         grid.AddGridObjectData(gridObjectDataList);
@@ -345,10 +354,11 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     public void RotateBuildingObject()
     {
         dir = PlacedObjectTypeSO.GetNextDir(dir);
+        Debug.Log("Dir: "+ dir.ToString());
     }
-    public void PlaceBuildingObject(Vector3 interactPos)
+    public bool TryPlaceBuildingObject(Vector3 interactPos)
     {
-        if (placedObjectTypeSO == null) return;
+        if (placedObjectTypeSO == null) return false;
 
         Debug.LogError($"{interactPos}: ({Mathf.RoundToInt(interactPos.x)}," +
             $"{Mathf.RoundToInt(interactPos.y)},{Mathf.RoundToInt(interactPos.z)})");
@@ -362,8 +372,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         Debug.LogError($"placedObjectOrigin : {placedObjectOrigin}");
         if (placedObjectOrigin == Vector2Int.zero && (interactPos.x < 0 || interactPos.z < 0))
         {
-            UtilsClass.CreateWorldTextPopup("Can't build here!", interactPos);
-            return;
+            return false;
         }
         List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(placedObjectOrigin, dir);
 
@@ -383,7 +392,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         if (canBuild)
         {
             Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-            Vector3 placedObjectWorldPosition = grid.GetWorldPosition(x, z) +
+            Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
             PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, new Vector2Int(x, z), dir, placedObjectTypeSO);
 
@@ -397,10 +406,11 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             GameManager.Instance.GameData.SaveGridData(grid);
             GameManager.Instance.SaveGame();
             DeselectObjectType();
+            return true;
         }
         else
         {
-            UtilsClass.CreateWorldTextPopup("Can't build here!", interactPos);
+               return false;
         }
     }
     private void DeselectObjectType()
@@ -432,16 +442,19 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     public Vector3 GetMouseWorldSnappedPosition()
     {
-        Vector3 interactPosition = UtilsClass.GetTouchWorldPosition3D();
-        if(interactPosition == -Vector3.one)
+        Vector3 interactPos = UtilsClass.GetTouchWorldPosition3D();
+        if(interactPos == -Vector3.one)
             return -Vector3.one;
         
-        grid.GetXZ(interactPosition, out int x, out int z);
-
+        grid.GetXZ(new Vector3(Mathf.RoundToInt(interactPos.x),
+                                Mathf.RoundToInt(interactPos.y),
+                                Mathf.RoundToInt(interactPos.z)), out int x, out int z);
+        Vector2Int placedObjectOrigin = new Vector2Int(x, z);
+        placedObjectOrigin = grid.ValidateGridPosition(placedObjectOrigin);
         if (placedObjectTypeSO != null)
         {
             Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-            Vector3 placedObjectWorldPosition = grid.GetWorldPosition(x, z) + new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
+            Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) + new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
             return placedObjectWorldPosition;
         }
         else
@@ -519,6 +532,12 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             outputPath = pathList
         };
         findPathJob.Schedule().Complete();
+        List<int2> resultPathList = new List<int2>();
+        for (int i = 0; i < pathList.Length; i++)
+        {
+            pathList.Add(resultPathList[i]);
+        }
+        PlayerStateMachine.Instance.SetPlayerPath(resultPathList);
 
         pathList.Dispose();
     }
@@ -691,15 +710,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
                 // Path found
                 NativeList<int2> path = CalculatePath(pathNodeArray, endNode);
                 outputPath = path;
-                
-                List<int2> pathList = new List<int2>();
-                for (int i = 0; i < path.Length; i++)
-                {
-                    pathList.Add(path[i]);
-                }
-                PlayerStateMachine.Instance.SetPlayerPath(pathList);
-
-                path.Dispose();
             }
 
             openList.Dispose();

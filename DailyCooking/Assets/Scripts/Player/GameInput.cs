@@ -218,8 +218,8 @@ public class GameInput : PersistentSingleton<GameInput>
 
     private void OnDestroy()
     {
-        playerAction?.Player.Disable();
-        playerAction?.Dispose();
+        //playerAction?.Player.Disable();
+        //playerAction?.Dispose();
         //EnhancedTouchSupport.Enable();
         //EnhancedTouch.Touch.onFingerMove -= Touch_OnFingerMoved;
         //EnhancedTouch.Touch.onFingerUp -= Touch_OnFingerUp;

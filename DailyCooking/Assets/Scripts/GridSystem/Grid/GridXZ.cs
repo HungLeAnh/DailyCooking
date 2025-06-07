@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CodeMonkey.Utils;
+using System.Linq;
 
 
 public class GridXZ<TGridObject> {
@@ -298,7 +299,10 @@ public class GridData
                 if (gridObject == null) continue;  
 
                 var model = gridObject.GetPlacedObject()?.GetModel();
-                if (model == null) continue;
+                if (model == null || 
+                    GridArrayData.Any(x=>x.Origin == model.Origin && 
+                        x.PlacedObjectTypeSOGuid == model.GetPlacedObjectTypeSOGuid())) 
+                    continue;
                 GridArrayData.Add(new GridObjectData(model.GetPlacedObjectTypeSOGuid(), model.Origin, model.Dir));
             }
         }

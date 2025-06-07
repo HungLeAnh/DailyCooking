@@ -9,6 +9,11 @@ public class UIShopPopup : UIPopup
     [SerializeField] private GameObject _shopCategoryPrefab;
     private List<UIShopCategoryItem> _shopCategoryItems = new List<UIShopCategoryItem>();
 
+    public void Awake()
+    {
+        _shopCategoryPrefab.SetActive(false);
+
+    }
     public override void SetupPopup()
     {
         base.SetupPopup();
@@ -16,16 +21,16 @@ public class UIShopPopup : UIPopup
     }
     public override void HidePopup(object param)
     {
-        base.HidePopup();   
+        base.HidePopup(param);   
 
     }
-    public override void ShowPopup()
+    public override void ShowPopup(object param)
     {
-        base.ShowPopup();
+        base.ShowPopup(param);
 
     }   
     public void Initialize()
-    {
+    {        
         var groupList = ConfigManager.Instance.ConfigShop.ShopItems.ToLookup(x => x.Category);
         foreach (var category in groupList)
         {
