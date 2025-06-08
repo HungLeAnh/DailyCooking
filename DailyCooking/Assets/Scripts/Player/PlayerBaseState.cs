@@ -74,6 +74,8 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
 
     public void MoveTowardsTarget(List<int2> target, float speed = 0)
     {
+        if (target.Count == 0)
+            return;
         Context.IsWalking = true;
         Context.WayPointIndex = 0;
         Context.PathList.Clear();

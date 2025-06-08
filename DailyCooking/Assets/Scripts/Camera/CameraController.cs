@@ -55,13 +55,6 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        GameInput.Instance.OnFingerDown -= OnPanStarted;
-        GameInput.Instance.OnFingerUp -= OnPanCanceled;
-        GameInput.Instance.OnDragPerformed -= OnPanMoved;
-        GameInput.Instance.OnPintchPerformed -= HandleZoom;
-    }
     private void OnBuildingEnd(object sender, EventArgs e)
     {
         isRotating = true;

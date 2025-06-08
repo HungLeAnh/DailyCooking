@@ -28,7 +28,7 @@ public class TablewareKitchenObject : KitchenObject
     public bool TryAddIngredient(KitchenObjectSO kitchenObjectSO)
     {
 
-        Debug.Log("Try add ingredient");
+        //Debug.Log("Try add ingredient");
         if (!validKitchenObjectSOList.Contains(kitchenObjectSO))
         {
             Debug.Log("add invalid object");

@@ -37,6 +37,7 @@ public class CounterModules : SimpleSingleton<CounterModules>
        var controller =  baseCounterControllers.Find(x => x.BaseCounterView == baseCounterView);
         if(controller != null)
         {
+            baseCounterView.UnsubEvent();
             baseCounterControllers.Remove(controller);
             controller.BaseCounterModel.Unsubscribe(Observer.EObserverEvent.ModelChange, controller);
             GridBuildingSystem.Instance.DestroyPlaceObject(baseCounterView.GetComponent<PlacedObjectView>());

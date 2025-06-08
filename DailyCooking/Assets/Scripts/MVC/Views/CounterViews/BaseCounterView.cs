@@ -28,11 +28,16 @@ public class BaseCounterView : MonoBehaviour, IContainerCounter
         CounterModules.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
         KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
     }
+    public void UnsubEvent()
+    {
+        CounterModules.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
+        KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
+    }
     private void Update()
     {
         OnUpdate?.Invoke();
     }
-
+    
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
         if (KitchenGameManager.Instance.IsGameOver())

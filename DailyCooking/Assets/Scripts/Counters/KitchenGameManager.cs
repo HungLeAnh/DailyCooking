@@ -182,6 +182,7 @@ public class KitchenGameManager : MonoBehaviour
         { 
             state = State.GameOver;
             OnStateChanged?.Invoke(this, EventArgs.Empty);
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameOverPopup.ToString());
         }
     }
     public bool IsTaskComplete()

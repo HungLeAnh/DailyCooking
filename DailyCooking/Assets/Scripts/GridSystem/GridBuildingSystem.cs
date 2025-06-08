@@ -13,6 +13,7 @@ using System.Linq;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Newtonsoft.Json;
 using System.IO;
+using Unity.VisualScripting.Antlr3.Runtime.Collections;
 
 public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 {    
@@ -394,7 +395,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
             Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
-            PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, new Vector2Int(x, z), dir, placedObjectTypeSO);
+            PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
 
             foreach (var gridPosition in gridPositionList)
             {
@@ -454,7 +455,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         if (placedObjectTypeSO != null)
         {
             Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-            Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) + new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
+            Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y); //+ new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
             return placedObjectWorldPosition;
         }
         else
@@ -474,7 +475,12 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             return Quaternion.identity;
         }
     }
-
+    public Vector3 GetPlacedObjectRotationOffset()
+    {
+        Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
+        Vector3 positionOffset = new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
+        return positionOffset;
+    }
     public void SetPlacedObjectTypeSO(PlacedObjectTypeSO placedObjectTypeSO,Vector3 objectPosition)
     {
         if(this.placedObjectTypeSO != null)
@@ -522,26 +528,15 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     public void FindPath(int2 startPos,int2 endPos)
     {
         //Debug.Log($"FindPath: startPos:{startPos} - endPos:{endPos}");
-        var pathList = new NativeList<int2>(Allocator.Persistent);
         FindPathJob findPathJob = new FindPathJob
         {
             startPosition = startPos,
             endPosition = endPos,
             gridSize = new int2(grid.GetWidth(), grid.GetHeight()),
             pathNodeArray = pathNodeArray,
-            outputPath = pathList
         };
         findPathJob.Schedule().Complete();
-        List<int2> resultPathList = new List<int2>();
-        for (int i = 0; i < pathList.Length; i++)
-        {
-            pathList.Add(resultPathList[i]);
-        }
-        PlayerStateMachine.Instance.SetPlayerPath(resultPathList);
-
-        pathList.Dispose();
     }
-
     public Vector3 GetFirstEmptyGridPos()
     {
         for (int x = 0; x < grid.GetWidth(); x++)
@@ -594,7 +589,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         public int2 endPosition;
         public int2 gridSize;
         public NativeArray<PathNodeStruct> pathNodeArray;
-        public NativeList<int2> outputPath;
 
 
         public void Execute()
@@ -709,7 +703,15 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             {
                 // Path found
                 NativeList<int2> path = CalculatePath(pathNodeArray, endNode);
-                outputPath = path;
+
+                List<int2> pathList = new List<int2>();
+                for (int i = 0; i < path.Length; i++)
+                {
+                    pathList.Add(path[i]);
+                }
+                PlayerStateMachine.Instance.SetPlayerPath(pathList);
+
+                path.Dispose();
             }
 
             openList.Dispose();

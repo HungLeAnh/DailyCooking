@@ -11,7 +11,7 @@ public class ClearCounterController : BaseCounterController
 
     public override void Interact(PlayerStateMachine playerStateMachine)
     {
-        Debug.Log("ClearCounter.Interact();");
+        //Debug.Log("ClearCounter.Interact();");
 
         if (!HasKitchenObject())
         {
