@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6795039293475916442}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Anchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7592323735390405500}
   - component: {fileID: 173473608530015586}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Pillar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -139,6 +139,10 @@ PrefabInstance:
       value: pillar_A (1)
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: dca4be04217813543af8da39df2d23d1, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: dca4be04217813543af8da39df2d23d1, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
@@ -208,6 +212,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: dca4be04217813543af8da39df2d23d1, type: 3}
       propertyPath: m_Name
       value: pillar_A
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: dca4be04217813543af8da39df2d23d1, type: 3}
+      propertyPath: m_Layer
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

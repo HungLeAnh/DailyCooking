@@ -117,7 +117,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     private void GameInput_OnFingerDown(object sender, Finger e)
     {
-        if (!isEditing || placedObjectTypeSO!=null)
+        if (!isEditing || placedObjectTypeSO != null)
             return;
         float maxDistance = 999f;
         Ray ray = Camera.main.ScreenPointToRay(e.screenPosition);

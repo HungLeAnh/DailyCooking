@@ -58,7 +58,7 @@ public class BaseCounterController : IKitchenObjectParent, IObserver
 
     }
 
-    private void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)
+    protected virtual void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)
     {
         if(BaseCounterModel.KitchenObject != null)
             BaseCounterModel.KitchenObject.DestroySelf();

@@ -19,7 +19,16 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     {
 
     }
-    
+    protected override void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)
+    {
+        base.BaseCounterView_OnRestartGame(sender, e);
+
+        var model = (CuttingCounterModel)BaseCounterModel;
+        model.CuttingRecipeSO = null;
+        model.CuttingProgress = 0;
+        model.NotifySubscribers(EObserverEvent.ModelChange);
+
+    }
     public override void Interact(PlayerStateMachine playerStateMachine)
     {
         var model = (CuttingCounterModel)BaseCounterModel;
