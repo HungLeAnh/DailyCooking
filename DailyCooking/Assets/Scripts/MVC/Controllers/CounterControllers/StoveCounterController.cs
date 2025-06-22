@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Observer;
+using System;
 using UnityEngine;
 
 [Serializable]
@@ -8,9 +9,23 @@ public class StoveCounterController : BaseCounterController
     {
         Init();
     }
-    private void Awake()
+    protected override void BaseCounterView_OnUpdate()
     {
-        //model.AudioSource = GetComponent<AudioSource>();
+        base.BaseCounterView_OnUpdate();
+        Update();
+    }
+    protected override void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)
+    {
+        base.BaseCounterView_OnRestartGame(sender, e);
+
+        var view = (StoveCounterView)BaseCounterView;
+
+        if (view.CookingTool.HasKitchenObject())
+            view.CookingTool.GetKitchenObject().DestroySelf();
+
+        view.CookingTool.ClearKitchenObject();
+        BaseCounterModel.NotifySubscribers(EObserverEvent.ModelChange);
+
     }
     private void Init()
     {
@@ -18,6 +33,9 @@ public class StoveCounterController : BaseCounterController
         view.CookingTool.CurrentState = CookingTool.State.Idle;
         view.CookingTool.OnStageChanged += CookingTool_OnStageChanged;
         view.CookingTool.OnProgressChanged += StoveCounter_OnProgressChanged;
+
+        var model = (StoveCounterModel)BaseCounterModel;
+        model.AudioSource = view.GetComponent<AudioSource>();
     }
 
     public override void Interact(PlayerStateMachine playerStateMachine)
@@ -105,7 +123,6 @@ public class StoveCounterController : BaseCounterController
         float burnShowProgressAmount = .5f;
 
         model.PlayWarningSound = view.CookingTool.IsDone() && e.progressNormalized >= burnShowProgressAmount;
-
 
     }
 

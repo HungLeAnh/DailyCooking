@@ -3,15 +3,6 @@ using UnityEngine;
 [Serializable]
 public class TablewareCounterController : BaseCounterController
 {
-    public event EventHandler OnTablewareSpawned;
-    public event EventHandler OnTablewareRemoved;
-
-    private float _spawnTimer;
-    private float _spawnTimerMax = 4f;
-
-    private int _tablewareSpawnAmount;
-    private int _tablewareSpawnAmountMax = 4;
-
     public TablewareCounterController(TablewareCounterView view,TablewareCounterModel model) : base(view,model)
     {
 
@@ -23,29 +14,32 @@ public class TablewareCounterController : BaseCounterController
     }
     private void Update()
     {
-        if (_tablewareSpawnAmount < _tablewareSpawnAmountMax)
+        var view = (TablewareCounterView)BaseCounterView;
+        var model = (TablewareCounterModel)BaseCounterModel;
+        if (model.TablewareSpawnAmount < view.TablewareSpawnAmountMax)
         {
-            _spawnTimer += Time.deltaTime;
-            if (_spawnTimer > _spawnTimerMax)
+            model.SpawnTimer += Time.deltaTime;
+            if (model.SpawnTimer >= view.SpawnTimerMax)
             {
-                _spawnTimer = 0f;
-                _tablewareSpawnAmount++;
-                OnTablewareSpawned?.Invoke(this, EventArgs.Empty);
+                model.SpawnTimer = 0f;
+                model.TablewareSpawnAmount++;
+                view.FireOnTablewareSpawned();
             }
         }
     }
     public override void Interact(PlayerStateMachine playerStateMachine)
     {
         var view = (TablewareCounterView)BaseCounterView;
+        var model = (TablewareCounterModel)BaseCounterModel;
         if (!playerStateMachine.HasKitchenObject())
         {
             //Player is empty handed
-            if (_tablewareSpawnAmount > 0)
+            if (model.TablewareSpawnAmount > 0)
             {
                 //There is at least one tableware
-                _tablewareSpawnAmount--; 
+                model.TablewareSpawnAmount--;
                 KitchenObject.SpawnKitchenObject(view.TablewareKitchenObjectSO, playerStateMachine);
-                OnTablewareRemoved?.Invoke(this, EventArgs.Empty);
+                view.FireOnTablewareRemoved();
             }
         }
     }

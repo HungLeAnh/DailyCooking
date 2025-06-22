@@ -114,6 +114,7 @@ public class GridXZ<TGridObject> {
             Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(gridObjectDataList[i].Dir);
             Vector3 placedObjectWorldPosition = this.GetWorldPosition(gridObjectDataList[i].Origin) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * this.GetCellSize();
+
             PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, gridObjectDataList[i].Origin, gridObjectDataList[i].Dir, placedObjectTypeSO);
 
             foreach (var gridPosition in gridPositionList)
@@ -214,6 +215,14 @@ public class GridXZ<TGridObject> {
     {
         if (x >= 0 && z >= 0 && x < width && z < height) {
             return gridArray[x, z];
+        } else {
+            return default(TGridObject);
+        }
+    }    
+    public TGridObject GetGridObject(Vector2Int pos) 
+    {
+        if (pos.x >= 0 && pos.y >= 0 && pos.x < width && pos.y < height) {
+            return gridArray[pos.x, pos.y];
         } else {
             return default(TGridObject);
         }

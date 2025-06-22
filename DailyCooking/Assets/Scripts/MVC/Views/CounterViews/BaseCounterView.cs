@@ -9,6 +9,7 @@ public interface IContainerCounter
 {
     public abstract KitchenObjectSO GetContainerKitchenObjectType();
 }
+[Serializable]
 public class BaseCounterView : MonoBehaviour, IContainerCounter
 {
     public Action OnUpdate;
@@ -28,6 +29,12 @@ public class BaseCounterView : MonoBehaviour, IContainerCounter
         CounterModules.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
         KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
     }
+    private void OnDestroy()
+    {
+        Hide();
+        CounterModules.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
+        KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
+    }
     public void UnsubEvent()
     {
         CounterModules.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
@@ -40,7 +47,8 @@ public class BaseCounterView : MonoBehaviour, IContainerCounter
     
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
-        if (KitchenGameManager.Instance.IsGameOver())
+        if (KitchenGameManager.Instance.IsGameOver()||
+            KitchenGameManager.Instance.IsEditing())
         {
             Hide();
             OnRestartGame?.Invoke(this, PlayerStateMachine.Instance);

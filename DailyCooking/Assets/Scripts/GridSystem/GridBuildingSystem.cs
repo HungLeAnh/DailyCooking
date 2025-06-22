@@ -105,7 +105,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         InitPillar();
         InitGridGuide();
         CounterModules.Instance.Initialize();
-        DeliveryManager.Instance.Init();
 
         GameInput.Instance.OnFingerDown += GameInput_OnFingerDown;
         GameInput.Instance.OnFingerUp += GameInput_OnFingerUp;
@@ -528,14 +527,27 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     public void FindPath(int2 startPos,int2 endPos)
     {
         //Debug.Log($"FindPath: startPos:{startPos} - endPos:{endPos}");
+        NativeList<int2> result = new NativeList<int2>(Allocator.Persistent);
+
         FindPathJob findPathJob = new FindPathJob
         {
             startPosition = startPos,
             endPosition = endPos,
             gridSize = new int2(grid.GetWidth(), grid.GetHeight()),
             pathNodeArray = pathNodeArray,
+            result = result
         };
         findPathJob.Schedule().Complete();
+        if (result.Length > 0)
+        {
+            List<int2> pathList = new List<int2>();
+            for (int i = 0; i < result.Length; i++)
+            {
+                pathList.Add(result[i]);
+            }
+            PlayerStateMachine.Instance.SetPlayerPath(pathList);
+        }
+        result.Dispose();
     }
     public Vector3 GetFirstEmptyGridPos()
     {
@@ -589,7 +601,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         public int2 endPosition;
         public int2 gridSize;
         public NativeArray<PathNodeStruct> pathNodeArray;
-
+        public NativeList<int2> result;
 
         public void Execute()
         {
@@ -702,16 +714,8 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             else
             {
                 // Path found
-                NativeList<int2> path = CalculatePath(pathNodeArray, endNode);
+                CalculatePath(pathNodeArray, endNode);
 
-                List<int2> pathList = new List<int2>();
-                for (int i = 0; i < path.Length; i++)
-                {
-                    pathList.Add(path[i]);
-                }
-                PlayerStateMachine.Instance.SetPlayerPath(pathList);
-
-                path.Dispose();
             }
 
             openList.Dispose();
@@ -722,24 +726,24 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         {
             if (endNode.cameFromNodeIndex == -1)
             {
-                // Couldn't find a path!
-                return new NativeList<int2>(Allocator.Temp);
+                // Couldn't find a path!  
+                return result; // Return an empty NativeList instead of null  
             }
             else
             {
-                // Found a path
-                NativeList<int2> path = new NativeList<int2>(Allocator.Temp);
-                path.Add(new int2(endNode.x, endNode.y));
+                // Found a path  
+
+                result.Add(new int2(endNode.x, endNode.y));
 
                 PathNodeStruct currentNode = endNode;
                 while (currentNode.cameFromNodeIndex != -1)
                 {
                     PathNodeStruct cameFromNode = pathNodeArray[currentNode.cameFromNodeIndex];
-                    path.Add(new int2(cameFromNode.x, cameFromNode.y));
+                    result.Add(new int2(cameFromNode.x, cameFromNode.y));
                     currentNode = cameFromNode;
                 }
 
-                return path;
+                return result;
             }
         }
         public static bool IsPositionInsideGrid(int2 position, int2 gridSize)

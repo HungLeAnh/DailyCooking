@@ -99,7 +99,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
 
         }
     }
-
+    
     private void OnReachDestination()
     {
         Context.IsReachedDestination = true;

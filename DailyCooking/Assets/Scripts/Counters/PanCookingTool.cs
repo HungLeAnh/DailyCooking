@@ -7,9 +7,9 @@ public class PanCookingTool : CookingTool
     [SerializeField] private FryingRecipeSO[] fryingRecipeSOArray;
     [SerializeField] private BurningRecipeSO[] burningRecipeSOArray;
 
-
     private FryingRecipeSO _fryingRecipeSO;
     private BurningRecipeSO _burningRecipeSO;
+
 
     public override void UpdateCookingState(State state, float cookingtime = 0)
     {

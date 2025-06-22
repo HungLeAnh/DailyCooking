@@ -7,21 +7,6 @@ using UnityEngine;
 [Serializable]
 public class BaseCounterController : IKitchenObjectParent, IObserver
 {
-    public static event EventHandler<KitchenObjectSO> OnAnyObjectPlacedHere;
-    public static event EventHandler<OnShowOptionalMenuArgs> OnShowOptionalMenu;
-    public class OnShowCombineRecipeArgs : EventArgs
-    {
-        public List<KitchenObjectSO> combineRecipeOutputList;
-    }
-    public class OnShowOptionalMenuArgs : EventArgs
-    {
-        public List<KitchenObjectSO> optionalList;
-    }
-    public static void ResetStaticData()
-    {
-        OnAnyObjectPlacedHere = null;
-    }
-
     private BaseCounterView _baseCounterView;
     private BaseCounterModel _baseCounterModel;
 
@@ -104,10 +89,14 @@ public class BaseCounterController : IKitchenObjectParent, IObserver
 
     public void FireOnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
     {
-        OnShowOptionalMenu?.Invoke(this, new OnShowOptionalMenuArgs
-        {
-            optionalList = kitchenObjectSOList
-        });
+        UIPopupManager.Instance.ShowPopup(
+                    UIPopupType.UIOptionMenuPopup.ToString(),
+                    new UIOptionMenuPopup.Param
+                    {
+                        sender = this,
+                        optionalList = kitchenObjectSOList
+                    }
+                );
     }
 
     public Transform GetKitchenObjectFollowTransform()
@@ -122,7 +111,14 @@ public class BaseCounterController : IKitchenObjectParent, IObserver
         {
             if (kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
             {
-                OnAnyObjectPlacedHere?.Invoke(this, kitchenObject.GetKitchenObjectSO());
+                UIPopupManager.Instance.ShowPopup(
+                    UIPopupType.UIOptionMenuPopup.ToString(),
+                    new UIOptionMenuPopup.Param
+                    {
+                        sender = this,
+                        objectSO = kitchenObject.GetKitchenObjectSO(),
+                    }
+                );
             }
             else
             {

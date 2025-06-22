@@ -35,10 +35,8 @@ public class BuildingGhost : MonoBehaviour
 
         if (this.placedObjectTypeSO == null)
         {
-            UIHUDManager.Instance.ShowAllUIElement();
             return;
         }
-        UIHUDManager.Instance.HideAllUIElement();
         targetQuaternion = GridBuildingSystem.Instance.GetPlacedObjectRotation();
         isRotating = true;
         OffsetRotation();

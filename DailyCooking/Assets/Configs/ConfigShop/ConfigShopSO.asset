@@ -13,99 +13,101 @@ MonoBehaviour:
   m_Name: ConfigShopSO
   m_EditorClassIdentifier: 
   shopItems:
-  - id: 1
-    name: BowlTablewareCounter
-    type: 0
-    price: 1000
-    reward: 1_1
-    category: 0
   - id: 2
     name: BunContainerCounter
     type: 0
     price: 1000
     reward: 2_1
     category: 0
+    unlockLevel: 2
   - id: 3
     name: CarrotContainerCounter
     type: 0
     price: 1000
     reward: 3_1
     category: 0
+    unlockLevel: 5
   - id: 4
     name: ChesseContainerCounter
     type: 0
     price: 1000
     reward: 4_1
     category: 0
+    unlockLevel: 3
   - id: 5
     name: ClearCounter
     type: 0
     price: 1000
     reward: 5_1
     category: 0
+    unlockLevel: 1
   - id: 6
     name: CuttingCounter
     type: 0
     price: 1000
     reward: 6_1
     category: 0
+    unlockLevel: 1
   - id: 7
     name: DeliverCounter
     type: 0
     price: 1000
     reward: 7_1
     category: 0
+    unlockLevel: 1
   - id: 8
     name: FridgeContainerCounter
     type: 0
     price: 1000
     reward: 8_1
     category: 0
+    unlockLevel: 2
   - id: 9
     name: LettuceContainerCounter
     type: 0
     price: 1000
     reward: 9_1
     category: 0
+    unlockLevel: 1
   - id: 10
     name: OnionContainerCounter
     type: 0
     price: 1000
     reward: 10_1
     category: 0
+    unlockLevel: 2
   - id: 11
     name: PlateTablewareCounter
     type: 0
     price: 1000
     reward: 11_1
     category: 0
+    unlockLevel: 1
   - id: 12
     name: PotatoContainerCounter
     type: 0
     price: 1000
     reward: 12_1
     category: 0
+    unlockLevel: 4
   - id: 13
     name: StovePanCounter
     type: 0
     price: 1000
     reward: 13_1
     category: 0
-  - id: 14
-    name: StovePotCounter
-    type: 0
-    price: 1000
-    reward: 14_1
-    category: 0
+    unlockLevel: 2
   - id: 15
     name: TomatoContainerCounter
     type: 0
     price: 1000
     reward: 15_1
     category: 0
+    unlockLevel: 1
   - id: 16
     name: TrashBinCounter
     type: 0
     price: 1000
     reward: 16_1
     category: 0
+    unlockLevel: 1

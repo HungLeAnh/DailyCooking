@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class TablewareCounterVisual : MonoBehaviour
 {
-    [SerializeField] private TablewareCounterController _tablewareCounter;
+    [SerializeField] private TablewareCounterView _tablewareView;
     [SerializeField] private Transform _tablewareVisualPrefab;
     [SerializeField] float tablewareOffsetX = .1f;
     [SerializeField] float tablewareOffsetY = 0.5f;
@@ -18,8 +18,8 @@ public class TablewareCounterVisual : MonoBehaviour
 
     private void Start()
     {
-        _tablewareCounter.OnTablewareSpawned += TablewareCounter_OnTablewareSpawned;
-        _tablewareCounter.OnTablewareRemoved += TablewareCounter_OnTablewareRemoved;
+        _tablewareView.OnTablewareSpawned += TablewareCounter_OnTablewareSpawned;
+        _tablewareView.OnTablewareRemoved += TablewareCounter_OnTablewareRemoved;
     }
 
     private void TablewareCounter_OnTablewareRemoved(object sender, System.EventArgs e)
@@ -35,10 +35,10 @@ public class TablewareCounterVisual : MonoBehaviour
 
     private void TablewareCounter_OnTablewareSpawned(object sender, System.EventArgs e)
     {
-        Transform tablewareVisualTransform = Instantiate(_tablewareVisualPrefab, _tablewareCounter.GetKitchenObjectFollowTransform());
+        Transform tablewareVisualTransform = Instantiate(_tablewareVisualPrefab, _tablewareView.CounterTopPoint);
 
         tablewareVisualTransform.localPosition = new Vector3(tablewareOffsetX * _tablewareVisualGameObjectList.Count, tablewareOffsetY, 0);
         tablewareVisualTransform.Rotate(tablewareRotation);
-        _tablewareVisualGameObjectList.Add(tablewareVisualTransform.gameObject);
+        _tablewareVisualGameObjectList.Add(tablewareVisualTransform.gameObject); 
     }
 }

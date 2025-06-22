@@ -2,23 +2,17 @@
 
 public class BurnWarningUI : MonoBehaviour
 {
-    private IHasProgress _IHasProgressGameObject;
 
     private void Start()
     {
-        _IHasProgressGameObject = GetComponentInParent<IHasProgress>();
-        if( _IHasProgressGameObject != null)
-        {
-            _IHasProgressGameObject.OnProgressChanged += IHasProgressGameObject_OnProgressChanged;
-        }
         Hide();
     }
 
-    private void IHasProgressGameObject_OnProgressChanged(object sender, IHasProgress.OnProgressChangedEventArgs e)
+    public void OnProgressChanged(IHasProgress sender, float progressNormalized)
     {
         float burnShowProgressAmount = .5f;
 
-        bool show = _IHasProgressGameObject.IsDone() && e.progressNormalized >= burnShowProgressAmount;
+        bool show = sender.IsDone() && progressNormalized >= burnShowProgressAmount;
 
         if (show)
         {
@@ -30,11 +24,11 @@ public class BurnWarningUI : MonoBehaviour
         }
 
     }
-    private void Show()
+    public void Show()
     {
         gameObject.SetActive(true);
     }
-    private void Hide()
+    public void Hide()
     {
         gameObject.SetActive(false);
 

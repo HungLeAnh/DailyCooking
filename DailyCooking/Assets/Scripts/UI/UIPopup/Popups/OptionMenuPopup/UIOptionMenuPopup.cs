@@ -9,6 +9,13 @@ using UnityEngine.UI;
 
 public class UIOptionMenuPopup : UIPopup
 {
+    public class Param
+    {
+        public object sender;
+        public List<KitchenObjectSO> optionalList;
+        public KitchenObjectSO objectSO;
+    }
+
     [SerializeField] private Transform _menuContainer;
     [SerializeField] private GameObject _itemPrefab;
     [SerializeField] private TextMeshProUGUI _title;
@@ -16,19 +23,37 @@ public class UIOptionMenuPopup : UIPopup
     private IHasOptionalSO _optionalCounter;
 
     List<OptionMenuItemUI> _menuItems = new List<OptionMenuItemUI>();
+
     private void Start()
     {
-        BaseCounterController.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
-        BaseCounterController.OnShowOptionalMenu += BaseCounter_OnShowOptionalMenu;
         _itemPrefab.SetActive(false);
+    }
+    public override void ShowPopup(object param = null)
+    {
+        base.ShowPopup(param);
+        var inputParam = _openParam as Param;
+        if (inputParam != null)
+        {
+            if (inputParam.objectSO != null)
+            {
+                BaseCounter_OnAnyObjectPlacedHere(inputParam.sender, inputParam.objectSO);
+            }
+            else if (inputParam.optionalList != null && inputParam.optionalList.Count > 0)
+            {
+                BaseCounter_OnShowOptionalMenu(inputParam.sender ,inputParam.optionalList);
+            }
+        }
+        else
+        {
+            Hide();
+        }
+    }
+    public override void HidePopup(object param = null)
+    {
+        base.HidePopup(param);
         Hide();
     }
-    private void OnDestroy()
-    {
-        BaseCounterController.OnAnyObjectPlacedHere -= BaseCounter_OnAnyObjectPlacedHere;
-        BaseCounterController.OnShowOptionalMenu -= BaseCounter_OnShowOptionalMenu;
-    }
-    private void BaseCounter_OnShowOptionalMenu(object sender, BaseCounterController.OnShowOptionalMenuArgs e)
+    private void BaseCounter_OnShowOptionalMenu(object sender, List<KitchenObjectSO> kitchenObjectSOList)
     {
         Show();
         _title.text = "Select ingredient to make: ";
@@ -36,7 +61,6 @@ public class UIOptionMenuPopup : UIPopup
         if (_optionalCounter == null)
             return;
 
-        var kitchenObjectSOList = e.optionalList;
         if (kitchenObjectSOList == null)
             return;
 
@@ -90,7 +114,7 @@ public class UIOptionMenuPopup : UIPopup
     private void Show()
     {
         gameObject.SetActive(true);
-        PlayerStateMachine.Instance.DisableInput(true);
+        //PlayerStateMachine.Instance.DisableInput(true);
     }
     private void Hide()
     {
@@ -102,7 +126,11 @@ public class UIOptionMenuPopup : UIPopup
             Destroy(item.gameObject);
         }
         _menuItems.Clear();
-        PlayerStateMachine.Instance.DisableInput(false);
+        //PlayerStateMachine.Instance.DisableInput(false);
 
+    }
+    public void OnClickBackground()
+    {
+        HidePopup();
     }
 }

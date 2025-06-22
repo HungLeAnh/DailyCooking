@@ -14,11 +14,12 @@ public class UIShopCategoryItem : MonoBehaviour
 
     public void SetCategory(IGrouping<ShopItemCategory, ConfigShopItem> category)
     {        
-        _itemPrefab.SetActive(false);   
+        _itemPrefab.SetActive(false);
 
+        var listItem = category.OrderBy(x => x.UnlockLevel).ToList();
         itemCategory = category.Key;
         categoryTitle.text = itemCategory.ToString();
-        foreach (var item in category)
+        foreach (var item in listItem)
         {
             GameObject shopItem = Instantiate(_itemPrefab, _categoryParent);
             UIShopItem shopItemComponent = shopItem.GetComponent<UIShopItem>();

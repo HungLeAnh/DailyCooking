@@ -17,8 +17,6 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
     public override void Interact(PlayerStateMachine playerStateMachine)
     {
         var view = (OptionalContainerCounterView)BaseCounterView;
-        if (_playerStateMachine != null)     
-            return;
         Debug.Log("Interact optional Counter");
         _playerStateMachine = playerStateMachine;
         FireOnShowOptionMenu(view.KitchenObjectSOList);

@@ -112,7 +112,8 @@ public static class PlacedObjectFactory
         placedObjectView.Initialize(controller);
 
         var counterView = placedObjectView.GetComponent<BaseCounterView>();
-        CounterModules.Instance.AddNewCounterController(counterView);
+        if(CounterModules.Instance.IsInited)
+            CounterModules.Instance.AddNewCounterController(counterView);
 
         return placedObjectView;
     }

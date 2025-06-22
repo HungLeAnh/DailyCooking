@@ -31,8 +31,8 @@ public class UIShopPopup : UIPopup
     }   
     public void Initialize()
     {        
-        var groupList = ConfigManager.Instance.ConfigShop.ShopItems.ToLookup(x => x.Category);
-        foreach (var category in groupList)
+        var categoryList = ConfigManager.Instance.ConfigShop.ShopItems.ToLookup(x => x.Category);
+        foreach (var category in categoryList)
         {
             GameObject shopCategory = Instantiate(_shopCategoryPrefab, _shopParent);
             shopCategory.gameObject.SetActive(true);

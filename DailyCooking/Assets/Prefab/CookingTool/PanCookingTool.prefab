@@ -150,6 +150,28 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 6983875412975341295}
   m_SourcePrefab: {fileID: 100100000, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
+--- !u!114 &927980690929840512 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8408743451753940217, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
+  m_PrefabInstance: {fileID: 8669713075343259001}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2e509b684f116b4e89120c61caa3c80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1449230221004652872 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7804088542725583921, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
+  m_PrefabInstance: {fileID: 8669713075343259001}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 899c967393c23df489e435d06acb510f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &2272796693335353773 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7483745177535470804, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
@@ -178,6 +200,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placePoint: {fileID: 2272796693335353773}
+  progressBarUI: {fileID: 927980690929840512}
+  burnWarningUI: {fileID: 1449230221004652872}
   fryingRecipeSOArray:
   - {fileID: 11400000, guid: 03a4633e975251e4bbcc10c49aa23b19, type: 2}
   - {fileID: 11400000, guid: 561cb208a595885409b71715b3d7984f, type: 2}

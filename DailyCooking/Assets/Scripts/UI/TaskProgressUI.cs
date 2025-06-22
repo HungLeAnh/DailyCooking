@@ -22,6 +22,13 @@ public class TaskProgressUI : MonoBehaviour
         {
             OnGameStart();
         }
+        else if(KitchenGameManager.Instance.IsEditing())
+        {
+            _earnProgressBar.fillAmount = 0;
+            _earnProgresstext.text = "0/?";
+            _serveProgressBar.fillAmount = 0;
+            _serveProgresstext.text = "0/?";
+        }
     }
 
     private void OnGameStart()

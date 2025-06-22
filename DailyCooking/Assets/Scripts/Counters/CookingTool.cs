@@ -19,6 +19,8 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     }
 
     [SerializeField] private Transform placePoint;
+    [SerializeField] private ProgressBarUI progressBarUI;
+    [SerializeField] private BurnWarningUI burnWarningUI;
 
     private State _state;
     private float _cookingTimer;
@@ -56,10 +58,10 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     }
     public virtual void FireOnProgressChanged(float progressNormalized)
     {
-        OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-        {
-            progressNormalized = progressNormalized
-        });
+        //OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
+        //{
+        //    progressNormalized = progressNormalized
+        //});
     }
     private void Update()
     {
@@ -73,7 +75,7 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
                     CookingTimer += Time.deltaTime;
 
                     FireOnProgressChanged(CookingTimer / CookingTimeMax);
-
+                    progressBarUI.OnProgressChanged(CookingTimer / CookingTimeMax);
                     if (CookingTimer > CookingTimeMax)
                     {
                         //Fried
@@ -92,7 +94,8 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
                     BurningTimer += Time.deltaTime;
 
                     FireOnProgressChanged(BurningTimer / BurningTimeMax);
-
+                    progressBarUI.OnProgressChanged(BurningTimer / BurningTimeMax);
+                    burnWarningUI.OnProgressChanged(this,BurningTimer / BurningTimeMax);
                     if (BurningTimer > BurningTimeMax)
                     {
                         //Fried
@@ -108,6 +111,8 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
                     }
                     break;
                 case CookingTool.State.Burned:
+                    progressBarUI.Hide();               
+                    burnWarningUI.Hide();
                     break;
             }
 
@@ -116,6 +121,8 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     public virtual void SetKitchenObject(KitchenObject kitchenObject)
     {
         _kitchenObject = kitchenObject;
+        progressBarUI.Hide();
+        burnWarningUI.Hide();
     }
 
     public Transform GetKitchenObjectFollowTransform()
@@ -129,6 +136,8 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     public void ClearKitchenObject()
     {
         _kitchenObject = null;
+        progressBarUI.Hide();
+        burnWarningUI.Hide();
     }
     public bool HasKitchenObject()
     {

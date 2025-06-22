@@ -11,9 +11,13 @@ public class UISettingsPopup : UIPopup
  
     [SerializeField] private TextMeshProUGUI soundEffectText;
     [SerializeField] private TextMeshProUGUI musicText;
-    
+
+    [Header("Cheat")]
+    [SerializeField] private Transform cheatTransform;
 
     private Action onCloseButtonAction;
+
+    private static int cheatTapCount = 0;
 
 
     private void Awake()
@@ -58,5 +62,26 @@ public class UISettingsPopup : UIPopup
     {
         base.HidePopup();
     }
+    public void OnTitleClick()
+    {
+        cheatTapCount++;
+        if (cheatTapCount >= 10)
+        {
+            ShowCheat();
+        }
+    }
 
+    private void ShowCheat()
+    {
+        cheatTransform.gameObject.SetActive(true);
+
+    }
+    public void OnCheatCoin()
+    {
+        GameManager.Instance.GameData.UpdatePlayerResources(1000);
+    }
+    public void OnCheatExp()
+    {
+        GameManager.Instance.GameData.UpdatePlayerExp(100);
+    }
 }

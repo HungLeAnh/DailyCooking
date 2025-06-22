@@ -13,12 +13,10 @@ public class TablewareKitchenObject : KitchenObject
     }
 
     [SerializeField] private List<KitchenObjectSO> validKitchenObjectSOList;
-    [SerializeField] private List<FoodSO> tablewareFoodSOList;
 
 
     private List<KitchenObjectSO> _ingredientSOList;
 
-    public List<FoodSO> TablewareFoodSOList { get => tablewareFoodSOList; set => tablewareFoodSOList = value; }
 
     private void Awake()
     {
@@ -31,13 +29,13 @@ public class TablewareKitchenObject : KitchenObject
         //Debug.Log("Try add ingredient");
         if (!validKitchenObjectSOList.Contains(kitchenObjectSO))
         {
-            Debug.Log("add invalid object");
+            //Debug.Log("add invalid object");
             return false;
         }
         if (_ingredientSOList.Contains(kitchenObjectSO))
         {
             //Already has this type
-            Debug.Log("Already has this type object");
+            //Debug.Log("Already has this type object");
             return false;
         }
         else

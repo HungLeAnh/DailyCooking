@@ -27,10 +27,27 @@ public class DeliveryManager : SimpleSingleton<DeliveryManager>
         unlockFoodList = new List<FoodSO>();
         unlockIngredient = new List<KitchenObjectSO>();
     }
+
+    public void OnDestroy()
+    {
+        OnRecipeSpawned = null;
+        OnRecipeCompleted = null;
+        OnRecipeSuccess = null;
+        OnRecipeFailed = null;
+        waitingRecipeSOList.Clear();
+        unlockFoodList.Clear();
+        unlockIngredient.Clear();
+    }
     public void Init()
     {
+        unlockFoodList.Clear();
+        waitingRecipeSOList.Clear();
+        unlockFoodList.Clear();
+        unlockIngredient.Clear();
         foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
         {
+            if(counterController.BaseCounterView == null)
+                continue;
             AddUnlockIngredient(counterController);
         }
 

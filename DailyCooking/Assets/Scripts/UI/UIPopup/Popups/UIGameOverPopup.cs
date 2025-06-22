@@ -34,7 +34,6 @@ public class UIGameOverPopup : UIPopup
     public void OnClick()
     {
         Hide();
-        KitchenGameManager.Instance.ChangeState(KitchenGameManager.State.Editing);
         KitchenGameManager.Instance.EndGame();
         UIHUDManager.Instance.ShowAllUIElement();
     }

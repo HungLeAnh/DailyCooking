@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class CounterModules : SimpleSingleton<CounterModules>
+public class CounterModules : PersistentSingleton<CounterModules>
 {
     public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
     public class OnSelectedCounterChangedEventArgs : EventArgs
@@ -12,12 +12,14 @@ public class CounterModules : SimpleSingleton<CounterModules>
         public BaseCounterView selectedCounterView;
     }
 
-    [SerializeReference] private List<BaseCounterController> baseCounterControllers = new List<BaseCounterController>();
-
+    private List<BaseCounterController> baseCounterControllers = new List<BaseCounterController>();
+    private bool isInited = false;
+    public bool IsInited => isInited;
     public List<BaseCounterController> BaseCounterControllers { get => baseCounterControllers; set => baseCounterControllers = value; }
 
     public void Initialize()
     {
+        isInited = true;
         var counterViews = GridBuildingSystem.Instance.Container.GetComponentsInChildren<BaseCounterView>();
         foreach (var counterView in counterViews)
         {
@@ -28,17 +30,19 @@ public class CounterModules : SimpleSingleton<CounterModules>
     }
     public void AddNewCounterController(BaseCounterView baseCounterView)
     {
-        var controller = baseCounterView.CreateControllerFromView();
-        baseCounterControllers.Add(controller as BaseCounterController);
-        DeliveryManager.Instance.AddUnlockIngredient(controller as BaseCounterController);
+        var controller = baseCounterView.CreateControllerFromView()as BaseCounterController;
+        baseCounterControllers.Add(controller) ;
+        DeliveryManager.Instance.AddUnlockIngredient(controller);
     }
-    public void DestroyCounter(BaseCounterView baseCounterView  )
+    public void DestroyCounter(BaseCounterView baseCounterView)
     {
-       var controller =  baseCounterControllers.Find(x => x.BaseCounterView == baseCounterView);
+       var controller =  baseCounterControllers.FindLast(x => x.BaseCounterView == baseCounterView);
+
+
         if(controller != null)
         {
-            baseCounterView.UnsubEvent();
             baseCounterControllers.Remove(controller);
+            controller.BaseCounterView.UnsubEvent();
             controller.BaseCounterModel.Unsubscribe(Observer.EObserverEvent.ModelChange, controller);
             GridBuildingSystem.Instance.DestroyPlaceObject(baseCounterView.GetComponent<PlacedObjectView>());
         }

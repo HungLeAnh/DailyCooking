@@ -59,6 +59,8 @@ public class UIInventoryPopup : UIPopup
         //sub switch tab here
         FillInventory(_selectedTab.TabType);
         GridBuildingSystem.Instance.FireOnBuildingStartEvent();
+        UIHUDManager.Instance.HideAllUIElement();
+
     }
 
     public override void HidePopup(object param = null)
@@ -80,7 +82,12 @@ public class UIInventoryPopup : UIPopup
 
         //unsub switch tab here
         if (!isPlacingObject)
+        {
             GridBuildingSystem.Instance.FireOnBuildingEndEvent();
+            UIHUDManager.Instance.ShowAllUIElement();
+
+        }
+
     }
 
     public void FillInventory(InventoryTabType _selectedTabType = InventoryTabType.Counter)
@@ -134,10 +141,6 @@ public class UIInventoryPopup : UIPopup
         }
 
 
-        if (selectedItemId >= 0)
-        {
-            UnselectItem(selectedItemId);
-        }
     }
     private void CreateInventoryItem(ItemStack prefabSO)
     {
@@ -154,17 +157,7 @@ public class UIInventoryPopup : UIPopup
         {
             int itemIndex = _listItem.FindIndex(o => o.PlacedObjectTypeSO == itemToInspect);
 
-            //unselect selected Item
-            if (selectedItemId >= 0 && selectedItemId != itemIndex)
-                UnselectItem(selectedItemId);
-
-            //change Selected ID 
             selectedItemId = itemIndex;
-
-            //show Information
-
-            //check if interactable
-
         }
 
         GameManager.Instance.GameData.RemoveInventoryData(itemToInspect.Guid);
@@ -175,13 +168,6 @@ public class UIInventoryPopup : UIPopup
         HidePopup();
     }
 
-    void UnselectItem(int itemIndex)
-    {
-        if (_listItem.Count > itemIndex)
-        {
-            _listItem[itemIndex].UnselectItem();
-        }
-    }
 
     void OnChangeTab(InventoryTab inventoryTab)
     {
@@ -194,7 +180,6 @@ public class UIInventoryPopup : UIPopup
         {
             if (selectedItemId >= 0)
             {
-                UnselectItem(selectedItemId);
                 selectedItemId = -1;
             }
 

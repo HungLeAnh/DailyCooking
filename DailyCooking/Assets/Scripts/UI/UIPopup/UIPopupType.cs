@@ -6,6 +6,7 @@ public enum UIPopupType
     UIGamePausePopup,
     UIGameStartCountdownPopup,
     UIInventoryPopup,
+    UILevelUpPopup,
     UILoadingPopup,
     UIMainMenuPopup,
     UIOptionMenuPopup,

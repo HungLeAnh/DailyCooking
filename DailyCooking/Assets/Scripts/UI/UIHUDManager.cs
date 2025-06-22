@@ -10,7 +10,8 @@ public enum UIHUDElements
     Shop,
     Inventory,
     Play,
-    Coin
+    Coin,
+    Level,
 }
 [Serializable]
 struct SerializableKeyValuePair<T1, T2>

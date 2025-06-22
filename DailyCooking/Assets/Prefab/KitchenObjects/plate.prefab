@@ -56,10 +56,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1c94b7f0c13c51d4ab047c26f734bbff, type: 2}
   - {fileID: 11400000, guid: 8c2f67e06d0c9ed40b55258cfa2918ed, type: 2}
   - {fileID: 11400000, guid: 20168b59800919e44a5e0ae2e13985a1, type: 2}
-  tablewareFoodSOList:
-  - {fileID: 11400000, guid: 76925b9fc7bd54e49915c59dfbb69df2, type: 2}
-  - {fileID: 11400000, guid: 27c3a1f72918bc74ca53c23f48556f98, type: 2}
-  - {fileID: 11400000, guid: 49395a9a760952f409a3cfa5c1bf3c3b, type: 2}
 --- !u!1 &8622493025619112790
 GameObject:
   m_ObjectHideFlags: 0
@@ -121,6 +117,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1907366457036583833}
   - {fileID: 1939925319464464249}
   - {fileID: 7922743563314071950}
   - {fileID: 7132141371091273176}
@@ -141,7 +138,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2143516488132797380, guid: e19c270275daa5c4cb162d3aa1420b91, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2421269877471860197, guid: e19c270275daa5c4cb162d3aa1420b91, type: 3}
       propertyPath: m_LocalPosition.x
@@ -275,6 +272,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SimpleSalad
       objectReference: {fileID: 0}
+    - target: {fileID: 2143516488132797380, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -329,6 +330,72 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2421269877471860197, guid: d56b580ab337b8246a901a0dcc99b55b, type: 3}
   m_PrefabInstance: {fileID: 4283464122896972444}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &4315090076376327804
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4737182407281673896}
+    m_Modifications:
+    - target: {fileID: 2143516488132797380, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_Name
+      value: OnionSalad
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.12
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5528338711477411110, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+      propertyPath: tablewareKitchenObject
+      value: 
+      objectReference: {fileID: 8121191103929895968}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+--- !u!4 &1907366457036583833 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2421269877471860197, guid: 6034753e9f6450c49b5250e862f7b485, type: 3}
+  m_PrefabInstance: {fileID: 4315090076376327804}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4854986956575281213
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -343,7 +410,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2143516488132797380, guid: 5ae59c44bd99e2d4a8a1d37894caf381, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2421269877471860197, guid: 5ae59c44bd99e2d4a8a1d37894caf381, type: 3}
       propertyPath: m_LocalPosition.x
@@ -413,7 +480,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2143516488132797380, guid: 4d533ef3816414a4cb93848636a02d44, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2364183451712471817, guid: 4d533ef3816414a4cb93848636a02d44, type: 3}
       propertyPath: m_SizeDelta.x

@@ -86,7 +86,9 @@ public class GameManager : PersistentSingleton<GameManager>
 public class GameData
 {
     [JsonIgnore] public Action OnResourceChange;
-    // Add all saveable properties
+    [JsonIgnore] public Action OnLevelChange;
+    [JsonIgnore] public Action OnExpChange;
+
     public PlayerData playerData = new PlayerData();
     public InventoryData inventoryData = new InventoryData();
     public GridData gridData = new GridData();
@@ -120,21 +122,36 @@ public class GameData
     {
         playerData.coins += addCoins;
         OnResourceChange?.Invoke();
+        GameManager.Instance.SaveGame();
+    }
+    public void UpdatePlayerExp(int addExp)
+    {
+        playerData.exp += addExp;
+        if (playerData.exp >= playerData.level * 100)
+        {
+            playerData.exp = 0;
+            playerData.level++;
+            OnLevelChange?.Invoke();
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UILevelUpPopup.ToString(), 
+                new UILevelUpPopup.Param { reward = $"{UILevelUpPopup.RewardType.Coin}_{playerData.level*100}"});
+        }        
+        OnExpChange?.Invoke();
+        GameManager.Instance.SaveGame();
     }
 }
 [Serializable]
 public class PlayerData
 {
     public int level=1;
-    public int experience=0;
+    public int exp=0;
     public int gems=0;
     public int coins = 1000;
     public int daysPlayed=1;
     public PlayerData(){}
-    public PlayerData(int level, int experience, int currency, int gems, int coins, int daysPlayed)
+    public PlayerData(int level, int exp, int currency, int gems, int coins, int daysPlayed)
     {
         this.level = level;
-        this.experience = experience;
+        this.exp = exp;
         this.gems = gems;
         this.coins = coins;
         this.daysPlayed = daysPlayed;
