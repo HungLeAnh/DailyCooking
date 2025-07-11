@@ -1,0 +1,24 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Editor/IconGenTool/IconGenEditorTool.uss?fileID=7433441132597879392&amp;guid=b288ada5919f52f419b01f67b6b5361d&amp;type=3#IconGenEditorTool" />
+    <ui:VisualElement name="Container" style="flex-grow: 1; flex-wrap: nowrap; width: auto; flex-direction: row;">
+        <ui:ListView name="List" header-title="Elements" show-foldout-header="true" allow-add="false" allow-remove="false" show-border="true" style="min-width: 300px; background-color: rgba(0, 0, 0, 0.08); border-left-color: rgba(0, 0, 0, 0.2); border-right-color: rgba(0, 0, 0, 0.2); border-top-color: rgba(0, 0, 0, 0.2); border-bottom-color: rgba(0, 0, 0, 0.2); border-right-width: 2px; border-left-width: 2px; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+        <ui:VisualElement name="Content" data-source-type="IconGenEditorTool, Assembly-CSharp-Editor" style="flex-grow: 1;">
+            <ui:Label text="Label" name="Header" style="-unity-font-style: bold; color: rgb(238, 202, 102);">
+                <Bindings>
+                    <ui:DataBinding property="text" binding-mode="ToTarget" data-source-path="m_selectedData.name" />
+                </Bindings>
+            </ui:Label>
+            <ui:VisualElement name="Output" style="height: 256px; width: 256px; align-items: center; justify-content: center; align-self: center;">
+                <Bindings>
+                    <ui:DataBinding property="style.backgroundImage" data-source-path="m_previewTexture" binding-mode="ToTarget" />
+                </Bindings>
+            </ui:VisualElement>
+            <ui:Vector3Field label="Camera Position" name="CameraPosition" style="height: 30px; flex-shrink: 1; flex-grow: 0; align-self: stretch; align-items: stretch;" />
+            <ui:Vector3Field label="CameraRotation" name="CameraRotation" style="height: 30px; flex-shrink: 1;" />
+            <ui:Vector3Field label="Object Rotation" name="ObjectRotation" style="height: 30px;" />
+            <uie:ColorField label="Background Color" value="#121414FF" name="BackgroundColor" />
+            <ui:Button text="Export" name="ExportButton" style="margin-top: 20px;" />
+            <ui:Button text="Export All" name="ExportAllButton" style="margin-top: 20px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

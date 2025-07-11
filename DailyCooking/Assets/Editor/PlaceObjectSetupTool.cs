@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-public class PlaceObjectSetup 
+public class PlaceObjectSetupTool 
 {
     [MenuItem("Tools/Setup Place Object SO")]
     public static void PlaceObjectSetupCounter()
