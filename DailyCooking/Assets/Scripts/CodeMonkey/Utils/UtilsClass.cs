@@ -1,16 +1,4 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading the Code Monkey Utilities
-    I hope you find them useful in your projects
-    If you have any questions use the contact form
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,7 +28,7 @@ namespace CodeMonkey.Utils {
         private static Transform cachedCanvasTransform;
         public static Transform GetCanvasTransform() {
             if (cachedCanvasTransform == null) {
-                Canvas canvas = MonoBehaviour.FindObjectOfType<Canvas>();
+                Canvas canvas = UnityEngine.Object.FindFirstObjectByType<Canvas>();
                 if (canvas != null) {
                     cachedCanvasTransform = canvas.transform;
                 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -36,16 +37,20 @@ public class CounterModules : PersistentSingleton<CounterModules>
     }
     public void DestroyCounter(BaseCounterView baseCounterView)
     {
-       var controller =  baseCounterControllers.FindLast(x => x.BaseCounterView == baseCounterView);
+        var controller = baseCounterControllers.FindLast(x => x.BaseCounterView == baseCounterView);
 
-
-        if(controller != null)
+        if (controller != null)
         {
-            baseCounterControllers.Remove(controller);
-            controller.BaseCounterView.UnsubEvent();
-            controller.BaseCounterModel.Unsubscribe(Observer.EObserverEvent.ModelChange, controller);
+            RemoveCounterController(controller);
             GridBuildingSystem.Instance.DestroyPlaceObject(baseCounterView.GetComponent<PlacedObjectView>());
         }
+    }
+
+    private void RemoveCounterController(BaseCounterController controller)
+    {
+        baseCounterControllers.Remove(controller);
+        controller.BaseCounterView.UnsubEvent();
+        controller.BaseCounterModel.Unsubscribe(Observer.EObserverEvent.ModelChange, controller);
     }
     public void FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs args)
     {
@@ -57,15 +62,7 @@ public class CounterModules : PersistentSingleton<CounterModules>
     }
     public bool TryGetCounterController(BaseCounterView baseCounterView, out BaseCounterController baseCounterController)
     {
-        baseCounterController = baseCounterControllers.Find(x => x.BaseCounterView == baseCounterView);
-        if(baseCounterController != null)
-        {
-            return true;
-        }
-        else
-        {
-            baseCounterController = null;
-            return false;
-        }
+        baseCounterController = baseCounterControllers.FirstOrDefault(x => x.BaseCounterView == baseCounterView);
+        return baseCounterController != null;
     }
 }

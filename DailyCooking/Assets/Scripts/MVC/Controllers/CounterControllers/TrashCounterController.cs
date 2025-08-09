@@ -12,7 +12,7 @@ public class TrashCounterController : BaseCounterController
 
     public TrashCounterView TrashCounterView { get => (TrashCounterView)BaseCounterView;}
 
-    new public static void ResetStaticData()
+    public static void ResetStaticData()
     {
         OnAnyObjectTrashed = null;
     }

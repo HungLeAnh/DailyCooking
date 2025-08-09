@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class BuildingSound : MonoBehaviour {
 
-    [SerializeField] private GridBuildingSystem3D gridBuildingSystem3D = null;
+    [SerializeField] private GridBuildingSystem gridBuildingSystem = null;
     [SerializeField] private Transform pfBuildingSound = null;
 
     private void Start() {
-        if (gridBuildingSystem3D != null) {
-            gridBuildingSystem3D.OnObjectPlaced += GridBuildingSystem3D_OnObjectPlaced;
+        if (gridBuildingSystem != null) {
+            gridBuildingSystem.OnObjectPlaced += GridBuildingSystem3D_OnObjectPlaced;
         }
 
     }

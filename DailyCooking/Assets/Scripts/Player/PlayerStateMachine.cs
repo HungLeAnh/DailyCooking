@@ -1,9 +1,5 @@
-using Cinemachine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -17,7 +13,7 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
         {
             if (_instance == null)
             {
-                _instance = FindObjectOfType<PlayerStateMachine>();
+                _instance = FindFirstObjectByType<PlayerStateMachine>();
             }
             return _instance;
 

@@ -199,74 +199,72 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         {
             for (int z = 0; z < grid.GetHeight(); z++)
             {
-
                 GameObject floor = Instantiate(floorPrefab, grid.GetWorldPosition(x, z), Quaternion.identity);
                 floor.transform.SetParent(floorContainer);
-                floor.transform.localPosition = new Vector3(floor.transform.localPosition.x, 0f, floor.transform.localPosition.z); ;
+                floor.transform.localPosition = new Vector3(floor.transform.localPosition.x, 0f, floor.transform.localPosition.z);
 
                 if (x == 0 || z == 0 || x == grid.GetWidth() - 1 || z == grid.GetHeight() - 1)
                 {
-                    GameObject wall = Instantiate(wallPrefab, grid.GetWorldPosition(x, z) +
-                        new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2) , Quaternion.identity);
-                    wall.transform.SetParent(wallContainer);
-                    gridWallList.Add(wall.GetComponent<GridWall>());
-                    if (x == 0) // Left border (facing right)
-                    {
-                        wall.transform.localPosition += new Vector3(-0.25f, 0, 0);
-                        wall.transform.rotation = Quaternion.Euler(0, 270, 0);
-                    }
-                    else if (x == grid.GetWidth() - 1) // Right border (facing left)
-                    {
-                        wall.transform.localPosition -= new Vector3(-0.25f, 0, 0);
-                        wall.transform.rotation = Quaternion.Euler(0, 90, 0);
-
-                    }
-                    if (z == 0) // Bottom border (facing down)
-                    {
-                        wall.transform.localPosition -= new Vector3(0, 0, 0.25f);
-                        wall.transform.rotation = Quaternion.Euler(0, 180, 0);
-
-                    }
-                    else if (z == grid.GetHeight() - 1) // Top border (facing up)
-                    {
-                        wall.transform.localPosition += new Vector3(0, 0, 0.25f);
-                        wall.transform.rotation = Quaternion.Euler(0, 0, 0);
-
-                    }
-
-                    if (x == 0)// Bottom corner
-                    {
-                        if (z == 0|| z == grid.GetHeight() - 1) 
-                        {
-                            GameObject blcwall = Instantiate(wallPrefab, grid.GetWorldPosition(x, z) +
-                                                new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2), Quaternion.identity);
-                            blcwall.transform.SetParent(wallContainer);
-                            blcwall.transform.localPosition -= new Vector3(0.25f, 0, 0);
-                            blcwall.transform.rotation = Quaternion.Euler(0, 270, 0);
-                            gridWallList.Add(blcwall.GetComponent<GridWall>());
-
-                            wall.transform.localPosition += new Vector3(0.25f, 0, 0);
-
-                        }
-
-                    }
-                    else if (x == grid.GetWidth() - 1) // Top  corner
-                    {
-                        if (z == 0 || z == grid.GetHeight() - 1) 
-                        {
-                            GameObject brcwall = Instantiate(wallPrefab, grid.GetWorldPosition(x, z) +
-                                                new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2), Quaternion.identity);
-                            brcwall.transform.SetParent(wallContainer);
-                            brcwall.transform.localPosition += new Vector3(0.25f, 0, 0);
-                            brcwall.transform.rotation = Quaternion.Euler(0, 90, 0);
-                            gridWallList.Add(brcwall.GetComponent<GridWall>());
-
-                            wall.transform.localPosition += new Vector3(-0.25f, 0, 0);
-
-                        }
-                    }
-
+                    PlaceWall(x, z, grid.GetWidth(), grid.GetHeight());
                 }
+            }
+        }
+    }
+
+    private void PlaceWall(int x, int z, int gridWidth, int gridHeight)
+    {
+        GameObject wall = Instantiate(wallPrefab, grid.GetWorldPosition(x, z) +
+            new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2), Quaternion.identity);
+        wall.transform.SetParent(wallContainer);
+        gridWallList.Add(wall.GetComponent<GridWall>());
+
+        if (x == 0) // Left border (facing right)
+        {
+            wall.transform.localPosition += new Vector3(-0.25f, 0, 0);
+            wall.transform.rotation = Quaternion.Euler(0, 270, 0);
+        }
+        else if (x == gridWidth - 1) // Right border (facing left)
+        {
+            wall.transform.localPosition -= new Vector3(-0.25f, 0, 0);
+            wall.transform.rotation = Quaternion.Euler(0, 90, 0);
+        }
+        if (z == 0) // Bottom border (facing down)
+        {
+            wall.transform.localPosition -= new Vector3(0, 0, 0.25f);
+            wall.transform.rotation = Quaternion.Euler(0, 180, 0);
+        }
+        else if (z == gridHeight - 1) // Top border (facing up)
+        {
+            wall.transform.localPosition += new Vector3(0, 0, 0.25f);
+            wall.transform.rotation = Quaternion.Euler(0, 0, 0);
+        }
+
+        if (x == 0) // Bottom corner
+        {
+            if (z == 0 || z == gridHeight - 1)
+            {
+                GameObject blcwall = Instantiate(wallPrefab, grid.GetWorldPosition(x, z) +
+                                    new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2), Quaternion.identity);
+                blcwall.transform.SetParent(wallContainer);
+                blcwall.transform.localPosition -= new Vector3(0.25f, 0, 0);
+                blcwall.transform.rotation = Quaternion.Euler(0, 270, 0);
+                gridWallList.Add(blcwall.GetComponent<GridWall>());
+
+                wall.transform.localPosition += new Vector3(0.25f, 0, 0);
+            }
+        }
+        else if (x == gridWidth - 1) // Top corner
+        {
+            if (z == 0 || z == gridHeight - 1)
+            {
+                GameObject brcwall = Instantiate(wallPrefab, grid.GetWorldPosition(x, z) +
+                                    new Vector3(grid.GetCellSize() / 2, 0, grid.GetCellSize() / 2), Quaternion.identity);
+                brcwall.transform.SetParent(wallContainer);
+                brcwall.transform.localPosition += new Vector3(0.25f, 0, 0);
+                brcwall.transform.rotation = Quaternion.Euler(0, 90, 0);
+                gridWallList.Add(brcwall.GetComponent<GridWall>());
+
+                wall.transform.localPosition += new Vector3(-0.25f, 0, 0);
             }
         }
     }
