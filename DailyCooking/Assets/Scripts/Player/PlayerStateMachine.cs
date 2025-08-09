@@ -3,24 +3,9 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerState>, IKitchenObjectParent
+public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitchenObjectParent
 {
-    private static PlayerStateMachine _instance;
-
-    public static PlayerStateMachine Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = FindFirstObjectByType<PlayerStateMachine>();
-            }
-            return _instance;
-
-        }
-    }
-
-    public PlayerStateContext Context { get => _context; set => _context = value; }
+    public PlayerStateContext Context { get; set; }
 
     public event EventHandler OnPickedSomething;
 
@@ -45,45 +30,28 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     [SerializeField]
     private PlacedObjectView placedObjectView;
 
-    private PlayerStateContext _context;
+    private StateManager<EPlayerState> _stateManager;
+    private PlayerStateFactory _stateFactory;
 
-
-
-    public void IntializeStates()
+    private void IntializeStates()
     {
         Context = new PlayerStateContext(_characterAnimator,moveSpeed,
             placedObjectView,Instance.transform,countersLayerMask, Instance.kitchenObjectHoldPoint);
 
-        _states.Add(EPlayerState.Idle, new PlayerIdleState(EPlayerState.Idle));
-        _states.Add(EPlayerState.Holding,new PlayerHoldingState(EPlayerState.Holding));
-        foreach (var key in _states.Keys)
-        {
-            _states[key].IntializeStates();
-        }
-        _currentState = _states[EPlayerState.Idle];
+        var states = _stateFactory.CreateStates(this);
+        _stateManager.SetStates(states, EPlayerState.Idle);
     }
-    private void Awake()
+    protected override void Awake()
     {
-        if (_instance == null)
-            _instance = this as PlayerStateMachine;
-        else
-        {
-            if (_instance != this)
-            {
-                Destroy(gameObject);
-            }
-        }
+        base.Awake();
+        _stateManager = new StateManager<EPlayerState>();
+        _stateFactory = new PlayerStateFactory();
         IntializeStates();
     }
     private void OnDestroy()
     {
         Context = null;
-        foreach (var state in _states)
-        {
-            state.Value.Dispose();
-        }
-        _states.Clear();
-        _currentState = null;
+        _stateManager.Dispose();
     }
 
 
@@ -123,7 +91,7 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     public void SetPlayerPath(List<int2> pathList)
     {
         pathList.Reverse();
-        var state = _currentState as PlayerBaseState;
+        var state = _stateManager.CurrentState as PlayerBaseState;
         state.MoveTowardsTarget(pathList);
 
     }

@@ -56,7 +56,7 @@ public class KitchenGameManager : MonoBehaviour
         state = State.Editing;
 
 
-        playerDay = GameManager.Instance.GameData.playerData.daysPlayed;
+        playerDay = GameManager.Instance.GameData.playerStats.playerData.daysPlayed;
         CreateDailytask();
         kitchenManagerUI.SetActive(false);
     }
@@ -99,8 +99,8 @@ public class KitchenGameManager : MonoBehaviour
                 //Win game
 
                 GameManager.Instance.GameData.UpdatePlayedDay(playerDay);
-                GameManager.Instance.GameData.UpdatePlayerResources((int)earnCount);
-                GameManager.Instance.GameData.UpdatePlayerExp(playerDay*10);
+                GameManager.Instance.GameData.playerStats.UpdatePlayerResources((int)earnCount);
+                GameManager.Instance.GameData.playerStats.UpdatePlayerExp(playerDay*10);
                 GameManager.Instance.SaveGame();
                 playerDay++;
             }

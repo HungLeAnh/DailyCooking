@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,8 +12,7 @@ public class PlayerHoldingState : PlayerBaseState
 
     public override void EnterState()
     {
-        if (_currentSubState != null)
-            _currentSubState.EnterState();
+        _subStateMachine.Start();
     }
 
     public override void ExitState()
@@ -28,33 +27,26 @@ public class PlayerHoldingState : PlayerBaseState
             return PlayerStateMachine.EPlayerState.Idle;
     }
 
-    public override void IntializeStates()
+    public override void IntializeStates(PlayerStateContext context)
     {
+        base.IntializeStates(context);
         if (!_isInited)
         {
-            _subStates.Add(PlayerStateMachine.EPlayerState.Holding_Idle, new PlayerHoldingIdleState(PlayerStateMachine.EPlayerState.Holding_Idle));
-            _subStates.Add(PlayerStateMachine.EPlayerState.Holding_Walking, new PlayerHoldingWalkState(PlayerStateMachine.EPlayerState.Holding_Walking));
+            var subStates = new Dictionary<PlayerStateMachine.EPlayerState, IState<PlayerStateMachine.EPlayerState>>
+            {
+                { PlayerStateMachine.EPlayerState.Holding_Idle, new PlayerHoldingIdleState(PlayerStateMachine.EPlayerState.Holding_Idle) },
+                { PlayerStateMachine.EPlayerState.Holding_Walking, new PlayerHoldingWalkState(PlayerStateMachine.EPlayerState.Holding_Walking) }
+            };
+            foreach (var key in subStates.Keys)
+            {
+                (subStates[key] as PlayerBaseState).IntializeStates(Context);
+            }
+            _subStateMachine.SetStates(subStates, PlayerStateMachine.EPlayerState.Holding_Idle);
             _isInited = true;
         }
-        _currentSubState = _subStates[PlayerStateMachine.EPlayerState.Holding_Idle];
-
     }
-
-    public override void OnTriggerEnter(Collider other)
-    {
-    }
-
-    public override void OnTriggerExit(Collider other)
-    {
-    }
-
-    public override void OnTriggerStay(Collider other)
-    {
-    }
-
     public override void UpdateState()
     {
-        base.UpdateState();
-        base.UpdateSubState();
+        _subStateMachine.Update();
     }
 }

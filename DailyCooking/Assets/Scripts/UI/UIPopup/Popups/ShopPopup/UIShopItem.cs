@@ -25,7 +25,7 @@ public class UIShopItem : MonoBehaviour
         textName.text = item.Name;
         textPrice.text = item.Price.ToString();
         buttonBuy.onClick.AddListener(OnClickButtonBuy);
-        if(item.UnlockLevel > GameManager.Instance.GameData.playerData.level)
+        if(item.UnlockLevel > GameManager.Instance.GameData.playerStats.playerData.level)
         {
             lockTransform.gameObject.SetActive(true);
         }
@@ -53,7 +53,7 @@ public class UIShopItem : MonoBehaviour
 
     private void OnClickButtonBuy()
     {
-        if(configShopItem.Price > GameManager.Instance.GameData.playerData.coins)
+        if(configShopItem.Price > GameManager.Instance.GameData.playerStats.playerData.coins)
         {
             Debug.Log("Not enough coins to buy this item.");
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup.ToString(), 
@@ -62,7 +62,7 @@ public class UIShopItem : MonoBehaviour
                 });
             return;
         }
-        GameManager.Instance.GameData.UpdatePlayerResources(-configShopItem.Price);
+        GameManager.Instance.GameData.playerStats.UpdatePlayerResources(-configShopItem.Price);
         GameManager.Instance.GameData.AddInventoryData(InventoryItemData.CreateInventoryItem(configShopItem.Id.ToString()));
         GameManager.Instance.SaveGame();
     }

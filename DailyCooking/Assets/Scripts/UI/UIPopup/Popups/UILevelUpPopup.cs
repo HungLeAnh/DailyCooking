@@ -44,7 +44,7 @@ public class UILevelUpPopup : UIPopup
 
     private void Show()
     {
-        levelText.text = GameManager.Instance.GameData.playerData.level.ToString();
+        levelText.text = GameManager.Instance.GameData.playerStats.playerData.level.ToString();
         if (_openParam != null)
         {
             Param param = _openParam as Param;
@@ -96,7 +96,7 @@ public class UILevelUpPopup : UIPopup
         {
             if (item.Key == nameof(RewardType.Coin))
             {
-                GameManager.Instance.GameData.UpdatePlayerResources(item.Value);
+                GameManager.Instance.GameData.playerStats.UpdatePlayerResources(item.Value);
             }
             else if (item.Key == nameof(RewardType.Gem))
             {

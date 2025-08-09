@@ -9,12 +9,15 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     protected PlayerStateContext Context;
     public PlayerBaseState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
-        Context = PlayerStateMachine.Instance.Context;
-        //Context.PlayerGameInput.OnFingerDown += PlayerGameInput_OnFingerDown;
+    }
+
+    public virtual void IntializeStates(PlayerStateContext context)
+    {
+        Context = context;
         Context.PlayerGameInput.OnTouchPerformed += PlayerGameInput_OnFingerDown;
         Context.PlayerGameInput.OnFingerUp += PlayerGameInput_OnFingerUp;
-
     }
+
     public override void Dispose()
     {
         base.Dispose();
