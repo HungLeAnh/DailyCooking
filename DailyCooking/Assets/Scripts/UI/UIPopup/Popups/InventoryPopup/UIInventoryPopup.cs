@@ -35,7 +35,7 @@ public class UIInventoryPopup : UIPopup
         base.SetupPopup();
 
         //foreach (var prefabSO in GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects)
-        foreach (var prefabSO in GameManager.Instance.GameData.inventoryData.Items)
+        foreach (var prefabSO in GameManager.Instance.GameData.InventoryData.Items)
         {
             CreateInventoryItem(prefabSO);
         }
@@ -101,7 +101,7 @@ public class UIInventoryPopup : UIPopup
         if (_selectedTab != null)
         {
             List<ItemStack> listItemsToShow = new List<ItemStack>();
-            listItemsToShow = GameManager.Instance.GameData.inventoryData.Items.FindAll(o => o.Item.TabType == _selectedTab.TabType);
+            listItemsToShow = GameManager.Instance.GameData.InventoryData.Items.FindAll(o => o.Item.TabType == _selectedTab.TabType);
 
             FillInvetoryItems(listItemsToShow);
         }

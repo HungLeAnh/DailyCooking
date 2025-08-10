@@ -1,34 +1,32 @@
 [System.Serializable]
 public class GameData
 {
-    public PlayerStats playerStats = new PlayerStats();
-    public InventoryData inventoryData = new InventoryData();
-    public GridData gridData = new GridData();
-    public TutorialData tutorialData = new TutorialData();
+    public PlayerStats PlayerStats { get; private set; } = new PlayerStats();
+    public InventoryData InventoryData { get; private set; } = new InventoryData();
+    public GridData GridData { get; private set; } = new GridData();
+    public TutorialData TutorialData { get; private set; } = new TutorialData();
 
-    public void SaveGridData(GridXZ<GridObject> grid)
+    public void UpdateGridData(GridXZ<GridObject> grid)
     {
-        gridData.SaveGridData(grid);
+        GridData.UpdateGridData(grid);
     }
     public void AddInventoryData(InventoryItemData item)
     {
-        inventoryData.Add(item);
+        InventoryData.Add(item);
     }    
     public void AddInventoryData(string guid)
     {
-        inventoryData.Add(guid);
+        InventoryData.Add(guid);
     }
     public void RemoveInventoryData(InventoryItemData item)
     {
-        inventoryData.Remove(item);
+        InventoryData.Remove(item);
     }    
     public void RemoveInventoryData(string id)
     {
-        inventoryData.Remove(id);
+        InventoryData.Remove(id);
     }
-    public void UpdatePlayedDay(int playerDay)
-    {
-        playerStats.playerData.daysPlayed = playerDay;
-    }
+
 }
+
 

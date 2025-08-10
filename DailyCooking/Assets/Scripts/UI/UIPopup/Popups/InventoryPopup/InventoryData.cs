@@ -5,6 +5,7 @@ using UnityEngine;
 [Serializable]
 public class InventoryData
 {
+    public Action OnInventoryDataChanged;
     private List<ItemStack> _items = new List<ItemStack>();
     public List<ItemStack> Items => _items;
 
@@ -33,6 +34,7 @@ public class InventoryData
         }
 
         _items.Add(new ItemStack(item, count));
+        OnInventoryDataChanged?.Invoke();
     }
     public void Add(string id, int count = 1)
     {
@@ -50,6 +52,7 @@ public class InventoryData
         }
 
         _items.Add(new ItemStack(InventoryItemData.CreateInventoryItem(id,true), count));
+        OnInventoryDataChanged?.Invoke();
     }
 
     public void Remove(InventoryItemData item, int count = 1)
@@ -68,6 +71,7 @@ public class InventoryData
                 if (currentItemStack.Amount <= 0)
                     _items.Remove(currentItemStack);
 
+                OnInventoryDataChanged?.Invoke();
                 return;
             }
         }
@@ -88,6 +92,7 @@ public class InventoryData
                 if (currentItemStack.Amount <= 0)
                     _items.Remove(currentItemStack);
 
+                OnInventoryDataChanged?.Invoke();
                 return;
             }
         }

@@ -1,6 +1,7 @@
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using UnityEngine;
 
 public class FileDataHandler
 {
@@ -37,8 +38,9 @@ public class FileDataHandler
             return gameData;
 
         }
-        catch 
+        catch (System.Exception e)
         {
+            Debug.LogError($"Error loading data from file: {fullPath} {e}");
             return null;
         }
     }

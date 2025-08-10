@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class UIPlayerResources : MonoBehaviour
 {
+    private const int EXP_PER_LEVEL_MULTIPLIER = 100;
+
     [SerializeField] private TextMeshProUGUI coinText;
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI expText;
@@ -15,42 +17,42 @@ public class UIPlayerResources : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.GameData.playerStats.OnResourceChange += OnResourceChange;
-        GameManager.Instance.GameData.playerStats.OnLevelChange += OnLevelChange;
-        GameManager.Instance.GameData.playerStats.OnExpChange += OnExpChange;
+        GameManager.Instance.GameData.PlayerStats.OnResourceChange += OnResourceChange;
+        GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChange;
+        GameManager.Instance.GameData.PlayerStats.OnExpChange += OnExpChange;
 
-        coinText.text = GameManager.Instance.GameData.playerStats.playerData.coins.ToString();
-        levelText.text = GameManager.Instance.GameData.playerStats.playerData.level.ToString();
-        expText.text = GameManager.Instance.GameData.playerStats.playerData.exp.ToString() + "/" + GameManager.Instance.GameData.playerStats.playerData.level * 100;
-        expSlider.value = (float)GameManager.Instance.GameData.playerStats.playerData.exp / (GameManager.Instance.GameData.playerStats.playerData.level * 100);
+        coinText.text = GameManager.Instance.GameData.PlayerStats.playerData.Coins.ToString();
+        levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
+        expText.text = GameManager.Instance.GameData.PlayerStats.playerData.Exp.ToString() + "/" + GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER;
+        expSlider.value = (float)GameManager.Instance.GameData.PlayerStats.playerData.Exp / (GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER);
 
     }
     private void OnDestroy()
     {
         if(GameManager.Instance == null || GameManager.Instance.GameData == null)
             return;
-        GameManager.Instance.GameData.playerStats.OnResourceChange -= OnResourceChange;
-        GameManager.Instance.GameData.playerStats.OnLevelChange -= OnLevelChange;
-        GameManager.Instance.GameData.playerStats.OnExpChange -= OnExpChange;
+        GameManager.Instance.GameData.PlayerStats.OnResourceChange -= OnResourceChange;
+        GameManager.Instance.GameData.PlayerStats.OnLevelChange -= OnLevelChange;
+        GameManager.Instance.GameData.PlayerStats.OnExpChange -= OnExpChange;
     }
     private void OnExpChange()
     {
         if (expText != null)
         {
-            expText.text = GameManager.Instance.GameData.playerStats.playerData.exp.ToString() + "/" + GameManager.Instance.GameData.playerStats.playerData.level * 100;
-            expSlider.value = (float)GameManager.Instance.GameData.playerStats.playerData.exp / (GameManager.Instance.GameData.playerStats.playerData.level * 100);
+            expText.text = GameManager.Instance.GameData.PlayerStats.playerData.Exp.ToString() + "/" + GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER;
+            expSlider.value = (float)GameManager.Instance.GameData.PlayerStats.playerData.Exp / (GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER);
         }
     }
 
     private void OnLevelChange()
     {        
         if (levelText != null)
-            levelText.text = GameManager.Instance.GameData.playerStats.playerData.level.ToString();
+            levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
     }  
 
     private void OnResourceChange()
     {
-        UpdateResources(GameManager.Instance.GameData.playerStats.playerData.coins);
+        UpdateResources(GameManager.Instance.GameData.PlayerStats.playerData.Coins);
     }
 
     public void UpdateResources(int coin)

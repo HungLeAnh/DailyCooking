@@ -12,10 +12,6 @@ public class BaseCounterController : IKitchenObjectParent, IObserver
     public BaseCounterView BaseCounterView { get => _baseCounterView; set => _baseCounterView = value; }
     public BaseCounterModel BaseCounterModel { get => _baseCounterModel; set => _baseCounterModel = value; }
 
-    public BaseCounterController()
-    {
-
-    }
     public BaseCounterController(BaseCounterView view,BaseCounterModel model)
     {
         _baseCounterView = view;
@@ -79,11 +75,9 @@ public class BaseCounterController : IKitchenObjectParent, IObserver
     }
     public virtual void Interact(PlayerStateMachine playerStateMachine)
     {
-        Debug.Log("BaseCounter.Interact();");
     }
     public virtual void ProcessKitchenObject(PlayerStateMachine playerStateMachine)
     {
-        Debug.Log("BaseCounter.ProcessKitchenObject();");
     }
 
     public void FireOnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)

@@ -10,7 +10,7 @@ public class StoveCounterView : BaseCounterView
     {
         return new StoveCounterController(this,new StoveCounterModel());
     }
-    internal override void UpdateView(object baseCounterModel)
+    public override void UpdateView(object baseCounterModel)
     {
         base.UpdateView(baseCounterModel);
 

@@ -10,14 +10,25 @@ public class SaveLoadManager : MonoBehaviour
         gameData = GameManager.Instance.GameData;
         dataHandler = GameManager.Instance.DataHandler;
 
-        gameData.playerStats.OnResourceChange += SaveGame;
-        gameData.playerStats.OnLevelChange += SaveGame;
+        gameData.PlayerStats.OnResourceChange += SaveGame;
+        gameData.PlayerStats.OnLevelChange += SaveGame;
+        gameData.PlayerStats.OnExpChange += SaveGame;
+        gameData.InventoryData.OnInventoryDataChanged += SaveGame;
+        gameData.GridData.OnGridDataChanged += SaveGame;
+        gameData.TutorialData.OnTutorialDataChanged += SaveGame;
     }
 
     private void OnDestroy()
     {
-        gameData.playerStats.OnResourceChange -= SaveGame;
-        gameData.playerStats.OnLevelChange -= SaveGame;
+        if (gameData != null && gameData.PlayerStats != null)
+        {
+            gameData.PlayerStats.OnResourceChange -= SaveGame;
+            gameData.PlayerStats.OnLevelChange -= SaveGame;
+            gameData.PlayerStats.OnExpChange -= SaveGame;
+            gameData.InventoryData.OnInventoryDataChanged -= SaveGame;
+            gameData.GridData.OnGridDataChanged -= SaveGame;
+            gameData.TutorialData.OnTutorialDataChanged -= SaveGame;
+        }
     }
 
     public void SaveGame()
@@ -25,3 +36,4 @@ public class SaveLoadManager : MonoBehaviour
         dataHandler.Save(gameData);
     }
 }
+

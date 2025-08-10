@@ -10,24 +10,29 @@ public class PlayerStats
 
     public PlayerData playerData = new PlayerData();
 
-    public void UpdatePlayerResources(int addCoins)
+    public void UpdatePlayerCoins(int addCoins)
     {
-        playerData.coins += addCoins;
+        playerData.Coins += addCoins;
         OnResourceChange?.Invoke();
     }
 
     public void UpdatePlayerExp(int addExp)
     {
-        playerData.exp += addExp;
-        if (playerData.exp >= playerData.level * 100)
+        playerData.Exp += addExp;
+        if (playerData.Exp >= playerData.Level * 100)
         {
-            playerData.exp = 0;
-            playerData.level++;
+            playerData.Exp = 0;
+            playerData.Level++;
             OnLevelChange?.Invoke();
-            OnLevelUp?.Invoke(playerData.level);
+            OnLevelUp?.Invoke(playerData.Level);
         }        
         OnExpChange?.Invoke();
-        GameManager.Instance.SaveGame();
+    }
+    public void UpdatePlayedDay(int playerDay)
+    {
+        playerData.DaysPlayed = playerDay;
+        OnResourceChange?.Invoke();
 
     }
 }
+

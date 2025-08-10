@@ -5,6 +5,12 @@ using UnityEngine;
 public class KitchenGameManager : MonoBehaviour
 {
     private const string PLAYER_DAY = "PlayerDay";
+    private const float COUNTDOWN_TO_START_TIMER_INITIAL = 3f;
+    private const float GAME_PLAYING_TIMER_MAX_INITIAL = 20f;
+    private const int PLAYER_EXP_MULTIPLIER = 10;
+    private const float TIME_SCALE_PAUSED = 0f;
+    private const float TIME_SCALE_UNPAUSED = 1f;
+
     public static KitchenGameManager Instance { get; private set; }
     
     public event EventHandler OnStateChanged;
@@ -31,9 +37,9 @@ public class KitchenGameManager : MonoBehaviour
     [SerializeField] private List<FryingRecipeSO> fryingRecipeSOList;
 
     private State state;
-    private float countdownToStartTimer = 3f;
+    private float countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
     private float gamePlayingTimer;
-    private float gamePlayingTimerMax = 20f;
+    private float gamePlayingTimerMax = GAME_PLAYING_TIMER_MAX_INITIAL;
     private bool isGamePaused = false;
     private long earnGoal;
     private long serveGoal;
@@ -56,7 +62,7 @@ public class KitchenGameManager : MonoBehaviour
         state = State.Editing;
 
 
-        playerDay = GameManager.Instance.GameData.playerStats.playerData.daysPlayed;
+        playerDay = GameManager.Instance.GameData.PlayerStats.playerData.DaysPlayed;
         CreateDailytask();
         kitchenManagerUI.SetActive(false);
     }
@@ -75,7 +81,7 @@ public class KitchenGameManager : MonoBehaviour
         GameManager.Instance.InitializePlayer();
         kitchenManagerUI.SetActive(true);
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup.ToString());
-        countdownToStartTimer = 3f;
+        countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
         DeliveryManager.Instance.Init();
     }
     public void EndGame()
@@ -98,10 +104,9 @@ public class KitchenGameManager : MonoBehaviour
             {
                 //Win game
 
-                GameManager.Instance.GameData.UpdatePlayedDay(playerDay);
-                GameManager.Instance.GameData.playerStats.UpdatePlayerResources((int)earnCount);
-                GameManager.Instance.GameData.playerStats.UpdatePlayerExp(playerDay*10);
-                GameManager.Instance.SaveGame();
+                GameManager.Instance.GameData.PlayerStats.UpdatePlayedDay(playerDay);
+                GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins((int)earnCount);
+                GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(playerDay * PLAYER_EXP_MULTIPLIER);
                 playerDay++;
             }
 
@@ -169,13 +174,13 @@ public class KitchenGameManager : MonoBehaviour
         isGamePaused = !isGamePaused;
         if (isGamePaused)
         {
-            Time.timeScale = 0f;
+            Time.timeScale = TIME_SCALE_PAUSED;
             OnGamePaused?.Invoke(this, EventArgs.Empty);
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIGamePausePopup.ToString());
         }
         else
         {
-            Time.timeScale = 1f;
+            Time.timeScale = TIME_SCALE_UNPAUSED;
             OnGameUnpaused?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -194,10 +199,7 @@ public class KitchenGameManager : MonoBehaviour
     }
     public bool IsTaskComplete()
     {
-        if (earnCount >= earnGoal && serveCount >= serveGoal)
-            return true;
-        else
-            return false;
+        return earnCount >= earnGoal && serveCount >= serveGoal;
     }
 
 }

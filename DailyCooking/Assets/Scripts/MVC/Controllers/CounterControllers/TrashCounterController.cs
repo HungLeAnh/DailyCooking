@@ -4,13 +4,14 @@ public class TrashCounterController : BaseCounterController
 {
     public static event EventHandler OnAnyObjectTrashed;
 
+    private TrashCounterView _trashCounterView;
 
     public TrashCounterController(TrashCounterView view,TrashCounterModel model) : base(view,model)
     {
-
+        _trashCounterView = view;
     }
 
-    public TrashCounterView TrashCounterView { get => (TrashCounterView)BaseCounterView;}
+    public TrashCounterView TrashCounterView { get => _trashCounterView;}
 
     public static void ResetStaticData()
     {

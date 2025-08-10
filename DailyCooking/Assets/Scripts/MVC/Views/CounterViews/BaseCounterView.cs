@@ -1,13 +1,9 @@
 ﻿using Observer;
 using System;
 using System.Collections.Generic;
-using Unity.Entities;
 using UnityEngine;
 
-public interface IContainerCounter
-{
-    public abstract KitchenObjectSO GetContainerKitchenObjectType();
-}
+
 [Serializable]
 public class BaseCounterView : MonoBehaviour, IContainerCounter
 {
@@ -18,7 +14,7 @@ public class BaseCounterView : MonoBehaviour, IContainerCounter
     [SerializeField] private Transform counterTopPoint;
     [SerializeField] private GameObject[] visualGameObjectArray;
 
-    public Transform CounterTopPoint { get => counterTopPoint; set => counterTopPoint = value; }
+    public Transform CounterTopPoint { get; private set; }
     public virtual object CreateControllerFromView()
     {
         return new BaseCounterController(this, new BaseCounterModel());
@@ -31,11 +27,6 @@ public class BaseCounterView : MonoBehaviour, IContainerCounter
     private void OnDestroy()
     {
         Hide();
-        CounterModules.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
-        KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
-    }
-    public void UnsubEvent()
-    {
         CounterModules.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
         KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
     }
@@ -81,17 +72,17 @@ public class BaseCounterView : MonoBehaviour, IContainerCounter
         }
     }
 
-    internal void FireInteractAlternateEvent(PlayerStateMachine playerStateMachine)
+    public void FireInteractAlternateEvent(PlayerStateMachine playerStateMachine)
     {
         OnInteractAlternate?.Invoke(this, playerStateMachine);
     }
 
-    internal void FireInteractEvent(PlayerStateMachine playerStateMachine)
+    public void FireInteractEvent(PlayerStateMachine playerStateMachine)
     {
         OnInteract?.Invoke(this, playerStateMachine);
     }
 
-    internal virtual void UpdateView(object baseCounterModel)
+    public virtual void UpdateView(object baseCounterModel)
     {
 
     }

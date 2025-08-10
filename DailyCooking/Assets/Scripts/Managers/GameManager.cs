@@ -14,7 +14,6 @@ public class GameManager : PersistentSingleton<GameManager>
     [Header("Settings")]
     [SerializeField] private string fileName = "GameData";
 
-    private List<IDataPersistence> dataPersistenceObjects = new List<IDataPersistence>();
     private GameObject playerGameObject;
     public FileDataHandler DataHandler => dataHandler;
 

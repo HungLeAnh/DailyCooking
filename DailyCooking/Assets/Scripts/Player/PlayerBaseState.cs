@@ -6,6 +6,9 @@ using UnityEngine.InputSystem.EnhancedTouch;
 
 public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerState>
 {
+    private const float MIN_DISTANCE_TO_TARGET = 0.05f;
+    private const float INTERACT_DISTANCE_MAX = 999f;
+
     protected PlayerStateContext Context;
     public PlayerBaseState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
@@ -45,14 +48,12 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
             Vector3 newDirection = Vector3.RotateTowards(Context.PlayerTransform.forward, targetDirection, step, 0.0f);
             Context.PlayerTransform.rotation = Quaternion.LookRotation(newDirection);
 
-            if (Vector3.Distance(Context.PlayerTransform.position, nextTarget) < 0.05f)
+            if (Vector3.Distance(Context.PlayerTransform.position, nextTarget) < MIN_DISTANCE_TO_TARGET)
             {
-                //Debug.Log($"Next waypoint {Context.WayPointIndex}:{Context.PathList[Context.WayPointIndex]}");
                 Context.WayPointIndex++;
                 if (Context.WayPointIndex >= Context.PathList.Count)
                 {
                     Context.IsWalking = false;
-                    //Debug.Log("Arrived");
                 }
             }
         }
@@ -94,10 +95,8 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         if (!Context.IsDisableInput && Context.IsWalking)
         {
             UpdatePlayerPosition();
-            //Debug.Log("Distance: "+ Vector2.Distance(Context.PlayerTransform.position, Context.EndPosition));
-            if (Vector3.Distance(Context.PlayerTransform.position, Context.EndPosition) > 0.05f)
+            if (Vector3.Distance(Context.PlayerTransform.position, Context.EndPosition) > MIN_DISTANCE_TO_TARGET)
                 return;
-            //Debug.Log("OnReachDestination");
             OnReachDestination();
 
         }
@@ -125,24 +124,21 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
             return;
 
         Context.IsTouching = true;
-        float interactDistance = 999f;
+        float interactDistance = INTERACT_DISTANCE_MAX;
         if (!Camera.main.pixelRect.Contains(finger.screenPosition))
             return;
         Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, Context.CounterLayerMask))
         {
-            //Debug.Log("Touch Position: " + pos);
             if (raycastHit.transform.TryGetComponent(out BaseCounterView baseCounter))
             {
                 if (baseCounter != Context.SelectedCounter)
                 {
-                    //Debug.LogError("Selected Counter: " + baseCounter.name);
                     SetSelectedCounter(baseCounter);
                     if (baseCounter.gameObject.TryGetComponent(out PlacedObjectView placedObjectView))
                     {
                         int2 counterOrigin = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
                         int2 playerPos = GridBuildingSystem.Instance.WorldPositionToGridPos(Context.PlayerTransform.position.x, Context.PlayerTransform.position.z);
-                        //Debug.Log("Counter Origin: " + counterOrigin);
                         Context.IsReachedDestination = false;
                         GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
 

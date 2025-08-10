@@ -45,7 +45,7 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
     {
         if(GameManager.Instance.GameState == GameState.InGame)
         {
-            if (!GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime)
+            if (!GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
             {
                 ShowFirstTimeTutorial();
             }
@@ -67,8 +67,7 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
         switch(panel.GetPanelType()){
             case TutorialType.FirstTimePlaying:
                 GridBuildingSystem.Instance.UnlockGrid();
-                GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime = true;
-                GameManager.Instance.SaveGame();
+                GameManager.Instance.GameData.TutorialData.SetHasPlayedFirstTime(true);
                 UIHUDManager.Instance.ShowAllUIElement();
                 break;
             case TutorialType.GameMechanic:

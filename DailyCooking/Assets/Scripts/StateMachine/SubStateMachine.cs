@@ -17,8 +17,7 @@ public class SubStateMachine<T> where T : Enum
     public void Start()
     {
         _currentSubState.EnterState();
-    }
-
+    }
     public void Update()
     {
         if (_currentSubState == null)
@@ -57,4 +56,5 @@ public class SubStateMachine<T> where T : Enum
         _currentSubState = null;
     }
 }
+
 

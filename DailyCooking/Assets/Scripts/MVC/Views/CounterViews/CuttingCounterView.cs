@@ -10,7 +10,7 @@ public class CuttingCounterView : BaseCounterView
     {
         return new CuttingCounterController(this,new CuttingCounterModel());
     }
-    internal override void UpdateView(object cuttingCounterModel)
+    public override void UpdateView(object cuttingCounterModel)
     {
         base.UpdateView(cuttingCounterModel);
         CuttingCounterModel model = (CuttingCounterModel)cuttingCounterModel;

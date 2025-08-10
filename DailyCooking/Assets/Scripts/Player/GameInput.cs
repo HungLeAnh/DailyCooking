@@ -11,6 +11,7 @@ using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch;
 public class GameInput : PersistentSingleton<GameInput>
 {
     private const string PLAYER_PREFS_BINDINGS = "InputBindings";
+    private const float INTERACT_DISTANCE_MAX = 999f;
     
     public event EventHandler<Finger> OnFingerDown;
     public event EventHandler<Finger> OnFingerMoved;
@@ -49,16 +50,12 @@ public class GameInput : PersistentSingleton<GameInput>
 
     private void OnDestroy()
     {
-        //playerAction?.Player.Disable();
-        //playerAction?.Dispose();
-        //EnhancedTouchSupport.Enable();
-        //EnhancedTouch.Touch.onFingerMove -= Touch_OnFingerMoved;
-        //EnhancedTouch.Touch.onFingerUp -= Touch_OnFingerUp;
-        //EnhancedTouch.Touch.onFingerDown -= Touch_OnFingerDown;
+        EnhancedTouch.Touch.onFingerDown -= Touch_OnFingerDown;
+        EnhancedTouch.Touch.onFingerMove -= Touch_OnFingerMoved;
+        EnhancedTouch.Touch.onFingerUp -= Touch_OnFingerUp;
 
-        //EnhancedTouchSupport.Disable();
-        //TouchSimulation.Disable();
-
+        EnhancedTouchSupport.Disable();
+        TouchSimulation.Disable();
     }
 
     private void Touch_OnFingerUp(Finger finger)
@@ -155,24 +152,22 @@ public class GameInput : PersistentSingleton<GameInput>
     public bool IsTouchOverBuildingGhost(Finger finger)
     {
         bool isTouchOverBuildingGhost = false;
-        if (finger != null)
+        
+        float interactDistance = INTERACT_DISTANCE_MAX;
+        Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayerMask))
         {
-            float interactDistance = 999f;
-            Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
-            if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayerMask))
+            //Debug.Log("Touch Position: " + pos);
+            if (raycastHit.transform.GetComponentInParent<BuildingGhost>() != null)
             {
-                //Debug.Log("Touch Position: " + pos);
-                if (raycastHit.transform.GetComponentInParent<BuildingGhost>() != null)
-                {
-                    isTouchOverBuildingGhost = true;
-                }
-                else
-                {
-                    isTouchOverBuildingGhost = false;
-                }
+                isTouchOverBuildingGhost = true;
             }
-
+            else
+            {
+                isTouchOverBuildingGhost = false;
+            }
         }
+
         return isTouchOverBuildingGhost || EventSystem.current.IsPointerOverGameObject();
     }
 }

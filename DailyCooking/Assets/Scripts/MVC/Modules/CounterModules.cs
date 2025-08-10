@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public class CounterModules : PersistentSingleton<CounterModules>
@@ -49,7 +48,6 @@ public class CounterModules : PersistentSingleton<CounterModules>
     private void RemoveCounterController(BaseCounterController controller)
     {
         baseCounterControllers.Remove(controller);
-        controller.BaseCounterView.UnsubEvent();
         controller.BaseCounterModel.Unsubscribe(Observer.EObserverEvent.ModelChange, controller);
     }
     public void FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs args)

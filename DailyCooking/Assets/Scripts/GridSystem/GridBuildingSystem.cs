@@ -12,8 +12,6 @@ using Unity.Mathematics;
 using System.Linq;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Newtonsoft.Json;
-using System.IO;
-using Unity.VisualScripting.Antlr3.Runtime.Collections;
 
 public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 {    
@@ -90,13 +88,13 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     private void Start()
     {
-        if (GameManager.Instance.GameData.gridData.GridArrayData == null)
+        if (GameManager.Instance.GameData.GridData.GridArrayData == null)
         {
             grid = new GridXZ<GridObject>(cellSize, Vector3.zero, (GridXZ<GridObject> grid, int x, int z) => new GridObject(grid, x, z));
         }
         else
         {
-            grid = new GridXZ<GridObject>(GameManager.Instance.GameData.gridData, (GridXZ<GridObject> grid, int x, int z) => new GridObject(grid, x, z));
+            grid = new GridXZ<GridObject>(GameManager.Instance.GameData.GridData, (GridXZ<GridObject> grid, int x, int z) => new GridObject(grid, x, z));
 
         }
         InitRoad();
@@ -292,16 +290,14 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     public void UnlockGrid()
     {
         grid.UnlockGrid(GameDefine.GridSize,GameDefine.GridSize);
-        GameManager.Instance.GameData.SaveGridData(grid);
         ResizePathNodeArray();
+        GameManager.Instance.GameData.UpdateGridData(grid);
         InitWallAndFloor();
         InitPillar();
-        if (!GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime)
+        if (!GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
         {
             InitDefaultCounters();
-            GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime = true;
-            GameManager.Instance.GameData.SaveGridData(grid);
-            GameManager.Instance.SaveGame();
+            GameManager.Instance.GameData.UpdateGridData(grid);
         }
     }
     public void ResizePathNodeArray()
@@ -336,9 +332,9 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         List<GridObjectData> gridObjectDataList = JsonConvert.DeserializeObject<List<GridObjectData>>(GameDefine.GridArrayDataInit,GameManager.Instance.DataHandler.Settings);
         foreach (GridObjectData gridObject in gridObjectDataList)
         {
-            if (GameManager.Instance.GameData.gridData.GridArrayData.Contains(gridObject))
+            if (GameManager.Instance.GameData.GridData.GridArrayData.Contains(gridObject))
                 continue;
-            GameManager.Instance.GameData.gridData.GridArrayData.Add(gridObject);
+            GameManager.Instance.GameData.GridData.GridArrayData.Add(gridObject);
         }
         grid.AddGridObjectData(gridObjectDataList);
     }
@@ -401,7 +397,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             }
             OnObjectPlaced?.Invoke(this, EventArgs.Empty);
             
-            GameManager.Instance.GameData.SaveGridData(grid);
+            GameManager.Instance.GameData.UpdateGridData(grid);
             GameManager.Instance.SaveGame();
             DeselectObjectType();
             return true;
@@ -482,9 +478,9 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         if(this.placedObjectTypeSO != null)
         {
-            GameManager.Instance.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);
-            GameManager.Instance.GameData.SaveGridData(grid);
-            GameManager.Instance.SaveGame();
+            GameManager.Instance.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);//??? should be using RemoveInventoryData?
+
+            GameManager.Instance.GameData.UpdateGridData(grid);
             OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
         }
         this.placedObjectTypeSO = placedObjectTypeSO;
@@ -588,7 +584,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
     public void SaveGrid()
     {
-        GameManager.Instance.GameData.SaveGridData(grid);
+        GameManager.Instance.GameData.UpdateGridData(grid);
         GameManager.Instance.SaveGame();
     }
 
