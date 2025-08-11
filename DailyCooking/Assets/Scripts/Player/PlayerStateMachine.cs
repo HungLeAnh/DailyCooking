@@ -51,9 +51,13 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         _stateManager = new StateManager<EPlayerState>();
         _stateFactory = new PlayerStateFactory();
         IntializeStates();
+        Context.PlayerGameInput.OnTouchPerformed += PlayerGameInput_OnFingerDown;
+        Context.PlayerGameInput.OnFingerUp += PlayerGameInput_OnFingerUp;
     }
     private void OnDestroy()
     {
+        Context.PlayerGameInput.OnTouchPerformed -= PlayerGameInput_OnFingerDown;
+        Context.PlayerGameInput.OnFingerUp -= PlayerGameInput_OnFingerUp;
         Context = null;
         _stateManager.Dispose();
     }
@@ -107,6 +111,97 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         List<int2> reversedPathList = new List<int2>(pathList); // Create a copy
         reversedPathList.Reverse();
         state.MoveTowardsTarget(reversedPathList);
+
+    }
+
+    private void PlayerGameInput_OnFingerUp(object sender, UnityEngine.InputSystem.EnhancedTouch.Finger e)
+    {
+        Context.IsTouching = false;
+
+    }
+
+    private void PlayerGameInput_OnFingerDown(object sender, UnityEngine.InputSystem.EnhancedTouch.Finger finger)
+    {
+        if (Context.IsTouching)
+            return;
+        if (!KitchenGameManager.Instance.IsGamePlaying())
+            return;
+        if (finger.currentTouch.delta.sqrMagnitude >= 0.1f)
+            return;
+
+        Context.IsTouching = true;
+        float interactDistance = 999f;
+        if (!Camera.main.pixelRect.Contains(finger.screenPosition))
+            return;
+        Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, Context.CounterLayerMask))
+        {
+            if (raycastHit.transform.TryGetComponent(out BaseCounterView baseCounter))
+            {
+                if (baseCounter != Context.SelectedCounter)
+                {
+                    SetSelectedCounter(baseCounter);
+                    if (baseCounter.gameObject.TryGetComponent(out PlacedObjectView placedObjectView))
+                    {
+                        Unity.Mathematics.int2 counterOrigin = new Unity.Mathematics.int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
+                        Unity.Mathematics.int2 playerPos = GridBuildingSystem.Instance.WorldPositionToGridPos(Context.PlayerTransform.position.x, Context.PlayerTransform.position.z);
+                        Context.IsReachedDestination = false;
+                        GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
+
+                    }
+                }
+                else if (baseCounter == Context.SelectedCounter)
+                {
+                    if (Context.SelectedCounter != null &&
+                        CounterModules.Instance.TryGetCounterController(Context.SelectedCounter,
+                                                out BaseCounterController baseCounterController))
+                    {
+                        IHasProgress progress = baseCounterController as IHasProgress;
+                        if (progress == null)
+                        {
+                            if (Context.IsReachedDestination)
+                            {
+                                SetSelectedCounter(baseCounter);
+                                Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
+                            }
+                        }
+                        else
+                        {
+
+                            if (progress.IsDone())
+                            {
+                                Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
+
+                            }
+                            else
+                            {
+
+                                Context.SelectedCounter.FireInteractAlternateEvent(PlayerStateMachine.Instance);
+                            }
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                SetSelectedCounter(null);
+            }
+        }
+        else
+        {
+            SetSelectedCounter(null);
+        }
+    }
+
+    private void SetSelectedCounter(BaseCounterView selectedCounter)
+    {
+        Context.SelectedCounter = selectedCounter;
+        CounterModules.Instance.FireOnSelectedCounterChanged(new CounterModules.OnSelectedCounterChangedEventArgs
+        {
+            selectedCounterView = selectedCounter != null ? selectedCounter : null
+
+        });
 
     }
 }

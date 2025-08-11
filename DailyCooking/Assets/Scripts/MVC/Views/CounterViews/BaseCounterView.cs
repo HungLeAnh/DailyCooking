@@ -14,7 +14,7 @@ public class BaseCounterView : MonoBehaviour, IContainerCounter
     [SerializeField] private Transform counterTopPoint;
     [SerializeField] private GameObject[] visualGameObjectArray;
 
-    public Transform CounterTopPoint { get; private set; }
+    public Transform CounterTopPoint => counterTopPoint;
     public virtual object CreateControllerFromView()
     {
         return new BaseCounterController(this, new BaseCounterModel());

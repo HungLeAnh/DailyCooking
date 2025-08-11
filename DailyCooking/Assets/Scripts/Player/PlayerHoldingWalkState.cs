@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -25,4 +25,14 @@ public class PlayerHoldingWalkState : PlayerBaseState
             return PlayerStateMachine.EPlayerState.Holding_Walking;
     }
 
+    public override void UpdateState()
+    {
+        if (!Context.IsDisableInput && Context.IsWalking)
+        {
+            UpdatePlayerPosition();
+            if (Vector3.Distance(Context.PlayerTransform.position, Context.EndPosition) > GameDefine.MIN_DISTANCE_TO_TARGET)
+                return;
+            OnReachDestination();
+        }
+    }
 }

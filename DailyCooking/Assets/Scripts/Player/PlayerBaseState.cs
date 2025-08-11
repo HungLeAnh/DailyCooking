@@ -6,9 +6,6 @@ using UnityEngine.InputSystem.EnhancedTouch;
 
 public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerState>
 {
-    private const float MIN_DISTANCE_TO_TARGET = 0.05f;
-    private const float INTERACT_DISTANCE_MAX = 999f;
-
     protected PlayerStateContext Context;
     public PlayerBaseState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
@@ -17,14 +14,10 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     public virtual void IntializeStates(PlayerStateContext context)
     {
         Context = context;
-        Context.PlayerGameInput.OnTouchPerformed += PlayerGameInput_OnFingerDown;
-        Context.PlayerGameInput.OnFingerUp += PlayerGameInput_OnFingerUp;
     }
 
     public override void Dispose()
     {
-        Context.PlayerGameInput.OnTouchPerformed -= PlayerGameInput_OnFingerDown;
-        Context.PlayerGameInput.OnFingerUp -= PlayerGameInput_OnFingerUp;
         Context = null;
     }
     public virtual void ChangeAnimationState(string animationName)
@@ -35,7 +28,12 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
 
         }
     }
-    public void UpdatePlayerPosition()
+    public override void UpdateState()
+    {
+        // Movement logic moved to specific walk states
+    }
+    
+    protected void UpdatePlayerPosition()
     {
         if (Context.IsWalking && Context.PathList.Count > 0)
         {
@@ -51,7 +49,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
             Vector3 newDirection = Vector3.RotateTowards(Context.PlayerTransform.forward, targetDirection, step, 0.0f);
             Context.PlayerTransform.rotation = Quaternion.LookRotation(newDirection);
 
-            if (Vector3.Distance(Context.PlayerTransform.position, nextTarget) < MIN_DISTANCE_TO_TARGET)
+            if (Vector3.Distance(Context.PlayerTransform.position, nextTarget) < GameDefine.MIN_DISTANCE_TO_TARGET)
             {
                 Context.WayPointIndex++;
                 if (Context.WayPointIndex >= Context.PathList.Count)
@@ -61,12 +59,12 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
             }
         }
     }
-    public void StopMove()
+    protected void StopMove()
     {
         Context.IsWalking = false;
     }
 
-    public void MoveTowardsTarget(int2 target, float speed = 0)
+    protected void MoveTowardsTarget(int2 target, float speed = 0)
     {
 
         Context.IsWalking = true;
@@ -93,19 +91,8 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         if (speed != 0)
             Context.MoveSpeed = speed;
     }
-    public override void UpdateState()
-    {
-        if (!Context.IsDisableInput && Context.IsWalking)
-        {
-            UpdatePlayerPosition();
-            if (Vector3.Distance(Context.PlayerTransform.position, Context.EndPosition) > MIN_DISTANCE_TO_TARGET)
-                return;
-            OnReachDestination();
-
-        }
-    }
     
-    private void OnReachDestination()
+    protected void OnReachDestination()
     {
         Context.IsReachedDestination = true;
         if (Context.SelectedCounter != null)
@@ -113,92 +100,4 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
             Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
         }
     }
-    private void PlayerGameInput_OnFingerUp(object sender, Finger e)
-    {
-        Context.IsTouching = false;
-    }
-    private void PlayerGameInput_OnFingerDown(object sender, Finger finger)
-    {
-        if (Context.IsTouching)
-            return;
-        if(!KitchenGameManager.Instance.IsGamePlaying())
-            return;
-        if (finger.currentTouch.delta.sqrMagnitude >= 0.1f)
-            return;
-
-        Context.IsTouching = true;
-        float interactDistance = INTERACT_DISTANCE_MAX;
-        if (!Camera.main.pixelRect.Contains(finger.screenPosition))
-            return;
-        Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
-        if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, Context.CounterLayerMask))
-        {
-            if (raycastHit.transform.TryGetComponent(out BaseCounterView baseCounter))
-            {
-                if (baseCounter != Context.SelectedCounter)
-                {
-                    SetSelectedCounter(baseCounter);
-                    if (baseCounter.gameObject.TryGetComponent(out PlacedObjectView placedObjectView))
-                    {
-                        int2 counterOrigin = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
-                        int2 playerPos = GridBuildingSystem.Instance.WorldPositionToGridPos(Context.PlayerTransform.position.x, Context.PlayerTransform.position.z);
-                        Context.IsReachedDestination = false;
-                        GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
-
-                    }
-                }
-                else if (baseCounter == Context.SelectedCounter)
-                {
-                    if (Context.SelectedCounter != null && 
-                        CounterModules.Instance.TryGetCounterController(Context.SelectedCounter,
-                                                out BaseCounterController baseCounterController))
-                    {
-                        IHasProgress progress = baseCounterController as IHasProgress;
-                        if (progress == null)
-                        {
-                            if (Context.IsReachedDestination)
-                            {
-                                SetSelectedCounter(baseCounter);
-                                Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
-                            }
-                        }
-                        else
-                        {
-
-                            if (progress.IsDone())
-                            {
-                                Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
-
-                            }
-                            else
-                            {
-
-                                Context.SelectedCounter.FireInteractAlternateEvent(PlayerStateMachine.Instance);
-                            }
-                        }
-                    }
-                }
-
-            }
-            else
-            {
-                SetSelectedCounter(null);
-            }
-        }
-        else
-        {
-            SetSelectedCounter(null);
-        }
-    }
-    private void SetSelectedCounter(BaseCounterView selectedCounter)
-    {
-        Context.SelectedCounter = selectedCounter;
-        CounterModules.Instance.FireOnSelectedCounterChanged(new CounterModules.OnSelectedCounterChangedEventArgs
-        {
-            selectedCounterView = selectedCounter != null ? selectedCounter : null
-
-        });
-
-    }
-
 }
