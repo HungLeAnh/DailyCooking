@@ -47,6 +47,7 @@ public class PlayerIdleState : PlayerBaseState
 
     public override void UpdateState()
     {
+        base.UpdateState();
         _subStateMachine.Update();
     }
 }

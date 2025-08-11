@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StateManager<T> : MonoBehaviour where T : Enum
+public class StateManager<T> where T : Enum
 {
     protected Dictionary<T, IState<T>> _states = new Dictionary<T, IState<T>>();
     protected IState<T> _currentState;

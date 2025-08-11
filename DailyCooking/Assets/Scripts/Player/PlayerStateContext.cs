@@ -24,7 +24,6 @@ public class PlayerStateContext
     private bool isReachedDestination;
     public PlayerStateContext(Animator animator, 
         float moveSpeed,
-        PlacedObjectView placedObjectView,
         Transform playerTransform, LayerMask counterLayerMask, Transform kitchenObjectHoldPoint)
     {
         _characterAnimator = animator;

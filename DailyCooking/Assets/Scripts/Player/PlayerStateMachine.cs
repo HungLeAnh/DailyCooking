@@ -11,10 +11,15 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
 
     public enum EPlayerState
     {
+        // Top-level states
         Idle, 
+        Holding,
+
+        // Sub-states for Idle
         Idle_Idle, 
         Idle_Walking,
-        Holding,
+
+        // Sub-states for Holding
         Holding_Idle,
         Holding_Walking,
     }
@@ -27,8 +32,6 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     private Transform kitchenObjectHoldPoint;
     [SerializeField] 
     private Animator _characterAnimator;
-    [SerializeField]
-    private PlacedObjectView placedObjectView;
 
     private StateManager<EPlayerState> _stateManager;
     private PlayerStateFactory _stateFactory;
@@ -36,10 +39,11 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     private void IntializeStates()
     {
         Context = new PlayerStateContext(_characterAnimator,moveSpeed,
-            placedObjectView,Instance.transform,countersLayerMask, Instance.kitchenObjectHoldPoint);
+            this.transform,countersLayerMask, this.kitchenObjectHoldPoint);
 
         var states = _stateFactory.CreateStates(this);
         _stateManager.SetStates(states, EPlayerState.Idle);
+        _stateManager.Start();
     }
     protected override void Awake()
     {
@@ -53,7 +57,10 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         Context = null;
         _stateManager.Dispose();
     }
-
+    private void Update()
+    {
+        _stateManager.Update();
+    }
 
     public Transform GetKitchenObjectFollowTransform()
     {
@@ -90,9 +97,16 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     }
     public void SetPlayerPath(List<int2> pathList)
     {
-        pathList.Reverse();
         var state = _stateManager.CurrentState as PlayerBaseState;
-        state.MoveTowardsTarget(pathList);
+        if (state == null)
+        {
+            Debug.LogError("Current state is not a PlayerBaseState. Cannot set player path.");
+            return;
+        }
+
+        List<int2> reversedPathList = new List<int2>(pathList); // Create a copy
+        reversedPathList.Reverse();
+        state.MoveTowardsTarget(reversedPathList);
 
     }
 }

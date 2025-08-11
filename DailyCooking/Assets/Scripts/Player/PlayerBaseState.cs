@@ -23,14 +23,17 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
 
     public override void Dispose()
     {
-        base.Dispose();
         Context.PlayerGameInput.OnTouchPerformed -= PlayerGameInput_OnFingerDown;
         Context.PlayerGameInput.OnFingerUp -= PlayerGameInput_OnFingerUp;
         Context = null;
     }
     public virtual void ChangeAnimationState(string animationName)
     {
-        Context.CharacterAnimator.CrossFade(animationName,0.1f,0,0.1f,0.1f);
+        if(Context != null)
+        {
+            Context.CharacterAnimator.CrossFade(animationName,0.1f,0,0.1f,0.1f);
+
+        }
     }
     public void UpdatePlayerPosition()
     {

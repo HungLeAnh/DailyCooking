@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlayerHoldingIdleState : PlayerHoldingState
+public class PlayerHoldingIdleState : PlayerBaseState
 {
     public PlayerHoldingIdleState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
@@ -29,5 +29,6 @@ public class PlayerHoldingIdleState : PlayerHoldingState
 
     public override void UpdateState()
     {
+        base.UpdateState();
     }
 }

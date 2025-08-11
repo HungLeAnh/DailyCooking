@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-public class PlayerHoldingWalkState : PlayerHoldingState
+public class PlayerHoldingWalkState : PlayerBaseState
 {
     public PlayerHoldingWalkState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
@@ -25,7 +25,4 @@ public class PlayerHoldingWalkState : PlayerHoldingState
             return PlayerStateMachine.EPlayerState.Holding_Walking;
     }
 
-    public override void UpdateState()
-    {
-    }
 }
