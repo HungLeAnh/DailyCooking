@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 [Serializable]
-public class BaseCounterView : MonoBehaviour, IContainerCounter
+public class BaseCounterView : MonoBehaviour, IInteractable
 {
     public Action OnUpdate;
     public event EventHandler<PlayerStateMachine> OnInteract;
@@ -87,8 +87,4 @@ public class BaseCounterView : MonoBehaviour, IContainerCounter
 
     }
 
-    public virtual KitchenObjectSO GetContainerKitchenObjectType()
-    {
-        return null;
-    }
 }

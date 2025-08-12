@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-public class ContainerCounterView : BaseCounterView
+public class ContainerCounterView : BaseCounterView, IContainerCounter
 {
     [SerializeField] private KitchenObjectSO kitchenObjectSO;
 
@@ -10,7 +10,7 @@ public class ContainerCounterView : BaseCounterView
     {
         return new ContainerCounterController(this,new ContainerCounterModel());
     }
-    public override KitchenObjectSO GetContainerKitchenObjectType()
+    public KitchenObjectSO GetContainerKitchenObjectType()
     {
         return kitchenObjectSO;
     }

@@ -55,7 +55,10 @@ public class DeliveryManager : SimpleSingleton<DeliveryManager>
 
     public void AddUnlockIngredient(BaseCounterController counterController)
     {
-        KitchenObjectSO kitchenObjectSO = counterController.BaseCounterView.GetContainerKitchenObjectType();
+        IContainerCounter containerCounter = counterController.BaseCounterView as IContainerCounter;
+        if(containerCounter == null) return;
+
+        KitchenObjectSO kitchenObjectSO = containerCounter.GetContainerKitchenObjectType();
         if (kitchenObjectSO != null)
         {
             if(!unlockIngredient.Contains(kitchenObjectSO))
