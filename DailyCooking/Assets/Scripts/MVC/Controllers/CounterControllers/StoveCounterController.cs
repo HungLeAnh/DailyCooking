@@ -7,6 +7,7 @@ public class StoveCounterController : BaseCounterController
     protected override void Awake()
     {
         base.Awake();
+        BaseCounterModel = new StoveCounterModel();
         Init();
     }
     
@@ -27,7 +28,6 @@ public class StoveCounterController : BaseCounterController
         var view = (StoveCounterView)BaseCounterView;
         view.CookingTool.CurrentState = CookingTool.State.Idle;
         view.CookingTool.OnStageChanged += CookingTool_OnStageChanged;
-        view.CookingTool.OnProgressChanged += StoveCounter_OnProgressChanged;
 
         var model = (StoveCounterModel)BaseCounterModel;
         model.AudioSource = view.AudioSource;
@@ -57,8 +57,8 @@ public class StoveCounterController : BaseCounterController
 
                     view.CookingTool.SetCookingRecipeSO();
 
-                    view.CookingTool.UpdateCookingState(CookingTool.State.Cooking, 0f);
-                    view.CookingTool.FireOnProgressChanged(view.CookingTool.CookingTimer / view.CookingTool.CookingTimeMax);
+                    view.CookingTool.UpdateCookingState(CookingTool.State.Cooking);
+
                 }
             }
             else
@@ -79,8 +79,7 @@ public class StoveCounterController : BaseCounterController
                     {
                         view.CookingTool.GetKitchenObject().DestroySelf();
 
-                        view.CookingTool.UpdateCookingState(CookingTool.State.Idle, 0f);
-                        view.CookingTool.FireOnProgressChanged(0f);
+                        view.CookingTool.UpdateCookingState(CookingTool.State.Idle);
                     }
                 }
             }
@@ -89,9 +88,7 @@ public class StoveCounterController : BaseCounterController
                 //Player is not carrying anything
                 view.CookingTool.GetKitchenObject().SetKitchenObjectParent(playerStateMachine);
 
-                view.CookingTool.UpdateCookingState(CookingTool.State.Idle, 0f);
-
-                view.CookingTool.FireOnProgressChanged(0f);
+                view.CookingTool.UpdateCookingState(CookingTool.State.Idle);
 
             }
         }
@@ -109,17 +106,14 @@ public class StoveCounterController : BaseCounterController
             model.AudioSource.Pause();
         }
     }
-
-    private void StoveCounter_OnProgressChanged(object sender, IHasProgress.OnProgressChangedEventArgs e)
+    public void PlayWarningSound()
     {
         var model = (StoveCounterModel)BaseCounterModel;
         var view = (StoveCounterView)BaseCounterView;
 
         float burnShowProgressAmount = .5f;
 
-        model.PlayWarningSound = view.CookingTool.IsDone() && e.progressNormalized >= burnShowProgressAmount;
+        model.PlayWarningSound = view.CookingTool.IsDone() && view.CookingTool.GetProgress() >= burnShowProgressAmount;
 
     }
-
-    
 }

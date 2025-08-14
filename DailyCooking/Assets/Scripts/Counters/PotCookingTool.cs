@@ -12,10 +12,6 @@ public class PotCookingTool : CookingTool,IHasOptionalSO
     private BurningRecipeSO _burningRecipeSO;
     private List<KitchenObjectSO> kitchenObjectSOList = new List<KitchenObjectSO>();
 
-    public override void UpdateCookingState(State state, float cookingtime = 0)
-    {
-        base.UpdateCookingState(state, cookingtime);
-    }
     public override bool HasRecipeWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
         CombineRecipeSO combineRecipeSO = GetCombineRecipesSOWithInput(inputKitchenObjectSO);

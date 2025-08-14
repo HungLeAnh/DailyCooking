@@ -6,10 +6,7 @@ using UnityEngine;
 
 public class BaseCounterView : MonoBehaviour
 {
-    
-    public event EventHandler<PlayerStateMachine> OnInteract;
-    public event EventHandler<PlayerStateMachine> OnInteractAlternate;
-    public event EventHandler<PlayerStateMachine> OnRestartGame;
+        public event EventHandler<PlayerStateMachine> OnRestartGame;
     [SerializeField] private Transform counterTopPoint;
     [SerializeField] private GameObject[] visualGameObjectArray;
 

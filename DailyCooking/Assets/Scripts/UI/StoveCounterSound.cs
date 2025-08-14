@@ -15,7 +15,6 @@ public class StoveCounterSound : MonoBehaviour
     private void Start()
     {
         stoveCounter.CookingTool.OnStageChanged += CookingTool_OnStageChanged;
-        stoveCounter.CookingTool.OnProgressChanged += StoveCounter_OnProgressChanged;
     }
 
     private void CookingTool_OnStageChanged(object sender, CookingTool.OnStageChangeEventArgs e)
@@ -29,16 +28,6 @@ public class StoveCounterSound : MonoBehaviour
         {
             audioSource.Pause();
         }
-    }
-
-    private void StoveCounter_OnProgressChanged(object sender, IHasProgress.OnProgressChangedEventArgs e)
-    {
-
-        float burnShowProgressAmount = .5f;
-
-        playWarningSound = stoveCounter.CookingTool.IsDone() && e.progressNormalized >= burnShowProgressAmount;
-
-
     }
 
     private void Update()

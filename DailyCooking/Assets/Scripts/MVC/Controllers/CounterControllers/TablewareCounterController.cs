@@ -3,6 +3,12 @@ using UnityEngine;
 using UnityEngine.PlayerLoop;
 public class TablewareCounterController : BaseCounterController
 {
+    protected override void Awake()
+    {
+        base.Awake();
+        BaseCounterModel = new TablewareCounterModel();
+    }
+
     private void Update()
     {
         var view = (TablewareCounterView)BaseCounterView;

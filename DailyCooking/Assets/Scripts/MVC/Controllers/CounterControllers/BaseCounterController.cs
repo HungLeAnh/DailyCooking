@@ -6,7 +6,7 @@ using UnityEngine;
 public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInteractable
 {
     [SerializeField] private BaseCounterView _baseCounterView;
-    [SerializeField] private BaseCounterModel _baseCounterModel;
+    private BaseCounterModel _baseCounterModel;
 
     public BaseCounterView BaseCounterView { get => _baseCounterView; set => _baseCounterView = value; }
     public BaseCounterModel BaseCounterModel { get => _baseCounterModel; set => _baseCounterModel = value; }
@@ -22,9 +22,6 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
         _baseCounterView.OnRestartGame += OnRestartGame;
 
     }
-
-
-
     protected virtual void OnRestartGame(object sender, PlayerStateMachine e)
     {
         if (_baseCounterModel.KitchenObject != null)
@@ -62,7 +59,7 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     {
         _baseCounterModel.KitchenObject = kitchenObject;
 
-        if (kitchenObject != null || kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
+        if (kitchenObject != null && kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
         {
             UIPopupManager.Instance.ShowPopup(
                 UIPopupType.UIOptionMenuPopup.ToString(),
