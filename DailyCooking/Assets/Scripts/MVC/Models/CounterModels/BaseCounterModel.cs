@@ -1,8 +1,7 @@
 ﻿using System;
-using Observer;
 
 [Serializable]
-public class BaseCounterModel : Observable
+public class BaseCounterModel
 {
     private KitchenObject _kitchenObject;
     public KitchenObject KitchenObject
@@ -11,7 +10,7 @@ public class BaseCounterModel : Observable
         set
         {
             _kitchenObject = value;
-            NotifySubscribers(EObserverEvent.ModelChange);
+            
         }
     }
 }

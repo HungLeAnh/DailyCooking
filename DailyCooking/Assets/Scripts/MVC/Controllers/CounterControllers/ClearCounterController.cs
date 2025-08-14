@@ -1,15 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-[Serializable]
 public class ClearCounterController : BaseCounterController
 {
-    public ClearCounterController(ClearCounterView view, ClearCounterModel model) : base(view,model)
-    {
-
-    }
-
-    public override void Interact(PlayerStateMachine playerStateMachine)
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         //Debug.Log("ClearCounter.Interact();");
 

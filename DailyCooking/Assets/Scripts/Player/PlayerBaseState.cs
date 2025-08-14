@@ -95,9 +95,9 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     protected void OnReachDestination()
     {
         Context.IsReachedDestination = true;
-        if (Context.SelectedCounter != null)
+        if (Context.SelectedCounterController != null)
         {
-            Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
+            Context.SelectedCounterController.InteractEvent(PlayerStateMachine.Instance);
         }
     }
 }

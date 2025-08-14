@@ -115,7 +115,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 919132149155446097, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
@@ -162,7 +162,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3798217560897031268, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
-      propertyPath: visualGameObjectArray.Array.data[0]
+      propertyPath: 'visualGameObjectArray.Array.data[0]'
       value: 
       objectReference: {fileID: 3123235296157627359}
     - target: {fileID: 5278761787930030305, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
@@ -258,6 +258,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4318572398297348773}
+    - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3214397304085762483}
   m_SourcePrefab: {fileID: 100100000, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
 --- !u!1 &2745458957846179637 stripped
 GameObject:
@@ -279,6 +282,19 @@ MonoBehaviour:
   counterTopPoint: {fileID: 8825809207230479060}
   visualGameObjectArray:
   - {fileID: 3123235296157627359}
+--- !u!114 &3214397304085762483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2745458957846179637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1883d17541ccdd94da9b422cc94b5a80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _baseCounterView: {fileID: 4318572398297348773}
 --- !u!4 &7487063772919328526 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5928228147787685814, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}

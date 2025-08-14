@@ -1,28 +1,11 @@
-﻿using Observer;
 using System;
-[Serializable]
+using System.Collections.Generic;
 public class CuttingCounterController : BaseCounterController, IHasProgress, IHasOptionalSO
 {
     public event EventHandler<IHasProgress.OnProgressChangedEventArgs> OnProgressChanged;
     public event EventHandler OnCut;
 
-
-
-    public CuttingCounterController(CuttingCounterView view, CuttingCounterModel model) : base(view,model)
-    {
-
-    }
-    protected override void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)
-    {
-        base.BaseCounterView_OnRestartGame(sender, e);
-
-        var model = (CuttingCounterModel)BaseCounterModel;
-        model.CuttingRecipeSO = null;
-        model.CuttingProgress = 0;
-        model.NotifySubscribers(EObserverEvent.ModelChange);
-
-    }
-    public override void Interact(PlayerStateMachine playerStateMachine)
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         var model = (CuttingCounterModel)BaseCounterModel;
         if (!HasKitchenObject())
@@ -40,12 +23,10 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                     {
                         //Show optional recipe menu
                         model.CuttingRecipeSO = null;
-                        model.NotifySubscribers(EObserverEvent.ModelChange);
                     }
                     else
                     {
                         model.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
-                        model.NotifySubscribers(EObserverEvent.ModelChange);
 
                         OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
                         {
@@ -84,7 +65,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
             }
         }
     }
-    public override void ProcessKitchenObject(PlayerStateMachine playerStateMachine)
+    public override void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
     {
         var model = (CuttingCounterModel)BaseCounterModel;
         if (HasKitchenObject() && HasRecipeWithInput(GetKitchenObject().GetKitchenObjectSO()))
@@ -102,8 +83,6 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                 progressNormalized = (float)model.CuttingProgress / model.CuttingRecipeSO.cuttingProgressMax
             });
 
-            model.NotifySubscribers(EObserverEvent.ModelChange);
-
             if (model.CuttingProgress >= model.CuttingRecipeSO.cuttingProgressMax)
             {
 
@@ -111,7 +90,6 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                 KitchenObject.SpawnKitchenObject(model.CuttingRecipeSO.output, this);
                 model.CuttingProgress = 0;
                 model.CuttingRecipeSO = null;
-                model.NotifySubscribers(EObserverEvent.ModelChange);
             }
         }
     }
@@ -171,7 +149,6 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
         {
             progressNormalized = (float)model.CuttingProgress / model.CuttingRecipeSO.cuttingProgressMax
         });
-        model.NotifySubscribers(EObserverEvent.ModelChange);
     }
 
     public bool IsDone()
@@ -193,5 +170,10 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     {
         var model = (CuttingCounterModel)BaseCounterModel;
         return model.CuttingProgress;
+    }
+
+    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
+    {
+        throw new NotImplementedException();
     }
 }

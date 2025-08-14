@@ -127,7 +127,7 @@ MonoBehaviour:
   failedSprite: {fileID: 21300000, guid: 0d6e1281049dccc4189bf308b2ccf331, type: 3}
 --- !u!95 &8300551614695354214
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -141,6 +141,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -281,15 +282,17 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -532,11 +535,11 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3798217560897031268, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
-      propertyPath: visualGameObjectArray.Array.data[0]
+      propertyPath: 'visualGameObjectArray.Array.data[0]'
       value: 
       objectReference: {fileID: 2907794202983226734}
     - target: {fileID: 3798217560897031268, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
-      propertyPath: visualGameObjectArray.Array.data[1]
+      propertyPath: 'visualGameObjectArray.Array.data[1]'
       value: 
       objectReference: {fileID: 7701291505566122785}
     - target: {fileID: 5278761787930030305, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
@@ -649,6 +652,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2532874433557822450}
+    - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8913670943834395952}
   m_SourcePrefab: {fileID: 100100000, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
 --- !u!1 &2014399910301516542 stripped
 GameObject:
@@ -671,6 +677,19 @@ MonoBehaviour:
   visualGameObjectArray:
   - {fileID: 2907794202983226734}
   - {fileID: 7701291505566122785}
+--- !u!114 &8913670943834395952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2014399910301516542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18944c3c5fd1d245a4a4ea5ba89f8b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _baseCounterView: {fileID: 2532874433557822450}
 --- !u!4 &4687833009781714322 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5278761787930030305, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
@@ -740,7 +759,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 919132149155446097, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
@@ -939,7 +958,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 919132149155446097, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}

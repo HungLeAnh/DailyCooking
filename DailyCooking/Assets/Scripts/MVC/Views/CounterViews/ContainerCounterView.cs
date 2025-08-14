@@ -6,10 +6,6 @@ public class ContainerCounterView : BaseCounterView, IContainerCounter
 
     public KitchenObjectSO KitchenObjectSO  => kitchenObjectSO;
 
-    public override object CreateControllerFromView()
-    {
-        return new ContainerCounterController(this,new ContainerCounterModel());
-    }
     public KitchenObjectSO GetContainerKitchenObjectType()
     {
         return kitchenObjectSO;

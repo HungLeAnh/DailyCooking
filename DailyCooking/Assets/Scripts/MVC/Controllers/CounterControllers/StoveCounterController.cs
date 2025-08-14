@@ -2,21 +2,17 @@
 using System;
 using UnityEngine;
 
-[Serializable]
 public class StoveCounterController : BaseCounterController
 {
-    public StoveCounterController(StoveCounterView view,StoveCounterModel model) : base(view,model)
+    protected override void Awake()
     {
+        base.Awake();
         Init();
     }
-    protected override void BaseCounterView_OnUpdate()
+    
+    protected override void OnRestartGame(object sender, PlayerStateMachine e)
     {
-        base.BaseCounterView_OnUpdate();
-        Update();
-    }
-    protected override void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)
-    {
-        base.BaseCounterView_OnRestartGame(sender, e);
+        base.OnRestartGame(sender, e);
 
         var view = (StoveCounterView)BaseCounterView;
 
@@ -24,7 +20,6 @@ public class StoveCounterController : BaseCounterController
             view.CookingTool.GetKitchenObject().DestroySelf();
 
         view.CookingTool.ClearKitchenObject();
-        BaseCounterModel.NotifySubscribers(EObserverEvent.ModelChange);
 
     }
     private void Init()
@@ -35,10 +30,10 @@ public class StoveCounterController : BaseCounterController
         view.CookingTool.OnProgressChanged += StoveCounter_OnProgressChanged;
 
         var model = (StoveCounterModel)BaseCounterModel;
-        model.AudioSource = view.GetComponent<AudioSource>();
+        model.AudioSource = view.AudioSource;
     }
 
-    public override void Interact(PlayerStateMachine playerStateMachine)
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         var view = (StoveCounterView)BaseCounterView;
 
@@ -126,21 +121,5 @@ public class StoveCounterController : BaseCounterController
 
     }
 
-    private void Update()
-    {
-        var model = (StoveCounterModel)BaseCounterModel;
-        var view = (StoveCounterView)BaseCounterView;
-
-        if (model.PlayWarningSound)
-        {
-            model.WarningSoundTimer -= Time.deltaTime;
-            if (model.WarningSoundTimer <= 0f)
-            {
-                float warningSoundTimerMax = .2f;
-                model.WarningSoundTimer = warningSoundTimerMax;
-                SoundManager.Instance.PlayWarningSound(view.transform.position);
-            }
-        }
-
-    }
+    
 }

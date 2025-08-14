@@ -1,5 +1,5 @@
 public interface IInteractable
 {
-    public void FireInteractEvent(PlayerStateMachine playerStateMachine);
-    public void FireInteractAlternateEvent(PlayerStateMachine playerStateMachine);
+    public void InteractEvent(PlayerStateMachine playerStateMachine);
+    public void InteractAlternateEvent(PlayerStateMachine playerStateMachine);
 }

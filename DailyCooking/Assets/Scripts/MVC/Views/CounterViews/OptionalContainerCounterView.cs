@@ -7,8 +7,4 @@ public class OptionalContainerCounterView : BaseCounterView
 
     public List<KitchenObjectSO> KitchenObjectSOList  => kitchenObjectSOList; 
 
-    public override object CreateControllerFromView()
-    {
-        return new OptionalContainerCounterController(this,new OptionalContainerCounterModel());
-    }
 }

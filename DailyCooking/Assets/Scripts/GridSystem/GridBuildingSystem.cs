@@ -389,7 +389,8 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             Vector3 placedObjectWorldPosition = grid.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
             PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
-
+            CounterModules.Instance.AddCounterController(placedObject.GetComponent<BaseCounterController>());
+            
             foreach (var gridPosition in gridPositionList)
             {
                 grid.GetGridObject(gridPosition.x, gridPosition.y).SetPlacedObject(placedObject);
@@ -398,7 +399,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             OnObjectPlaced?.Invoke(this, EventArgs.Empty);
             
             GameManager.Instance.GameData.UpdateGridData(grid);
-            GameManager.Instance.SaveGame();
             DeselectObjectType();
             return true;
         }

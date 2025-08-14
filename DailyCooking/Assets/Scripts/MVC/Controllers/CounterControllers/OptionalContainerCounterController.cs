@@ -2,24 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
 public class OptionalContainerCounterController : BaseCounterController, IHasOptionalSO
 {
     public event EventHandler OnPlayreGrabbedObject;
 
     private PlayerStateMachine _playerStateMachine;
-    public OptionalContainerCounterController(OptionalContainerCounterView view,OptionalContainerCounterModel model) 
-        : base(view,model)
-    {
 
-    }
 
-    public override void Interact(PlayerStateMachine playerStateMachine)
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         var view = (OptionalContainerCounterView)BaseCounterView;
         Debug.Log("Interact optional Counter");
         _playerStateMachine = playerStateMachine;
-        FireOnShowOptionMenu(view.KitchenObjectSOList);
+        OnShowOptionMenu(view.KitchenObjectSOList);
     }
 
     public void SetOptionKitchenObjectSO(int index)
@@ -46,4 +41,16 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
         }
         _playerStateMachine = null;
     }
+    public  void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
+    {
+        UIPopupManager.Instance.ShowPopup(
+            UIPopupType.UIOptionMenuPopup.ToString(),
+            new UIOptionMenuPopup.Param
+            {
+                sender = this,
+                optionalList = kitchenObjectSOList
+            }
+        );
+    }
+
 }

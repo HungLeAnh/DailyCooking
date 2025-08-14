@@ -1,66 +1,39 @@
-﻿using Observer;
+﻿
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public class BaseCounterController : IKitchenObjectParent, IObserver
+public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInteractable
 {
-    private BaseCounterView _baseCounterView;
-    private BaseCounterModel _baseCounterModel;
+    [SerializeField] private BaseCounterView _baseCounterView;
+    [SerializeField] private BaseCounterModel _baseCounterModel;
 
     public BaseCounterView BaseCounterView { get => _baseCounterView; set => _baseCounterView = value; }
     public BaseCounterModel BaseCounterModel { get => _baseCounterModel; set => _baseCounterModel = value; }
 
-    public BaseCounterController(BaseCounterView view,BaseCounterModel model)
+    protected virtual void Awake()
     {
-        _baseCounterView = view;
-        BaseCounterModel = model;
-
-        ConnectModel();
         ConnectView();
-    }
-    public virtual void ConnectModel()
-    {
-        BaseCounterModel.Subscribe(EObserverEvent.ModelChange, this);
+        _baseCounterModel = new BaseCounterModel();
     }
 
     public virtual void ConnectView()
     {
-        _baseCounterView.OnInteract += BaseCounterView_OnInteract;
-        _baseCounterView.OnInteractAlternate += BaseCounterView_OnProcessKitchenObject;
-        _baseCounterView.OnRestartGame += BaseCounterView_OnRestartGame;
-        _baseCounterView.OnUpdate += BaseCounterView_OnUpdate;
-    }
-    
-    protected virtual void BaseCounterView_OnUpdate()
-    {
+        _baseCounterView.OnRestartGame += OnRestartGame;
 
     }
 
-    protected virtual void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)
+
+
+    protected virtual void OnRestartGame(object sender, PlayerStateMachine e)
     {
-        if(BaseCounterModel.KitchenObject != null)
-            BaseCounterModel.KitchenObject.DestroySelf();
+        if (_baseCounterModel.KitchenObject != null)
+            _baseCounterModel.KitchenObject.DestroySelf();
 
         ClearKitchenObject();
-        BaseCounterModel.NotifySubscribers(EObserverEvent.ModelChange);
+
     }
 
-    private void BaseCounterView_OnProcessKitchenObject(object sender, PlayerStateMachine e)
-    {
-        ProcessKitchenObject(e);
-    }
-
-    private void BaseCounterView_OnInteract(object sender, PlayerStateMachine e)
-    {
-        Interact(e);
-    }
-
-    public void OnNotify()
-    {
-        _baseCounterView.UpdateView(BaseCounterModel);
-    }
     public KitchenObject GetKitchenObject()
     {
         return BaseCounterModel.KitchenObject;
@@ -73,50 +46,33 @@ public class BaseCounterController : IKitchenObjectParent, IObserver
     {
         return BaseCounterModel.KitchenObject != null;
     }
-    public virtual void Interact(PlayerStateMachine playerStateMachine)
-    {
-    }
-    public virtual void ProcessKitchenObject(PlayerStateMachine playerStateMachine)
+    public virtual void InteractEvent(PlayerStateMachine playerStateMachine)
     {
     }
 
-    public void FireOnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
+    public virtual void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
     {
-        UIPopupManager.Instance.ShowPopup(
-                    UIPopupType.UIOptionMenuPopup.ToString(),
-                    new UIOptionMenuPopup.Param
-                    {
-                        sender = this,
-                        optionalList = kitchenObjectSOList
-                    }
-                );
     }
-
+   
     public Transform GetKitchenObjectFollowTransform()
     {
         return _baseCounterView.CounterTopPoint;
     }
     public void SetKitchenObject(KitchenObject kitchenObject)
     {
-        BaseCounterModel.KitchenObject = kitchenObject;
-        BaseCounterModel.NotifySubscribers(EObserverEvent.ModelChange);
-        if (kitchenObject != null)
-        {
-            if (kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
-            {
-                UIPopupManager.Instance.ShowPopup(
-                    UIPopupType.UIOptionMenuPopup.ToString(),
-                    new UIOptionMenuPopup.Param
-                    {
-                        sender = this,
-                        objectSO = kitchenObject.GetKitchenObjectSO(),
-                    }
-                );
-            }
-            else
-            {
+        _baseCounterModel.KitchenObject = kitchenObject;
 
-            }
+        if (kitchenObject != null || kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
+        {
+            UIPopupManager.Instance.ShowPopup(
+                UIPopupType.UIOptionMenuPopup.ToString(),
+                new UIOptionMenuPopup.Param
+                {
+                    sender = this,
+                    objectSO = kitchenObject.GetKitchenObjectSO(),
+                }
+            );
         }
     }
+
 }

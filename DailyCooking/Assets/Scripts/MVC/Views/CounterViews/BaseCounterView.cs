@@ -4,10 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-[Serializable]
-public class BaseCounterView : MonoBehaviour, IInteractable
+public class BaseCounterView : MonoBehaviour
 {
-    public Action OnUpdate;
+    
     public event EventHandler<PlayerStateMachine> OnInteract;
     public event EventHandler<PlayerStateMachine> OnInteractAlternate;
     public event EventHandler<PlayerStateMachine> OnRestartGame;
@@ -15,9 +14,9 @@ public class BaseCounterView : MonoBehaviour, IInteractable
     [SerializeField] private GameObject[] visualGameObjectArray;
 
     public Transform CounterTopPoint => counterTopPoint;
-    public virtual object CreateControllerFromView()
+    public T GetController<T>() where T : BaseCounterController
     {
-        return new BaseCounterController(this, new BaseCounterModel());
+        return GetComponent<T>();
     }
     private void Start()
     {
@@ -30,11 +29,7 @@ public class BaseCounterView : MonoBehaviour, IInteractable
         CounterModules.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
         KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
     }
-    private void Update()
-    {
-        OnUpdate?.Invoke();
-    }
-    
+
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
         if (KitchenGameManager.Instance.IsGameOver()||
@@ -47,7 +42,7 @@ public class BaseCounterView : MonoBehaviour, IInteractable
 
     private void Player_OnSelectedCounterChanged(object sender, CounterModules.OnSelectedCounterChangedEventArgs e)
     {
-        if (e.selectedCounterView == this)
+        if (e.selectedCounterController.BaseCounterView == this)
         {
             Show();
         }
@@ -70,21 +65,6 @@ public class BaseCounterView : MonoBehaviour, IInteractable
         {
             visualGameObject.SetActive(false);
         }
-    }
-
-    public void FireInteractAlternateEvent(PlayerStateMachine playerStateMachine)
-    {
-        OnInteractAlternate?.Invoke(this, playerStateMachine);
-    }
-
-    public void FireInteractEvent(PlayerStateMachine playerStateMachine)
-    {
-        OnInteract?.Invoke(this, playerStateMachine);
-    }
-
-    public virtual void UpdateView(object baseCounterModel)
-    {
-
-    }
+    }   
 
 }

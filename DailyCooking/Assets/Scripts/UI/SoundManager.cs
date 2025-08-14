@@ -35,7 +35,7 @@ public class SoundManager : PersistentSingleton<SoundManager>
     private void TrashCounter_OnAnyObjectTrashed(object sender, System.EventArgs e)
     {
         TrashCounterController trashCounter = sender as TrashCounterController;
-        PlaySound(AudioClipRefsSO.objectDrop, trashCounter.TrashCounterView.transform.position);
+        PlaySound(AudioClipRefsSO.objectDrop, trashCounter.BaseCounterView.transform.position);
     }
 
     private void BaseCounter_OnAnyObjectPlacedHere(object sender, KitchenObjectSO e)

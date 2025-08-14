@@ -69,11 +69,11 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 23a2e74b3d5b55541a4ad924dc9a6bd4, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: -7511558181221131132, guid: 23a2e74b3d5b55541a4ad924dc9a6bd4, type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 919132149155446097, guid: 23a2e74b3d5b55541a4ad924dc9a6bd4, type: 3}
@@ -148,7 +148,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 793024427a3e73245b0cc989a2bed3ea, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 919132149155446097, guid: 793024427a3e73245b0cc989a2bed3ea, type: 3}
@@ -191,11 +191,11 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3798217560897031268, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
-      propertyPath: visualGameObjectArray.Array.data[0]
+      propertyPath: 'visualGameObjectArray.Array.data[0]'
       value: 
       objectReference: {fileID: 822681558580453437}
     - target: {fileID: 3798217560897031268, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
-      propertyPath: visualGameObjectArray.Array.data[1]
+      propertyPath: 'visualGameObjectArray.Array.data[1]'
       value: 
       objectReference: {fileID: 1704534021329119347}
     - target: {fileID: 5278761787930030305, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
@@ -275,6 +275,9 @@ PrefabInstance:
       addedObject: {fileID: 5497824712826023381}
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 5120340976702731949}
+    - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 5094793971710397197}
   m_SourcePrefab: {fileID: 100100000, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
 --- !u!4 &886707663028080637 stripped
@@ -313,6 +316,20 @@ MonoBehaviour:
   visualGameObjectArray:
   - {fileID: 822681558580453437}
   _cookingTool: {fileID: 447210626167731086}
+  _audioSource: {fileID: 5094793971710397197}
+--- !u!114 &5120340976702731949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5777116932338227740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dab21b58a88eee34aadf8efb8bb1df78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _baseCounterView: {fileID: 5497824712826023381}
 --- !u!82 &5094793971710397197
 AudioSource:
   m_ObjectHideFlags: 0
@@ -324,6 +341,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 511c1cbfb8b48b64083aec78fe17115f, type: 3}
+  m_Resource: {fileID: 8300000, guid: 511c1cbfb8b48b64083aec78fe17115f, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1

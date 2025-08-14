@@ -2,17 +2,11 @@
 using System.Drawing.Text;
 using UnityEngine;
 
-[Serializable]
 public class ContainerCounterController : BaseCounterController
 {
     public event EventHandler OnPlayreGrabbedObject;
 
-    public ContainerCounterController(ContainerCounterView view, ContainerCounterModel model) : base(view,model)
-    {
-
-    }
-
-    public override void Interact(PlayerStateMachine playerStateMachine)
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         var view = (ContainerCounterView)BaseCounterView;
         if (!playerStateMachine.HasKitchenObject())

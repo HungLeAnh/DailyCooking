@@ -177,11 +177,11 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: -7511558181221131132, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 919132149155446097, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
@@ -260,11 +260,11 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: ecc3a1ddf5bdf454981a0c404b5ebb68, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: -7511558181221131132, guid: ecc3a1ddf5bdf454981a0c404b5ebb68, type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 919132149155446097, guid: ecc3a1ddf5bdf454981a0c404b5ebb68, type: 3}
@@ -311,11 +311,11 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3798217560897031268, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
-      propertyPath: visualGameObjectArray.Array.data[0]
+      propertyPath: 'visualGameObjectArray.Array.data[0]'
       value: 
       objectReference: {fileID: 5814564096301845110}
     - target: {fileID: 3798217560897031268, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
-      propertyPath: visualGameObjectArray.Array.data[1]
+      propertyPath: 'visualGameObjectArray.Array.data[1]'
       value: 
       objectReference: {fileID: 5885395211066086123}
     - target: {fileID: 5278761787930030305, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
@@ -377,6 +377,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4613707733294792051}
+    - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6050601189291074793}
     - targetCorrespondingSourceObject: {fileID: 2396028362469192550, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6114863099887917622}
@@ -442,3 +445,16 @@ MonoBehaviour:
   _tablewareKitchenObjectSO: {fileID: 11400000, guid: e4578b73d42e3f540bcf852eb01b658a, type: 2}
   _spawnTimerMax: 4
   _tablewareSpawnAmountMax: 4
+--- !u!114 &6050601189291074793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8335752877465535745}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ef6d8bf60f15aa4bb11b3d97bd7fd53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _baseCounterView: {fileID: 4613707733294792051}

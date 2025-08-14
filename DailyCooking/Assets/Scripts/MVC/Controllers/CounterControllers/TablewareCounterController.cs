@@ -1,17 +1,8 @@
 ﻿using System;
 using UnityEngine;
-[Serializable]
+using UnityEngine.PlayerLoop;
 public class TablewareCounterController : BaseCounterController
 {
-    public TablewareCounterController(TablewareCounterView view,TablewareCounterModel model) : base(view,model)
-    {
-
-    }
-    protected override void BaseCounterView_OnUpdate()
-    {
-        base.BaseCounterView_OnUpdate();
-        Update();
-    }
     private void Update()
     {
         var view = (TablewareCounterView)BaseCounterView;
@@ -27,7 +18,7 @@ public class TablewareCounterController : BaseCounterController
             }
         }
     }
-    public override void Interact(PlayerStateMachine playerStateMachine)
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         var view = (TablewareCounterView)BaseCounterView;
         var model = (TablewareCounterModel)BaseCounterModel;

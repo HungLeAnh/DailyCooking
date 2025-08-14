@@ -14,7 +14,7 @@ public class PlayerStateContext
     private GameInput _gameInput;
     private Transform _playerTransform;
     private LayerMask _counterLayermask;
-    private BaseCounterView _selectedCounter;
+    private BaseCounterController _selectedCounterController;
     private KitchenObject _kitchenObject;
     private Transform _kitchenObjectHoldPoint;
     private Vector3 endPosition;
@@ -48,7 +48,7 @@ public class PlayerStateContext
     public bool IsDisableInput { get => _idDisableInput; set => _idDisableInput = value; }
     public bool IsWalking { get => _isWalking; set => _isWalking = value; }
     public Vector3 LastInteractDir { get => _lastInteractDir; set => _lastInteractDir = value; }
-    public BaseCounterView SelectedCounter { get => _selectedCounter; set => _selectedCounter = value; }
+    public BaseCounterController SelectedCounterController { get => _selectedCounterController; set => _selectedCounterController = value; }
     public KitchenObject KitchenObject { get => _kitchenObject; set => _kitchenObject = value; }
     public Vector3 EndPosition { get => endPosition; set => endPosition = value; }
     public List<int2> PathList { get => _pathList; set => _pathList = value; }

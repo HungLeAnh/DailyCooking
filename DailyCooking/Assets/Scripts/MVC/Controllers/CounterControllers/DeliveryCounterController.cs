@@ -1,6 +1,5 @@
 ﻿using System;
 
-[Serializable]
 public class DeliveryCounterController : BaseCounterController
 {
     public static DeliveryCounterController Instance { get; private set; }
@@ -9,12 +8,13 @@ public class DeliveryCounterController : BaseCounterController
     {
         Instance = this;
     }
-    public DeliveryCounterController(DeliveryCounterView view,DeliveryCounterModel model) : base(view,model)
+    protected override void Awake()
     {
+        base.Awake();
         Init();
     }
 
-    public override void Interact(PlayerStateMachine playerStateMachine)
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         if (playerStateMachine.HasKitchenObject())
         {

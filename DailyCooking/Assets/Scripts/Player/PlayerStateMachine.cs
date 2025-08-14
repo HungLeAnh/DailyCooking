@@ -136,9 +136,9 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, Context.CounterLayerMask))
         {
-            if (raycastHit.transform.TryGetComponent(out BaseCounterView baseCounter))
+            if (raycastHit.transform.TryGetComponent(out BaseCounterController baseCounter))
             {
-                if (baseCounter != Context.SelectedCounter)
+                if (baseCounter != Context.SelectedCounterController)
                 {
                     SetSelectedCounter(baseCounter);
                     if (baseCounter.gameObject.TryGetComponent(out PlacedObjectView placedObjectView))
@@ -150,19 +150,18 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
 
                     }
                 }
-                else if (baseCounter == Context.SelectedCounter)
+                else if (baseCounter == Context.SelectedCounterController)
                 {
-                    if (Context.SelectedCounter != null &&
-                        CounterModules.Instance.TryGetCounterController(Context.SelectedCounter,
-                                                out BaseCounterController baseCounterController))
+                    if (Context.SelectedCounterController != null &&
+                        CounterModules.Instance.IsContainerCounter(Context.SelectedCounterController))
                     {
-                        IHasProgress progress = baseCounterController as IHasProgress;
+                        IHasProgress progress = Context.SelectedCounterController as IHasProgress;
                         if (progress == null)
                         {
                             if (Context.IsReachedDestination)
                             {
                                 SetSelectedCounter(baseCounter);
-                                Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
+                                Context.SelectedCounterController.InteractEvent(PlayerStateMachine.Instance);
                             }
                         }
                         else
@@ -170,13 +169,13 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
 
                             if (progress.IsDone())
                             {
-                                Context.SelectedCounter.FireInteractEvent(PlayerStateMachine.Instance);
+                                Context.SelectedCounterController.InteractEvent(PlayerStateMachine.Instance);
 
                             }
                             else
                             {
 
-                                Context.SelectedCounter.FireInteractAlternateEvent(PlayerStateMachine.Instance);
+                                Context.SelectedCounterController.InteractAlternateEvent(PlayerStateMachine.Instance);
                             }
                         }
                     }
@@ -194,12 +193,12 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         }
     }
 
-    private void SetSelectedCounter(BaseCounterView selectedCounter)
+    private void SetSelectedCounter(BaseCounterController selectedCounter)
     {
-        Context.SelectedCounter = selectedCounter;
+        Context.SelectedCounterController = selectedCounter;
         CounterModules.Instance.FireOnSelectedCounterChanged(new CounterModules.OnSelectedCounterChangedEventArgs
         {
-            selectedCounterView = selectedCounter != null ? selectedCounter : null
+            selectedCounterController = selectedCounter != null ? selectedCounter : null
 
         });
 

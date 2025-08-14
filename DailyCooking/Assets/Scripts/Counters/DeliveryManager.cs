@@ -46,16 +46,17 @@ public class DeliveryManager : SimpleSingleton<DeliveryManager>
         unlockIngredient.Clear();
         foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
         {
-            if(counterController.BaseCounterView == null)
+            BaseCounterView counterView = counterController.GetComponent<BaseCounterView>();
+            if(counterView == null)
                 continue;
-            AddUnlockIngredient(counterController);
+            AddUnlockIngredient(counterController, counterView);
         }
 
     }
 
-    public void AddUnlockIngredient(BaseCounterController counterController)
+    public void AddUnlockIngredient(BaseCounterController counterController, BaseCounterView counterView)
     {
-        IContainerCounter containerCounter = counterController.BaseCounterView as IContainerCounter;
+        IContainerCounter containerCounter = counterView as IContainerCounter;
         if(containerCounter == null) return;
 
         KitchenObjectSO kitchenObjectSO = containerCounter.GetContainerKitchenObjectType();

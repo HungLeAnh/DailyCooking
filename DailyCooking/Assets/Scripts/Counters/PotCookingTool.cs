@@ -93,4 +93,9 @@ public class PotCookingTool : CookingTool,IHasOptionalSO
         }
         return kitchenObjectSOs;
     }
+
+    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
+    {
+        throw new NotImplementedException();
+    }
 }

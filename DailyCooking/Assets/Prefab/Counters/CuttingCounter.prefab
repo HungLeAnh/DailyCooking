@@ -53,11 +53,11 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 576c6698a57d42040af8112020f3289d, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: -7511558181221131132, guid: 576c6698a57d42040af8112020f3289d, type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 919132149155446097, guid: 576c6698a57d42040af8112020f3289d, type: 3}
@@ -104,7 +104,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3798217560897031268, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
-      propertyPath: visualGameObjectArray.Array.data[0]
+      propertyPath: 'visualGameObjectArray.Array.data[0]'
       value: 
       objectReference: {fileID: 3819329314662397923}
     - target: {fileID: 5278761787930030305, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
@@ -207,6 +207,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6158020882091036308}
+    - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5483194497773665733}
   m_SourcePrefab: {fileID: 100100000, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
 --- !u!4 &780917685626107248 stripped
 Transform:
@@ -257,6 +260,19 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8fb39336a1ea95c41a1b18b41daf020e, type: 2}
   - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
   progressBarUI: {fileID: 588416869854212033}
+--- !u!114 &5483194497773665733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5777116932338227740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b18b45e73a099b4fb572b1d2a20ebc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _baseCounterView: {fileID: 6158020882091036308}
 --- !u!1001 &5109503152327724974
 PrefabInstance:
   m_ObjectHideFlags: 0
