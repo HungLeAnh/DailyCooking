@@ -1,7 +1,4 @@
-﻿using System;
-using UnityEngine;
-
-public class ClearCounterController : BaseCounterController
+﻿public class ClearCounterController : BaseCounterController
 {
     protected override void Awake()
     {
@@ -13,18 +10,11 @@ public class ClearCounterController : BaseCounterController
     {
         //Debug.Log("ClearCounter.Interact();");
 
-        if (!HasKitchenObject())
+        if (!HasKitchenObject() && playerStateMachine.HasKitchenObject())
         {
-            //There is no kitchen object
-            if (playerStateMachine.HasKitchenObject())
-            {
-                //Player is carrying something
-                playerStateMachine.GetKitchenObject().SetKitchenObjectParent(this);
-            }
-            else
-            {
-                //Player is not carrying anything
-            }
+            //Place object player carrying on the counter
+            playerStateMachine.GetKitchenObject().SetKitchenObjectParent(this);
+            
         }
         else
         {

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Drawing.Text;
-using UnityEngine;
 
 public class ContainerCounterController : BaseCounterController
 {
@@ -10,8 +8,6 @@ public class ContainerCounterController : BaseCounterController
         BaseCounterModel = new BaseCounterModel();
     }
 
-    public event EventHandler OnPlayreGrabbedObject;
-
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         var view = (ContainerCounterView)BaseCounterView;
@@ -19,9 +15,6 @@ public class ContainerCounterController : BaseCounterController
         {
             //Player is not carrying anything
             KitchenObject.SpawnKitchenObject(view.KitchenObjectSO, playerStateMachine);
-
-
-            OnPlayreGrabbedObject?.Invoke(this, EventArgs.Empty);
         }
         else
         {
