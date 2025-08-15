@@ -416,9 +416,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
       insertIndex: -1
       addedObject: {fileID: 925864812902392102}
-    - targetCorrespondingSourceObject: {fileID: 2396028362469192550, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6114863099887917622}
   m_SourcePrefab: {fileID: 100100000, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
 --- !u!4 &3444354065172779232 stripped
 Transform:
@@ -435,28 +432,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6913807303263569228, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
   m_PrefabInstance: {fileID: 6923571607344896652}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &4707687300844841450 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2396028362469192550, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
-  m_PrefabInstance: {fileID: 6923571607344896652}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6114863099887917622
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4707687300844841450}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a55dd74f98d5b8647863fc23f521fad9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _tablewareView: {fileID: 0}
-  _tablewareVisualPrefab: {fileID: 6154266614422445402, guid: e2ea2de7418dabb40816017224610779, type: 3}
-  tablewareOffsetX: 0.1
-  tablewareOffsetY: 0.5
-  tablewareRotation: {x: 0, y: 0, z: 90}
 --- !u!1 &8335752877465535745 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1422007882026835853, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
@@ -481,6 +456,10 @@ MonoBehaviour:
   _tablewareKitchenObjectSO: {fileID: 11400000, guid: 3f9a28b714814864a8748e005522c083, type: 2}
   _spawnTimerMax: 4
   _tablewareSpawnAmountMax: 4
+  _tablewareVisualPrefab: {fileID: -8679921383154817045, guid: d6a20c1af91110c4b887b864b14ceac0, type: 3}
+  tablewareOffsetX: 0.1
+  tablewareOffsetY: 1
+  tablewareRotation: {x: 0, y: 0, z: 90}
 --- !u!114 &925864812902392102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -494,3 +473,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _baseCounterView: {fileID: 4613707733294792051}
+  _tablewareKitchenObjectSO: {fileID: 11400000, guid: 3f9a28b714814864a8748e005522c083, type: 2}
+  _spawnTimerMax: 4
+  _tablewareSpawnAmountMax: 4

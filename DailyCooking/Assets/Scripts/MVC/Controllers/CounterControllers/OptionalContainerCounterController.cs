@@ -1,36 +1,35 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class OptionalContainerCounterController : BaseCounterController, IHasOptionalSO
 {
+    [SerializeField] private List<KitchenObjectSO> kitchenObjectSOList;
+
+    public event EventHandler OnPlayreGrabbedObject;
+
+    private PlayerStateMachine _playerStateMachine;
+
     protected override void Awake()
     {
         base.Awake();
         BaseCounterModel = new BaseCounterModel();
     }
 
-    public event EventHandler OnPlayreGrabbedObject;
-
-    private PlayerStateMachine _playerStateMachine;
-
-
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        var view = (OptionalContainerCounterView)BaseCounterView;
         Debug.Log("Interact optional Counter");
         _playerStateMachine = playerStateMachine;
-        OnShowOptionMenu(view.KitchenObjectSOList);
+        OnShowOptionMenu(kitchenObjectSOList);
     }
 
     public void SetOptionKitchenObjectSO(int index)
     {
-        var view = (OptionalContainerCounterView)BaseCounterView;
         if (!_playerStateMachine.HasKitchenObject())
         {
             //Player is not carrying anything
-            KitchenObject.SpawnKitchenObject(view.KitchenObjectSOList[index], _playerStateMachine);
-
+            KitchenObject.SpawnKitchenObject(kitchenObjectSOList[index], _playerStateMachine);
 
             OnPlayreGrabbedObject?.Invoke(this, EventArgs.Empty);
         }
@@ -40,14 +39,15 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             if (_playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
             {
                 //Player is holding a plate
-                if (tablewareKitchenObject.TryAddIngredient(view.KitchenObjectSOList[index]))
+                if (tablewareKitchenObject.TryAddIngredient(kitchenObjectSOList[index]))
                 {
                 }
             }
         }
         _playerStateMachine = null;
     }
-    public  void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
+
+    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
     {
         UIPopupManager.Instance.ShowPopup(
             UIPopupType.UIOptionMenuPopup.ToString(),
@@ -58,5 +58,4 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             }
         );
     }
-
 }

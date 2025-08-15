@@ -1,7 +1,12 @@
-﻿using System;
+﻿
+using System;
+using UnityEngine;
 
-public class ContainerCounterController : BaseCounterController
+public class ContainerCounterController : BaseCounterController, IContainerCounter
 {
+    [SerializeField] private KitchenObjectSO kitchenObjectSO;
+
+
     protected override void Awake()
     {
         base.Awake();
@@ -10,11 +15,10 @@ public class ContainerCounterController : BaseCounterController
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        var view = (ContainerCounterView)BaseCounterView;
         if (!playerStateMachine.HasKitchenObject())
         {
             //Player is not carrying anything
-            KitchenObject.SpawnKitchenObject(view.KitchenObjectSO, playerStateMachine);
+            KitchenObject.SpawnKitchenObject(kitchenObjectSO, playerStateMachine);
         }
         else
         {
@@ -22,10 +26,15 @@ public class ContainerCounterController : BaseCounterController
             if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
             {
                 //Player is holding a plate
-                if (tablewareKitchenObject.TryAddIngredient(view.KitchenObjectSO))
+                if (tablewareKitchenObject.TryAddIngredient(kitchenObjectSO))
                 {
                 }
             }
         }
+    }
+
+    public KitchenObjectSO GetContainerKitchenObjectType()
+    {
+        return kitchenObjectSO; 
     }
 }

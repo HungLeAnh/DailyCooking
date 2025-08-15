@@ -251,14 +251,6 @@ MonoBehaviour:
   counterTopPoint: {fileID: 886707663028080637}
   visualGameObjectArray:
   - {fileID: 3819329314662397923}
-  cuttingRecipeSOArray:
-  - {fileID: 11400000, guid: 1d02dc73db885f346a64d250880b7dd4, type: 2}
-  - {fileID: 11400000, guid: a38c3a45a63565442a408863dfe6a113, type: 2}
-  - {fileID: 11400000, guid: d92c3ca9c36cd9f4db431a6e4e3cdc8b, type: 2}
-  - {fileID: 11400000, guid: 82b52adef9815c6428fb367a3965fe0a, type: 2}
-  - {fileID: 11400000, guid: 03df2848847bcdc4fafa39a849b83e11, type: 2}
-  - {fileID: 11400000, guid: 8fb39336a1ea95c41a1b18b41daf020e, type: 2}
-  - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
   progressBarUI: {fileID: 588416869854212033}
 --- !u!114 &5483194497773665733
 MonoBehaviour:
@@ -273,6 +265,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _baseCounterView: {fileID: 6158020882091036308}
+  cuttingRecipeSOArray:
+  - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
+  - {fileID: 11400000, guid: 03df2848847bcdc4fafa39a849b83e11, type: 2}
+  - {fileID: 11400000, guid: 8fb39336a1ea95c41a1b18b41daf020e, type: 2}
+  - {fileID: 11400000, guid: 82b52adef9815c6428fb367a3965fe0a, type: 2}
+  - {fileID: 11400000, guid: d92c3ca9c36cd9f4db431a6e4e3cdc8b, type: 2}
+  - {fileID: 11400000, guid: a38c3a45a63565442a408863dfe6a113, type: 2}
+  - {fileID: 11400000, guid: 1d02dc73db885f346a64d250880b7dd4, type: 2}
 --- !u!1001 &5109503152327724974
 PrefabInstance:
   m_ObjectHideFlags: 0

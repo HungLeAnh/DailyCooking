@@ -1,19 +1,26 @@
+
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+
 public class CuttingCounterController : BaseCounterController, IHasProgress, IHasOptionalSO
 {
+    [SerializeField] private CuttingRecipeSO[] cuttingRecipeSOArray;
     public event EventHandler OnCut;
+
+    private CuttingCounterModel _cuttingCounterModel;
+    private CuttingCounterView _cuttingCounterView;
 
     protected override void Awake()
     {
         base.Awake();
-        BaseCounterModel = new CuttingCounterModel();
+        _cuttingCounterModel = new CuttingCounterModel();
+        BaseCounterModel = _cuttingCounterModel;
+        _cuttingCounterView = (CuttingCounterView)BaseCounterView;
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        var model = (CuttingCounterModel)BaseCounterModel;
-        var view = (CuttingCounterView)BaseCounterView;
         if (!HasKitchenObject())
         {
             //There is no kitchen object
@@ -28,104 +35,64 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                     if (GetKitchenObject().GetKitchenObjectOptionalProcessSO() != null)
                     {
                         //Show optional recipe menu
-                        model.CuttingRecipeSO = null;
+                        _cuttingCounterModel.CuttingRecipeSO = null;
                     }
                     else
                     {
-                        model.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
-
-                        UpdateProgressUI(model, view);
+                        _cuttingCounterModel.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
+                        UpdateProgressUI();
                     }
                 }
-            }
-            else
-            {
-                //Player is not carrying anything
             }
         }
         else
         {
-            if (model.CuttingProgress == 0)
+            if (_cuttingCounterModel.CuttingProgress == 0)
             {
                 //There is kitchen object here not process / done process
-                if (playerStateMachine.HasKitchenObject())
-                {
-                    //Player is carrying something
-                    if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject plateKitchenObject))
-                    {
-                        //Player is holding a plate
-                        if (plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO()))
-                        {
-                            GetKitchenObject().DestroySelf();
-                        }
-                    }
-                }
-                else
-                {
-                    //Player is not carrying anything
-                    GetKitchenObject().SetKitchenObjectParent(playerStateMachine);
-                }
+                base.HandleInteraction(playerStateMachine);
             }
         }
     }
 
-    private void UpdateProgressUI(CuttingCounterModel model, CuttingCounterView view)
+    private void UpdateProgressUI()
     {
-        var progressNormalized = (float)model.CuttingProgress / model.CuttingRecipeSO.cuttingProgressMax;
-
-        view.UpdateProgressBar(progressNormalized);
+        var progressNormalized = (float)_cuttingCounterModel.CuttingProgress / _cuttingCounterModel.CuttingRecipeSO.cuttingProgressMax;
+        _cuttingCounterView.UpdateProgressBar(progressNormalized);
     }
 
     public override void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
     {
-        var model = (CuttingCounterModel)BaseCounterModel;
-        var view = (CuttingCounterView)BaseCounterView;
-
         if (HasKitchenObject() && HasRecipeWithInput(GetKitchenObject().GetKitchenObjectSO()))
         {
             //there is kitchen object here
-            model.CuttingProgress++;
+            _cuttingCounterModel.CuttingProgress++;
 
             OnCut?.Invoke(this, EventArgs.Empty);
 
-            if (model.CuttingRecipeSO == null)
-                model.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
+            if (_cuttingCounterModel.CuttingRecipeSO == null)
+                _cuttingCounterModel.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
 
-            UpdateProgressUI(model, view);
+            UpdateProgressUI();
 
-            if (model.CuttingProgress >= model.CuttingRecipeSO.cuttingProgressMax)
+            if (_cuttingCounterModel.CuttingProgress >= _cuttingCounterModel.CuttingRecipeSO.cuttingProgressMax)
             {
-
                 GetKitchenObject().DestroySelf();
-                KitchenObject.SpawnKitchenObject(model.CuttingRecipeSO.output, this);
-                model.CuttingProgress = 0;
-                model.CuttingRecipeSO = null;
+                KitchenObject.SpawnKitchenObject(_cuttingCounterModel.CuttingRecipeSO.output, this);
+                _cuttingCounterModel.CuttingProgress = 0;
+                _cuttingCounterModel.CuttingRecipeSO = null;
             }
         }
     }
 
     private bool HasRecipeWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
-        CuttingRecipeSO cuttingRecipeSO = GetCuttingRecipeSOWithInput(inputKitchenObjectSO);
-        return cuttingRecipeSO != null;
+        return GetCuttingRecipeSOWithInput(inputKitchenObjectSO) != null;
+    }
 
-    }
-    private KitchenObjectSO GetOutputForInput(KitchenObjectSO inputKitchenObjectSO)
-    {
-        CuttingRecipeSO cuttingRecipeSO = GetCuttingRecipeSOWithInput(inputKitchenObjectSO);
-        if (cuttingRecipeSO != null)
-        {
-            return cuttingRecipeSO.output;
-        }
-        else
-        {
-            return null;
-        }
-    }
     private CuttingRecipeSO GetCuttingRecipeSOWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
-        var view = (CuttingCounterView)BaseCounterView;
-        foreach (CuttingRecipeSO cuttingRecipeSO in view.CuttingRecipeSOArray)
+        foreach (CuttingRecipeSO cuttingRecipeSO in cuttingRecipeSOArray)
         {
             if (cuttingRecipeSO.input == inputKitchenObjectSO)
             {
@@ -134,12 +101,11 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
         }
         return null;
     }
+
     private CuttingRecipeSO GetCuttingRecipeSOWithOutput(int outputKitchenObjectSOIndex)
     {
-        var view = (CuttingCounterView)BaseCounterView;
-
         var outputKitchenObjectSO = GetKitchenObject().GetKitchenObjectOptionalProcessSO().processListOutput[outputKitchenObjectSOIndex];
-        foreach (CuttingRecipeSO cuttingRecipeSO in view.CuttingRecipeSOArray)
+        foreach (CuttingRecipeSO cuttingRecipeSO in cuttingRecipeSOArray)
         {
             if (cuttingRecipeSO.output == outputKitchenObjectSO)
             {
@@ -151,33 +117,20 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
 
     public void SetOptionKitchenObjectSO(int index)
     {
-        var model = (CuttingCounterModel)BaseCounterModel;
-        var view = (CuttingCounterView)BaseCounterView;
-        model.CuttingRecipeSO = GetCuttingRecipeSOWithOutput(index);
-
-        UpdateProgressUI(model, view);
-
+        _cuttingCounterModel.CuttingRecipeSO = GetCuttingRecipeSOWithOutput(index);
+        UpdateProgressUI();
     }
 
     public bool IsDone()
     {
-        var model = (CuttingCounterModel)BaseCounterModel;
-        if(model.CuttingProgress == 0 && 
-            model.CuttingRecipeSO == null &&
-            model.KitchenObject != null)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return _cuttingCounterModel.CuttingProgress == 0 &&
+               _cuttingCounterModel.CuttingRecipeSO == null &&
+               _cuttingCounterModel.KitchenObject != null;
     }
 
     public float GetProgress()
     {
-        var model = (CuttingCounterModel)BaseCounterModel;
-        return model.CuttingProgress;
+        return _cuttingCounterModel.CuttingProgress;
     }
 
     public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)

@@ -1,42 +1,49 @@
-﻿using System;
+﻿
+using System;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
+
 public class TablewareCounterController : BaseCounterController
 {
+    [SerializeField] private KitchenObjectSO _tablewareKitchenObjectSO;
+    [SerializeField] private float _spawnTimerMax = 4f;
+    [SerializeField] private int _tablewareSpawnAmountMax = 4;
+
+    private TablewareCounterModel _tablewareCounterModel;
+    private TablewareCounterView _tablewareCounterView;
+
     protected override void Awake()
     {
         base.Awake();
-        BaseCounterModel = new TablewareCounterModel();
+        _tablewareCounterModel = new TablewareCounterModel();
+        BaseCounterModel = _tablewareCounterModel;
+        _tablewareCounterView = (TablewareCounterView)BaseCounterView;
     }
 
     private void Update()
     {
-        var view = (TablewareCounterView)BaseCounterView;
-        var model = (TablewareCounterModel)BaseCounterModel;
-        if (model.TablewareSpawnAmount < view.TablewareSpawnAmountMax)
+        if (_tablewareCounterModel.TablewareSpawnAmount < _tablewareSpawnAmountMax)
         {
-            model.SpawnTimer += Time.deltaTime;
-            if (model.SpawnTimer >= view.SpawnTimerMax)
+            _tablewareCounterModel.SpawnTimer += Time.deltaTime;
+            if (_tablewareCounterModel.SpawnTimer >= _spawnTimerMax)
             {
-                model.SpawnTimer = 0f;
-                model.TablewareSpawnAmount++;
-                view.FireOnTablewareSpawned();
+                _tablewareCounterModel.SpawnTimer = 0f;
+                _tablewareCounterModel.TablewareSpawnAmount++;
+                _tablewareCounterView.OnTablewareSpawned();
             }
         }
     }
+
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        var view = (TablewareCounterView)BaseCounterView;
-        var model = (TablewareCounterModel)BaseCounterModel;
         if (!playerStateMachine.HasKitchenObject())
         {
             //Player is empty handed
-            if (model.TablewareSpawnAmount > 0)
+            if (_tablewareCounterModel.TablewareSpawnAmount > 0)
             {
                 //There is at least one tableware
-                model.TablewareSpawnAmount--;
-                KitchenObject.SpawnKitchenObject(view.TablewareKitchenObjectSO, playerStateMachine);
-                view.FireOnTablewareRemoved();
+                _tablewareCounterModel.TablewareSpawnAmount--;
+                KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
+                _tablewareCounterView.OnTablewareRemoved();
             }
         }
     }
