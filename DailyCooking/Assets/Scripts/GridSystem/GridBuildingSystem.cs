@@ -348,14 +348,14 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     public void RotateBuildingObject()
     {
         dir = PlacedObjectTypeSO.GetNextDir(dir);
-        Debug.Log("Dir: "+ dir.ToString());
+        //Debug.Log("Dir: "+ dir.ToString());
     }
     public bool TryPlaceBuildingObject(Vector3 interactPos)
     {
         if (placedObjectTypeSO == null) return false;
 
-        Debug.LogError($"{interactPos}: ({Mathf.RoundToInt(interactPos.x)}," +
-            $"{Mathf.RoundToInt(interactPos.y)},{Mathf.RoundToInt(interactPos.z)})");
+        //Debug.LogError($"{interactPos}: ({Mathf.RoundToInt(interactPos.x)}," +
+        //    $"{Mathf.RoundToInt(interactPos.y)},{Mathf.RoundToInt(interactPos.z)})");
 
         grid.GetXZ(new Vector3(Mathf.RoundToInt(interactPos.x),
                                 Mathf.RoundToInt(interactPos.y),
@@ -363,7 +363,9 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
         Vector2Int placedObjectOrigin = new Vector2Int(x, z);
         placedObjectOrigin = grid.ValidateGridPosition(placedObjectOrigin);
-        Debug.LogError($"placedObjectOrigin : {placedObjectOrigin}");
+        
+        //Debug.LogError($"placedObjectOrigin : {placedObjectOrigin}");
+        
         if (placedObjectOrigin == Vector2Int.zero && (interactPos.x < 0 || interactPos.z < 0))
         {
             return false;

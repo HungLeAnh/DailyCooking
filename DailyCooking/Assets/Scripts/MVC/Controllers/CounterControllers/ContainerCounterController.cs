@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class ContainerCounterController : BaseCounterController
 {
+    protected override void Awake()
+    {
+        base.Awake();
+        BaseCounterModel = new BaseCounterModel();
+    }
+
     public event EventHandler OnPlayreGrabbedObject;
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)

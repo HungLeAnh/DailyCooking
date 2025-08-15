@@ -13,14 +13,46 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
 
     protected virtual void Awake()
     {
-        ConnectView();
-        _baseCounterModel = new BaseCounterModel();
     }
 
-    public virtual void ConnectView()
+    protected virtual void Start()
     {
-        _baseCounterView.OnRestartGame += OnRestartGame;
+        CounterModules.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
+        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+    }
 
+    protected virtual void OnDestroy()
+    {
+        CounterModules.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
+        KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
+    }
+
+    private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
+    {
+        if (KitchenGameManager.Instance.IsGameOver() ||
+            KitchenGameManager.Instance.IsEditing())
+        {
+            BaseCounterView.Hide();
+            OnRestartGame(this, PlayerStateMachine.Instance);
+        }
+    }
+
+    private void Player_OnSelectedCounterChanged(object sender, CounterModules.OnSelectedCounterChangedEventArgs e)
+    {
+        if (e.selectedCounterController == null)
+        {
+            BaseCounterView.Hide();
+            return;
+        }
+
+        if (e.selectedCounterController.BaseCounterView == this.BaseCounterView)
+        {
+            BaseCounterView.Show();
+        }
+        else
+        {
+            BaseCounterView.Hide();
+        }
     }
     protected virtual void OnRestartGame(object sender, PlayerStateMachine e)
     {
@@ -37,7 +69,7 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     }
     public void ClearKitchenObject()
     {
-        BaseCounterModel.KitchenObject = null;
+        BaseCounterModel.ClearKitchenObject();
     }
     public bool HasKitchenObject()
     {
@@ -57,7 +89,7 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     }
     public void SetKitchenObject(KitchenObject kitchenObject)
     {
-        _baseCounterModel.KitchenObject = kitchenObject;
+        BaseCounterModel.SetKitchenObject(kitchenObject);
 
         if (kitchenObject != null && kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
         {

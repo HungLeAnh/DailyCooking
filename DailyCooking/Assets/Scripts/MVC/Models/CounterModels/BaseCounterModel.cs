@@ -7,10 +7,20 @@ public class BaseCounterModel
     public KitchenObject KitchenObject
     {
         get => _kitchenObject;
-        set
+        private set
         {
             _kitchenObject = value;
             
         }
+    }
+
+    public void SetKitchenObject(KitchenObject kitchenObject)
+    {
+        KitchenObject = kitchenObject;
+    }
+
+    public void ClearKitchenObject()
+    {
+        KitchenObject = null;
     }
 }

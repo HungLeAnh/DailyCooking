@@ -11,6 +11,7 @@ public class DeliveryCounterController : BaseCounterController
     protected override void Awake()
     {
         base.Awake();
+        BaseCounterModel = new BaseCounterModel();
         Init();
     }
 

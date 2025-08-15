@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class BaseCounterView : MonoBehaviour
 {
-        public event EventHandler<PlayerStateMachine> OnRestartGame;
     [SerializeField] private Transform counterTopPoint;
     [SerializeField] private GameObject[] visualGameObjectArray;
 
@@ -15,46 +14,8 @@ public class BaseCounterView : MonoBehaviour
     {
         return GetComponent<T>();
     }
-    private void Start()
-    {
-        CounterModules.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
-        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
-    }
-    private void OnDestroy()
-    {
-        Hide();
-        CounterModules.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
-        KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
-    }
 
-    private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
-    {
-        if (KitchenGameManager.Instance.IsGameOver()||
-            KitchenGameManager.Instance.IsEditing())
-        {
-            Hide();
-            OnRestartGame?.Invoke(this, PlayerStateMachine.Instance);
-        }
-    }
-
-    private void Player_OnSelectedCounterChanged(object sender, CounterModules.OnSelectedCounterChangedEventArgs e)
-    {
-        if (e.selectedCounterController == null)
-        {
-            Hide();
-            return;
-        }
-
-        if (e.selectedCounterController.BaseCounterView == this)
-        {
-            Show();
-        }
-        else
-        {
-            Hide();
-        }
-    }
-    private void Show()
+    public void Show()
     {
         foreach (var visualGameObject in visualGameObjectArray)
         {
@@ -62,7 +23,7 @@ public class BaseCounterView : MonoBehaviour
         }
 
     }
-    private void Hide()
+    public void Hide()
     {
         foreach (var visualGameObject in visualGameObjectArray)
         {

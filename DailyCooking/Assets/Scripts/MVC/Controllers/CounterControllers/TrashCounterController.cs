@@ -1,6 +1,12 @@
 ﻿using System;
 public class TrashCounterController : BaseCounterController
 {
+    protected override void Awake()
+    {
+        base.Awake();
+        BaseCounterModel = new BaseCounterModel();
+    }
+
     public static event EventHandler OnAnyObjectTrashed;
 
     
