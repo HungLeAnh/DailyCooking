@@ -30,7 +30,6 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     }
     public override void UpdateState()
     {
-        // Movement logic moved to specific walk states
     }
     
     protected void UpdatePlayerPosition()
@@ -72,6 +71,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         Context.PathList.Clear();
         Context.PathList = new List<int2>() { target };
         Context.EndPosition = GridBuildingSystem.Instance.GridPositionToWorldPosition(target);
+        Context.IsDisableInput = true;
 
         if (speed != 0)
             Context.MoveSpeed = speed;
@@ -87,7 +87,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         Context.PathList = target;
         
         Context.EndPosition = GridBuildingSystem.Instance.GridPositionToWorldPosition(target[target.Count - 1]);
-
+        Context.IsDisableInput = true;
         if (speed != 0)
             Context.MoveSpeed = speed;
     }
@@ -99,5 +99,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         {
             Context.SelectedCounterController.InteractEvent(PlayerStateMachine.Instance);
         }
+        Context.IsDisableInput = false;
+
     }
 }

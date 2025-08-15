@@ -26,7 +26,9 @@ public class PlayerIdleWalkState : PlayerBaseState
     }
     public override void UpdateState()
     {
-        if (!Context.IsDisableInput && Context.IsWalking)
+        base.UpdateState();
+        _subStateMachine.Update();
+        if (Context.IsWalking)
         {
             UpdatePlayerPosition();
             if (Vector3.Distance(Context.PlayerTransform.position, Context.EndPosition) > GameDefine.MIN_DISTANCE_TO_TARGET)

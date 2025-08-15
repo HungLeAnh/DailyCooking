@@ -122,6 +122,8 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
 
     private void PlayerGameInput_OnFingerDown(object sender, UnityEngine.InputSystem.EnhancedTouch.Finger finger)
     {
+        if (Context.IsDisableInput)
+            return;
         if (Context.IsTouching)
             return;
         if (!KitchenGameManager.Instance.IsGamePlaying())

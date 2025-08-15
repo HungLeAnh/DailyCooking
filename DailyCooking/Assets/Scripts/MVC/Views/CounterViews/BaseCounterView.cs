@@ -39,6 +39,12 @@ public class BaseCounterView : MonoBehaviour
 
     private void Player_OnSelectedCounterChanged(object sender, CounterModules.OnSelectedCounterChangedEventArgs e)
     {
+        if (e.selectedCounterController == null)
+        {
+            Hide();
+            return;
+        }
+
         if (e.selectedCounterController.BaseCounterView == this)
         {
             Show();
