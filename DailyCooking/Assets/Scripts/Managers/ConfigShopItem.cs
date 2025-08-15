@@ -7,17 +7,16 @@ public class ConfigShopItem
     [SerializeField] private string name;
     [SerializeField] private ShopItemType type;
     [SerializeField] private int price;
-    [SerializeField] private RewardData[] reward;
+    [SerializeField] private string reward;
     [SerializeField] private ShopItemCategory category;
     [SerializeField] private int unlockLevel;
 
-    public ShopItemCategory Category => category;
-    public RewardData[] Reward => reward;
-    public int Price => price;
-    public ShopItemType Type => type;
-    public string Name => name;
-    public int Id => id;
-    public int UnlockLevel => unlockLevel;
-
+    public int Id { get => id; set => id = value; }
+    public string Name { get => name; set => name = value; }
+    public ShopItemType Type { get => type; set => type = value; }
+    public int Price { get => price; set => price = value; }
+    public string Reward { get => reward; set => reward = value; }
+    public ShopItemCategory Category { get => category; set => category = value; }
+    public int UnlockLevel { get => unlockLevel; set => unlockLevel = value; }
 }
 

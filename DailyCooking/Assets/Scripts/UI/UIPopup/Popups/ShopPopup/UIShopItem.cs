@@ -14,13 +14,14 @@ public class UIShopItem : MonoBehaviour
     [SerializeField] private Button buttonBuy;
     private ConfigShopItem configShopItem;
     private ShopItemCategory itemCategory;
-
+    private Dictionary<string, int> parsedData = new Dictionary<string, int>();
     public void SetItem(ConfigShopItem item,ShopItemCategory itemCategory)
     {
         this.gameObject.SetActive(true);    
         this.configShopItem = item;
         this.itemCategory = itemCategory;
 
+        //imageIcon.sprite = item.Icon;
         textName.text = item.Name;
         textPrice.text = item.Price.ToString();
         buttonBuy.onClick.AddListener(OnClickButtonBuy);
@@ -33,24 +34,49 @@ public class UIShopItem : MonoBehaviour
             lockTransform.gameObject.SetActive(false);
         }
 
-        ProcessRewardVisuals(item.Reward);
+        string[] pairs = item.Reward.Split(';');
+
+        foreach (var pair in pairs)
+        {
+            // Split each pair by '_' to get id and amount
+            string[] parts = pair.Split('_');
+            if (parts.Length == 2)
+            {
+                string id = parts[0];
+                int amount = int.Parse(parts[1]); 
+                parsedData[id] = amount;
+            }
+        }
+        GetReward(parsedData);
 
     }
 
     private void OnClickButtonBuy()
     {
-        ShopManager.Instance.OnPurchase(configShopItem);
+        if(configShopItem.Price > GameManager.Instance.GameData.PlayerStats.playerData.Coins)
+        {
+            Debug.Log("Not enough coins to buy this item.");
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup.ToString(), 
+                new UIGameNotiPopup.Param {Title = "warning", 
+                                            Message = "Not enough coins to buy this item."
+                });
+            return;
+        }
+        GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(-configShopItem.Price);
+        GameManager.Instance.GameData.AddInventoryData(InventoryItemData.CreateInventoryItem(configShopItem.Id.ToString()));
+        GameManager.Instance.SaveGame();
     }
 
-    private void ProcessRewardVisuals(RewardData[] rewardData)
+    private void GetReward(Dictionary<string, int> parsedData)
     {
-        if(rewardData.Length == 0) return;
+        var parsedDataList = parsedData.ToList();
+        if(parsedDataList.Count == 0) return;
         switch (itemCategory)
         {
             case ShopItemCategory.Counters:
 
                 var placedObject = GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects
-                    .Find(x => x.id == rewardData[0].id);
+                    .Find(x => x.id == parsedDataList[0].Key);
                 if (placedObject == null)
                 {
                     gameObject.SetActive(false);
