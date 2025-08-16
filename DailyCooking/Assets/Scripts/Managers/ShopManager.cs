@@ -9,7 +9,7 @@ public class ShopManager : PersistentSingleton<ShopManager>
         if(item.Price > GameManager.Instance.GameData.PlayerStats.playerData.Coins)
         {
             Debug.Log("Not enough coins to buy this item.");
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup.ToString(), 
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup, 
                 new UIGameNotiPopup.Param {Title = "warning", 
                                             Message = "Not enough coins to buy this item."
                 });
@@ -19,4 +19,3 @@ public class ShopManager : PersistentSingleton<ShopManager>
         GameManager.Instance.GameData.AddInventoryData(InventoryItemData.CreateInventoryItem(item.Id.ToString()));
     }
 }
-
