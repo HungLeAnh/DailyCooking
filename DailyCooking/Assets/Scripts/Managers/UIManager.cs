@@ -14,7 +14,7 @@ public class UIManager : MonoBehaviour
 
     private void ShowLevelUpPopup(int level)
     {
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UILevelUpPopup.ToString(), 
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UILevelUpPopup, 
             new UILevelUpPopup.Param { reward = new RewardData[] { new RewardData(UILevelUpPopup.RewardType.Coin.ToString(), level * 100) } });
     }
 }

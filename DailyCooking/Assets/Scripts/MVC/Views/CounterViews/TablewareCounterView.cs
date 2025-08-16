@@ -1,12 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 public class TablewareCounterView : BaseCounterView
 {
-
-    [SerializeField] private KitchenObjectSO _tablewareKitchenObjectSO;
-    [SerializeField] private float _spawnTimerMax = 4f;
-    [SerializeField] private int _tablewareSpawnAmountMax = 4;
 
     [SerializeField] private Transform _tablewareVisualPrefab;
     [SerializeField] float tablewareOffsetX = .1f;

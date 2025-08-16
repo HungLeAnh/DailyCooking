@@ -1,4 +1,4 @@
-﻿public class TablewareCounterModel : BaseCounterModel
+public class TablewareCounterModel : BaseCounterModel
 {
     private float _spawnTimer;
     private int _tablewareSpawnAmount;

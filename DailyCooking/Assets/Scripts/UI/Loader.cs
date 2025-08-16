@@ -15,7 +15,7 @@ public static class Loader
     public static void Load(Scene targetScene)
     {
         Loader.targetScene = targetScene;
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UILoadingPopup.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UILoadingPopup);
     }
     public static void LoaderCallback()
     {

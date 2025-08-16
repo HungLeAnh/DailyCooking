@@ -1,13 +1,15 @@
 ﻿public class ClearCounterController : BaseCounterController
 {
-    protected override void Awake()
+    private ClearCounterService _clearCounterService;
+
+    private void Awake()
     {
-        base.Awake();
         BaseCounterModel = new BaseCounterModel();
+        _clearCounterService = new ClearCounterService();
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        HandleInteraction(playerStateMachine);
+        _clearCounterService.Interact(this, playerStateMachine);
     }
 }

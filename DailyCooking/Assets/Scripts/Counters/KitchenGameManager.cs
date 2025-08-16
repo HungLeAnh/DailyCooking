@@ -80,7 +80,7 @@ public class KitchenGameManager : MonoBehaviour
         CreateDailytask();
         GameManager.Instance.InitializePlayer();
         kitchenManagerUI.SetActive(true);
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup);
         countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
         DeliveryManager.Instance.Init();
     }

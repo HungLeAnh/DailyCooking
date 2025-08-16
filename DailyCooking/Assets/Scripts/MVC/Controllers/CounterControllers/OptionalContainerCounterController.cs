@@ -1,4 +1,3 @@
-﻿
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,12 +8,15 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
     public event EventHandler OnPlayreGrabbedObject;
 
+    private OptionalContainerCounterService _optionalContainerCounterService;
     private PlayerStateMachine _playerStateMachine;
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
         BaseCounterModel = new BaseCounterModel();
+        _optionalContainerCounterService = new OptionalContainerCounterService();
+
+        _optionalContainerCounterService.OnPlayerGrabbedObject += () => OnPlayreGrabbedObject?.Invoke(this, EventArgs.Empty);
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
@@ -26,31 +28,14 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
     public void SetOptionKitchenObjectSO(int index)
     {
-        if (!_playerStateMachine.HasKitchenObject())
-        {
-            //Player is not carrying anything
-            KitchenObject.SpawnKitchenObject(kitchenObjectSOList[index], _playerStateMachine);
-
-            OnPlayreGrabbedObject?.Invoke(this, EventArgs.Empty);
-        }
-        else
-        {
-            //Player is carrying something
-            if (_playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
-            {
-                //Player is holding a plate
-                if (tablewareKitchenObject.TryAddIngredient(kitchenObjectSOList[index]))
-                {
-                }
-            }
-        }
+        _optionalContainerCounterService.SetOption(index, _playerStateMachine, kitchenObjectSOList);
         _playerStateMachine = null;
     }
 
     public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
     {
         UIPopupManager.Instance.ShowPopup(
-            UIPopupType.UIOptionMenuPopup.ToString(),
+            UIPopupType.UIOptionMenuPopup,
             new UIOptionMenuPopup.Param
             {
                 sender = this,

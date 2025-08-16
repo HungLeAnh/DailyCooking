@@ -55,7 +55,7 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     #region Click
     public void OnSettingsClicked()
     {
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup);
     }
     public void OnPauseClicked()
     {
@@ -63,7 +63,7 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     }
     public void OnShopClicked()
     {
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIShopPopup.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIShopPopup);
     }
     public void OnInventoryClicked()
     {

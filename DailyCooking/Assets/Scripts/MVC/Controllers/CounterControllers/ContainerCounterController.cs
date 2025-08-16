@@ -1,40 +1,30 @@
-﻿
 using System;
 using UnityEngine;
 
 public class ContainerCounterController : BaseCounterController, IContainerCounter
 {
-    [SerializeField] private KitchenObjectSO kitchenObjectSO;
+    [SerializeField] private KitchenObjectSO _kitchenObjectSO;
 
+    private ContainerCounterService _containerCounterService;
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
         BaseCounterModel = new BaseCounterModel();
+        _containerCounterService = new ContainerCounterService();
+
+        _containerCounterService.OnSpawnKitchenObject += (sender, spawnedKitchenObjectSO) =>
+        {
+
+        };
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        if (!playerStateMachine.HasKitchenObject())
-        {
-            //Player is not carrying anything
-            KitchenObject.SpawnKitchenObject(kitchenObjectSO, playerStateMachine);
-        }
-        else
-        {
-            //Player is carrying something
-            if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
-            {
-                //Player is holding a plate
-                if (tablewareKitchenObject.TryAddIngredient(kitchenObjectSO))
-                {
-                }
-            }
-        }
+        _containerCounterService.Interact(playerStateMachine, _kitchenObjectSO);
     }
 
     public KitchenObjectSO GetContainerKitchenObjectType()
     {
-        return kitchenObjectSO; 
+        return _kitchenObjectSO;
     }
 }

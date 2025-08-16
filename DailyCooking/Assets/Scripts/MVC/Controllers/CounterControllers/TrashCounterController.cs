@@ -1,18 +1,16 @@
-﻿using System;
+using System;
 public class TrashCounterController : BaseCounterController
 {
-    protected override void Awake()
+    private TrashCounterService _trashCounterService;
+
+    private void Awake()
     {
-        base.Awake();
         BaseCounterModel = new BaseCounterModel();
+        _trashCounterService = new TrashCounterService();
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        if (playerStateMachine.HasKitchenObject())
-        {
-            playerStateMachine.GetKitchenObject().DestroySelf();
-
-        }
+        _trashCounterService.Interact(playerStateMachine);
     }
 }

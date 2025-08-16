@@ -11,9 +11,7 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     public BaseCounterView BaseCounterView { get => _baseCounterView; set => _baseCounterView = value; }
     public BaseCounterModel BaseCounterModel { get => _baseCounterModel; set => _baseCounterModel = value; }
 
-    protected virtual void Awake()
-    {
-    }
+    
 
     protected virtual void Start()
     {
@@ -83,43 +81,7 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     {
     }
 
-    protected virtual void HandleInteraction(PlayerStateMachine playerStateMachine)
-    {
-        if (!HasKitchenObject() && playerStateMachine.HasKitchenObject())
-        {
-            //Place object player carrying on the counter
-            playerStateMachine.GetKitchenObject().SetKitchenObjectParent(this);
-        }
-        else if (HasKitchenObject() && !playerStateMachine.HasKitchenObject())
-        {
-            //Player is not carrying anything
-            GetKitchenObject().SetKitchenObjectParent(playerStateMachine);
-        }
-        else if (HasKitchenObject() && playerStateMachine.HasKitchenObject())
-        {
-            //Player is carrying something and counter has something
-            if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject plateKitchenObject))
-            {
-                //Player is holding a plate
-                if (plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO()))
-                {
-                    GetKitchenObject().DestroySelf();
-                }
-            }
-            else
-            {
-                //Player is not carrying plate
-                if (GetKitchenObject().TryGetTableware(out plateKitchenObject))
-                {
-                    //Counter is holding the plate
-                    if (plateKitchenObject.TryAddIngredient(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
-                    {
-                        playerStateMachine.GetKitchenObject().DestroySelf();
-                    }
-                }
-            }
-        }
-    }
+    
    
     public Transform GetKitchenObjectFollowTransform()
     {
@@ -132,7 +94,7 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
         if (kitchenObject != null && kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
         {
             UIPopupManager.Instance.ShowPopup(
-                UIPopupType.UIOptionMenuPopup.ToString(),
+                UIPopupType.UIOptionMenuPopup,
                 new UIOptionMenuPopup.Param
                 {
                     sender = this,

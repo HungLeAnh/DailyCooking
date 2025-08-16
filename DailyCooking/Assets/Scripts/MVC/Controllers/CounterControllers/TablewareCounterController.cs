@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using UnityEngine;
 
@@ -9,42 +9,27 @@ public class TablewareCounterController : BaseCounterController
     [SerializeField] private int _tablewareSpawnAmountMax = 4;
 
     private TablewareCounterModel _tablewareCounterModel;
+    private TablewareCounterService _tablewareCounterService;
     private TablewareCounterView _tablewareCounterView;
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
         _tablewareCounterModel = new TablewareCounterModel();
         BaseCounterModel = _tablewareCounterModel;
+        _tablewareCounterService = new TablewareCounterService(_spawnTimerMax, _tablewareSpawnAmountMax, _tablewareKitchenObjectSO);
         _tablewareCounterView = (TablewareCounterView)BaseCounterView;
+
+        _tablewareCounterService.OnTablewareSpawned += () => _tablewareCounterView.OnTablewareSpawned();
+        _tablewareCounterService.OnTablewareRemoved += () => _tablewareCounterView.OnTablewareRemoved();
     }
 
     private void Update()
     {
-        if (_tablewareCounterModel.TablewareSpawnAmount < _tablewareSpawnAmountMax)
-        {
-            _tablewareCounterModel.SpawnTimer += Time.deltaTime;
-            if (_tablewareCounterModel.SpawnTimer >= _spawnTimerMax)
-            {
-                _tablewareCounterModel.SpawnTimer = 0f;
-                _tablewareCounterModel.TablewareSpawnAmount++;
-                _tablewareCounterView.OnTablewareSpawned();
-            }
-        }
+        _tablewareCounterService.Update(_tablewareCounterModel);
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        if (!playerStateMachine.HasKitchenObject())
-        {
-            //Player is empty handed
-            if (_tablewareCounterModel.TablewareSpawnAmount > 0)
-            {
-                //There is at least one tableware
-                _tablewareCounterModel.TablewareSpawnAmount--;
-                KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
-                _tablewareCounterView.OnTablewareRemoved();
-            }
-        }
+        _tablewareCounterService.Interact(_tablewareCounterModel, playerStateMachine);
     }
 }

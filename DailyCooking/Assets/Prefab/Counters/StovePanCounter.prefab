@@ -313,7 +313,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _baseCounterView: {fileID: 6967601015886198059}
-  _cookingTool: {fileID: 447210626167731086}
+  _cookingRecipeSOArray:
+  - {fileID: 0}
+  _burningRecipeSOArray:
+  - {fileID: 11400000, guid: 76eee288774439d45ab2141f8a55fb0f, type: 2}
   _audioSource: {fileID: 5094793971710397197}
 --- !u!82 &5094793971710397197
 AudioSource:
@@ -493,17 +496,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 75940d3b72ff6a548b27c5373d11e390, type: 3}
---- !u!114 &447210626167731086 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6983875412975341295, guid: 75940d3b72ff6a548b27c5373d11e390, type: 3}
-  m_PrefabInstance: {fileID: 7412777782712417633}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30b1028be114bde439f8f15bd3d9d09e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &5085610323345306486 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2327461308816248343, guid: 75940d3b72ff6a548b27c5373d11e390, type: 3}

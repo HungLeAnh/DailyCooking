@@ -1,30 +1,24 @@
-﻿using System;
+using System;
 
 public class DeliveryCounterController : BaseCounterController
 {
     public static DeliveryCounterController Instance { get; private set; }
 
+    private DeliveryCounterService _deliveryCounterService;
+
     public void Init()
     {
         Instance = this;
     }
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
         BaseCounterModel = new BaseCounterModel();
+        _deliveryCounterService = new DeliveryCounterService();
         Init();
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        if (playerStateMachine.HasKitchenObject())
-        {
-            if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
-            {
-                DeliveryManager.Instance.DeliverRecipe(tablewareKitchenObject);
-                playerStateMachine.GetKitchenObject().DestroySelf();
-
-            }
-        }
+        _deliveryCounterService.Interact(playerStateMachine);
     }
 }

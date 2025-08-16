@@ -1,4 +1,4 @@
-﻿public class CuttingCounterModel: BaseCounterModel
+public class CuttingCounterModel: BaseCounterModel
 {
     private int cuttingProgress;
     private CuttingRecipeSO _cuttingRecipeSO;
