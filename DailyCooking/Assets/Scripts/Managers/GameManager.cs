@@ -31,7 +31,7 @@ public class GameManager : PersistentSingleton<GameManager>
     private void Start()
     {
         LoadGame();
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup);
     }
 
     public void InitializePlayer()

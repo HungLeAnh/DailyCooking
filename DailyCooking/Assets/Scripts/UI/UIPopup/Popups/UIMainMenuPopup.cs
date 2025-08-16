@@ -18,7 +18,7 @@ public class UIMainMenuPopup : UIPopup
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup.ToString());
         });
         optionsButton.onClick.AddListener(() => {
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup.ToString());
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup);
         });
         quitButton.onClick.AddListener(() =>
         {

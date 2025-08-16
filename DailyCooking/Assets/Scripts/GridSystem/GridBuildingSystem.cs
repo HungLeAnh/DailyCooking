@@ -126,7 +126,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
                 SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO,raycastHit.transform.position);
                 var counterView = targetPlaceObjectView.GetComponent<BaseCounterView>();
                 CounterModules.Instance.DestroyCounter(counterView);
-                UIPopupManager.Instance.HidePopup(UIPopupType.UIInventoryPopup.ToString(),
+                UIPopupManager.Instance.HidePopup(UIPopupType.UIInventoryPopup,
                     new UIInventoryPopup.Param { isPlacingObject = true});
             }
         }

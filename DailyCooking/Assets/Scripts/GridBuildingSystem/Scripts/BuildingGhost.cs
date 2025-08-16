@@ -153,12 +153,12 @@ public class BuildingGhost : MonoBehaviour
     {
         if (GridBuildingSystem.Instance.TryPlaceBuildingObject(visualContainer.position))
         {
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup.ToString());
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
             ShowCanvas(false);
         }
         else
         {
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup.ToString(),
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup,
                new UIGameNotiPopup.Param
                {
                    Title = "warning",
@@ -172,7 +172,7 @@ public class BuildingGhost : MonoBehaviour
         isRotating = false;
         visual.gameObject.GetComponent<PlacedObjectView>().DestroySelf();
 
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
         ShowCanvas(false);
         GridBuildingSystem.Instance.SetPlacedObjectTypeSO(null,-Vector3.one);
 

@@ -23,7 +23,7 @@ public class UIDayTaskPopup : UIPopup
     {
         HidePopup();
         KitchenGameManager.Instance.ChangeState(KitchenGameManager.State.CountdownToStart);
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameStartCountdownPopup.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameStartCountdownPopup);
 
     }
 

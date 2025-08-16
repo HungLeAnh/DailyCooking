@@ -43,6 +43,6 @@ public class UIShopPopup : UIPopup
     }
     public void OnCloseClick()
     {
-        UIPopupManager.Instance.HidePopup(UIPopupType.UIShopPopup.ToString());
+        UIPopupManager.Instance.HidePopup(UIPopupType.UIShopPopup);
     }
 }

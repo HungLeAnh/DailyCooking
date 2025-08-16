@@ -23,7 +23,7 @@ public class LoaderCallBack : MonoBehaviour
         yield return new WaitForSeconds(delayCallBack);            
         isFirstUpadate = true;
 
-        UIPopupManager.Instance.HidePopup(UIPopupType.UILoadingPopup.ToString());
+        UIPopupManager.Instance.HidePopup(UIPopupType.UILoadingPopup);
 
     }
 }

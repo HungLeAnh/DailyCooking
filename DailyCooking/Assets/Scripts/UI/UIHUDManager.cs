@@ -67,7 +67,7 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     }
     public void OnInventoryClicked()
     {
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
     }
     public void OnPlayClicked()
     {

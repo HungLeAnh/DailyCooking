@@ -135,7 +135,7 @@ public class KitchenGameManager : MonoBehaviour
                 if (gamePlayingTimer < 0f)
                 {
                     ChangeState(State.GameOver);
-                    UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameOverPopup.ToString());
+                    UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameOverPopup);
                 }
                 break;
             case State.GameOver:
@@ -176,7 +176,7 @@ public class KitchenGameManager : MonoBehaviour
         {
             Time.timeScale = TIME_SCALE_PAUSED;
             OnGamePaused?.Invoke(this, EventArgs.Empty);
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGamePausePopup.ToString());
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGamePausePopup);
         }
         else
         {
@@ -194,7 +194,7 @@ public class KitchenGameManager : MonoBehaviour
         if (IsTaskComplete()) 
         {
             ChangeState(State.GameOver);
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameOverPopup.ToString());
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameOverPopup);
         }
     }
     public bool IsTaskComplete()

@@ -21,7 +21,7 @@ public static class Loader
     {
         SceneManager.LoadScene(targetScene.ToString());
         if(targetScene == Scene.MainMenuScene)
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup.ToString());
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup);
 
     }
 }
