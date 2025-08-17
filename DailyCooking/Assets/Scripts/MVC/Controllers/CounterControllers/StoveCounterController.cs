@@ -1,55 +1,41 @@
 using System;
 using UnityEngine;
-public class StoveCounterController : BaseCounterController, IHasProgress
+
+public class StoveCounterController : BaseCounterController
 {
-    [SerializeField] private CookingRecipeSO[] _cookingRecipeSOArray;
-    [SerializeField] private BurningRecipeSO[] _burningRecipeSOArray;
-    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private CookingTool _cookingTool;
     private StoveCounterModel _stoveCounterModel;
     private StoveCounterService _stoveCounterService;
-
-    public event EventHandler<float> OnProgressChanged;
-    public event EventHandler<StoveCounterService.State> OnStateChanged;
 
     private void Awake()
     {
         _stoveCounterModel = new StoveCounterModel();
         BaseCounterModel = _stoveCounterModel;
-        _stoveCounterService = new StoveCounterService(_cookingRecipeSOArray, _burningRecipeSOArray);
-
-        _stoveCounterService.OnStateChanged += (sender, state) =>
-        {
-            bool playSound = state == StoveCounterService.State.Cooking || state == StoveCounterService.State.Cooked;
-            if (playSound)
-            {
-                _audioSource.Play();
-            }
-            else
-            {
-                _audioSource.Pause();
-            }
-            OnStateChanged?.Invoke(this, state);
-        };
-        _stoveCounterService.OnProgressChanged += (sender, progress) => OnProgressChanged?.Invoke(this, progress);
+        _stoveCounterService = new StoveCounterService(_cookingTool);
     }
 
-    private void Update()
+    protected override void OnRestartGame(object sender, PlayerStateMachine e)
     {
-        _stoveCounterService.Update(_stoveCounterModel, this);
+        base.OnRestartGame(sender, e);
+
+        if (_cookingTool.HasKitchenObject())
+            _cookingTool.GetKitchenObject().DestroySelf();
+
+        _cookingTool.ClearKitchenObject();
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        _stoveCounterService.Interact(_stoveCounterModel, this, playerStateMachine);
+        _stoveCounterService.Interact(this, playerStateMachine);
     }
 
     public float GetProgress()
     {
-        return _stoveCounterModel.GetProgress();
+        return _cookingTool.GetProgress();
     }
 
     public bool IsDone()
     {
-        return _stoveCounterModel.IsDone();
+        return _cookingTool.IsDone();
     }
 }

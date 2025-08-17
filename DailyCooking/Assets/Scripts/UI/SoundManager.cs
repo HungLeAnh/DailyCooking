@@ -96,6 +96,11 @@ public class SoundManager : PersistentSingleton<SoundManager>
         PlaySound(AudioClipRefsSO.warning, position);
 
     }
+    public void PlayCookingSound(Vector3 position)
+    {
+        PlaySound(AudioClipRefsSO.stoveSizzle, position);
+
+    }
     public void ChangeVolume()
     {
         volume += .1f;

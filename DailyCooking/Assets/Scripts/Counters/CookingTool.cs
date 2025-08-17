@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectParent
 {
-    public event EventHandler<OnStageChangeEventArgs> OnStageChanged;
-
     public class OnStageChangeEventArgs : EventArgs
     {
         public State state;
@@ -52,10 +50,14 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     }
     public virtual void FireOnStateChange()
     {
-        OnStageChanged?.Invoke(this, new OnStageChangeEventArgs
+        bool playSound = CurrentState == State.Cooking || CurrentState == State.Cooked;
+        if (playSound)
         {
-            state = CurrentState
-        });
+            SoundManager.Instance.PlayCookingSound(gameObject.transform.position);
+        }
+        else
+        {
+        }
     }
     private void Update()
     {
