@@ -144,9 +144,10 @@ public class SoundManager : PersistentSingleton<SoundManager>
     }
     public void StopSound(AudioSource audioSource)
     {
-        if (audioSource != null)
+        var audio = audioSourcePool.Find(x => x == audioSource);
+        if (audio != null)
         {
-            audioSource.Stop();
+            audio?.Stop();
         }
     }
 

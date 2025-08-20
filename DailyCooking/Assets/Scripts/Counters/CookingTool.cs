@@ -51,7 +51,7 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
         FireOnStateChange();
     }
     public virtual void FireOnStateChange()
-    {
+    { 
         if(CurrentState == State.Idle || CurrentState == State.Burned)
         {
             SoundManager.Instance.StopSound(cookingSound);
@@ -59,12 +59,11 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
         }
         if (CurrentState == State.Cooking || CurrentState == State.Cooked)
         {
-            cookingSound = SoundManager.Instance.PlayCookingSound(gameObject.transform.position);
+            if(cookingSound == null || !cookingSound.isPlaying)
+                cookingSound = SoundManager.Instance.PlayCookingSound(gameObject.transform.position);
         }
-        if(CurrentState == State.Cooked && GetProgress() >= burnShowProgressAmount)
-        {
-            warningSound = SoundManager.Instance.PlayWarningSound(gameObject.transform.position);
-        }
+        
+
     }
     private void Update()
     {
@@ -96,7 +95,13 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
                     BurningTimer += Time.deltaTime;
 
                     progressBarUI.OnProgressChanged(BurningTimer / BurningTimeMax);
-                    burnWarningUI.OnProgressChanged(this,BurningTimer / BurningTimeMax);
+                    burnWarningUI.OnProgressChanged(this, BurningTimer / BurningTimeMax);
+
+                    if (GetProgress() >= burnShowProgressAmount && ( warningSound == null || !warningSound.isPlaying))
+                    {
+                        warningSound = SoundManager.Instance.PlayWarningSound(gameObject.transform.position);
+                    }
+
                     if (BurningTimer > BurningTimeMax)
                     {
                         //Fried
