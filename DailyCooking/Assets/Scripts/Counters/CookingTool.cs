@@ -25,6 +25,8 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     private float _cookingTimeMax;
     private float _burningTimeMax;
     private KitchenObject _kitchenObject;
+    private AudioSource cookingSound;
+    private AudioSource warningSound;
 
     public State CurrentState { get => _state; set => _state = value; }
     public float CookingTimer { get => _cookingTimer; set => _cookingTimer = value; }
@@ -52,16 +54,16 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     {
         if(CurrentState == State.Idle || CurrentState == State.Burned)
         {
-            SoundManager.Instance.StopPlaySound(SoundType.Cooking);
-            SoundManager.Instance.StopPlaySound(SoundType.Warning);
+            SoundManager.Instance.StopSound(cookingSound);
+            SoundManager.Instance.StopSound(warningSound);
         }
         if (CurrentState == State.Cooking || CurrentState == State.Cooked)
         {
-            SoundManager.Instance.PlayCookingSound(gameObject.transform.position);
+            cookingSound = SoundManager.Instance.PlayCookingSound(gameObject.transform.position);
         }
         if(CurrentState == State.Cooked && GetProgress() >= burnShowProgressAmount)
         {
-            SoundManager.Instance.PlayWarningSound(gameObject.transform.position);
+            warningSound = SoundManager.Instance.PlayWarningSound(gameObject.transform.position);
         }
     }
     private void Update()

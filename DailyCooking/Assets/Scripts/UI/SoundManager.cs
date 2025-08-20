@@ -1,32 +1,20 @@
-﻿using NUnit.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-public enum SoundType
-{
-    Footstep,
-    Warning,
-    Cooking,
-    ObjectPickup,
-    ObjectDrop,
-    DeliverySuccess,
-    DeliveryFailed,
-    Chop,
-    CountDown,
-    None
-}
+
 public class SoundManager : PersistentSingleton<SoundManager>   
 {
     private const string PLAYER_SOUND_EFFECTS_VOLUME = "SoundEffectVolume";
 
     [SerializeField] private AudioClipRefsSO AudioClipRefsSO;
     private float footstepTimer;
-    private float footstepTimerMax = 0.1f;
+    [SerializeField] private float footstepTimerMax = 0.1f;
     private float volume = 1f;
-    private Dictionary<SoundType, AudioSource> audioSourceDictionary;
+    private List<AudioSource> audioSourcePool;
     protected override void Awake()
     {
         base.Awake();
+        audioSourcePool = new List<AudioSource>();
         volume = PlayerPrefs.GetFloat(PLAYER_SOUND_EFFECTS_VOLUME, 1f);
     }
     private void Start()
@@ -40,126 +28,136 @@ public class SoundManager : PersistentSingleton<SoundManager>
         {
             DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
             DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
-            //CuttingCounterController.OnAnyCut += CuttingCounter_OnAnyCut;
-            //PlayerStateMachine.Instance.OnPickedSomething += Player_OnPickedSomething;
-            //BaseCounterController.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
-            //TrashCounterController.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
+            
+        }
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
+        if (DeliveryManager.Instance != null)
+        {
+            DeliveryManager.Instance.OnRecipeSuccess -= DeliveryManager_OnRecipeSuccess;
+            DeliveryManager.Instance.OnRecipeFailed -= DeliveryManager_OnRecipeFailed;
         }
     }
 
     private void TrashCounter_OnAnyObjectTrashed(object sender, System.EventArgs e)
     {
         TrashCounterController trashCounter = sender as TrashCounterController;
-        PlaySound(AudioClipRefsSO.objectDrop, trashCounter.BaseCounterView.transform.position,
-            soundType: SoundType.ObjectDrop);
+        PlaySound(AudioClipRefsSO.objectDrop, trashCounter.BaseCounterView.transform.position);
     }
 
     private void BaseCounter_OnAnyObjectPlacedHere(object sender, KitchenObjectSO e)
     {
         BaseCounterController baseCounter = sender as BaseCounterController;
-        PlaySound(AudioClipRefsSO.objectDrop, baseCounter.BaseCounterView.transform.position,
-            soundType: SoundType.ObjectDrop);
+        PlaySound(AudioClipRefsSO.objectDrop, baseCounter.BaseCounterView.transform.position);
     }
 
     private void Player_OnPickedSomething(object sender, System.EventArgs e)
     {
-        PlaySound(AudioClipRefsSO.objectPickup, PlayerStateMachine.Instance.transform.position,
-            soundType: SoundType.ObjectPickup);
+        PlaySound(AudioClipRefsSO.objectPickup, PlayerStateMachine.Instance.transform.position);
     }
 
     private void CuttingCounter_OnAnyCut(object sender, System.EventArgs e)
     {
         CuttingCounterController cuttingCounter = sender as CuttingCounterController;
-        PlaySound(AudioClipRefsSO.chop, cuttingCounter.BaseCounterView.transform.position,
-            soundType: SoundType.Chop);
+        PlaySound(AudioClipRefsSO.chop, cuttingCounter.BaseCounterView.transform.position);
     }
 
     private void DeliveryManager_OnRecipeFailed(object sender, System.EventArgs e)
     {
         DeliveryCounterController deliveryCounter = DeliveryCounterController.Instance;
         PlaySound(AudioClipRefsSO.deliveryFailed, 
-            deliveryCounter.BaseCounterView.transform.position, soundType: SoundType.DeliveryFailed);
+            deliveryCounter.BaseCounterView.transform.position);
     }
 
     private void DeliveryManager_OnRecipeSuccess(object sender, System.EventArgs e)
     {
         DeliveryCounterController deliveryCounter = DeliveryCounterController.Instance;
         PlaySound(AudioClipRefsSO.deliverySuccess, 
-            deliveryCounter.BaseCounterView.transform.position, soundType : SoundType.DeliverySuccess);
+            deliveryCounter.BaseCounterView.transform.position);
     }
-    private void PlaySoundAtPosition(AudioClip clip, Vector3 position, 
-        float volume = 1f, bool destroyOnEnd = true, SoundType soundType = SoundType.None)
+    private AudioSource GetPooledAudioSource()
     {
-        if(audioSourceDictionary.ContainsKey(soundType))
+        for (int i = 0; i < audioSourcePool.Count; i++)
         {
-            audioSourceDictionary[soundType].Stop();
-            audioSourceDictionary[soundType].clip = clip;
-            audioSourceDictionary[soundType].spatialBlend = 0f;
-            audioSourceDictionary[soundType].volume = volume;
-            audioSourceDictionary[soundType].Play();
-        }
-        else
-        {
-            GameObject tempGO = new GameObject("TempAudio");
-            tempGO.transform.position = position;
-            AudioSource audioSource = tempGO.AddComponent<AudioSource>();
-            audioSource.clip = clip;
-            audioSource.spatialBlend = 0f;
-            audioSource.volume = volume; 
-            audioSource.Play();
-            if(!destroyOnEnd)
+            if (!audioSourcePool[i].isPlaying)
             {
-                Destroy(tempGO, clip.length);
-            }
-            else
-            {
-                audioSourceDictionary.Add(soundType,audioSource);
+                return audioSourcePool[i];
             }
         }
-           
+
+        GameObject tempGO = new GameObject("TempAudio");
+        tempGO.transform.SetParent(transform);
+        AudioSource audioSource = tempGO.AddComponent<AudioSource>();
+        audioSourcePool.Add(audioSource);
+        return audioSource;
     }
 
-    private void PlaySound(AudioClip audioClip, Vector3 position,
-        float volume = 1f, bool destroyOnEnd = true ,SoundType soundType = SoundType.None)
+    private AudioSource PlaySoundAtPosition(AudioClip clip, Vector3 position, float volume = 1f, bool loop = false)
     {
-        PlaySoundAtPosition(audioClip, position, volume, destroyOnEnd, soundType);
-    }
-    public void StopPlaySound(SoundType soundType)
-    {
-        audioSourceDictionary[soundType].Stop();
-    }
-    private void PlaySound(AudioClip[] audioClipArray, Vector3 position, 
-        float volumeMultiplier = 1f, bool destroyOnEnd = true, SoundType soundType = SoundType.None)
-    {
-        PlaySound(audioClipArray[Random.Range(0, audioClipArray.Length)], position, 
-            volumeMultiplier * volume, destroyOnEnd, soundType);
+        AudioSource audioSource = GetPooledAudioSource();
+        audioSource.transform.position = position;
+        audioSource.clip = clip;
+        audioSource.spatialBlend = 1f;
+        audioSource.volume = volume;
+        audioSource.loop = loop;
+        audioSource.Play();
+        return audioSource;
     }
 
-    public void PlayFootStepSound(Vector3 position, float volume)
+    public AudioSource PlaySound(AudioClip audioClip, Vector3 position, bool loop = false)
+    {
+        return PlaySoundAtPosition(audioClip, position, volume, loop);
+    }
+    
+    public AudioSource PlaySound(AudioClip[] audioClipArray, Vector3 position, bool loop = false)
+    {
+        return PlaySound(audioClipArray[Random.Range(0, audioClipArray.Length)], position, loop);
+    }
+
+    public void PlayFootStepSound(Vector3 position)
     {
         footstepTimer -= Time.deltaTime;
         if (footstepTimer < 0)
         {
             footstepTimer = footstepTimerMax;
 
-            PlaySound(AudioClipRefsSO.footstep, position, volume, soundType : SoundType.Footstep);
+            PlaySound(AudioClipRefsSO.footstep, position);
         }
     }
     public void PlayCountdownSound()
     {
-        PlaySound(AudioClipRefsSO.warning, Vector3.zero, soundType: SoundType.CountDown);
+        PlaySound(AudioClipRefsSO.warning, Vector3.zero);
 
     }
-    public void PlayWarningSound(Vector3 position)
+    public AudioSource PlayWarningSound(Vector3 position, bool loop = true)
     {
-        PlaySound(AudioClipRefsSO.warning, position, soundType : SoundType.Warning);
+        return PlaySound(AudioClipRefsSO.warning, position, loop);
 
     }
-    public void PlayCookingSound(Vector3 position)
+    public AudioSource PlayCookingSound(Vector3 position, bool loop = true)
     {
-        PlaySound(AudioClipRefsSO.stoveSizzle, position, soundType: SoundType.Cooking);
+        return PlaySound(AudioClipRefsSO.stoveSizzle, position, loop);
 
     }
+    public void StopSound(AudioSource audioSource)
+    {
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+        }
+    }
+
+    public void StopAllSounds()
+    {
+        foreach (AudioSource audioSource in audioSourcePool)
+        {
+            audioSource.Stop();
+        }
+    }
+
     public void ChangeVolume()
     {
         volume += .1f;
@@ -167,7 +165,13 @@ public class SoundManager : PersistentSingleton<SoundManager>
         {
             volume = 0f;
         }
-        PlayerPrefs.SetFloat(PLAYER_SOUND_EFFECTS_VOLUME, volume);
+        SetVolume(volume);
+    }
+
+    public void SetVolume(float volume)
+    {
+        this.volume = Mathf.Clamp01(volume);
+        PlayerPrefs.SetFloat(PLAYER_SOUND_EFFECTS_VOLUME, this.volume);
         PlayerPrefs.Save();
     }
     public float GetVolume()
