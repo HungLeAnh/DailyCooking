@@ -18,7 +18,7 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     [SerializeField] private Transform placePoint;
     [SerializeField] private ProgressBarUI progressBarUI;
     [SerializeField] private BurnWarningUI burnWarningUI;
-
+    [SerializeField] private float burnShowProgressAmount = 0.5f;
     private State _state;
     private float _cookingTimer;
     private float _burningTimer;
@@ -50,13 +50,18 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     }
     public virtual void FireOnStateChange()
     {
-        bool playSound = CurrentState == State.Cooking || CurrentState == State.Cooked;
-        if (playSound)
+        if(CurrentState == State.Idle || CurrentState == State.Burned)
+        {
+            SoundManager.Instance.StopPlaySound(SoundType.Cooking);
+            SoundManager.Instance.StopPlaySound(SoundType.Warning);
+        }
+        if (CurrentState == State.Cooking || CurrentState == State.Cooked)
         {
             SoundManager.Instance.PlayCookingSound(gameObject.transform.position);
         }
-        else
+        if(CurrentState == State.Cooked && GetProgress() >= burnShowProgressAmount)
         {
+            SoundManager.Instance.PlayWarningSound(gameObject.transform.position);
         }
     }
     private void Update()
