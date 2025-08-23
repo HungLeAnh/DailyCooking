@@ -7,6 +7,7 @@ public class OrderFoodState : BotState
     public override void Enter()
     {
         Debug.Log("Bot is ordering food.");
+        stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Talk);
     }
 
     public override void Update()

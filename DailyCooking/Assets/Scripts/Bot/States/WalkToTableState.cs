@@ -7,6 +7,7 @@ public class WalkToTableState : BotState
     public override void Enter()
     {
         Debug.Log("Bot is walking to the table.");
+        stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walk);
     }
 
     public override void Update()

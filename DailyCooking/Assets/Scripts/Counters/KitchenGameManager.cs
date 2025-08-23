@@ -83,6 +83,7 @@ public class KitchenGameManager : MonoBehaviour
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup);
         countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
         DeliveryManager.Instance.Init();
+        BotManager.Instance.Initialize();
     }
     public void EndGame()
     {

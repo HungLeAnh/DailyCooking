@@ -7,6 +7,7 @@ public class WaitingForFoodState : BotState
     public override void Enter()
     {
         Debug.Log("Bot is waiting for food.");
+        stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Idle);
     }
 
     public override void Update()
