@@ -12,8 +12,17 @@ public class WaitForTableState : BotState
 
     public override void Update()
     {
-        // Logic to check if a table is available
-        // If a table is available, transition to WalkToTableState
-        // stateMachine.SetState(new WalkToTableState(stateMachine));
+        Table availableTable = TableManager.Instance.GetAvailableTable();
+        if (availableTable != null)
+        {
+            int seatIndex = availableTable.GetAvailableSeat();
+            if (seatIndex != -1)
+            {
+                stateMachine.GetBotController().TargetTable = availableTable;
+                stateMachine.GetBotController().TargetSeatIndex = seatIndex;
+                availableTable.OccupySeat(seatIndex);
+                stateMachine.SetState(new WalkToTableState(stateMachine));
+            }
+        }
     }
 }

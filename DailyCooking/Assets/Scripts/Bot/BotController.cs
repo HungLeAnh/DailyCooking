@@ -5,6 +5,9 @@ public class BotController : MonoBehaviour
     [SerializeField] private Animator animator;
     private BotStateMachine stateMachine;
 
+    public Table TargetTable { get; set; }
+    public int TargetSeatIndex { get; set; }
+
     public Animator Animator { get => animator; }
 
     private void Awake()
