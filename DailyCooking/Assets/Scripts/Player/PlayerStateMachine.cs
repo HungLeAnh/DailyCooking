@@ -145,10 +145,11 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                     SetSelectedCounter(baseCounter);
                     if (baseCounter.gameObject.TryGetComponent(out PlacedObjectView placedObjectView))
                     {
-                        Unity.Mathematics.int2 counterOrigin = new Unity.Mathematics.int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
-                        Unity.Mathematics.int2 playerPos = GridBuildingSystem.Instance.WorldPositionToGridPos(Context.PlayerTransform.position.x, Context.PlayerTransform.position.z);
+                        int2 counterOrigin = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
+                        int2 playerPos = GridBuildingSystem.Instance.WorldPositionToGridPos(Context.PlayerTransform.position.x, Context.PlayerTransform.position.z);
                         Context.IsReachedDestination = false;
-                        GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
+                        
+                        //GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
 
                     }
                 }
