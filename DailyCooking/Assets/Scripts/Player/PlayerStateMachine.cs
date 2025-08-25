@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitchenObjectParent
 {
@@ -31,14 +32,16 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     [SerializeField] 
     private Transform kitchenObjectHoldPoint;
     [SerializeField] 
-    private Animator _characterAnimator;
+    private Animator characterAnimator;
+    [SerializeField]
+    private NavMeshAgent navMeshAgent;
 
     private StateManager<EPlayerState> _stateManager;
     private PlayerStateFactory _stateFactory;
 
     private void IntializeStates()
     {
-        Context = new PlayerStateContext(_characterAnimator,moveSpeed,
+        Context = new PlayerStateContext(characterAnimator,moveSpeed,
             this.transform,countersLayerMask, this.kitchenObjectHoldPoint);
 
         var states = _stateFactory.CreateStates(this);
@@ -145,12 +148,15 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                     SetSelectedCounter(baseCounter);
                     if (baseCounter.gameObject.TryGetComponent(out PlacedObjectView placedObjectView))
                     {
-                        int2 counterOrigin = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
-                        int2 playerPos = GridBuildingSystem.Instance.WorldPositionToGridPos(Context.PlayerTransform.position.x, Context.PlayerTransform.position.z);
+                        int2 gridPos = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
+                        Vector3 counterOrigin = GridBuildingSystem.Instance
+                                    .GridPositionToWorldPosition(gridPos);
                         Context.IsReachedDestination = false;
                         
                         //GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
-
+                        Debug.Log("Set destination to " + counterOrigin);
+                        Debug.Log("PlacedObjectView position: " + placedObjectView.transform.position);
+                        navMeshAgent.SetDestination(counterOrigin);
                     }
                 }
                 else if (baseCounter == Context.SelectedCounterController)

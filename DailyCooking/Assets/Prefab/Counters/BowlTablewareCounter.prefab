@@ -318,6 +318,10 @@ PrefabInstance:
       propertyPath: 'visualGameObjectArray.Array.data[1]'
       value: 
       objectReference: {fileID: 984793098455047794}
+    - target: {fileID: 4937836932083093934, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
+      propertyPath: m_Center.y
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 5278761787930030305, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -453,9 +457,6 @@ MonoBehaviour:
   visualGameObjectArray:
   - {fileID: 5814564096301845110}
   - {fileID: 984793098455047794}
-  _tablewareKitchenObjectSO: {fileID: 11400000, guid: 3f9a28b714814864a8748e005522c083, type: 2}
-  _spawnTimerMax: 4
-  _tablewareSpawnAmountMax: 4
   _tablewareVisualPrefab: {fileID: -8679921383154817045, guid: d6a20c1af91110c4b887b864b14ceac0, type: 3}
   tablewareOffsetX: 0.1
   tablewareOffsetY: 1

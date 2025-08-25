@@ -1,17 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CodeMonkey.Utils;
-using JetBrains.Annotations;
-using UnityEngine.InputSystem;
 using System;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Jobs;
 using Unity.Mathematics;
-using System.Linq;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Newtonsoft.Json;
+using Unity.AI.Navigation;
 
 public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 {    
@@ -33,6 +27,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
     [SerializeField] private float cellSize = 2f;
     [SerializeField] private PlacedObjectDatabase placedObjectDatabase;
+    [SerializeField] private NavMeshSurface navMeshSurface;
 
     [Header("Grid Guide")]
     [SerializeField] private GameObject gridGuideObject;
@@ -103,6 +98,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
         GameInput.Instance.OnFingerDown += GameInput_OnFingerDown;
         GameInput.Instance.OnFingerUp += GameInput_OnFingerUp;
+        navMeshSurface.BuildNavMesh();
     }
 
     private void GameInput_OnFingerUp(object sender, Finger e)
