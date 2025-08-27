@@ -22,9 +22,10 @@ public class PlayerStateContext
     private int _wayPointIndex;
     private bool isTouching;
     private bool isReachedDestination;
+    private UnityEngine.AI.NavMeshAgent _navMeshAgent;
     public PlayerStateContext(Animator animator, 
         float moveSpeed,
-        Transform playerTransform, LayerMask counterLayerMask, Transform kitchenObjectHoldPoint)
+        Transform playerTransform, LayerMask counterLayerMask, Transform kitchenObjectHoldPoint, UnityEngine.AI.NavMeshAgent navMeshAgent)
     {
         _characterAnimator = animator;
         _gameInput = GameInput.Instance;
@@ -36,9 +37,11 @@ public class PlayerStateContext
         _pathList = new List<int2>();
         _isWalking = false;
         _wayPointIndex = 0;
+        _navMeshAgent = navMeshAgent;
     }
 
     //Read only
+    public UnityEngine.AI.NavMeshAgent NavMeshAgent => _navMeshAgent;
     public Animator CharacterAnimator => _characterAnimator;
     public GameInput PlayerGameInput => _gameInput; 
     public float MoveSpeed { get => _movespeed; set => _movespeed = value; }

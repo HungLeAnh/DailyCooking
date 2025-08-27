@@ -34,29 +34,29 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     
     protected void UpdatePlayerPosition()
     {
-        if (Context.IsWalking && Context.PathList.Count > 0)
-        {
-            // Calculate the step size
-            float step = Context.MoveSpeed * Time.deltaTime;
-            var nextTarget = GridBuildingSystem.Instance.GridPositionToWorldPosition(Context.PathList[Context.WayPointIndex]);
+        //if (Context.IsWalking && Context.PathList.Count > 0)
+        //{
+        //    // Calculate the step size
+        //    float step = Context.MoveSpeed * Time.deltaTime;
+        //    var nextTarget = GridBuildingSystem.Instance.GridPositionToWorldPosition(Context.PathList[Context.WayPointIndex]);
 
-            // Move the character towards the target
-            Context.PlayerTransform.position = Vector3.MoveTowards(Context.PlayerTransform.position, nextTarget, step);
+        //    // Move the character towards the target
+        //    Context.PlayerTransform.position = Vector3.MoveTowards(Context.PlayerTransform.position, nextTarget, step);
 
-            // Optionally, rotate the character to face the target
-            Vector3 targetDirection = nextTarget - Context.PlayerTransform.position;
-            Vector3 newDirection = Vector3.RotateTowards(Context.PlayerTransform.forward, targetDirection, step, 0.0f);
-            Context.PlayerTransform.rotation = Quaternion.LookRotation(newDirection);
+        //    // Optionally, rotate the character to face the target
+        //    Vector3 targetDirection = nextTarget - Context.PlayerTransform.position;
+        //    Vector3 newDirection = Vector3.RotateTowards(Context.PlayerTransform.forward, targetDirection, step, 0.0f);
+        //    Context.PlayerTransform.rotation = Quaternion.LookRotation(newDirection);
 
-            if (Vector3.Distance(Context.PlayerTransform.position, nextTarget) < GameDefine.MIN_DISTANCE_TO_TARGET)
-            {
-                Context.WayPointIndex++;
-                if (Context.WayPointIndex >= Context.PathList.Count)
-                {
-                    Context.IsWalking = false;
-                }
-            }
-        }
+        //    if (Vector3.Distance(Context.PlayerTransform.position, nextTarget) < GameDefine.MIN_DISTANCE_TO_TARGET)
+        //    {
+        //        Context.WayPointIndex++;
+        //        if (Context.WayPointIndex >= Context.PathList.Count)
+        //        {
+        //            Context.IsWalking = false;
+        //        }
+        //    }
+        //}
     }
     protected void StopMove()
     {

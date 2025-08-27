@@ -41,13 +41,21 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
 
     private void IntializeStates()
     {
-        Context = new PlayerStateContext(characterAnimator,moveSpeed,
-            this.transform,countersLayerMask, this.kitchenObjectHoldPoint);
+        Context = new PlayerStateContext(characterAnimator, moveSpeed,
+            this.transform, countersLayerMask, this.kitchenObjectHoldPoint, navMeshAgent);
 
         var states = _stateFactory.CreateStates(this);
         _stateManager.SetStates(states, EPlayerState.Idle);
         _stateManager.Start();
+
+        SetupNavMeshAgent();
     }
+
+    private void SetupNavMeshAgent()
+    {
+        navMeshAgent.speed = moveSpeed;
+    }
+
     protected override void Awake()
     {
         base.Awake();
@@ -152,11 +160,8 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                         Vector3 counterOrigin = GridBuildingSystem.Instance
                                     .GridPositionToWorldPosition(gridPos);
                         Context.IsReachedDestination = false;
-                        
-                        //GridBuildingSystem.Instance.FindPath(playerPos, counterOrigin);
-                        Debug.Log("Set destination to " + counterOrigin);
-                        Debug.Log("PlacedObjectView position: " + placedObjectView.transform.position);
                         navMeshAgent.SetDestination(counterOrigin);
+                        Context.IsWalking = true;
                     }
                 }
                 else if (baseCounter == Context.SelectedCounterController)
@@ -167,7 +172,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                         IHasProgress progress = Context.SelectedCounterController as IHasProgress;
                         if (progress == null)
                         {
-                            if (Context.IsReachedDestination)
+                            if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
                             {
                                 SetSelectedCounter(baseCounter);
                                 Context.SelectedCounterController.InteractEvent(PlayerStateMachine.Instance);

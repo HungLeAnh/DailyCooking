@@ -14,14 +14,16 @@ public class WalkToTableState : BotState
         Transform seatTransform = table.GetSeatTransform(seatIndex);
 
         Debug.Log("Bot is walking to seat " + seatIndex + " at table " + table.name);
-        // Here you would add the logic to move the bot to the seatTransform.position
+        stateMachine.GetBotController().NavMeshAgent.SetDestination(seatTransform.position);
     }
 
     public override void Update()
     {
         // Logic for walking to the table
         // When the bot reaches the table, transition to OrderFoodState
-        // For now, let's assume the bot reaches the table instantly
-        stateMachine.SetState(new OrderFoodState(stateMachine));
+        if (stateMachine.GetBotController().NavMeshAgent.remainingDistance <= stateMachine.GetBotController().NavMeshAgent.stoppingDistance)
+        {
+            stateMachine.SetState(new OrderFoodState(stateMachine));
+        }
     }
 }

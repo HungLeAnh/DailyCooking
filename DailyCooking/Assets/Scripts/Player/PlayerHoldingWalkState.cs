@@ -31,10 +31,11 @@ public class PlayerHoldingWalkState : PlayerBaseState
         _subStateMachine.Update();
         if (Context.IsWalking)
         {
-            UpdatePlayerPosition();
-            if (Vector3.Distance(Context.PlayerTransform.position, Context.EndPosition) > GameDefine.MIN_DISTANCE_TO_TARGET)
-                return;
-            OnReachDestination();
+            if (Context.NavMeshAgent.remainingDistance <= Context.NavMeshAgent.stoppingDistance)
+            {
+                Context.IsWalking = false;
+                OnReachDestination();
+            }
         }
     }
 }
