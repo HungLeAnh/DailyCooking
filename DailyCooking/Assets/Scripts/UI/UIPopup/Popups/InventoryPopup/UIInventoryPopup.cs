@@ -161,7 +161,6 @@ public class UIInventoryPopup : UIPopup
         }
 
         GameManager.Instance.GameData.RemoveInventoryData(itemToInspect.Guid);
-        GameManager.Instance.SaveGame();
 
         GridBuildingSystem.Instance.SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
         isPlacingObject = true;
