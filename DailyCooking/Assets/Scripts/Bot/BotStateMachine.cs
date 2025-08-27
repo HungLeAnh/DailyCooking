@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class BotStateMachine
 {
-    private BotController botController;
+    private BotCustomerController botController;
     private BotState currentState;
 
-    public BotStateMachine(BotController botController)
+    public BotStateMachine(BotCustomerController botController)
     {
         this.botController = botController;
         // Set initial state
@@ -31,7 +31,7 @@ public class BotStateMachine
         }
     }
 
-    public BotController GetBotController()
+    public BotCustomerController GetBotController()
     {
         return botController;
     }
