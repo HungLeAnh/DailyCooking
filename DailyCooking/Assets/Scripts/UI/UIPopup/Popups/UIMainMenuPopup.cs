@@ -14,7 +14,7 @@ public class UIMainMenuPopup : UIPopup
         playButton.onClick.AddListener(() =>
         {
             Loader.Load(Loader.Scene.GameScene);
-            GameManager.Instance.SwitchState(GameState.InGame);
+            GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
         });
         optionsButton.onClick.AddListener(() => {

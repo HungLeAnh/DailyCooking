@@ -36,24 +36,7 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
         }
     }
 
-    private void Start()
-    {
-        GameManager.Instance.OnStateChange += GameManager_OnStateChange;
-    }
-
-    private void GameManager_OnStateChange(object sender, EventArgs e)
-    {
-        if(GameManager.Instance.GameState == GameState.InGame)
-        {
-            if (!GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
-            {
-                ShowFirstTimeTutorial();
-            }
-
-        }
-    }
-
-    private void ShowFirstTimeTutorial()
+    public void ShowFirstTimeTutorial()
     {
         UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].StartTutorial();

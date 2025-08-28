@@ -346,7 +346,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             OnObjectPlaced?.Invoke(this, EventArgs.Empty);
             
             GameManager.Instance.GameData.UpdateGridData(grid);
-            Debug.LogError("Placed Object at : "+ placedObjectWorldPosition);
+            //Debug.LogError("Placed Object at : "+ placedObjectWorldPosition);
             DeselectObjectType();
             return true;
         }

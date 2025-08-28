@@ -5,11 +5,10 @@ using UnityEngine;
 [DefaultExecutionOrder(-1)]
 public class GameManager : PersistentSingleton<GameManager>
 {
-    public event EventHandler OnStateChange;
     [SerializeField] private GameObject playerPrefab;
     private GameData gameData;
     private FileDataHandler dataHandler;
-    private GameState gameState;
+    private GameManagerBaseState currentState;
 
     [Header("Settings")]
     [SerializeField] private string fileName = "GameData";
@@ -18,7 +17,7 @@ public class GameManager : PersistentSingleton<GameManager>
     public FileDataHandler DataHandler => dataHandler;
 
     public GameData GameData => gameData;
-    public GameState GameState => gameState;
+    
     protected override void Awake()
     {
         base.Awake();
@@ -26,12 +25,10 @@ public class GameManager : PersistentSingleton<GameManager>
             Application.persistentDataPath,
             fileName
         );
-        SwitchState(GameState.MainMenu);
     }
     private void Start()
     {
         LoadGame();
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup);
         
         gameData.PlayerStats.OnResourceChange += SaveGame;
         gameData.PlayerStats.OnLevelChange += SaveGame;
@@ -39,6 +36,13 @@ public class GameManager : PersistentSingleton<GameManager>
         gameData.InventoryData.OnInventoryDataChanged += SaveGame;
         gameData.GridData.OnGridDataChanged += SaveGame;
         gameData.TutorialData.OnTutorialDataChanged += SaveGame;
+
+        SwitchState(new MainMenuState(this));
+    }
+
+    private void Update()
+    {
+        currentState?.Update();
     }
 
     private void OnDestroy()
@@ -81,9 +85,10 @@ public class GameManager : PersistentSingleton<GameManager>
         dataHandler.Save(gameData);
     }
 
-    public void SwitchState(GameState newState)
+    public void SwitchState(GameManagerBaseState newState)
     {
-        gameState = newState;
-        OnStateChange?.Invoke(this,EventArgs.Empty);
+        currentState?.Exit();
+        currentState = newState;
+        currentState.Enter();
     }
 }
