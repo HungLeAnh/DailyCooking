@@ -1,0 +1,160 @@
+class BaseCounterController {
+  + BaseCounterView BaseCounterView
+  + BaseCounterModel BaseCounterModel
+  + InteractEvent(PlayerStateMachine)
+  + InteractAlternateEvent(PlayerStateMachine)
+  + GetKitchenObject(): KitchenObject
+  + ClearKitchenObject()
+  + HasKitchenObject(): bool
+  + GetKitchenObjectFollowTransform(): Transform
+  + SetKitchenObject(KitchenObject)
+}
+BaseCounterController --|> MonoBehaviour
+BaseCounterController --|> IKitchenObjectParent
+BaseCounterController --|> IInteractable
+
+class ClearCounterController {
+  + InteractEvent(PlayerStateMachine)
+}
+ClearCounterController --|> BaseCounterController
+
+class ContainerCounterController {
+  + InteractEvent(PlayerStateMachine)
+  + GetContainerKitchenObjectType(): KitchenObjectSO
+}
+ContainerCounterController --|> BaseCounterController
+ContainerCounterController --|> IContainerCounter
+
+class CuttingCounterController {
+  + event EventHandler OnCut
+  + InteractEvent(PlayerStateMachine)
+  + InteractAlternateEvent(PlayerStateMachine)
+  + SetOptionKitchenObjectSO(int)
+  + IsDone(): bool
+  + GetProgress(): float
+  + OnShowOptionMenu(List<KitchenObjectSO>)
+}
+CuttingCounterController --|> BaseCounterController
+CuttingCounterController --|> IHasProgress
+CuttingCounterController --|> IHasOptionalSO
+
+class DeliveryCounterController {
+  + static DeliveryCounterController Instance
+  + Init()
+  + InteractEvent(PlayerStateMachine)
+}
+DeliveryCounterController --|> BaseCounterController
+
+class OptionalContainerCounterController {
+  + event EventHandler OnPlayreGrabbedObject
+  + InteractEvent(PlayerStateMachine)
+  + SetOptionKitchenObjectSO(int)
+  + OnShowOptionMenu(List<KitchenObjectSO>)
+}
+OptionalContainerCounterController --|> BaseCounterController
+OptionalContainerCounterController --|> IHasOptionalSO
+
+class StoveCounterController {
+  + InteractEvent(PlayerStateMachine)
+  + GetProgress(): float
+  + IsDone(): bool
+}
+StoveCounterController --|> BaseCounterController
+
+class TablewareCounterController {
+  + InteractEvent(PlayerStateMachine)
+}
+TablewareCounterController --|> BaseCounterController
+
+class TrashCounterController {
+  + InteractEvent(PlayerStateMachine)
+}
+TrashCounterController --|> BaseCounterController
+
+class BaseCounterModel {
+  + KitchenObject KitchenObject
+  + SetKitchenObject(KitchenObject)
+  + ClearKitchenObject()
+}
+
+class ClearCounterModel {
+}
+ClearCounterModel --|> BaseCounterModel
+
+class ContainerCounterModel {
+}
+ContainerCounterModel --|> BaseCounterModel
+
+class CuttingCounterModel {
+  + int CuttingProgress
+  + CuttingRecipeSO CuttingRecipeSO
+  + float ProgressNormalized
+}
+CuttingCounterModel --|> BaseCounterModel
+
+class DeliveryCounterModel {
+}
+DeliveryCounterModel --|> BaseCounterModel
+
+class OptionalContainerCounterModel {
+}
+OptionalContainerCounterModel --|> BaseCounterModel
+
+class StoveCounterModel {
+}
+StoveCounterModel --|> BaseCounterModel
+
+class TablewareCounterModel {
+  + int TablewareSpawnAmount
+  + float SpawnTimer
+}
+TablewareCounterModel --|> BaseCounterModel
+
+class TrashCounterModel {
+}
+TrashCounterModel --|> BaseCounterModel
+
+class CounterModules {
+  + event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged
+  + bool IsInited
+  + List<BaseCounterController> BaseCounterControllers
+  + Initialize()
+  + DestroyCounter(BaseCounterView)
+  + AddCounterController(BaseCounterController)
+  + FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs)
+  + IsContainerCounter(BaseCounterController): bool
+}
+CounterModules --|> PersistentSingleton
+
+class OnSelectedCounterChangedEventArgs {
+  + BaseCounterController selectedCounterController
+}
+OnSelectedCounterChangedEventArgs --|> EventArgs
+
+class BaseCounterView {
+  + Transform CounterTopPoint
+  + GetController<T>(): T
+  + Show()
+  + Hide()
+}
+BaseCounterView --|> MonoBehaviour
+
+class CuttingCounterView {
+  + UpdateProgressBar(float)
+}
+CuttingCounterView --|> BaseCounterView
+
+interface IInteractable {
+  + InteractEvent(PlayerStateMachine)
+  + InteractAlternateEvent(PlayerStateMachine)
+}
+
+class StoveCounterView {
+}
+StoveCounterView --|> BaseCounterView
+
+class TablewareCounterView {
+  + OnTablewareRemoved()
+  + OnTablewareSpawned()
+}
+TablewareCounterView --|> BaseCounterView

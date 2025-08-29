@@ -1,0 +1,28 @@
+abstract class PlayerBaseState {
+  # PlayerStateContext Context
+  + IntializeStates(PlayerStateContext)
+  + Dispose()
+  + ChangeAnimationState(string)
+  + UpdateState()
+  # UpdatePlayerPosition()
+  # StopMove()
+  # MoveTowardsTarget(int2, float)
+  + MoveTowardsTarget(List<int2>, float)
+  # OnReachDestination()
+}
+PlayerBaseState --|> BaseState<PlayerStateMachine.EPlayerState>
+
+class PlayerStateMachine {
+  + PlayerStateContext Context
+  + event EventHandler OnPickedSomething
+  + enum EPlayerState { Idle, Holding, Idle_Idle, Idle_Walking, Holding_Idle, Holding_Walking }
+  + GetKitchenObjectFollowTransform(): Transform
+  + SetKitchenObject(KitchenObject)
+  + GetKitchenObject(): KitchenObject
+  + ClearKitchenObject()
+  + HasKitchenObject(): bool
+  + DisableInput(bool)
+  + SetPlayerPath(List<int2>)
+}
+PlayerStateMachine --|> PersistentSingleton
+PlayerStateMachine --|> IKitchenObjectParent

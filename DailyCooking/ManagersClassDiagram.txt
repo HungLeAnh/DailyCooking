@@ -1,0 +1,185 @@
+class ConfigManager {
+  + ConfigShop ConfigShop
+  + LoadConfig()
+}
+ConfigManager --|> PersistentSingleton
+
+class ConfigShopItem {
+  + int Id
+  + string Name
+  + ShopItemType Type
+  + int Price
+  + string Reward
+  + ShopItemCategory Category
+  + int UnlockLevel
+}
+
+class CustomContractResolver {
+  # CreateProperty(MemberInfo, MemberSerialization)
+}
+CustomContractResolver --|> DefaultContractResolver
+
+class FileDataHandler {
+  + JsonSerializerSettings Settings
+  + Load(): GameData
+  + Save(GameData)
+}
+
+class GameData {
+  + PlayerStats PlayerStats
+  + InventoryData InventoryData
+  + GridData GridData
+  + TutorialData TutorialData
+  + UpdateGridData(GridXZ<GridObject>)
+  + AddInventoryData(InventoryItemData)
+  + AddInventoryData(string)
+  + RemoveInventoryData(InventoryItemData)
+  + RemoveInventoryData(string)
+}
+
+class GameDefine {
+  // Contains constants for Grid and Player State Machine
+}
+GameDefine --|> MonoBehaviour
+
+class GameManager {
+  + FileDataHandler DataHandler
+  + GameData GameData
+  + InitializePlayer()
+  + DestroyPlayer()
+  + NewGame()
+  + LoadGame()
+  + SaveGame()
+  + SwitchState(GameManagerBaseState)
+}
+GameManager --|> PersistentSingleton
+
+class PlayerData {
+  + int Level
+  + int Exp
+  + int Gems
+  + int Coins
+  + int DaysPlayed
+}
+
+class PlayerStats {
+  + event Action OnResourceChange
+  + event Action OnLevelChange
+  + event Action OnExpChange
+  + event Action<int> OnLevelUp
+  + PlayerData playerData
+  + UpdatePlayerCoins(int)
+  + UpdatePlayerExp(int)
+  + UpdatePlayedDay(int)
+}
+
+class RewardData {
+  + string id
+  + int amount
+}
+
+enum ShopItemCategory {
+  Counters,
+  Tables,
+  None
+}
+
+enum ShopItemType {
+  Item,
+  Currency,
+        
+  None
+}
+
+class ShopManager {
+  + OnPurchase(ConfigShopItem)
+}
+ShopManager --|> PersistentSingleton
+
+abstract class GameManagerBaseState {
+  # GameManager gameManager
+  + Enter()
+  + Update()
+  + Exit()
+}
+
+class InGameState {
+  + Enter()
+}
+InGameState --|> GameManagerBaseState
+
+class MainMenuState {
+  + Enter()
+}
+MainMenuState --|> GameManagerBaseState
+
+class StartDayState {
+  + Enter()
+}
+StartDayState --|> GameManagerBaseState
+
+class TutorialData {
+  + event Action OnTutorialDataChanged
+  + bool HasPlayedFirstTime
+  + SetHasPlayedFirstTime(bool)
+}
+
+enum TutorialType {
+  None,
+  FirstTimePlaying,
+  GameMechanic
+}
+
+class TutorialManager {
+  + ShowFirstTimeTutorial()
+}
+TutorialManager --|> PersistentSingleton
+
+enum TutorialPanelPosition {
+  TopLeft,
+  TopRight,
+  BottomLeft,
+  BottomRight,
+  Center
+}
+
+class TutorialStep {
+  + int id
+  + string content
+  + TutorialPanelPosition panelPosition
+  + Vector2 panelOffset
+  + RectTransform elementToHighlight
+  + bool isImportant
+}
+
+class TutorialPanel {
+  + event EventHandler OnTutorialClosed
+  + HighlightElement(RectTransform)
+  + SetPosition(TutorialPanelPosition, Vector2)
+  + SetContent(string)
+  + NextStep()
+  + PreviousStep()
+  + StartTutorial()
+  + CloseTutorial()
+  + GetPanelType(): TutorialType
+}
+TutorialPanel --|> MonoBehaviour
+
+class UIManager {
+  // Handles UI updates based on game events
+}
+UIManager --|> MonoBehaviour
+
+class UniversalUnityConverter {
+  + CanConvert(Type): bool
+  + WriteJson(JsonWriter, object, JsonSerializer)
+  + ReadJson(JsonReader, Type, object, JsonSerializer): object
+}
+UniversalUnityConverter --|> JsonConverter
+
+class UpgradeManager {
+  + Register(IUpgradeable)
+  + Unregister(IUpgradeable)
+  + Upgrade(GameObject)
+}
+UpgradeManager --|> SimpleSingleton
