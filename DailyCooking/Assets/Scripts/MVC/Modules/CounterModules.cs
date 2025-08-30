@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class CounterModules : PersistentSingleton<CounterModules>
+public class CounterModules : PersistentSingleton<CounterModules>, ICounterModules
 {
     public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
     public class OnSelectedCounterChangedEventArgs : EventArgs

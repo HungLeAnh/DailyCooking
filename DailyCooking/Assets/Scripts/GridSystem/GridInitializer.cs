@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 public class GridInitializer : IGridInitializer
 {
     private IGridManager gridManager;
+    private IGameManager gameManager;
     private Transform roadContainer;
     private GameObject roadPrefab;
     private GameObject roadCornerPrefab;
@@ -18,9 +19,10 @@ public class GridInitializer : IGridInitializer
 
     public List<GridWall> GridWallList => gridWallList;
 
-    public GridInitializer(IGridManager gridManager, Transform roadContainer, GameObject roadPrefab, GameObject roadCornerPrefab, Transform pillarContainer, GameObject pillarPrefab, Transform wallContainer, GameObject wallPrefab, Transform floorContainer, GameObject floorPrefab)
+    public GridInitializer(IGridManager gridManager, IGameManager gameManager, Transform roadContainer, GameObject roadPrefab, GameObject roadCornerPrefab, Transform pillarContainer, GameObject pillarPrefab, Transform wallContainer, GameObject wallPrefab, Transform floorContainer, GameObject floorPrefab)
     {
         this.gridManager = gridManager;
+        this.gameManager = gameManager;
         this.roadContainer = roadContainer;
         this.roadPrefab = roadPrefab;
         this.roadCornerPrefab = roadCornerPrefab;
@@ -157,12 +159,12 @@ public class GridInitializer : IGridInitializer
 
     public void InitDefaultCounters()
     {
-        List<GridObjectData> gridObjectDataList = JsonConvert.DeserializeObject<List<GridObjectData>>(GameDefine.GridArrayDataInit,GameManager.Instance.DataHandler.Settings);
+        List<GridObjectData> gridObjectDataList = JsonConvert.DeserializeObject<List<GridObjectData>>(GameDefine.GridArrayDataInit,gameManager.DataHandler.Settings);
         foreach (GridObjectData gridObject in gridObjectDataList)
         {
-            if (GameManager.Instance.GameData.GridData.GridArrayData.Contains(gridObject))
+            if (gameManager.GameData.GridData.GridArrayData.Contains(gridObject))
                 continue;
-            GameManager.Instance.GameData.GridData.GridArrayData.Add(gridObject);
+            gameManager.GameData.GridData.GridArrayData.Add(gridObject);
         }
         gridManager.AddGridObjectData(gridObjectDataList);
     }

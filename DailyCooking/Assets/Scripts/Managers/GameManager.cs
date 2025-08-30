@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DefaultExecutionOrder(-1)]
-public class GameManager : PersistentSingleton<GameManager>
+public class GameManager : PersistentSingleton<GameManager>, IGameManager
 {
     [SerializeField] private GameObject playerPrefab;
     private GameData gameData;

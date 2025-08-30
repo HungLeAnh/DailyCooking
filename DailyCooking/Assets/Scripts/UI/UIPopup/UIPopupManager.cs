@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class UIPopupManager : PersistentSingleton<UIPopupManager>
+public class UIPopupManager : PersistentSingleton<UIPopupManager>, IUIPopupManager
 {
 
     [SerializeField] private PopupDatabase popupDatabase;

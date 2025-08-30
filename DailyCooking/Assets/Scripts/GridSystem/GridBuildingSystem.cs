@@ -9,10 +9,6 @@ using Unity.AI.Navigation;
 
 public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 {    
-    private const int MOVE_STRAIGHT_COST = 10;
-    private const int MOVE_DIAGONAL_COST = 14;
-    private const float GRID_OFFSET = 0.01f;
-
     public class OnSelectedChangedArgs : EventArgs
     {
         public PlacedObjectTypeSO placedObjectTypeSO;
@@ -44,20 +40,16 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     [SerializeField] private GameObject roadPrefab;
     [SerializeField] private GameObject roadCornerPrefab;
 
-    
-    
     [Header("Counter")]
     [SerializeField] private Transform counterContainer;
     [SerializeField] private LayerMask counterLayerMask;    
 
     private IGridManager gridManager;
+    private IGameManager gameManager;
     public IBuildingPlacementManager buildingPlacementManager;
     private IGridInitializer gridInitializer;
     private IGridVisualizer gridVisualizer;
-    private List<GridWall> gridWallList = new List<GridWall>(); 
-     
-    
-
+    private List<GridWall> gridWallList = new List<GridWall>();
 
     private Dictionary<string, PlacedObjectTypeSO> placedObjectTypeSODictionary = new Dictionary<string, PlacedObjectTypeSO>();
     
@@ -72,6 +64,12 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     private void Awake()
     {
+        // Get concrete instances of singletons
+        this.gameManager = GameManager.Instance;
+
+        ICounterModules counterModulesInstance = CounterModules.Instance;
+        IUIPopupManager uiPopupManagerInstance = UIPopupManager.Instance;
+
         foreach (var placedObject in placedObjectDatabase.PlacedObjects)
         {
             placedObjectTypeSODictionary[placedObject.Guid] = placedObject;
@@ -85,20 +83,20 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             gridManager = new GridManager(GameManager.Instance.GameData.GridData, (GridXZ<GridObject> grid, int x, int z) => new GridObject(grid, x, z));
 
         }
-        gridInitializer = new GridInitializer(gridManager, roadContainer, roadPrefab, roadCornerPrefab, pillarContainer, pillarPrefab, wallContainer, wallPrefab, floorContainer, floorPrefab); // Initialize GridInitializer
+        gridInitializer = new GridInitializer(gridManager, this.gameManager, roadContainer, roadPrefab, roadCornerPrefab, pillarContainer, pillarPrefab, wallContainer, wallPrefab, floorContainer, floorPrefab); // Initialize GridInitializer
         gridInitializer.InitRoad();
         gridInitializer.InitWallAndFloor();
         gridInitializer.InitPillar();
         gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList); // Initialize GridVisualizer
         gridVisualizer.SetActiveGridGuide(false); // Moved from InitGridGuide()
 
-        buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer); // Initialize BuildingPlacementManager
+
+        buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, counterModulesInstance, uiPopupManagerInstance); // Initialize BuildingPlacementManager
+        counterModulesInstance.Initialize(); // Initialize CounterModules here
 
     }
     private void Start()
     {
-
-        CounterModules.Instance.Initialize();
 
         GameInput.Instance.OnFingerDown += GameInput_OnFingerDown;
         GameInput.Instance.OnFingerUp += GameInput_OnFingerUp;
@@ -138,29 +136,18 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         buildingPlacementManager.DestroyPlaceObject(placedObjectView);
     }
-        
-    
-
-    
-
-    
-
-    
-
     public void UnlockGrid()
     {
         gridManager.UnlockGrid(GameDefine.GridSize,GameDefine.GridSize);
-        GameManager.Instance.GameData.UpdateGridData(gridManager.Grid);
+        gameManager.GameData.UpdateGridData(gridManager.Grid);
         gridInitializer.InitWallAndFloor();
         gridInitializer.InitPillar();
         if (!GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
         {
             gridInitializer.InitDefaultCounters();
-            GameManager.Instance.GameData.UpdateGridData(gridManager.Grid);
+            gameManager.GameData.UpdateGridData(gridManager.Grid);
         }
     }
-    
-    
     public void RotateBuildingObject()
     {
         buildingPlacementManager.RotateBuildingObject();
@@ -169,15 +156,10 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         return buildingPlacementManager.TryPlaceBuildingObject(interactPos);
     }
-    
-    
-    
-    
     public Vector3 GetMouseWorldSnappedPosition()
     {
         return buildingPlacementManager.GetMouseWorldSnappedPosition();
     }
-
     public Quaternion GetPlacedObjectRotation()
     {
         return buildingPlacementManager.GetPlacedObjectRotation();
@@ -190,9 +172,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         buildingPlacementManager.SetPlacedObjectTypeSO(placedObjectTypeSO, objectPosition);
     }
-
-    
-
     public PlacedObjectTypeSO GetPlacedObjectTypeSOByGuid(string Guid)
     {
         if (placedObjectTypeSODictionary.TryGetValue(Guid,out PlacedObjectTypeSO placedObjectSO))
@@ -208,7 +187,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         return PlacedObjectDatabase.PlacedObjects.Find(x => x.id == id);
     }
-
     public Vector3 GetFirstEmptyGridPos()
     {
         for (int x = 0; x < gridManager.GetWidth(); x++)
@@ -223,7 +201,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         }
         return Vector3.zero;
     }
-
     public int2 WorldPositionToGridPos(float x, float y)
     {
         if(gridManager.ValidateGridPosition(new Vector2Int(Mathf.RoundToInt(x), Mathf.RoundToInt(y))) != null)
@@ -233,7 +210,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         }
         return  new int2(-int.MaxValue, -int.MaxValue);
     }
-
     public Vector3 GridPositionToWorldPosition(int2 int2)
     {
         if (gridManager.ValidateGridPosition(new Vector2Int(int2.x, int2.y)) != null)
@@ -242,15 +218,12 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         }
         return Vector3.negativeInfinity;
     }
-
     public Vector2 GetGridSize()
     {
         return new Vector2Int(gridManager.GetWidth(), gridManager.GetHeight());
     }
-
     public void SaveGrid()
     {
-        GameManager.Instance.GameData.UpdateGridData(gridManager.Grid);
+        gameManager.GameData.UpdateGridData(gridManager.Grid);
     }
-
 }

@@ -13,18 +13,24 @@ public class BuildingPlacementManager : IBuildingPlacementManager
 
     private IGridManager gridManager;
     private IGridVisualizer gridVisualizer;
+    private IGameManager gameManager;
+    private ICounterModules counterModules;
+    private IUIPopupManager uiPopupManager;
     private PlacedObjectTypeSO placedObjectTypeSO;
     private Dir dir = Dir.Down;
     private bool isBuilding = false;
 
-    public bool IsBuilding => isBuilding;
-
     public PlacedObjectTypeSO PlacedObjectTypeSO => placedObjectTypeSO;
 
-    public BuildingPlacementManager(IGridManager gridManager, IGridVisualizer gridVisualizer)
+    public bool IsBuilding => isBuilding;
+
+    public BuildingPlacementManager(IGridManager gridManager, IGridVisualizer gridVisualizer, IGameManager gameManager, ICounterModules counterModules, IUIPopupManager uiPopupManager)
     {
         this.gridManager = gridManager;
         this.gridVisualizer = gridVisualizer;
+        this.gameManager = gameManager;
+        this.counterModules = counterModules;
+        this.uiPopupManager = uiPopupManager;
     }
 
     public void RotateBuildingObject()
@@ -67,7 +73,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             Vector3 placedObjectWorldPosition = gridManager.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
             PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
-            CounterModules.Instance.AddCounterController(placedObject.GetComponent<BaseCounterController>());
+            counterModules.AddCounterController(placedObject.GetComponent<BaseCounterController>());
             
             foreach (var gridPosition in gridPositionList)
             {
@@ -76,7 +82,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             }
             OnObjectPlaced?.Invoke(this, EventArgs.Empty);
             
-            GameManager.Instance.GameData.UpdateGridData(gridManager.Grid);
+            gameManager.GameData.UpdateGridData(gridManager.Grid);
             DeselectObjectType();
             return true;
         }
@@ -100,8 +106,8 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     {
         if(this.placedObjectTypeSO != null)
         {
-            GameManager.Instance.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);
-            GameManager.Instance.GameData.UpdateGridData(gridManager.Grid);
+            gameManager.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);
+            gameManager.GameData.UpdateGridData(gridManager.Grid);
             OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
         }
         this.placedObjectTypeSO = placedObjectTypeSO;
