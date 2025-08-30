@@ -40,8 +40,8 @@ public class CameraController : MonoBehaviour
         GameInput.Instance.OnDragPerformed += OnPanMoved;
         GameInput.Instance.OnPintchPerformed += HandleZoom;
 
-        GridBuildingSystem.Instance.OnBuildingStart += OnBuildingStart;
-        GridBuildingSystem.Instance.OnBuildingEnd += OnBuildingEnd;
+        GridBuildingSystem.Instance.buildingPlacementManager.OnBuildingStart += OnBuildingStart;
+        GridBuildingSystem.Instance.buildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
         
     }
     private void Update()

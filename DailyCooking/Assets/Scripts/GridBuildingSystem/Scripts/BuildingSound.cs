@@ -9,7 +9,7 @@ public class BuildingSound : MonoBehaviour {
 
     private void Start() {
         if (gridBuildingSystem != null) {
-            gridBuildingSystem.OnObjectPlaced += GridBuildingSystem3D_OnObjectPlaced;
+            gridBuildingSystem.buildingPlacementManager.OnObjectPlaced += GridBuildingSystem3D_OnObjectPlaced;
         }
 
     }

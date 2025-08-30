@@ -25,7 +25,7 @@ public class BuildingGhost : MonoBehaviour
         RefreshVisual(-Vector3.one);
         GameInput.Instance.OnFingerDown += OnPanStarted;
         GameInput.Instance.OnFingerUp += OnPanCanceled;
-        GridBuildingSystem.Instance.OnSelectedChanged += Instance_OnSelectedChanged;
+        GridBuildingSystem.Instance.buildingPlacementManager.OnSelectedChanged += Instance_OnSelectedChanged;
     }
 
     private void Instance_OnSelectedChanged(object sender, GridBuildingSystem.OnSelectedChangedArgs args) 
@@ -37,7 +37,7 @@ public class BuildingGhost : MonoBehaviour
         {
             return;
         }
-        targetQuaternion = GridBuildingSystem.Instance.GetPlacedObjectRotation();
+        targetQuaternion = GridBuildingSystem.Instance.buildingPlacementManager.GetPlacedObjectRotation();
         isRotating = true;
         OffsetRotation();
 
@@ -90,7 +90,7 @@ public class BuildingGhost : MonoBehaviour
     {
         if (isDragging == false)
             return;
-        Vector3 targetPosition = GridBuildingSystem.Instance.GetMouseWorldSnappedPosition();
+        Vector3 targetPosition = GridBuildingSystem.Instance.buildingPlacementManager.GetMouseWorldSnappedPosition();
         //Debug.Log("Dragging Building Ghost target pos: "+ targetPosition);
         if (targetPosition == -Vector3.one)
             return;
@@ -151,7 +151,7 @@ public class BuildingGhost : MonoBehaviour
     }
     public void OnClickConfirm()
     {
-        if (GridBuildingSystem.Instance.TryPlaceBuildingObject(visualContainer.position))
+        if (GridBuildingSystem.Instance.buildingPlacementManager.TryPlaceBuildingObject(visualContainer.position))
         {
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
             ShowCanvas(false);
@@ -174,15 +174,15 @@ public class BuildingGhost : MonoBehaviour
 
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
         ShowCanvas(false);
-        GridBuildingSystem.Instance.SetPlacedObjectTypeSO(null,-Vector3.one);
+        GridBuildingSystem.Instance.buildingPlacementManager.SetPlacedObjectTypeSO(null,-Vector3.one);
 
     }
     public void OnClickRotate()
     {
         if (placedObjectTypeSO != null)
         {
-            GridBuildingSystem.Instance.RotateBuildingObject();
-            targetQuaternion = GridBuildingSystem.Instance.GetPlacedObjectRotation();
+            GridBuildingSystem.Instance.buildingPlacementManager.RotateBuildingObject();
+            targetQuaternion = GridBuildingSystem.Instance.buildingPlacementManager.GetPlacedObjectRotation();
             isRotating = true;
             OffsetRotation();
         }
@@ -190,7 +190,7 @@ public class BuildingGhost : MonoBehaviour
 
     private void OffsetRotation()
     {
-        visual.localPosition = GridBuildingSystem.Instance.GetPlacedObjectRotationOffset();
+        visual.localPosition = GridBuildingSystem.Instance.buildingPlacementManager.GetPlacedObjectRotationOffset();
     }
 }
 
