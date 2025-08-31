@@ -43,8 +43,8 @@ public class UIInventoryPopup : UIPopup
         _tabsPanel.SetTabs(inventoryTabDatabase.TabTypesList[0]);
         _selectedTab = inventoryTabDatabase.TabTypesList[0];
         FillInventory(_selectedTab.TabType);        
-        GridBuildingSystem.Instance.buildingPlacementManager.OnObjectPlaced += GridBuildingSystem_OnObjectPlaced;
-        GridBuildingSystem.Instance.buildingPlacementManager.OnReturnPlaceObjectToInventory += GridBuildingSystem_OnReturnPlaceObjectToInventory;
+        GridBuildingSystem.Instance.BuildingPlacementManager.OnObjectPlaced += GridBuildingSystem_OnObjectPlaced;
+        GridBuildingSystem.Instance.BuildingPlacementManager.OnReturnPlaceObjectToInventory += GridBuildingSystem_OnReturnPlaceObjectToInventory;
     }
 
     public override void ShowPopup(object param = null)
@@ -58,7 +58,7 @@ public class UIInventoryPopup : UIPopup
         }
         //sub switch tab here
         FillInventory(_selectedTab.TabType);
-        GridBuildingSystem.Instance.buildingPlacementManager.FireOnBuildingStartEvent();
+        GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingStartEvent();
         UIHUDManager.Instance.HideAllUIElement();
 
     }
@@ -83,7 +83,7 @@ public class UIInventoryPopup : UIPopup
         //unsub switch tab here
         if (!isPlacingObject)
         {
-            GridBuildingSystem.Instance.buildingPlacementManager.FireOnBuildingEndEvent();
+            GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingEndEvent();
             UIHUDManager.Instance.ShowAllUIElement();
 
         }
@@ -162,7 +162,7 @@ public class UIInventoryPopup : UIPopup
 
         GameManager.Instance.GameData.RemoveInventoryData(itemToInspect.Guid);
 
-        GridBuildingSystem.Instance.buildingPlacementManager.SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
+        GridBuildingSystem.Instance.BuildingPlacementManager.SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
         isPlacingObject = true;
         HidePopup();
     }

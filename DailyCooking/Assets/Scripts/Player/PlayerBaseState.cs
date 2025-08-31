@@ -38,7 +38,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         //{
         //    // Calculate the step size
         //    float step = Context.MoveSpeed * Time.deltaTime;
-        //    var nextTarget = GridBuildingSystem.Instance.GridPositionToWorldPosition(Context.PathList[Context.WayPointIndex]);
+        var nextTarget = GridBuildingSystem.Instance.GridManager.GridPositionToWorldPosition(Context.PathList[Context.WayPointIndex]);
 
         //    // Move the character towards the target
         //    Context.PlayerTransform.position = Vector3.MoveTowards(Context.PlayerTransform.position, nextTarget, step);
@@ -70,7 +70,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         Context.WayPointIndex = 0;
         Context.PathList.Clear();
         Context.PathList = new List<int2>() { target };
-        Context.EndPosition = GridBuildingSystem.Instance.GridPositionToWorldPosition(target);
+        Context.EndPosition = GridBuildingSystem.Instance.GridManager.GridPositionToWorldPosition(target);
         Context.IsDisableInput = true;
 
         if (speed != 0)
@@ -86,7 +86,7 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
         Context.PathList.Clear();
         Context.PathList = target;
         
-        Context.EndPosition = GridBuildingSystem.Instance.GridPositionToWorldPosition(target[target.Count - 1]);
+        Context.EndPosition = GridBuildingSystem.Instance.GridManager.GridPositionToWorldPosition(target[target.Count - 1]);
         Context.IsDisableInput = true;
         if (speed != 0)
             Context.MoveSpeed = speed;

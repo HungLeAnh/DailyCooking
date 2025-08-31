@@ -60,7 +60,7 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
 
     public void InitializePlayer()
     {
-        Vector3 placePosition = GridBuildingSystem.Instance.GetFirstEmptyGridPos();
+        Vector3 placePosition = GridBuildingSystem.Instance.GridManager.GetFirstEmptyGridPos();
 
         playerGameObject = Instantiate(playerPrefab, placePosition, Quaternion.identity);
     }

@@ -57,4 +57,43 @@ public class GridManager : IGridManager
     {
         grid.AddGridObjectData(gridObjectDataList);
     }
+
+    public Vector3 GetFirstEmptyGridPos()
+    {
+        for (int x = 0; x < grid.GetWidth(); x++)
+        {
+            for (int z = 0; z < grid.GetHeight(); z++)
+            {
+                if (grid.GetGridObject(x, z).CanBuild())
+                {
+                    return grid.GetWorldPosition(x, z);
+                }
+            }
+        }
+        return Vector3.zero;
+    }
+
+    public int2 WorldPositionToGridPos(float x, float y)
+    {
+        if(grid.ValidateGridPosition(new Vector2Int(Mathf.RoundToInt(x), Mathf.RoundToInt(y))) != null)
+        {
+            grid.GetXZ(new Vector3(Mathf.RoundToInt(x), 0, Mathf.RoundToInt(y)), out int xPos, out int yPos);
+            return new int2(xPos, yPos);
+        }
+        return  new int2(-int.MaxValue, -int.MaxValue);
+    }
+
+    public Vector3 GridPositionToWorldPosition(int2 int2)
+    {
+        if (grid.ValidateGridPosition(new Vector2Int(int2.x, int2.y)) != null)
+        {
+            return grid.GetWorldPosition(int2.x, int2.y);
+        }
+        return Vector3.negativeInfinity;
+    }
+
+    public Vector2 GetGridSize()
+    {
+        return new Vector2Int(grid.GetWidth(), grid.GetHeight());
+    }
 }

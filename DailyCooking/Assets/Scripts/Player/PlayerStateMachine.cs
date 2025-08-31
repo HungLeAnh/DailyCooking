@@ -157,7 +157,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                     if (baseCounter.gameObject.TryGetComponent(out PlacedObjectView placedObjectView))
                     {
                         int2 gridPos = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
-                        Vector3 counterOrigin = GridBuildingSystem.Instance
+                        Vector3 counterOrigin = GridBuildingSystem.Instance.GridManager
                                     .GridPositionToWorldPosition(gridPos);
                         Context.IsReachedDestination = false;
                         navMeshAgent.SetDestination(counterOrigin);

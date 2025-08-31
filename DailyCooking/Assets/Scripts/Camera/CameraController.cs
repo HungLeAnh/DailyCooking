@@ -40,8 +40,8 @@ public class CameraController : MonoBehaviour
         GameInput.Instance.OnDragPerformed += OnPanMoved;
         GameInput.Instance.OnPintchPerformed += HandleZoom;
 
-        GridBuildingSystem.Instance.buildingPlacementManager.OnBuildingStart += OnBuildingStart;
-        GridBuildingSystem.Instance.buildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
+        GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingStart += OnBuildingStart;
+        GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
         
     }
     private void Update()
@@ -71,7 +71,7 @@ public class CameraController : MonoBehaviour
         if(!isPanning)
             return;
         
-        panBounds = GridBuildingSystem.Instance.GetGridSize();
+        panBounds = GridBuildingSystem.Instance.GridManager.GetGridSize();
         if (panBounds == Vector2Int.zero)
         {
             panBounds = new Vector2Int(GameDefine.GridSize, GameDefine.GridSize);

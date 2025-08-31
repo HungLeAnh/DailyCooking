@@ -46,7 +46,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
     private IGridManager gridManager;
     private IGameManager gameManager;
-    public IBuildingPlacementManager buildingPlacementManager;
+    private IBuildingPlacementManager buildingPlacementManager;
     private IGridInitializer gridInitializer;
     private IGridVisualizer gridVisualizer;
     private List<GridWall> gridWallList = new List<GridWall>();
@@ -57,6 +57,11 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     public Dictionary<string, PlacedObjectTypeSO> PlaceObjectTypeSODictionary => placedObjectTypeSODictionary;
 
     public Transform Container { get => counterContainer; set => counterContainer = value; }
+    public IGridManager GridManager { get => gridManager; set => gridManager = value; }
+    public IGameManager GameManagerInterface { get => gameManager; set => gameManager = value; }
+    public IBuildingPlacementManager BuildingPlacementManager { get => buildingPlacementManager; set => buildingPlacementManager = value; }
+    public IGridInitializer GridInitializer { get => gridInitializer; set => gridInitializer = value; }
+    public IGridVisualizer GridVisualizer { get => gridVisualizer; set => gridVisualizer = value; }
 
     private void OnDestroy()
     {
@@ -119,12 +124,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         {
             if (raycastHit.transform.TryGetComponent<PlacedObjectView>(out PlacedObjectView targetPlaceObjectView))
             {
-                // dir = targetPlaceObjectView.GetModel().Dir; // Handled by BuildingPlacementManager
-                buildingPlacementManager.SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO,raycastHit.transform.position);
-                var counterView = targetPlaceObjectView.GetComponent<BaseCounterView>();
-                CounterModules.Instance.DestroyCounter(counterView);
-                UIPopupManager.Instance.HidePopup(UIPopupType.UIInventoryPopup,
-                    new UIInventoryPopup.Param { isPlacingObject = true});
+                buildingPlacementManager.HandleExistingObjectInteraction(targetPlaceObjectView);
             }
             else
             {
@@ -187,41 +187,10 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         return PlacedObjectDatabase.PlacedObjects.Find(x => x.id == id);
     }
-    public Vector3 GetFirstEmptyGridPos()
-    {
-        for (int x = 0; x < gridManager.GetWidth(); x++)
-        {
-            for (int z = 0; z < gridManager.GetHeight(); z++)
-            {
-                if (gridManager.Grid.GetGridObject(x, z).CanBuild())
-                {
-                    return gridManager.GetWorldPosition(x, z);
-                }
-            }
-        }
-        return Vector3.zero;
-    }
-    public int2 WorldPositionToGridPos(float x, float y)
-    {
-        if(gridManager.ValidateGridPosition(new Vector2Int(Mathf.RoundToInt(x), Mathf.RoundToInt(y))) != null)
-        {
-            gridManager.GetXZ(new Vector3(Mathf.RoundToInt(x), 0, Mathf.RoundToInt(y)), out int xPos, out int yPos);
-            return new int2(xPos, yPos);
-        }
-        return  new int2(-int.MaxValue, -int.MaxValue);
-    }
-    public Vector3 GridPositionToWorldPosition(int2 int2)
-    {
-        if (gridManager.ValidateGridPosition(new Vector2Int(int2.x, int2.y)) != null)
-        {
-            return gridManager.GetWorldPosition(int2.x, int2.y);
-        }
-        return Vector3.negativeInfinity;
-    }
-    public Vector2 GetGridSize()
-    {
-        return new Vector2Int(gridManager.GetWidth(), gridManager.GetHeight());
-    }
+    
+    
+    
+    
     public void SaveGrid()
     {
         gameManager.GameData.UpdateGridData(gridManager.Grid);
