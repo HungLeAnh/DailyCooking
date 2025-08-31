@@ -172,10 +172,10 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         isBuilding = false;
     }
 
-    public void HandleExistingObjectInteraction(PlacedObjectView targetPlaceObjectView)
+    public void HandleExistingObjectInteraction(PlacedObjectView targetPlaceObjectView,Vector3 objectPosition)
     {
         // dir = targetPlaceObjectView.GetModel().Dir; // This was commented out in GridBuildingSystem, so keep it commented or remove if not needed
-        SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO, targetPlaceObjectView.transform.position);
+        SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO, objectPosition);
         var counterView = targetPlaceObjectView.GetComponent<BaseCounterView>();
         counterModules.DestroyCounter(counterView);
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,

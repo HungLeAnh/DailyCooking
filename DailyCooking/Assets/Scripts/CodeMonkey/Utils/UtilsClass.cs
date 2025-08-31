@@ -229,7 +229,7 @@ namespace CodeMonkey.Utils {
                 return raycastHit.point;
             }
             else
-                return Vector3.zero;
+                return -Vector3.one;
         }        
         public static Vector3 GetTouchWorldPosition3D()
         {

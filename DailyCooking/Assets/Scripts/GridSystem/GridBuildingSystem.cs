@@ -114,8 +114,8 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     private void GameInput_OnFingerDown(object sender, Finger e)
     {
-        if (!buildingPlacementManager.IsBuilding || 
-            buildingPlacementManager.PlacedObjectTypeSO != null)
+        if (!BuildingPlacementManager.IsBuilding || 
+            BuildingPlacementManager.PlacedObjectTypeSO != null)
             return; // Check if in edit mode
 
         float maxDistance = 999f;
@@ -124,11 +124,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         {
             if (raycastHit.transform.TryGetComponent<PlacedObjectView>(out PlacedObjectView targetPlaceObjectView))
             {
-                buildingPlacementManager.HandleExistingObjectInteraction(targetPlaceObjectView);
-            }
-            else
-            {
-                buildingPlacementManager.TryPlaceBuildingObject(raycastHit.point);
+                BuildingPlacementManager.HandleExistingObjectInteraction(targetPlaceObjectView,raycastHit.transform.position);
             }
         }
     }
@@ -148,30 +144,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             gameManager.GameData.UpdateGridData(gridManager.Grid);
         }
     }
-    public void RotateBuildingObject()
-    {
-        buildingPlacementManager.RotateBuildingObject();
-    }
-    public bool TryPlaceBuildingObject(Vector3 interactPos)
-    {
-        return buildingPlacementManager.TryPlaceBuildingObject(interactPos);
-    }
-    public Vector3 GetMouseWorldSnappedPosition()
-    {
-        return buildingPlacementManager.GetMouseWorldSnappedPosition();
-    }
-    public Quaternion GetPlacedObjectRotation()
-    {
-        return buildingPlacementManager.GetPlacedObjectRotation();
-    }
-    public Vector3 GetPlacedObjectRotationOffset()
-    {
-        return buildingPlacementManager.GetPlacedObjectRotationOffset();
-    }
-    public void SetPlacedObjectTypeSO(PlacedObjectTypeSO placedObjectTypeSO,Vector3 objectPosition)
-    {
-        buildingPlacementManager.SetPlacedObjectTypeSO(placedObjectTypeSO, objectPosition);
-    }
     public PlacedObjectTypeSO GetPlacedObjectTypeSOByGuid(string Guid)
     {
         if (placedObjectTypeSODictionary.TryGetValue(Guid,out PlacedObjectTypeSO placedObjectSO))
@@ -187,10 +159,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         return PlacedObjectDatabase.PlacedObjects.Find(x => x.id == id);
     }
-    
-    
-    
-    
     public void SaveGrid()
     {
         gameManager.GameData.UpdateGridData(gridManager.Grid);
