@@ -17,9 +17,6 @@ public class PlayerStateContext
     private BaseCounterController _selectedCounterController;
     private KitchenObject _kitchenObject;
     private Transform _kitchenObjectHoldPoint;
-    private Vector3 endPosition;
-    private List<int2> _pathList;
-    private int _wayPointIndex;
     private bool isTouching;
     private bool isReachedDestination;
     private UnityEngine.AI.NavMeshAgent _navMeshAgent;
@@ -34,9 +31,7 @@ public class PlayerStateContext
         _counterLayermask = counterLayerMask;
         _kitchenObjectHoldPoint = kitchenObjectHoldPoint;
         _idDisableInput = false;
-        _pathList = new List<int2>();
         _isWalking = false;
-        _wayPointIndex = 0;
         _navMeshAgent = navMeshAgent;
     }
 
@@ -50,12 +45,8 @@ public class PlayerStateContext
     //Read and Write
     public bool IsDisableInput { get => _idDisableInput; set => _idDisableInput = value; }
     public bool IsWalking { get => _isWalking; set => _isWalking = value; }
-    public Vector3 LastInteractDir { get => _lastInteractDir; set => _lastInteractDir = value; }
     public BaseCounterController SelectedCounterController { get => _selectedCounterController; set => _selectedCounterController = value; }
     public KitchenObject KitchenObject { get => _kitchenObject; set => _kitchenObject = value; }
-    public Vector3 EndPosition { get => endPosition; set => endPosition = value; }
-    public List<int2> PathList { get => _pathList; set => _pathList = value; }
-    public int WayPointIndex { get => _wayPointIndex; set => _wayPointIndex = value; }
     public bool IsTouching { get => isTouching; set => isTouching = value; }
     public bool IsReachedDestination { get => isReachedDestination; set => isReachedDestination = value; }
 }

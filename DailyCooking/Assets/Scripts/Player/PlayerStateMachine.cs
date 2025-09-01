@@ -110,20 +110,6 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     {
         Context.IsDisableInput = isDisable;
     }
-    public void SetPlayerPath(List<int2> pathList)
-    {
-        var state = _stateManager.CurrentState as PlayerBaseState;
-        if (state == null)
-        {
-            Debug.LogError("Current state is not a PlayerBaseState. Cannot set player path.");
-            return;
-        }
-
-        List<int2> reversedPathList = new List<int2>(pathList); // Create a copy
-        reversedPathList.Reverse();
-        state.MoveTowardsTarget(reversedPathList);
-
-    }
 
     private void PlayerGameInput_OnFingerUp(object sender, UnityEngine.InputSystem.EnhancedTouch.Finger e)
     {
@@ -159,9 +145,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                         int2 gridPos = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
                         Vector3 counterOrigin = GridBuildingSystem.Instance.GridManager
                                     .GridPositionToWorldPosition(gridPos);
-                        Context.IsReachedDestination = false;
-                        navMeshAgent.SetDestination(counterOrigin);
-                        Context.IsWalking = true;
+                        MoveToPosition(counterOrigin);
                     }
                 }
                 else if (baseCounter == Context.SelectedCounterController)
@@ -205,6 +189,15 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         {
             SetSelectedCounter(null);
         }
+    }
+
+    private void MoveToPosition(Vector3 counterOrigin)
+    {
+        navMeshAgent.SetDestination(counterOrigin);
+        Context.IsReachedDestination = false;
+        Context.IsWalking = true;
+        Context.NavMeshAgent.isStopped = false;
+
     }
 
     private void SetSelectedCounter(BaseCounterController selectedCounter)
