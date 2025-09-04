@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
+using System;
 
 public class GridInitializer : IGridInitializer
 {
@@ -15,11 +16,19 @@ public class GridInitializer : IGridInitializer
     private GameObject wallPrefab;
     private Transform floorContainer;
     private GameObject floorPrefab;
-    private List<GridWall> gridWallList = new List<GridWall>();
+    private Transform doorContainer;
+    private GameObject doorPrefab;
+    private Vector2 doorPosition;
 
+    private List<GridWall> gridWallList = new List<GridWall>();
     public List<GridWall> GridWallList => gridWallList;
 
-    public GridInitializer(IGridManager gridManager, IGameManager gameManager, Transform roadContainer, GameObject roadPrefab, GameObject roadCornerPrefab, Transform pillarContainer, GameObject pillarPrefab, Transform wallContainer, GameObject wallPrefab, Transform floorContainer, GameObject floorPrefab)
+    public GridInitializer(IGridManager gridManager, IGameManager gameManager, 
+        Transform roadContainer, GameObject roadPrefab, GameObject roadCornerPrefab, 
+        Transform pillarContainer, GameObject pillarPrefab, 
+        Transform wallContainer, GameObject wallPrefab, 
+        Transform floorContainer, GameObject floorPrefab,
+        Transform doorContainer, GameObject doorPrefab, Vector2 doorPosition)
     {
         this.gridManager = gridManager;
         this.gameManager = gameManager;
@@ -32,6 +41,9 @@ public class GridInitializer : IGridInitializer
         this.wallPrefab = wallPrefab;
         this.floorContainer = floorContainer;
         this.floorPrefab = floorPrefab;
+        this.doorContainer = doorContainer;
+        this.doorPrefab = doorPrefab;
+        this.doorPosition = doorPosition;
     }
 
     public void InitRoad()
@@ -90,12 +102,42 @@ public class GridInitializer : IGridInitializer
                 GameObject floor = GameObject.Instantiate(floorPrefab, gridManager.GetWorldPosition(x, z), Quaternion.identity);
                 floor.transform.SetParent(floorContainer);
                 floor.transform.localPosition = new Vector3(floor.transform.localPosition.x, 0f, floor.transform.localPosition.z);
-
-                if (x == 0 || z == 0 || x == gridManager.GetWidth() - 1 || z == gridManager.GetHeight() - 1)
+                
+                if(x == doorPosition.x && z == doorPosition.y)
+                    PlaceDoor(x, z);
+                else if (x == 0 || z == 0 || x == gridManager.GetWidth() - 1 || z == gridManager.GetHeight() - 1)
                 {
                     PlaceWall(x, z, gridManager.GetWidth(), gridManager.GetHeight());
                 }
             }
+        }
+    }
+
+    private void PlaceDoor(int x, int z)
+    {
+        GameObject door = GameObject.Instantiate(doorPrefab, gridManager.GetWorldPosition(x, z) +
+            new Vector3(gridManager.GetCellSize() / 2, 0, gridManager.GetCellSize() / 2), Quaternion.identity);
+        door.transform.SetParent(doorContainer);
+        gridWallList.Add(door.GetComponent<GridWall>());
+        if (x == 0) // Left border (facing right)
+        {
+            door.transform.localPosition += new Vector3(-0.25f, 0, 0);
+            door.transform.rotation = Quaternion.Euler(0, 270, 0);
+        }
+        else if (x == gridManager.GetWidth() - 1) // Right border (facing left)
+        {
+            door.transform.localPosition -= new Vector3(-0.25f, 0, 0);
+            door.transform.rotation = Quaternion.Euler(0, 90, 0);
+        }
+        if (z == 0) // Bottom border (facing down)
+        {
+            door.transform.localPosition -= new Vector3(0, 0, 0.25f);
+            door.transform.rotation = Quaternion.Euler(0, 180, 0);
+        }
+        else if (z == gridManager.GetHeight() - 1) // Top border (facing up)
+        {
+            door.transform.localPosition += new Vector3(0, 0, 0.25f);
+            door.transform.rotation = Quaternion.Euler(0, 0, 0);
         }
     }
 

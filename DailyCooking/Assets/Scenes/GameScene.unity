@@ -2902,6 +2902,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1754446481}
   m_CullTransparentMesh: 1
+--- !u!1 &1827430283
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1827430284}
+  m_Layer: 0
+  m_Name: DoorContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1827430284
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827430283}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1853001321}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1853001319
 GameObject:
   m_ObjectHideFlags: 0
@@ -2936,19 +2967,22 @@ MonoBehaviour:
   navMeshSurface: {fileID: 1574853263}
   gridGuideObject: {fileID: 688327780}
   gridGuideMaterial: {fileID: 2100000, guid: 3077f760661a789459e2a175cc9eac66, type: 2}
-  counterContainer: {fileID: 497990426}
-  counterLayerMask:
-    serializedVersion: 2
-    m_Bits: 64
   floorContainer: {fileID: 620875409}
   floorPrefab: {fileID: 6862675218130391429, guid: 98721bfc86e350e489641da42c709c78, type: 3}
   wallContainer: {fileID: 639065543}
   wallPrefab: {fileID: 6862675218130391429, guid: 495d0a1ab4afbc24ab42ff32ac53ddb5, type: 3}
+  doorContainer: {fileID: 1827430284}
+  doorPrefab: {fileID: 6862675218130391429, guid: a4d35a292ba67a64787d06f04df9d63e, type: 3}
+  doorPosition: {x: 2, y: 0}
   pillarContainer: {fileID: 565428492}
   pillarPrefab: {fileID: 6862675218130391429, guid: 7f8514c2698767146883472d8762952f, type: 3}
   roadContainer: {fileID: 188843614}
   roadPrefab: {fileID: 6862675218130391429, guid: c90f83a767765614ebc45e0fbdd997ed, type: 3}
   roadCornerPrefab: {fileID: 6862675218130391429, guid: 40108cecb4f9d97428ae524b6243cf68, type: 3}
+  counterContainer: {fileID: 497990426}
+  counterLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!4 &1853001321
 Transform:
   m_ObjectHideFlags: 0
@@ -2966,6 +3000,7 @@ Transform:
   - {fileID: 497990426}
   - {fileID: 620875409}
   - {fileID: 639065543}
+  - {fileID: 1827430284}
   - {fileID: 565428492}
   - {fileID: 188843614}
   m_Father: {fileID: 0}

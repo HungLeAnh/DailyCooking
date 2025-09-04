@@ -29,8 +29,13 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
     [Header("Wall")]
     [SerializeField] private Transform wallContainer;
-    [SerializeField] private GameObject wallPrefab;    
+    [SerializeField] private GameObject wallPrefab;
     
+    [Header("Door")]
+    [SerializeField] private Transform doorContainer;
+    [SerializeField] private GameObject doorPrefab;
+    [SerializeField] private Vector2 doorPosition;
+
     [Header("Pillar")]
     [SerializeField] private Transform pillarContainer;
     [SerializeField] private GameObject pillarPrefab;
@@ -88,7 +93,13 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             gridManager = new GridManager(GameManager.Instance.GameData.GridData, (GridXZ<GridObject> grid, int x, int z) => new GridObject(grid, x, z));
 
         }
-        gridInitializer = new GridInitializer(gridManager, this.gameManager, roadContainer, roadPrefab, roadCornerPrefab, pillarContainer, pillarPrefab, wallContainer, wallPrefab, floorContainer, floorPrefab); // Initialize GridInitializer
+        gridInitializer = new GridInitializer(gridManager, this.gameManager, 
+            roadContainer, roadPrefab, roadCornerPrefab, 
+            pillarContainer, pillarPrefab, 
+            wallContainer, wallPrefab, 
+            floorContainer, floorPrefab,
+            doorContainer, doorPrefab, doorPosition);
+
         gridInitializer.InitRoad();
         gridInitializer.InitWallAndFloor();
         gridInitializer.InitPillar();
