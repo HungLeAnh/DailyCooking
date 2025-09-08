@@ -58,6 +58,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -358,6 +361,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placePoint: {fileID: 2272796693335353773}
+  progressBarUI: {fileID: 0}
+  burnWarningUI: {fileID: 0}
+  burnShowProgressAmount: 0.5
   combineRecipeSOArray:
   - {fileID: 11400000, guid: 0aefb950d4687af4cb75cdcbb9ed0b74, type: 2}
   burningRecipeSOArray:

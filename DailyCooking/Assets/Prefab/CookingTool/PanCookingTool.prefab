@@ -58,6 +58,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -202,6 +205,7 @@ MonoBehaviour:
   placePoint: {fileID: 2272796693335353773}
   progressBarUI: {fileID: 927980690929840512}
   burnWarningUI: {fileID: 1449230221004652872}
+  burnShowProgressAmount: 0.5
   fryingRecipeSOArray:
   - {fileID: 11400000, guid: 03a4633e975251e4bbcc10c49aa23b19, type: 2}
   - {fileID: 11400000, guid: 561cb208a595885409b71715b3d7984f, type: 2}
