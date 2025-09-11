@@ -1,6 +1,6 @@
 using UnityEngine;
 using Unity.Mathematics;
-
+using System.Collections.Generic;
 public interface IGridManager
 {
     GridXZ<GridObject> Grid { get; }
@@ -11,7 +11,7 @@ public interface IGridManager
     int GetHeight();
     float GetCellSize();
     void UnlockGrid(int width, int height);
-    void AddGridObjectData(System.Collections.Generic.List<GridObjectData> gridObjectDataList);
+    void AddGridObjectData(List<GridObjectData> gridObjectDataList);
     Vector3 GetFirstEmptyGridPos();
     int2 WorldPositionToGridPos(float x, float y);
     Vector3 GridPositionToWorldPosition(int2 int2);
