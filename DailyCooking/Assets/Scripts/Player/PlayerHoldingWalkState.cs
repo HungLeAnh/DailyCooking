@@ -31,9 +31,9 @@ public class PlayerHoldingWalkState : PlayerBaseState
         _subStateMachine.Update();
         if (Context.IsWalking)
         {
-            if (Context.NavMeshAgent.remainingDistance <= Context.NavMeshAgent.stoppingDistance)
+            if (Vector3.Distance(Context.PlayerTransform.position, 
+                Context.NavMeshAgent.destination) <= Context.NavMeshAgent.stoppingDistance)
             {
-                Context.IsWalking = false;
                 OnReachDestination();
             }
         }

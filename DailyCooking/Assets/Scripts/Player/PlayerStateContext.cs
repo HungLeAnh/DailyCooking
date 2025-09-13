@@ -18,7 +18,6 @@ public class PlayerStateContext
     private KitchenObject _kitchenObject;
     private Transform _kitchenObjectHoldPoint;
     private bool isTouching;
-    private bool isReachedDestination;
     private UnityEngine.AI.NavMeshAgent _navMeshAgent;
     public PlayerStateContext(Animator animator, 
         float moveSpeed,
@@ -39,7 +38,6 @@ public class PlayerStateContext
     public UnityEngine.AI.NavMeshAgent NavMeshAgent => _navMeshAgent;
     public Animator CharacterAnimator => _characterAnimator;
     public GameInput PlayerGameInput => _gameInput; 
-    public float MoveSpeed { get => _movespeed; set => _movespeed = value; }
     public Transform PlayerTransform => _playerTransform;
     public LayerMask CounterLayerMask => _counterLayermask;
     //Read and Write
@@ -48,5 +46,4 @@ public class PlayerStateContext
     public BaseCounterController SelectedCounterController { get => _selectedCounterController; set => _selectedCounterController = value; }
     public KitchenObject KitchenObject { get => _kitchenObject; set => _kitchenObject = value; }
     public bool IsTouching { get => isTouching; set => isTouching = value; }
-    public bool IsReachedDestination { get => isReachedDestination; set => isReachedDestination = value; }
 }

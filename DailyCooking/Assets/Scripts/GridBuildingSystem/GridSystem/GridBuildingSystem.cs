@@ -86,7 +86,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         }
         if (GameManager.Instance.GameData.GridData.GridArrayData == null)
         {
-            gridManager = new GridManager(cellSize, Vector3.zero, (GridXZ<GridObject> grid, int x, int z) => new GridObject(grid, x, z));
+            gridManager = new GridManager(0, 0, cellSize, Vector3.zero, (GridXZ<GridObject> grid, int x, int z) => new GridObject(grid, x, z));
         }
         else
         {

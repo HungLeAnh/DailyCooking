@@ -21,21 +21,12 @@ public class GridXZ<TGridObject> {
     private TGridObject[,] gridArray;
     private Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject;
 
-    public GridXZ(float cellSize, Vector3 originPosition, Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject) {
-        this.width = 0;
-        this.height = 0;
+    public GridXZ(int width, int height, float cellSize, Vector3 originPosition, Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject)
+    {
+        this.width = width;
+        this.height = height;
         this.cellSize = cellSize;
         this.originPosition = originPosition;
-        this.createGridObject = createGridObject;
-
-        gridArray = new TGridObject[width, height];
-
-        for (int x = 0; x < gridArray.GetLength(0); x++) {
-            for (int z = 0; z < gridArray.GetLength(1); z++) {
-                gridArray[x, z] = createGridObject(this, x, z);
-            }
-        }
-
         ShowDebug();
     }
     public GridXZ(GridData gridData, Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject)
@@ -55,52 +46,9 @@ public class GridXZ<TGridObject> {
                 gridArray[x, z] =  createGridObject(this, x, z);
             }
         }
-
-        if (gridData.GridArrayData == null)
-        {
-            return;
-        }
-        for (int i = 0; i < gridData.GridArrayData.Count; i++)
-        {
-            PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(gridData.GridArrayData[i].PlacedObjectTypeSOGuid);
-            List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(gridData.GridArrayData[i].Origin, gridData.GridArrayData[i].Dir);
-            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(gridData.GridArrayData[i].Dir);
-            Vector3 placedObjectWorldPosition = this.GetWorldPosition(gridData.GridArrayData[i].Origin) +
-                new Vector3(rotationOffset.x, 0, rotationOffset.y) * this.GetCellSize();
-            PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, gridData.GridArrayData[i].Origin, gridData.GridArrayData[i].Dir, placedObjectTypeSO);
-
-            foreach (var gridPosition in gridPositionList)
-            {
-                var gridObject = this.GetGridObject(gridPosition.x, gridPosition.y) as GridObject;
-                gridObject.SetPlacedObject(placedObject);
-
-            }
-        }
         ShowDebug();
     }
-    public void AddGridObjectData(List<GridObjectData> gridObjectDataList)
-    {
-        if (gridObjectDataList == null) return;
-        if (gridObjectDataList.Count <= 0) return;
-
-        for (int i = 0; i < gridObjectDataList.Count; i++)
-        {
-            PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(gridObjectDataList[i].PlacedObjectTypeSOGuid);
-            List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(gridObjectDataList[i].Origin, gridObjectDataList[i].Dir);
-            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(gridObjectDataList[i].Dir);
-            Vector3 placedObjectWorldPosition = this.GetWorldPosition(gridObjectDataList[i].Origin) +
-                new Vector3(rotationOffset.x, 0, rotationOffset.y) * this.GetCellSize();
-
-            PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, gridObjectDataList[i].Origin, gridObjectDataList[i].Dir, placedObjectTypeSO);
-
-            foreach (var gridPosition in gridPositionList)
-            {
-                var gridObject = this.GetGridObject(gridPosition.x, gridPosition.y) as GridObject;
-                gridObject.SetPlacedObject(placedObject);
-
-            }
-        }
-    }
+    
     private void ShowDebug()
     {
         bool showDebug = false;

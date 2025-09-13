@@ -31,15 +31,12 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     public override void UpdateState()
     {
     }
-    protected void StopMove()
-    {
-        Context.IsWalking = false;
-    }
     protected void OnReachDestination()
     {
-        Context.IsReachedDestination = true;
         Context.IsDisableInput = false;
         Context.NavMeshAgent.isStopped = true;
+        Context.IsWalking = false;
+
         if (Context.SelectedCounterController != null)
         {
             Context.SelectedCounterController.InteractEvent(PlayerStateMachine.Instance);

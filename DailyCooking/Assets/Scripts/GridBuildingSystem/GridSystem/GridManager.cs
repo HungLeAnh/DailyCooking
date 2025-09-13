@@ -8,14 +8,15 @@ public class GridManager : IGridManager
 
     public GridXZ<GridObject> Grid => grid;
 
-    public GridManager(float cellSize, Vector3 originPosition, System.Func<GridXZ<GridObject>, int, int, GridObject> createGridObject)
+    public GridManager(int width, int height, float cellSize, Vector3 originPosition, System.Func<GridXZ<GridObject>, int, int, GridObject> createGridObject)
     {
-        grid = new GridXZ<GridObject>(cellSize, originPosition, createGridObject);
+        grid = new GridXZ<GridObject>(width, height, cellSize, originPosition, createGridObject);
     }
 
     public GridManager(GridData gridData, System.Func<GridXZ<GridObject>, int, int, GridObject> createGridObject)
     {
         grid = new GridXZ<GridObject>(gridData, createGridObject);
+        GridObjectSpawner.SpawnObjectsFromData(grid, gridData.GridArrayData);
     }
 
     public Vector3 GetWorldPosition(int x, int z)
@@ -49,13 +50,13 @@ public class GridManager : IGridManager
     }
 
     public void UnlockGrid(int width, int height)
-    {
+    { 
         grid.UnlockGrid(width, height);
     }
 
     public void AddGridObjectData(List<GridObjectData> gridObjectDataList)
     {
-        grid.AddGridObjectData(gridObjectDataList);
+        GridObjectSpawner.SpawnObjectsFromData(grid, gridObjectDataList);
     }
 
     public Vector3 GetFirstEmptyGridPos()

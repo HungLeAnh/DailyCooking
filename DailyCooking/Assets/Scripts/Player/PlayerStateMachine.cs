@@ -193,11 +193,12 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
 
     private void MoveToPosition(Vector3 counterOrigin)
     {
-        navMeshAgent.SetDestination(counterOrigin);
-        Context.IsReachedDestination = false;
+        var cellSize = GridBuildingSystem.Instance.GridManager.GetCellSize();
+        Vector3 offset = new Vector3(cellSize/2,0,cellSize/2);
+        navMeshAgent.SetDestination(counterOrigin + offset);
         Context.IsWalking = true;
         Context.NavMeshAgent.isStopped = false;
-
+        Debug.LogError("Set Destination to " + counterOrigin + offset);
     }
 
     private void SetSelectedCounter(BaseCounterController selectedCounter)
