@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.EnhancedTouch;
 public class BuildingGhost : MonoBehaviour 
 {
     [SerializeField] private GameObject buildingCanvas;
@@ -23,8 +19,8 @@ public class BuildingGhost : MonoBehaviour
     private void Start() 
     {
         RefreshVisual(-Vector3.one);
-        GameInput.Instance.OnFingerDown += OnPanStarted;
-        GameInput.Instance.OnFingerUp += OnPanCanceled;
+        GameInput.Instance.OnMouseClickPerformed += OnPanStarted;
+        GameInput.Instance.OnMouseClickCanceled += OnPanCanceled;
         GridBuildingSystem.Instance.BuildingPlacementManager.OnSelectedChanged += Instance_OnSelectedChanged;
     }
 
@@ -42,13 +38,13 @@ public class BuildingGhost : MonoBehaviour
         OffsetRotation();
 
     }
-    private void OnPanCanceled(object sender, Finger e)
+    private void OnPanCanceled(object sender, EventArgs e)
     {
         isDragging = false;
 
     }
 
-    private void OnPanStarted(object sender, Finger e)
+    private void OnPanStarted(object sender, Vector2 e)
     {
         if (placedObjectTypeSO == null)
         {
@@ -57,7 +53,7 @@ public class BuildingGhost : MonoBehaviour
 
         float interactDistance = 999f;
 
-        Ray ray = _camera.ScreenPointToRay(e.screenPosition);
+        Ray ray = _camera.ScreenPointToRay(e);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayer))
         {
             //Debug.Log("Touch Position: " + pos);

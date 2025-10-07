@@ -2,9 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using CodeMonkey.Utils;
 using System;
-using Unity.Mathematics;
-using UnityEngine.InputSystem.EnhancedTouch;
-using Newtonsoft.Json;
 using Unity.AI.Navigation;
 
 public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
@@ -114,28 +111,24 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     private void Start()
     {
 
-        GameInput.Instance.OnFingerDown += GameInput_OnFingerDown;
-        GameInput.Instance.OnFingerUp += GameInput_OnFingerUp;
+        GameInput.Instance.OnMouseClickPerformed += GameInput_OnMouseClickPerformed;
         navMeshSurface.BuildNavMesh();
     }
 
-    private void GameInput_OnFingerUp(object sender, Finger e)
+    private void GameInput_OnMouseClickPerformed(object sender, Vector2 e)
     {
-
-    }
-    private void GameInput_OnFingerDown(object sender, Finger e)
-    {
-        if (!BuildingPlacementManager.IsBuilding || 
+        // Check if in edit mode
+        if (!BuildingPlacementManager.IsBuilding ||
             BuildingPlacementManager.PlacedObjectTypeSO != null)
-            return; // Check if in edit mode
+            return; 
 
         float maxDistance = 999f;
-        Ray ray = Camera.main.ScreenPointToRay(e.screenPosition);
+        Ray ray = Camera.main.ScreenPointToRay(e);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance, counterLayerMask))
         {
             if (raycastHit.transform.TryGetComponent<PlacedObjectView>(out PlacedObjectView targetPlaceObjectView))
             {
-                BuildingPlacementManager.HandleExistingObjectInteraction(targetPlaceObjectView,raycastHit.transform.position);
+                BuildingPlacementManager.HandleExistingObjectInteraction(targetPlaceObjectView, raycastHit.transform.position);
             }
         }
     }

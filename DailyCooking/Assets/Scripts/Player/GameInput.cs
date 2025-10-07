@@ -91,7 +91,7 @@ public class GameInput : PersistentSingleton<GameInput>
         {
             lastClickPosition = playerAction.Player.Pan.ReadValue<Vector2>();
             OnMousePanPerformed?.Invoke(this, lastClickPosition);
-            Debug.Log("panning... " + lastClickPosition);
+            //Debug.Log("panning... " + lastClickPosition);
         }
     }
 
