@@ -28,13 +28,5 @@ public class PlayerIdleWalkState : PlayerBaseState
     {
         base.UpdateState();
         _subStateMachine.Update();
-        if (Context.IsWalking)
-        {
-            if (Vector3.Distance(Context.PlayerTransform.position,
-                Context.NavMeshAgent.destination) <= Context.NavMeshAgent.stoppingDistance)
-            {
-                OnReachDestination();
-            }
-        }
     }
 }

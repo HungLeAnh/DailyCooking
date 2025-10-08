@@ -1,8 +1,4 @@
 ﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
 public class PlayerStateContext 
 {
     public float defaultDistanceTarget = 0.5f;
@@ -17,11 +13,10 @@ public class PlayerStateContext
     private BaseCounterController _selectedCounterController;
     private KitchenObject _kitchenObject;
     private Transform _kitchenObjectHoldPoint;
-    private bool isTouching;
-    private UnityEngine.AI.NavMeshAgent _navMeshAgent;
     public PlayerStateContext(Animator animator, 
         float moveSpeed,
-        Transform playerTransform, LayerMask counterLayerMask, Transform kitchenObjectHoldPoint, UnityEngine.AI.NavMeshAgent navMeshAgent)
+        Transform playerTransform, LayerMask counterLayerMask, 
+        Transform kitchenObjectHoldPoint)
     {
         _characterAnimator = animator;
         _gameInput = GameInput.Instance;
@@ -31,11 +26,9 @@ public class PlayerStateContext
         _kitchenObjectHoldPoint = kitchenObjectHoldPoint;
         _idDisableInput = false;
         _isWalking = false;
-        _navMeshAgent = navMeshAgent;
     }
 
     //Read only
-    public UnityEngine.AI.NavMeshAgent NavMeshAgent => _navMeshAgent;
     public Animator CharacterAnimator => _characterAnimator;
     public GameInput PlayerGameInput => _gameInput; 
     public Transform PlayerTransform => _playerTransform;
@@ -45,5 +38,4 @@ public class PlayerStateContext
     public bool IsWalking { get => _isWalking; set => _isWalking = value; }
     public BaseCounterController SelectedCounterController { get => _selectedCounterController; set => _selectedCounterController = value; }
     public KitchenObject KitchenObject { get => _kitchenObject; set => _kitchenObject = value; }
-    public bool IsTouching { get => isTouching; set => isTouching = value; }
 }

@@ -33,8 +33,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     private Transform kitchenObjectHoldPoint;
     [SerializeField] 
     private Animator characterAnimator;
-    [SerializeField]
-    private NavMeshAgent navMeshAgent;
+
 
     private StateManager<EPlayerState> _stateManager;
     private PlayerStateFactory _stateFactory;
@@ -42,18 +41,12 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     private void IntializeStates()
     {
         Context = new PlayerStateContext(characterAnimator, moveSpeed,
-            this.transform, countersLayerMask, this.kitchenObjectHoldPoint, navMeshAgent);
+            this.transform, countersLayerMask, this.kitchenObjectHoldPoint);
 
         var states = _stateFactory.CreateStates(this);
         _stateManager.SetStates(states, EPlayerState.Idle);
         _stateManager.Start();
 
-        SetupNavMeshAgent();
-    }
-
-    private void SetupNavMeshAgent()
-    {
-        navMeshAgent.speed = moveSpeed;
     }
 
     protected override void Awake()
@@ -62,19 +55,18 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         _stateManager = new StateManager<EPlayerState>();
         _stateFactory = new PlayerStateFactory();
         IntializeStates();
-        Context.PlayerGameInput.OnTouchPerformed += PlayerGameInput_OnFingerDown;
-        Context.PlayerGameInput.OnFingerUp += PlayerGameInput_OnFingerUp;
+
     }
     private void OnDestroy()
     {
-        Context.PlayerGameInput.OnTouchPerformed -= PlayerGameInput_OnFingerDown;
-        Context.PlayerGameInput.OnFingerUp -= PlayerGameInput_OnFingerUp;
         Context = null;
         _stateManager.Dispose();
     }
     private void Update()
     {
         _stateManager.Update();
+
+        HandleMovement();
     }
 
     public Transform GetKitchenObjectFollowTransform()
@@ -111,28 +103,20 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         Context.IsDisableInput = isDisable;
     }
 
-    private void PlayerGameInput_OnFingerUp(object sender, UnityEngine.InputSystem.EnhancedTouch.Finger e)
-    {
-        Context.IsTouching = false;
-
-    }
-
-    private void PlayerGameInput_OnFingerDown(object sender, UnityEngine.InputSystem.EnhancedTouch.Finger finger)
+    private void PlayerGameInput_OnFingerDown(object sender, Touch finger)
     {
         if (Context.IsDisableInput)
             return;
-        if (Context.IsTouching)
-            return;
+
         if (!KitchenGameManager.Instance.IsGamePlaying())
             return;
-        if (finger.currentTouch.delta.sqrMagnitude >= 0.1f)
+        if (finger.deltaPosition.sqrMagnitude >= 0.1f)
             return;
 
-        Context.IsTouching = true;
         float interactDistance = 999f;
-        if (!Camera.main.pixelRect.Contains(finger.screenPosition))
+        if (!Camera.main.pixelRect.Contains(finger.position))
             return;
-        Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
+        Ray ray = Camera.main.ScreenPointToRay(finger.position);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, Context.CounterLayerMask))
         {
             if (raycastHit.transform.TryGetComponent(out BaseCounterController baseCounter))
@@ -145,7 +129,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                         int2 gridPos = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
                         Vector3 counterOrigin = GridBuildingSystem.Instance.GridManager
                                     .GridPositionToWorldPosition(gridPos);
-                        MoveToPosition(counterOrigin);
+                        //MoveToPosition(counterOrigin);
                     }
                 }
                 else if (baseCounter == Context.SelectedCounterController)
@@ -156,7 +140,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                         IHasProgress progress = Context.SelectedCounterController as IHasProgress;
                         if (progress == null)
                         {
-                            if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
+                            if (false)//check for distance to counter
                             {
                                 SetSelectedCounter(baseCounter);
                                 Context.SelectedCounterController.InteractEvent(PlayerStateMachine.Instance);
@@ -191,16 +175,59 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         }
     }
 
-    private void MoveToPosition(Vector3 counterOrigin)
+    private void HandleMovement()
     {
-        var cellSize = GridBuildingSystem.Instance.GridManager.GetCellSize();
-        Vector3 offset = new Vector3(cellSize/2,0,cellSize/2);
-        navMeshAgent.SetDestination(counterOrigin + offset);
-        Context.IsWalking = true;
-        Context.NavMeshAgent.isStopped = false;
-        Debug.LogError("Set Destination to " + counterOrigin + offset);
-    }
+        Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
 
+
+        Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
+
+        float moveDistance = moveSpeed * Time.deltaTime;
+        float playerRadius = 0.7f;
+        bool canMove = !Physics.BoxCast(transform.position, Vector3.one * playerRadius, moveDir, Quaternion.identity, moveDistance, countersLayerMask);
+
+        if (!canMove)
+        {
+            //try to move on X
+            Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
+            canMove = (moveDir.x < -.5f || moveDir.x > .5f) && !Physics.BoxCast(transform.position, Vector3.one * playerRadius, moveDirX, Quaternion.identity, moveDistance, countersLayerMask);
+            if (canMove)
+            {
+                moveDir = moveDirX;
+
+            }
+            else
+            {
+                //can't move on X
+                //try to move on Z
+                Vector3 moveDirZ = new Vector3(0, 0, moveDir.z).normalized;
+                canMove = (moveDir.z < -.5f || moveDir.z > .5f) && !Physics.BoxCast(transform.position, Vector3.one * playerRadius, moveDirZ, Quaternion.identity, moveDistance, countersLayerMask);
+                if (canMove)
+                {
+                    //can move on Z
+                    moveDir = moveDirZ;
+                }
+                else
+                {
+                    //can't move at all
+                }
+            }
+
+
+        }
+
+        if (canMove)
+        {
+            transform.position += moveDir * moveDistance;
+
+        }
+
+
+        Context.IsWalking = moveDir != Vector3.zero;
+
+        float rotateSpeed = 10f;
+        transform.forward = Vector3.Slerp(transform.forward, moveDir, rotateSpeed * Time.deltaTime);
+    }
     private void SetSelectedCounter(BaseCounterController selectedCounter)
     {
         Context.SelectedCounterController = selectedCounter;
