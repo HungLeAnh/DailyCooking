@@ -173,6 +173,9 @@ public class GameInput : PersistentSingleton<GameInput>
 
     public bool IsMouseOverUI()
     {
+        if(Touchscreen.current == null)
+            return EventSystem.current.IsPointerOverGameObject();
+
         foreach (var touch in Touchscreen.current.touches)
         {
             if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
@@ -184,7 +187,7 @@ public class GameInput : PersistentSingleton<GameInput>
                 }
             }
         }
-        return EventSystem.current.IsPointerOverGameObject(); 
+        return false;
     }
     public bool IsTouchOverBuildingGhost(Vector2 position)
     {
