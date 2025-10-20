@@ -14,8 +14,8 @@ public class DeliveryManager : SimpleSingleton<DeliveryManager>
     [SerializeField] private List<FoodSO> FoodSOList;
 
     private List<FoodSO> waitingRecipeSOList;
-    private float spawnRecipeTimer;
-    private float spawnRecipeTimerMax = 4f;
+    private float spawnCustomerTimer;
+    private float spawnCustomerTimerMax = 4f;
     private int waitingRecipesMax = 4;
     private int successfulRecipesAmount;
 
@@ -113,19 +113,25 @@ public class DeliveryManager : SimpleSingleton<DeliveryManager>
 
     private void Update()
     {
-        spawnRecipeTimer -= Time.deltaTime;
-        if (spawnRecipeTimer <= 0f)
+        spawnCustomerTimer -= Time.deltaTime;
+        if (spawnCustomerTimer <= 0f)
         {
-            spawnRecipeTimer = spawnRecipeTimerMax;
+            spawnCustomerTimer = spawnCustomerTimerMax;
 
-            if (KitchenGameManager.Instance.IsGamePlaying() && waitingRecipeSOList.Count < waitingRecipesMax)
-            {
-                FoodSO waitingRecipeSO = unlockFoodList[UnityEngine.Random.Range(0, unlockFoodList.Count)];
+            //Spawn customer here instead of recipe
 
-                waitingRecipeSOList.Add(waitingRecipeSO);
-                OnRecipeSpawned?.Invoke(this, EventArgs.Empty);
-            }
+            //if (KitchenGameManager.Instance.IsGamePlaying() && waitingRecipeSOList.Count < waitingRecipesMax)
+            //{
+            //    FoodSO waitingRecipeSO = unlockFoodList[UnityEngine.Random.Range(0, unlockFoodList.Count)];
+
+            //    waitingRecipeSOList.Add(waitingRecipeSO);
+            //    OnRecipeSpawned?.Invoke(this, EventArgs.Empty);
+            //}
         }
+    }
+    public FoodSO GetUnlockedFood()
+    {
+        return unlockFoodList[UnityEngine.Random.Range(0, unlockFoodList.Count)];
     }
 
     public void DeliverRecipe(TablewareKitchenObject tablewareKitchenObject)

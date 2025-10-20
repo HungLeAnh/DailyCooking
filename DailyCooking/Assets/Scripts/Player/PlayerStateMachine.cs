@@ -57,8 +57,18 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         IntializeStates();
 
     }
+    private void Start()
+    {
+        GameInput.Instance.OnInteract1Performed += PlayerStateMachine_OnInteract1Performed;
+        GameInput.Instance.OnInteract2Performed += PlayerStateMachine_OnInteract2Performed;
+    }
+
+
+
     private void OnDestroy()
     {
+        GameInput.Instance.OnInteract1Performed -= PlayerStateMachine_OnInteract1Performed;
+        GameInput.Instance.OnInteract2Performed -= PlayerStateMachine_OnInteract2Performed;
         Context = null;
         _stateManager.Dispose();
     }
@@ -67,6 +77,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         _stateManager.Update();
 
         HandleMovement();
+        HandleInteractions();
     }
 
     public Transform GetKitchenObjectFollowTransform()
@@ -103,78 +114,48 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         Context.IsDisableInput = isDisable;
     }
 
-    private void PlayerGameInput_OnFingerDown(object sender, Touch finger)
+    private void PlayerStateMachine_OnInteract2Performed(object sender, EventArgs e)
     {
-        if (Context.IsDisableInput)
-            return;
+        Context.SelectedInteactableObject?.InteractAlternateEvent(PlayerStateMachine.Instance);
+    }
+    private void PlayerStateMachine_OnInteract1Performed(object sender, EventArgs e)
+    {
+        Context.SelectedInteactableObject?.InteractEvent(PlayerStateMachine.Instance);
+    }
+    private void HandleInteractions()
+    {
+        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
 
-        if (!KitchenGameManager.Instance.IsGamePlaying())
-            return;
-        if (finger.deltaPosition.sqrMagnitude >= 0.1f)
-            return;
 
-        float interactDistance = 999f;
-        if (!Camera.main.pixelRect.Contains(finger.position))
-            return;
-        Ray ray = Camera.main.ScreenPointToRay(finger.position);
-        if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, Context.CounterLayerMask))
+        Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
+
+        if (moveDir != Vector3.zero)
         {
-            if (raycastHit.transform.TryGetComponent(out BaseCounterController baseCounter))
+            Context.LastInteractDir = moveDir;
+        }
+
+        float interactDistance = 2f;
+        if (Physics.Raycast(transform.position, Context.LastInteractDir,
+            out RaycastHit raycastHit, interactDistance))
+        {
+            if (raycastHit.transform.TryGetComponent(out IInteractable interactableObject))
             {
-                if (baseCounter != Context.SelectedCounterController)
+                if (interactableObject != Context.SelectedInteactableObject)
                 {
-                    SetSelectedCounter(baseCounter);
-                    if (baseCounter.gameObject.TryGetComponent(out PlacedObjectView placedObjectView))
-                    {
-                        int2 gridPos = new int2(placedObjectView.GetModel().Origin.x, placedObjectView.GetModel().Origin.y);
-                        Vector3 counterOrigin = GridBuildingSystem.Instance.GridManager
-                                    .GridPositionToWorldPosition(gridPos);
-                        //MoveToPosition(counterOrigin);
-                    }
+                    SetInteractableObject(interactableObject);
                 }
-                else if (baseCounter == Context.SelectedCounterController)
-                {
-                    if (Context.SelectedCounterController != null &&
-                        CounterModules.Instance.IsContainerCounter(Context.SelectedCounterController))
-                    {
-                        IHasProgress progress = Context.SelectedCounterController as IHasProgress;
-                        if (progress == null)
-                        {
-                            if (false)//check for distance to counter
-                            {
-                                SetSelectedCounter(baseCounter);
-                                Context.SelectedCounterController.InteractEvent(PlayerStateMachine.Instance);
-                            }
-                        }
-                        else
-                        {
-
-                            if (progress.IsDone())
-                            {
-                                Context.SelectedCounterController.InteractEvent(PlayerStateMachine.Instance);
-
-                            }
-                            else
-                            {
-
-                                Context.SelectedCounterController.InteractAlternateEvent(PlayerStateMachine.Instance);
-                            }
-                        }
-                    }
-                }
-
             }
             else
             {
-                SetSelectedCounter(null);
+                SetInteractableObject(null);
             }
         }
         else
         {
-            SetSelectedCounter(null);
+            SetInteractableObject(null);
         }
-    }
 
+    }
     private void HandleMovement()
     {
         Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
@@ -227,6 +208,10 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
 
         float rotateSpeed = 10f;
         transform.forward = Vector3.Slerp(transform.forward, moveDir, rotateSpeed * Time.deltaTime);
+    }
+    private void SetInteractableObject(IInteractable interactable)
+    {
+        Context.SelectedInteactableObject = interactable;
     }
     private void SetSelectedCounter(BaseCounterController selectedCounter)
     {

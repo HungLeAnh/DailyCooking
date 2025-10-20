@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class OrderFoodState : BotState
@@ -8,12 +9,19 @@ public class OrderFoodState : BotState
     {
         Debug.Log("Bot is ordering food.");
         stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Talk);
+        stateMachine.GetBotController().OnInteract += OnOrderComplete;
+        stateMachine.GetBotController().ShowOrder();
+    }
+
+    private void OnOrderComplete(PlayerStateMachine playerStateMachine)
+    {
+        stateMachine.GetBotController().HideOrder();
+        stateMachine.GetBotController().OrderFood();
+        stateMachine.SetState(new WaitingForFoodState(stateMachine));
     }
 
     public override void Update()
     {
-        // Logic for ordering food
-        // After ordering, transition to WaitingForFoodState
-        // stateMachine.SetState(new WaitingForFoodState(stateMachine));
+
     }
 }

@@ -13,6 +13,7 @@ public class PlayerStateContext
     private BaseCounterController _selectedCounterController;
     private KitchenObject _kitchenObject;
     private Transform _kitchenObjectHoldPoint;
+    private IInteractable _selectedInteactableObject;
     public PlayerStateContext(Animator animator, 
         float moveSpeed,
         Transform playerTransform, LayerMask counterLayerMask, 
@@ -38,4 +39,6 @@ public class PlayerStateContext
     public bool IsWalking { get => _isWalking; set => _isWalking = value; }
     public BaseCounterController SelectedCounterController { get => _selectedCounterController; set => _selectedCounterController = value; }
     public KitchenObject KitchenObject { get => _kitchenObject; set => _kitchenObject = value; }
+    public Vector3 LastInteractDir { get => _lastInteractDir; set => _lastInteractDir = value; }
+    public IInteractable SelectedInteactableObject { get => _selectedInteactableObject; set => _selectedInteactableObject = value; }
 }

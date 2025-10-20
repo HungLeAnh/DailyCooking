@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class WaitingForFoodState : BotState
@@ -8,6 +9,25 @@ public class WaitingForFoodState : BotState
     {
         Debug.Log("Bot is waiting for food.");
         stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Idle);
+        stateMachine.GetBotController().OnInteract += OnFoodServed;
+
+    }
+
+    private void OnFoodServed(PlayerStateMachine playerStateMachine)
+    {
+        IKitchenObjectParent player = playerStateMachine as IKitchenObjectParent;
+        if (player.HasKitchenObject())
+        {
+            if (player.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
+            {
+                if (stateMachine.GetBotController().IsServerCorrectFood(tablewareKitchenObject))
+                {
+                    stateMachine.SetState(new EatingState(stateMachine));
+                    player.GetKitchenObject().DestroySelf();
+                }
+            }
+        }
+
     }
 
     public override void Update()

@@ -8,6 +8,9 @@ public class GameInput : PersistentSingleton<GameInput>
     private const string PLAYER_PREFS_BINDINGS = "InputBindings";
     private const float INTERACT_DISTANCE_MAX = 999f;
     
+    public event EventHandler OnInteract1Performed;
+    public event EventHandler OnInteract2Performed;
+
     public event EventHandler<Vector2> OnMousePanPerformed;
     public event EventHandler<Vector2> OnMouseClickPerformed;
     public event EventHandler OnMouseClickCanceled;
@@ -44,7 +47,8 @@ public class GameInput : PersistentSingleton<GameInput>
         playerAction.Player.Click.performed += ctx => StartClick();
         playerAction.Player.Click.canceled += ctx => EndClick();
         playerAction.Player.Pan.performed += ctx => PanCamera();
-
+        playerAction.Player.Interact1.performed += ctx => Interact1Performed();
+        playerAction.Player.Interact2.performed += ctx => Interact2Performed();
         //Touch
         playerAction.Player.Touch0Contact.performed += TouchContactPerformed;
         playerAction.Player.Touch1Contact.performed += TouchContactPerformed;
@@ -54,6 +58,16 @@ public class GameInput : PersistentSingleton<GameInput>
         playerAction.Player.Touch1Pos.performed += Touch1Pos_performed;
 
 
+    }
+
+    private void Interact2Performed()
+    {
+        OnInteract2Performed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void Interact1Performed()
+    {
+        OnInteract1Performed?.Invoke(this, EventArgs.Empty);
     }
 
     private void TouchContactPerformed(InputAction.CallbackContext obj)
@@ -140,7 +154,8 @@ public class GameInput : PersistentSingleton<GameInput>
         if (timeSinceLastTouch > touchTimeThreshold)
             isPanning = true;
     }
-    private void HandlePanAndTap()
+
+    /*private void HandlePanAndTap()
     {
 
 
@@ -170,7 +185,8 @@ public class GameInput : PersistentSingleton<GameInput>
             return;
 
     }
-
+    */
+    
     public bool IsMouseOverUI()
     {
         if(Touchscreen.current == null)

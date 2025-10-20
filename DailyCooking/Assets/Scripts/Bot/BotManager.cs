@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,17 +21,39 @@ public class BotManager : SimpleSingleton<BotManager>
 
     private void Start()
     {
+        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+    }
+    private void OnDestroy()
+    {
+        KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
+        botPool.Clear();
+    }
+
+    private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
+    {
+        if (KitchenGameManager.Instance.IsGamePlaying())
+        {
+            StartCoroutine(SpawnBotRoutine());
+
+        }
+        else
+        {
+            StopCoroutine(SpawnBotRoutine());
+            foreach (var bot in botPool)
+            {
+                bot.SetActive(false);
+            }
+        }
+    }
+
+    public void Initialize()
+    {
         for (int i = 0; i < poolSize; i++)
         {
             GameObject bot = Instantiate(botPrefab, transform.position, Quaternion.identity, transform);
             bot.SetActive(false);
             botPool.Add(bot);
         }
-
-    }
-    public void Initialize()
-    {
-        StartCoroutine(SpawnBotRoutine());
     }
     private IEnumerator SpawnBotRoutine()
     {

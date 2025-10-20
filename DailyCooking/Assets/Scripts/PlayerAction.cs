@@ -163,6 +163,24 @@ public partial class @PlayerAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Interact1"",
+                    ""type"": ""Button"",
+                    ""id"": ""0ede0993-a82e-4a82-87d2-ed662001b80a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Interact2"",
+                    ""type"": ""Button"",
+                    ""id"": ""747e71ba-e4a8-4552-a8b7-fbcea5ebb54e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -308,6 +326,50 @@ public partial class @PlayerAction: IInputActionCollection2, IDisposable
                     ""action"": ""Touch1Contact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""477232e6-bfff-4f18-9353-0d6d9bb24c0e"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""436d5c57-a1c6-4cec-8cd7-99a302793901"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1a3e0f32-4197-4158-ab1a-d87e1638503d"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1b5a091a-f313-461a-9c68-b9816a071717"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -324,6 +386,8 @@ public partial class @PlayerAction: IInputActionCollection2, IDisposable
         m_Player_Touch1Pos = m_Player.FindAction("Touch1Pos", throwIfNotFound: true);
         m_Player_Touch0Contact = m_Player.FindAction("Touch0Contact", throwIfNotFound: true);
         m_Player_Touch1Contact = m_Player.FindAction("Touch1Contact", throwIfNotFound: true);
+        m_Player_Interact1 = m_Player.FindAction("Interact1", throwIfNotFound: true);
+        m_Player_Interact2 = m_Player.FindAction("Interact2", throwIfNotFound: true);
     }
 
     ~@PlayerAction()
@@ -412,6 +476,8 @@ public partial class @PlayerAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Touch1Pos;
     private readonly InputAction m_Player_Touch0Contact;
     private readonly InputAction m_Player_Touch1Contact;
+    private readonly InputAction m_Player_Interact1;
+    private readonly InputAction m_Player_Interact2;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -455,6 +521,14 @@ public partial class @PlayerAction: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Touch1Contact".
         /// </summary>
         public InputAction @Touch1Contact => m_Wrapper.m_Player_Touch1Contact;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Interact1".
+        /// </summary>
+        public InputAction @Interact1 => m_Wrapper.m_Player_Interact1;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Interact2".
+        /// </summary>
+        public InputAction @Interact2 => m_Wrapper.m_Player_Interact2;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -505,6 +579,12 @@ public partial class @PlayerAction: IInputActionCollection2, IDisposable
             @Touch1Contact.started += instance.OnTouch1Contact;
             @Touch1Contact.performed += instance.OnTouch1Contact;
             @Touch1Contact.canceled += instance.OnTouch1Contact;
+            @Interact1.started += instance.OnInteract1;
+            @Interact1.performed += instance.OnInteract1;
+            @Interact1.canceled += instance.OnInteract1;
+            @Interact2.started += instance.OnInteract2;
+            @Interact2.performed += instance.OnInteract2;
+            @Interact2.canceled += instance.OnInteract2;
         }
 
         /// <summary>
@@ -540,6 +620,12 @@ public partial class @PlayerAction: IInputActionCollection2, IDisposable
             @Touch1Contact.started -= instance.OnTouch1Contact;
             @Touch1Contact.performed -= instance.OnTouch1Contact;
             @Touch1Contact.canceled -= instance.OnTouch1Contact;
+            @Interact1.started -= instance.OnInteract1;
+            @Interact1.performed -= instance.OnInteract1;
+            @Interact1.canceled -= instance.OnInteract1;
+            @Interact2.started -= instance.OnInteract2;
+            @Interact2.performed -= instance.OnInteract2;
+            @Interact2.canceled -= instance.OnInteract2;
         }
 
         /// <summary>
@@ -636,5 +722,19 @@ public partial class @PlayerAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnTouch1Contact(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Interact1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInteract1(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Interact2" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInteract2(InputAction.CallbackContext context);
     }
 }

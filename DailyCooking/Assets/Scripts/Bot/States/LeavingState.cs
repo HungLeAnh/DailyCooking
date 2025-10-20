@@ -19,7 +19,7 @@ public class LeavingState : BotState
         if (stateMachine.GetBotController().NavMeshAgent.remainingDistance <= stateMachine.GetBotController().NavMeshAgent.stoppingDistance)
         {
             // Bot has reached the exit, destroy it
-            GameObject.Destroy(stateMachine.GetBotController().gameObject);
+            BotManager.Instance.ReturnBotToPool(stateMachine.GetBotController().gameObject);
         }
     }
 }

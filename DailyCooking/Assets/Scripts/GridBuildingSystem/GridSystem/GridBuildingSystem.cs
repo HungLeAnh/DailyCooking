@@ -98,7 +98,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             doorContainer, doorPrefab, doorPosition);
 
         gridInitializer.InitRoad();
-        gridInitializer.InitWallAndFloor();
+        //gridInitializer.InitWallAndFloor();
         gridInitializer.InitPillar();
         gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList); // Initialize GridVisualizer
         gridVisualizer.SetActiveGridGuide(false); // Moved from InitGridGuide()
@@ -140,7 +140,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         gridManager.UnlockGrid(GameDefine.GridSize,GameDefine.GridSize);
         gameManager.GameData.UpdateGridData(gridManager.Grid);
-        gridInitializer.InitWallAndFloor();
+        //gridInitializer.InitWallAndFloor();
         gridInitializer.InitPillar();
         if (!GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
         {
