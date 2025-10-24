@@ -13,4 +13,8 @@ public class GameDefine : MonoBehaviour
     public const float MIN_DISTANCE_TO_TARGET = 0.05f;
     public const float INTERACT_DISTANCE_MAX = 999f;
     #endregion
+
+    #region Emotion
+    public const float EMOTION_DURATION = 30f;
+    #endregion
 }

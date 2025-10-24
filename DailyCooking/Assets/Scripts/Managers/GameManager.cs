@@ -12,7 +12,7 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
 
     [Header("Settings")]
     [SerializeField] private string fileName = "GameData";
-
+    
     private GameObject playerGameObject;
     public FileDataHandler DataHandler => dataHandler;
 

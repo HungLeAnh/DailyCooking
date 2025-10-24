@@ -15,7 +15,6 @@ public class OrderFoodState : BotState
 
     private void OnOrderComplete(PlayerStateMachine playerStateMachine)
     {
-        stateMachine.GetBotController().HideOrder();
         stateMachine.GetBotController().OrderFood();
         stateMachine.SetState(new WaitingForFoodState(stateMachine));
     }

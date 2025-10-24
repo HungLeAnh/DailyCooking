@@ -11,6 +11,10 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     [SerializeField] private GameObject foodBubble;
     [SerializeField] private GameObject orderBubble;
     [SerializeField] private GameObject emotionBubble;
+    [SerializeField] private GameObject BubbleFrame;
+
+    [SerializeField] private BubbleEmotionUI bubbleEmotionUI;
+    [SerializeField] private BubbleFoodUI bubbleFoodUI;
 
     private BotStateMachine stateMachine;
     private FoodSO waitingFood;
@@ -23,9 +27,13 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     private void Awake()
     {
         stateMachine = new BotStateMachine(this);
+
         foodBubble.SetActive(false);
         orderBubble.SetActive(false);
-        //emotionBubble.SetActive(false);
+        emotionBubble.SetActive(false);
+        BubbleFrame.SetActive(false);
+
+        bubbleEmotionUI.OnEmotionEnd += OnEmotionEnd;
     }
 
     public void PlayAnimation(BotAnimation.State animationState)
@@ -78,15 +86,30 @@ public class BotCustomerController : MonoBehaviour,IInteractable
         //Player did not deliver correct recipe
         return false;
     }
+    private void OnEmotionEnd(EmotionType emotionType)
+    {
+        Debug.LogError("BotCustomerController: OnEmotionEnd called");   
+        stateMachine.SetState(new LeavingState(stateMachine));
+    }
     public void OrderFood()
     {
         waitingFood = DeliveryManager.Instance.GetUnlockedFood();
+
+        BubbleFrame.SetActive(true);
+        orderBubble.SetActive(false);
         foodBubble.SetActive(true);
-        foodBubble.GetComponent<BubbleFoodUI>().SetOrder(new[] { waitingFood.Sprite });
+
+        bubbleFoodUI.SetOrder(new[] { waitingFood.Sprite });
+        bubbleEmotionUI.StartEmotion();
+
     }
     public void ShowOrder()
     {
+        BubbleFrame.SetActive(true);
         orderBubble.SetActive(true);
+        emotionBubble.SetActive(true);
+        bubbleEmotionUI.StartEmotion();
+        
     }
     public void InteractEvent(PlayerStateMachine playerStateMachine)
     {
@@ -96,10 +119,5 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     public void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
     {
         
-    }
-
-    internal void HideOrder()
-    {
-        orderBubble.SetActive(false);
     }
 }
