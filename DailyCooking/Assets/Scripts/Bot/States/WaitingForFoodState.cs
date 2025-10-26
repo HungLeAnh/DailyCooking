@@ -24,6 +24,7 @@ public class WaitingForFoodState : BotState
                 {
                     stateMachine.SetState(new EatingState(stateMachine));
                     player.GetKitchenObject().DestroySelf();
+                    stateMachine.GetBotController().StopBubble();
                 }
             }
         }
@@ -32,8 +33,6 @@ public class WaitingForFoodState : BotState
 
     public override void Update()
     {
-        // Logic for waiting for food
-        // When the food arrives, transition to EatingState
-        // stateMachine.SetState(new EatingState(stateMachine));
+
     }
 }

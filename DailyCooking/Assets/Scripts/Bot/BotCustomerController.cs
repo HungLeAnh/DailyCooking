@@ -90,6 +90,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     {
         Debug.LogError("BotCustomerController: OnEmotionEnd called");   
         stateMachine.SetState(new LeavingState(stateMachine));
+        StopBubble();
     }
     public void OrderFood()
     {
@@ -119,5 +120,29 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     public void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
     {
         
+    }
+
+    public void ResetBot()
+    {
+        TargetTable = null;
+        TargetSeatIndex = -1;
+        waitingFood = null;
+
+        stateMachine.SetState(new BotIdleState(stateMachine));
+    }
+
+    public void ClearTargetTable()
+    {
+        TargetTable.VacateSeat(TargetSeatIndex);
+    }
+
+    public void StopBubble()
+    {
+        bubbleEmotionUI.StopEmotion();
+
+        foodBubble.SetActive(false);
+        orderBubble.SetActive(false);
+        emotionBubble.SetActive(false);
+        BubbleFrame.SetActive(false);
     }
 }

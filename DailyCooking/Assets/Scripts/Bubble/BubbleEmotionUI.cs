@@ -19,6 +19,12 @@ public class BubbleEmotionUI: MonoBehaviour
         imageEmotionClock.fillAmount = 1f;
         currentEmotion = EmotionType.Happy;
     }
+    public void StopEmotion()
+    {
+        currentEmotion = EmotionType.None;
+        imageEmotion.sprite = null;
+        imageEmotionClock.fillAmount = 0f;
+    }
 
     private void Update()
     {

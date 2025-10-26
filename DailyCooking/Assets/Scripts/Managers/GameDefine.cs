@@ -15,6 +15,6 @@ public class GameDefine : MonoBehaviour
     #endregion
 
     #region Emotion
-    public const float EMOTION_DURATION = 30f;
+    public const float EMOTION_DURATION = 15f;
     #endregion
 }
