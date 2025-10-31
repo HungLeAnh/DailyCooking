@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// To use the upgrade system, attach a GenericUpgrader component to this GameObject.
-// Then, in the Inspector, subscribe the AddSeat method to the OnUpgrade event in the GenericUpgrader.
-public class Table : MonoBehaviour, IUpgradeable
+public class Table : MonoBehaviour, IUpgradeable, IInteractable
 {
-    public TableUpgradeDataList upgradeDataList;
-    public List<Transform> seats = new List<Transform>();
+    [SerializeField] private TableUpgradeDataList upgradeDataList;
+    [SerializeField] private List<Transform> seats = new List<Transform>();
+    [SerializeField] private List<Transform> kitchenObjectFollowPoints = new List<Transform>();
+    [SerializeField] private GameObject[] visualGameObjectArray;
+
     private bool[] isSeatOccupied;
+    private KitchenObject[] kitchenObjects;
 
     public int Level { get; set; } = 1;
 
@@ -117,5 +119,89 @@ public class Table : MonoBehaviour, IUpgradeable
             return seats[seatIndex];
         }
         return null;
+    }
+
+    public Transform GetKitchenObjectFollowTransform(int index)
+    {
+        if (kitchenObjectFollowPoints != null && index >= 0 && index < kitchenObjects.Length)
+        {
+            return kitchenObjectFollowPoints[index];
+        }
+        return null;
+    }
+
+    public void SetKitchenObject(KitchenObject kitchenObject, int index)
+    {
+        if (kitchenObjects != null && index >= 0 && index < kitchenObjects.Length)
+        {
+            kitchenObjects[index] = kitchenObject;
+        }
+    }
+
+    public KitchenObject GetKitchenObject(int index)
+    {
+        if (kitchenObjects != null && index >= 0 && index < kitchenObjects.Length)
+        {
+            return kitchenObjects[index];
+        }
+        return null;
+    }
+
+    public void ClearKitchenObject(int index)
+    {
+        if(kitchenObjects != null && index >= 0 && index < kitchenObjects.Length)
+        {
+            kitchenObjects[index] = null;
+        }
+    }
+
+    public bool HasKitchenObject()
+    {
+        return kitchenObjects != null && kitchenObjects.Length > 0;
+    }
+
+    public void InteractEvent(PlayerStateMachine playerStateMachine)
+    {
+        Debug.LogError("Table: InteractEvent called");
+        if (!playerStateMachine.HasKitchenObject())
+        {
+            // Player is not carrying anything
+
+        }
+        else
+        {
+
+        }
+    }
+
+    public void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
+    {
+        
+    }
+
+    public void OnSelected()
+    {
+        Show();
+    }
+
+    public void OnDeselected()
+    {
+        Hide();
+    }
+
+    public void Show()
+    {
+        foreach (var visualGameObject in visualGameObjectArray)
+        {
+            visualGameObject.SetActive(true);
+        }
+
+    }
+    public void Hide()
+    {
+        foreach (var visualGameObject in visualGameObjectArray)
+        {
+            visualGameObject.SetActive(false);
+        }
     }
 }

@@ -6,42 +6,24 @@ using UnityEngine;
 public class DeliveryManager : SimpleSingleton<DeliveryManager>
 {
 
-    public event EventHandler OnRecipeSpawned;
-    public event EventHandler OnRecipeCompleted;
-    public event EventHandler OnRecipeSuccess;
-    public event EventHandler OnRecipeFailed;
-
     [SerializeField] private List<FoodSO> FoodSOList;
-
-    private List<FoodSO> waitingRecipeSOList;
-    private float spawnCustomerTimer;
-    private float spawnCustomerTimerMax = 4f;
-    private int waitingRecipesMax = 4;
-    private int successfulRecipesAmount;
 
     private List<FoodSO> unlockFoodList;
     private List<KitchenObjectSO> unlockIngredient;
     private void Awake()
     {
-        waitingRecipeSOList = new List<FoodSO>();
         unlockFoodList = new List<FoodSO>();
         unlockIngredient = new List<KitchenObjectSO>();
     }
 
     public void OnDestroy()
     {
-        OnRecipeSpawned = null;
-        OnRecipeCompleted = null;
-        OnRecipeSuccess = null;
-        OnRecipeFailed = null;
-        waitingRecipeSOList.Clear();
         unlockFoodList.Clear();
         unlockIngredient.Clear();
     }
     public void Init()
     {
         unlockFoodList.Clear();
-        waitingRecipeSOList.Clear();
         unlockFoodList.Clear();
         unlockIngredient.Clear();
         foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
@@ -110,86 +92,8 @@ public class DeliveryManager : SimpleSingleton<DeliveryManager>
         }
         return false;
     }
-
-    private void Update()
-    {
-        spawnCustomerTimer -= Time.deltaTime;
-        if (spawnCustomerTimer <= 0f)
-        {
-            spawnCustomerTimer = spawnCustomerTimerMax;
-
-            //Spawn customer here instead of recipe
-
-            //if (KitchenGameManager.Instance.IsGamePlaying() && waitingRecipeSOList.Count < waitingRecipesMax)
-            //{
-            //    FoodSO waitingRecipeSO = unlockFoodList[UnityEngine.Random.Range(0, unlockFoodList.Count)];
-
-            //    waitingRecipeSOList.Add(waitingRecipeSO);
-            //    OnRecipeSpawned?.Invoke(this, EventArgs.Empty);
-            //}
-        }
-    }
     public FoodSO GetUnlockedFood()
     {
         return unlockFoodList[UnityEngine.Random.Range(0, unlockFoodList.Count)];
-    }
-
-    public void DeliverRecipe(TablewareKitchenObject tablewareKitchenObject)
-    {
-        foreach (var waitingFood in waitingRecipeSOList.ToList())
-        {
-
-                if (waitingFood.kitchenObjectSOList.Count == tablewareKitchenObject.GetKitchenObjectSOList().Count)
-                {
-                    //Has the same number of ingredients
-                    bool plateContentMathesRecipe = true;
-
-                    foreach (KitchenObjectSO recipeKitchenObjectSO in waitingFood.kitchenObjectSOList)
-                    {
-                        //Cycling through all ingredients in recipe
-                        bool ingredientFound = false;
-                        foreach (KitchenObjectSO plateKitchenObjectSO in tablewareKitchenObject.GetKitchenObjectSOList())
-                        {
-                            //Cycling through all ingredients in recipe
-                            if (plateKitchenObjectSO == recipeKitchenObjectSO)
-                            {
-                                ingredientFound = true;
-                                break;
-                            }
-                        }
-                        if (!ingredientFound)
-                        {
-                            // This Recipe ingredient was not found on the plate
-                            plateContentMathesRecipe = false;
-
-                        }
-                    }
-
-                    if (plateContentMathesRecipe)
-                    {
-                        // Player delivered correct recipe 
-                        waitingRecipeSOList.Remove(waitingFood);
-                        successfulRecipesAmount++;
-                        OnRecipeCompleted?.Invoke(this, EventArgs.Empty);
-                        OnRecipeSuccess?.Invoke(this, EventArgs.Empty);
-                        KitchenGameManager.Instance.ServeFood(waitingFood);
-                        return;
-                    }
-                }
-            
-        }
-
-        //No matches found
-        //Player did not deliver correct recipe
-        OnRecipeFailed?.Invoke(this, EventArgs.Empty);
-    }
-
-    public List<FoodSO> GetWaitingRecipeSOList()
-    {
-        return waitingRecipeSOList;
-    }
-    public int GetSuccessfulRecipeAmount()
-    {
-        return successfulRecipesAmount;
     }
 }

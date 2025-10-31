@@ -211,16 +211,10 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     }
     private void SetInteractableObject(IInteractable interactable)
     {
+
+        Context.SelectedInteactableObject?.OnDeselected();
+        if (interactable != null)
+            interactable.OnSelected();
         Context.SelectedInteactableObject = interactable;
-    }
-    private void SetSelectedCounter(BaseCounterController selectedCounter)
-    {
-        Context.SelectedCounterController = selectedCounter;
-        CounterModules.Instance.FireOnSelectedCounterChanged(new CounterModules.OnSelectedCounterChangedEventArgs
-        {
-            selectedCounterController = selectedCounter != null ? selectedCounter : null
-
-        });
-
     }
 }

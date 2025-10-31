@@ -16,6 +16,8 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     [SerializeField] private BubbleEmotionUI bubbleEmotionUI;
     [SerializeField] private BubbleFoodUI bubbleFoodUI;
 
+    [SerializeField] private GameObject[] visualGameObjectArray;
+
     private BotStateMachine stateMachine;
     private FoodSO waitingFood;
 
@@ -88,7 +90,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     }
     private void OnEmotionEnd(EmotionType emotionType)
     {
-        Debug.LogError("BotCustomerController: OnEmotionEnd called");   
+        //Debug.LogError("BotCustomerController: OnEmotionEnd called");   
         stateMachine.SetState(new LeavingState(stateMachine));
         StopBubble();
     }
@@ -144,5 +146,30 @@ public class BotCustomerController : MonoBehaviour,IInteractable
         orderBubble.SetActive(false);
         emotionBubble.SetActive(false);
         BubbleFrame.SetActive(false);
+    }
+
+    public void OnSelected()
+    {
+        Show();
+    }
+
+    public void OnDeselected()
+    {
+        Hide();
+    }
+    public void Show()
+    {
+        foreach (var visualGameObject in visualGameObjectArray)
+        {
+            visualGameObject.SetActive(true);
+        }
+
+    }
+    public void Hide()
+    {
+        foreach (var visualGameObject in visualGameObjectArray)
+        {
+            visualGameObject.SetActive(false);
+        }
     }
 }
