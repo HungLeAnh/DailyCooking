@@ -15,16 +15,12 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
 
     protected virtual void Start()
     {
-        CounterModules.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
         KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
     }
-
     protected virtual void OnDestroy()
     {
-        CounterModules.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
         KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
     }
-
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
         if (KitchenGameManager.Instance.IsGameOver() ||
@@ -32,24 +28,6 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
         {
             BaseCounterView.Hide();
             OnRestartGame(this, PlayerStateMachine.Instance);
-        }
-    }
-
-    private void Player_OnSelectedCounterChanged(object sender, CounterModules.OnSelectedCounterChangedEventArgs e)
-    {
-        if (e.selectedCounterController == null)
-        {
-            BaseCounterView.Hide();
-            return;
-        }
-
-        if (e.selectedCounterController.BaseCounterView == this.BaseCounterView)
-        {
-            BaseCounterView.Show();
-        }
-        else
-        {
-            BaseCounterView.Hide();
         }
     }
     protected virtual void OnRestartGame(object sender, PlayerStateMachine e)
@@ -81,8 +59,6 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     {
     }
 
-    
-   
     public Transform GetKitchenObjectFollowTransform()
     {
         return _baseCounterView.CounterTopPoint;
@@ -104,4 +80,13 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
         }
     }
 
+    public void OnSelected()
+    {
+        BaseCounterView.Show();
+    }
+
+    public void OnDeselected()
+    {
+        BaseCounterView.Hide();
+    }
 }

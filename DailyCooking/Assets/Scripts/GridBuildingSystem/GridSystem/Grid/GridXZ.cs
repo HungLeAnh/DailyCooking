@@ -27,6 +27,8 @@ public class GridXZ<TGridObject> {
         this.height = height;
         this.cellSize = cellSize;
         this.originPosition = originPosition;
+        this.createGridObject = createGridObject;
+        gridArray = new TGridObject[width, height];
         ShowDebug();
     }
     public GridXZ(GridData gridData, Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject)

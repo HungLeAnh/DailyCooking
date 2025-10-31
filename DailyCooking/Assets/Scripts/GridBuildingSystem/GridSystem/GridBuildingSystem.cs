@@ -100,12 +100,12 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         gridInitializer.InitRoad();
         //gridInitializer.InitWallAndFloor();
         gridInitializer.InitPillar();
-        gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList); // Initialize GridVisualizer
+        gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList);
         gridVisualizer.SetActiveGridGuide(false); // Moved from InitGridGuide()
 
 
-        buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, counterModulesInstance, uiPopupManagerInstance); // Initialize BuildingPlacementManager
-        counterModulesInstance.Initialize(); // Initialize CounterModules here
+        buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, counterModulesInstance, uiPopupManagerInstance);
+        counterModulesInstance.Initialize();
 
     }
     private void Start()

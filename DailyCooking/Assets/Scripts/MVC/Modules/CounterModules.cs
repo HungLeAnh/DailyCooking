@@ -6,12 +6,6 @@ using UnityEngine;
 
 public class CounterModules : PersistentSingleton<CounterModules>, ICounterModules
 {
-    public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
-    public class OnSelectedCounterChangedEventArgs : EventArgs
-    {
-        public BaseCounterController selectedCounterController;
-    }
-
     private List<BaseCounterController> baseCounterControllers = new List<BaseCounterController>();
     private bool isInited = false;
     public bool IsInited => isInited;
@@ -52,10 +46,6 @@ public class CounterModules : PersistentSingleton<CounterModules>, ICounterModul
     private void RemoveCounterController(BaseCounterController controller)
     {
         baseCounterControllers.Remove(controller);    
-    }
-    public void FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs args)
-    {
-        OnSelectedCounterChanged?.Invoke(this, args);
     }
     public bool IsContainerCounter(BaseCounterController controller)
     {

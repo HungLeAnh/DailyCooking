@@ -24,22 +24,13 @@ public class SoundManager : PersistentSingleton<SoundManager>
 
     private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
     {
-        if (KitchenGameManager.Instance != null)
-        {
-            DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
-            DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
-            
-        }
+
     }
 
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
-        if (DeliveryManager.Instance != null)
-        {
-            DeliveryManager.Instance.OnRecipeSuccess -= DeliveryManager_OnRecipeSuccess;
-            DeliveryManager.Instance.OnRecipeFailed -= DeliveryManager_OnRecipeFailed;
-        }
+
     }
 
     private void TrashCounter_OnAnyObjectTrashed(object sender, System.EventArgs e)
@@ -65,19 +56,6 @@ public class SoundManager : PersistentSingleton<SoundManager>
         PlaySound(AudioClipRefsSO.chop, cuttingCounter.BaseCounterView.transform.position);
     }
 
-    private void DeliveryManager_OnRecipeFailed(object sender, System.EventArgs e)
-    {
-        DeliveryCounterController deliveryCounter = DeliveryCounterController.Instance;
-        PlaySound(AudioClipRefsSO.deliveryFailed, 
-            deliveryCounter.BaseCounterView.transform.position);
-    }
-
-    private void DeliveryManager_OnRecipeSuccess(object sender, System.EventArgs e)
-    {
-        DeliveryCounterController deliveryCounter = DeliveryCounterController.Instance;
-        PlaySound(AudioClipRefsSO.deliverySuccess, 
-            deliveryCounter.BaseCounterView.transform.position);
-    }
     private AudioSource GetPooledAudioSource()
     {
         for (int i = 0; i < audioSourcePool.Count; i++)
