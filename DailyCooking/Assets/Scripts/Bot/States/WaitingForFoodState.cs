@@ -35,4 +35,8 @@ public class WaitingForFoodState : BotState
     {
 
     }
+    public override void Exit()
+    {
+        stateMachine.GetBotController().OnInteract -= OnFoodServed;
+    }
 }

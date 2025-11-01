@@ -23,4 +23,8 @@ public class OrderFoodState : BotState
     {
 
     }
+    public override void Exit()
+    {
+        stateMachine.GetBotController().OnInteract -= OnOrderComplete;
+    }
 }
