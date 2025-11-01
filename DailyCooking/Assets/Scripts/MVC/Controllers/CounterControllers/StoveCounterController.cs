@@ -4,13 +4,11 @@ using UnityEngine;
 public class StoveCounterController : BaseCounterController
 {
     [SerializeField] private CookingTool _cookingTool;
-    private StoveCounterModel _stoveCounterModel;
     private StoveCounterService _stoveCounterService;
 
     private void Awake()
     {
-        _stoveCounterModel = new StoveCounterModel();
-        BaseCounterModel = _stoveCounterModel;
+        BaseCounterModel = new BaseCounterModel();
         _stoveCounterService = new StoveCounterService(_cookingTool);
     }
 
