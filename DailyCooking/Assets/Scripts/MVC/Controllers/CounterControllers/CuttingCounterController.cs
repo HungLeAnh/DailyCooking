@@ -5,38 +5,100 @@ using UnityEngine;
 public class CuttingCounterController : BaseCounterController, IHasProgress, IHasOptionalSO
 {
     [SerializeField] private CuttingRecipeSO[] _cuttingRecipeSOArray;
-    public event EventHandler OnCut;
 
     private CuttingCounterModel _cuttingCounterModel;
-    private CuttingCounterService _cuttingCounterService;
     private CuttingCounterView _cuttingCounterView;
 
     private void Awake()
     {
         _cuttingCounterModel = new CuttingCounterModel();
         BaseCounterModel = _cuttingCounterModel;
-        _cuttingCounterService = new CuttingCounterService(_cuttingRecipeSOArray);
         _cuttingCounterView = (CuttingCounterView)BaseCounterView;
-
-        _cuttingCounterService.OnProgressChanged += (sender, progress) => _cuttingCounterView.UpdateProgressBar(progress);
-        _cuttingCounterService.OnCut += (sender, e) => OnCut?.Invoke(this, EventArgs.Empty);
-        _cuttingCounterService.OnSpawnKitchenObject += (sender, kitchenObjectSO) =>
-        {
-            if (kitchenObjectSO == null)
-            {
-                _cuttingCounterView.UpdateProgressBar(0f);
-            }
-        };
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        _cuttingCounterService.Interact(_cuttingCounterModel, this, playerStateMachine);
+        if (!HasKitchenObject())
+        {
+            if (playerStateMachine.HasKitchenObject())
+            {
+                if (HasRecipeWithInput(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
+                {
+                    playerStateMachine.GetKitchenObject().SetKitchenObjectParent(this);
+                    _cuttingCounterModel.CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
+                    _cuttingCounterModel.CuttingProgress = 0;
+                    _cuttingCounterView.UpdateProgressBar((float)_cuttingCounterModel.CuttingProgress 
+                        / _cuttingCounterModel.CuttingRecipeSO.cuttingProgressMax);
+                    
+                }
+            }
+        }
+        else
+        {
+            if (_cuttingCounterModel.CuttingProgress == 0)
+            {
+                if (playerStateMachine.HasKitchenObject())
+                {
+                    if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
+                    {
+                        if (tablewareKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO()))
+                        {
+                            GetKitchenObject().DestroySelf();
+                            _cuttingCounterView.UpdateProgressBar(0f);
+                        }
+                    }
+                }
+                else
+                {
+                    GetKitchenObject().SetKitchenObjectParent(playerStateMachine);
+                    _cuttingCounterView.UpdateProgressBar(0f);
+                }
+            }
+        }
+    }
+    public void Cut(CuttingCounterModel model, IKitchenObjectParent counter)
+    {
+        if (counter.HasKitchenObject() && HasRecipeWithInput(counter.GetKitchenObject().GetKitchenObjectSO()))
+        {
+            model.CuttingProgress++;
+
+            if (model.CuttingRecipeSO == null)
+            {
+                model.CuttingRecipeSO = GetCuttingRecipeSOWithInput(counter.GetKitchenObject().GetKitchenObjectSO());
+            }
+
+            _cuttingCounterView.UpdateProgressBar((float)model.CuttingProgress / model.CuttingRecipeSO.cuttingProgressMax);
+
+            if (model.CuttingProgress >= model.CuttingRecipeSO.cuttingProgressMax)
+            {
+                counter.GetKitchenObject().DestroySelf();
+                KitchenObject.SpawnKitchenObject(model.CuttingRecipeSO.output, counter);
+                model.CuttingProgress = 0;
+                model.CuttingRecipeSO = null;
+                _cuttingCounterView.UpdateProgressBar(0f);
+            }
+        }
+    }
+    private bool HasRecipeWithInput(KitchenObjectSO inputKitchenObjectSO)
+    {
+        return GetCuttingRecipeSOWithInput(inputKitchenObjectSO) != null;
+    }
+
+    private CuttingRecipeSO GetCuttingRecipeSOWithInput(KitchenObjectSO inputKitchenObjectSO)
+    {
+        foreach (CuttingRecipeSO cuttingRecipeSO in _cuttingRecipeSOArray)
+        {
+            if (cuttingRecipeSO.input == inputKitchenObjectSO)
+            {
+                return cuttingRecipeSO;
+            }
+        }
+        return null;
     }
 
     public override void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
     {
-        _cuttingCounterService.Cut(_cuttingCounterModel, this);
+        Cut(_cuttingCounterModel, this);
     }
 
     public void SetOptionKitchenObjectSO(int index)

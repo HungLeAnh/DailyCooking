@@ -4,12 +4,10 @@ using UnityEngine;
 public class StoveCounterController : BaseCounterController
 {
     [SerializeField] private CookingTool _cookingTool;
-    private StoveCounterService _stoveCounterService;
 
     private void Awake()
     {
         BaseCounterModel = new BaseCounterModel();
-        _stoveCounterService = new StoveCounterService(_cookingTool);
     }
 
     protected override void OnRestartGame(object sender, PlayerStateMachine e)
@@ -24,7 +22,37 @@ public class StoveCounterController : BaseCounterController
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        _stoveCounterService.Interact(this, playerStateMachine);
+        if (!_cookingTool.HasKitchenObject())
+        {
+            if (playerStateMachine.HasKitchenObject())
+            {
+                if (_cookingTool.HasRecipeWithInput(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
+                {
+                    playerStateMachine.GetKitchenObject().SetKitchenObjectParent(_cookingTool);
+                    _cookingTool.SetCookingRecipeSO();
+                    _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
+                }
+            }
+        }
+        else
+        {
+            if (playerStateMachine.HasKitchenObject())
+            {
+                if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject plateKitchenObject))
+                {
+                    if (plateKitchenObject.TryAddIngredient(_cookingTool.GetKitchenObject().GetKitchenObjectSO()))
+                    {
+                        _cookingTool.GetKitchenObject().DestroySelf();
+                        _cookingTool.UpdateCookingState(CookingTool.State.Idle);
+                    }
+                }
+            }
+            else
+            {
+                _cookingTool.GetKitchenObject().SetKitchenObjectParent(playerStateMachine);
+                _cookingTool.UpdateCookingState(CookingTool.State.Idle);
+            }
+        }
     }
 
     public float GetProgress()

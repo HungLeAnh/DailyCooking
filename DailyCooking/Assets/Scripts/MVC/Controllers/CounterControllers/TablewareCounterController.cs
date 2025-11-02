@@ -9,27 +9,40 @@ public class TablewareCounterController : BaseCounterController
     [SerializeField] private int _tablewareSpawnAmountMax = 4;
 
     private TablewareCounterModel _tablewareCounterModel;
-    private TablewareCounterService _tablewareCounterService;
     private TablewareCounterView _tablewareCounterView;
 
     private void Awake()
     {
         _tablewareCounterModel = new TablewareCounterModel();
         BaseCounterModel = _tablewareCounterModel;
-        _tablewareCounterService = new TablewareCounterService(_spawnTimerMax, _tablewareSpawnAmountMax, _tablewareKitchenObjectSO);
         _tablewareCounterView = (TablewareCounterView)BaseCounterView;
 
-        _tablewareCounterService.OnTablewareSpawned += () => _tablewareCounterView.OnTablewareSpawned();
-        _tablewareCounterService.OnTablewareRemoved += () => _tablewareCounterView.OnTablewareRemoved();
     }
 
     private void Update()
     {
-        _tablewareCounterService.Update(_tablewareCounterModel);
+        if (_tablewareCounterModel.TablewareSpawnAmount < _tablewareSpawnAmountMax)
+        {
+            _tablewareCounterModel.SpawnTimer += Time.deltaTime;
+            if (_tablewareCounterModel.SpawnTimer >= _spawnTimerMax)
+            {
+                _tablewareCounterModel.SpawnTimer = 0f;
+                _tablewareCounterModel.TablewareSpawnAmount++;
+                _tablewareCounterView.OnTablewareSpawned();
+            }
+        }
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        _tablewareCounterService.Interact(_tablewareCounterModel, playerStateMachine);
+        if (!playerStateMachine.HasKitchenObject())
+        {
+            if (_tablewareCounterModel.TablewareSpawnAmount > 0)
+            {
+                _tablewareCounterModel.TablewareSpawnAmount--;
+                KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
+                _tablewareCounterView.OnTablewareRemoved();
+            }
+        }
     }
 }

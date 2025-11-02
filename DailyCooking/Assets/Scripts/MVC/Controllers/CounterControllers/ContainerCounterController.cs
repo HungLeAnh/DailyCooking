@@ -5,22 +5,28 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
 {
     [SerializeField] private KitchenObjectSO _kitchenObjectSO;
 
-    private ContainerCounterService _containerCounterService;
-
     private void Awake()
     {
         BaseCounterModel = new BaseCounterModel();
-        _containerCounterService = new ContainerCounterService();
-
-        _containerCounterService.OnSpawnKitchenObject += (sender, spawnedKitchenObjectSO) =>
-        {
-
-        };
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        _containerCounterService.Interact(playerStateMachine, _kitchenObjectSO);
+        if (!playerStateMachine.HasKitchenObject())
+        {
+            KitchenObject.SpawnKitchenObject(_kitchenObjectSO, playerStateMachine);
+        }
+        else
+        {
+            if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
+            {
+                if (tablewareKitchenObject.TryAddIngredient(_kitchenObjectSO))
+                {
+                    // Indicate ingredient added to plate
+                    //OnSpawnKitchenObject?.Invoke(this, null); 
+                }
+            }
+        }
     }
 
     public KitchenObjectSO GetContainerKitchenObjectType()

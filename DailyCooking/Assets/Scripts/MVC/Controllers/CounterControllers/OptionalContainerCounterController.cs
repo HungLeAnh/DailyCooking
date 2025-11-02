@@ -8,15 +8,12 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
     public event EventHandler OnPlayreGrabbedObject;
 
-    private OptionalContainerCounterService _optionalContainerCounterService;
     private PlayerStateMachine _playerStateMachine;
 
     private void Awake()
     {
         BaseCounterModel = new BaseCounterModel();
-        _optionalContainerCounterService = new OptionalContainerCounterService();
 
-        _optionalContainerCounterService.OnPlayerGrabbedObject += () => OnPlayreGrabbedObject?.Invoke(this, EventArgs.Empty);
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
@@ -28,7 +25,20 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
     public void SetOptionKitchenObjectSO(int index)
     {
-        _optionalContainerCounterService.SetOption(index, _playerStateMachine, kitchenObjectSOList);
+        if (!_playerStateMachine.HasKitchenObject())
+        {
+            KitchenObject.SpawnKitchenObject(kitchenObjectSOList[index], _playerStateMachine);
+            OnPlayreGrabbedObject?.Invoke(this, EventArgs.Empty);
+        }
+        else
+        {
+            if (_playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
+            {
+                if (tablewareKitchenObject.TryAddIngredient(kitchenObjectSOList[index]))
+                {
+                }
+            }
+        }
         _playerStateMachine = null;
     }
 
