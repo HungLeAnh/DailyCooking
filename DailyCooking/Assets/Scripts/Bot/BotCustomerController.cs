@@ -96,7 +96,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     }
     public void OrderFood()
     {
-        waitingFood = DeliveryManager.Instance.GetUnlockedFood();
+        waitingFood = KitchenGameManager.Instance.GetUnlockedFood();
 
         BubbleFrame.SetActive(true);
         orderBubble.SetActive(false);

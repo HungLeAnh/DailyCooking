@@ -290,6 +290,12 @@ MonoBehaviour:
   fryingRecipeSOList:
   - {fileID: 11400000, guid: 03a4633e975251e4bbcc10c49aa23b19, type: 2}
   - {fileID: 11400000, guid: 561cb208a595885409b71715b3d7984f, type: 2}
+  FoodSOList:
+  - {fileID: 11400000, guid: 49395a9a760952f409a3cfa5c1bf3c3b, type: 2}
+  - {fileID: 11400000, guid: 76925b9fc7bd54e49915c59dfbb69df2, type: 2}
+  - {fileID: 11400000, guid: 27c3a1f72918bc74ca53c23f48556f98, type: 2}
+  - {fileID: 11400000, guid: b9df040063576f745893f915f0232c86, type: 2}
+  - {fileID: 11400000, guid: 614a2c435fd3a2a46bc43782c863e397, type: 2}
 --- !u!1 &140795779
 GameObject:
   m_ObjectHideFlags: 0
@@ -2337,56 +2343,6 @@ MonoBehaviour:
   m_MinRegionArea: 0.2
   m_NavMeshData: {fileID: 23800000, guid: 212235b3c544ab54196ed39e644f6920, type: 2}
   m_BuildHeightMesh: 0
---- !u!1 &1656926242
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1656926244}
-  - component: {fileID: 1656926243}
-  m_Layer: 0
-  m_Name: DeliverManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1656926243
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1656926242}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75f12b36c5e1bf040a1feec8fd9e6468, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  FoodSOList:
-  - {fileID: 11400000, guid: 49395a9a760952f409a3cfa5c1bf3c3b, type: 2}
-  - {fileID: 11400000, guid: 76925b9fc7bd54e49915c59dfbb69df2, type: 2}
-  - {fileID: 11400000, guid: 27c3a1f72918bc74ca53c23f48556f98, type: 2}
-  - {fileID: 11400000, guid: b9df040063576f745893f915f0232c86, type: 2}
-  - {fileID: 11400000, guid: 614a2c435fd3a2a46bc43782c863e397, type: 2}
---- !u!4 &1656926244
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1656926242}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1658115911
 GameObject:
   m_ObjectHideFlags: 0
@@ -3903,7 +3859,6 @@ SceneRoots:
   - {fileID: 2130496731}
   - {fileID: 805335353}
   - {fileID: 106792872}
-  - {fileID: 1656926244}
   - {fileID: 997290952}
   - {fileID: 1853001321}
   - {fileID: 2070905293}

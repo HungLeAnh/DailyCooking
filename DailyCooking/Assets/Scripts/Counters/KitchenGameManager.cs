@@ -35,6 +35,7 @@ public class KitchenGameManager : MonoBehaviour
     [SerializeField] private GameObject kitchenManagerUI;
     [SerializeField] private List<CuttingRecipeSO> cuttingRecipeSOList;
     [SerializeField] private List<FryingRecipeSO> fryingRecipeSOList;
+    [SerializeField] private List<FoodSO> FoodSOList;
 
     private State state;
     private float countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
@@ -46,6 +47,8 @@ public class KitchenGameManager : MonoBehaviour
     private long earnCount;
     private long serveCount;
     private int playerDay = -1;
+    private List<FoodSO> unlockFoodList;
+    private List<KitchenObjectSO> unlockIngredient;
 
     public long EarnCount => earnCount;
     public long ServeCount => serveCount;
@@ -60,12 +63,32 @@ public class KitchenGameManager : MonoBehaviour
     {
         Instance = this;
         state = State.Editing;
-
+        unlockFoodList = new List<FoodSO>();
+        unlockIngredient = new List<KitchenObjectSO>();
 
         playerDay = GameManager.Instance.GameData.PlayerStats.playerData.DaysPlayed;
         CreateDailytask();
         kitchenManagerUI.SetActive(false);
     }
+    public void OnDestroy()
+    {
+        unlockFoodList.Clear();
+        unlockIngredient.Clear();
+    }
+    public void Init()
+    {
+        unlockFoodList.Clear();
+        unlockFoodList.Clear();
+        unlockIngredient.Clear();
+        foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
+        {
+            if (counterController == null)
+                continue;
+            AddUnlockIngredient(counterController);
+        }
+
+    }
+
     private void CreateDailytask()
     {
         EarnGoal = playerDay * earnGoalMultiply;
@@ -82,7 +105,7 @@ public class KitchenGameManager : MonoBehaviour
         kitchenManagerUI.SetActive(true);
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup);
         countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
-        DeliveryManager.Instance.Init();
+        Init();
         BotManager.Instance.Initialize();
     }
     public void EndGame()
@@ -203,4 +226,66 @@ public class KitchenGameManager : MonoBehaviour
         return earnCount >= earnGoal && serveCount >= serveGoal;
     }
 
+
+    public void AddUnlockIngredient(BaseCounterController counterController)
+    {
+        IContainerCounter containerCounter = counterController as IContainerCounter;
+        if (containerCounter == null) return;
+
+        KitchenObjectSO kitchenObjectSO = containerCounter.GetContainerKitchenObjectType();
+        if (kitchenObjectSO != null)
+        {
+            if (!unlockIngredient.Contains(kitchenObjectSO))
+                unlockIngredient.Add(kitchenObjectSO);
+        }
+        GetUnlockFood();
+
+    }
+
+    private void GetUnlockFood()
+    {
+        foreach (var foodSO in FoodSOList)
+        {
+            bool isUnlocked = true;
+            foreach (var ingredient in foodSO.kitchenObjectSOList)
+            {
+                isUnlocked = isUnlocked && IsIngredientUnlocked(ingredient);
+                if (!isUnlocked)
+                {
+                    break;
+                }
+            }
+            if (isUnlocked)
+            {
+                if (!unlockFoodList.Contains(foodSO))
+                    unlockFoodList.Add(foodSO);
+            }
+        }
+    }
+
+    private bool IsIngredientUnlocked(KitchenObjectSO ingredient)
+    {
+        foreach (var unlockIngredient in unlockIngredient)
+        {
+            if (unlockIngredient == ingredient)
+            {
+                return true;
+            }
+            else
+            {
+                var cuttingRecipeSO = KitchenGameManager.Instance.CuttingRecipeSOList.Find(x => x.input == unlockIngredient &&
+                                                                       x.output == ingredient);
+                var fryingRecipeSO = KitchenGameManager.Instance.FryingRecipeSOList.Find(x => x.input == unlockIngredient &&
+                                                                       x.output == ingredient);
+                if (cuttingRecipeSO != null || fryingRecipeSO != null)
+                    return true;
+            }
+
+        }
+        return false;
+    }
+    public FoodSO GetUnlockedFood()
+    {
+        return unlockFoodList[UnityEngine.Random.Range(0, unlockFoodList.Count)];
+    }
 }
