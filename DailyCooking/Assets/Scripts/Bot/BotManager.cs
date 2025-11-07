@@ -59,7 +59,8 @@ public class BotManager : SimpleSingleton<BotManager>
     {
         while (true)
         {
-            GetBot();
+            var bot = GetBot();
+            bot.GetComponent<BotCustomerController>().InitBot();
             yield return new WaitForSeconds(20f);
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -19,7 +20,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     [SerializeField] private GameObject[] visualGameObjectArray;
 
     private BotStateMachine stateMachine;
-    private FoodSO waitingFood;
+    private List<FoodSO> waitingFood;
 
     public Table TargetTable { get; set; }
     public int TargetSeatIndex { get; set; }
@@ -34,7 +35,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
         orderBubble.SetActive(false);
         emotionBubble.SetActive(false);
         BubbleFrame.SetActive(false);
-
+        waitingFood = new List<FoodSO>();
         bubbleEmotionUI.OnEmotionEnd += OnEmotionEnd;
     }
 
@@ -49,38 +50,40 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     }
     public bool IsServerCorrectFood(TablewareKitchenObject tablewareKitchenObject)
     {
-
-        if (waitingFood.kitchenObjectSOList.Count == tablewareKitchenObject.GetKitchenObjectSOList().Count)
+        foreach (FoodSO waitingFood in waitingFood)
         {
-            //Has the same number of ingredients
-            bool plateContentMathesRecipe = true;
-
-            foreach (KitchenObjectSO recipeKitchenObjectSO in waitingFood.kitchenObjectSOList)
+            if (waitingFood.kitchenObjectSOList.Count == tablewareKitchenObject.GetKitchenObjectSOList().Count)
             {
-                //Cycling through all ingredients in recipe
-                bool ingredientFound = false;
-                foreach (KitchenObjectSO plateKitchenObjectSO in tablewareKitchenObject.GetKitchenObjectSOList())
+                //Has the same number of ingredients
+                bool plateContentMathesRecipe = true;
+
+                foreach (KitchenObjectSO recipeKitchenObjectSO in waitingFood.kitchenObjectSOList)
                 {
                     //Cycling through all ingredients in recipe
-                    if (plateKitchenObjectSO == recipeKitchenObjectSO)
+                    bool ingredientFound = false;
+                    foreach (KitchenObjectSO plateKitchenObjectSO in tablewareKitchenObject.GetKitchenObjectSOList())
                     {
-                        ingredientFound = true;
-                        break;
+                        //Cycling through all ingredients in recipe
+                        if (plateKitchenObjectSO == recipeKitchenObjectSO)
+                        {
+                            ingredientFound = true;
+                            break;
+                        }
+                    }
+                    if (!ingredientFound)
+                    {
+                        // This Recipe ingredient was not found on the plate
+                        plateContentMathesRecipe = false;
+
                     }
                 }
-                if (!ingredientFound)
+
+                if (plateContentMathesRecipe)
                 {
-                    // This Recipe ingredient was not found on the plate
-                    plateContentMathesRecipe = false;
-
+                    // Player delivered correct recipe 
+                    KitchenGameManager.Instance.ServeFood(waitingFood.price);
+                    return true;
                 }
-            }
-
-            if (plateContentMathesRecipe)
-            {
-                // Player delivered correct recipe 
-                KitchenGameManager.Instance.ServeFood(waitingFood);
-                return true;
             }
         }
 
@@ -96,13 +99,13 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     }
     public void OrderFood()
     {
-        waitingFood = KitchenGameManager.Instance.GetUnlockedFood();
+        waitingFood.Add(KitchenGameManager.Instance.GetUnlockedFood());
 
         BubbleFrame.SetActive(true);
         orderBubble.SetActive(false);
         foodBubble.SetActive(true);
 
-        bubbleFoodUI.SetOrder(new[] { waitingFood.Sprite });
+        bubbleFoodUI.SetOrder(waitingFood);
         bubbleEmotionUI.StartEmotion();
 
     }
@@ -128,9 +131,14 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     {
         TargetTable = null;
         TargetSeatIndex = -1;
-        waitingFood = null;
+        waitingFood.Clear();
 
         stateMachine.SetState(new BotIdleState(stateMachine));
+    }
+    public void InitBot()
+    {
+        stateMachine.SetState(new WaitForTableState(stateMachine));
+
     }
 
     public void ClearTargetTable()

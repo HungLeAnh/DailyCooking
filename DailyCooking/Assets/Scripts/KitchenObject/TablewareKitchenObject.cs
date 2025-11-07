@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-public class TablewareKitchenObject : KitchenObject
+public class TablewareKitchenObject : KitchenObject, IInteractable
 {
     public event EventHandler<OnIngredientAddedEventArgs> OnIngredientAdded;
     public class OnIngredientAddedEventArgs : EventArgs
@@ -13,6 +13,7 @@ public class TablewareKitchenObject : KitchenObject
     }
 
     [SerializeField] private List<KitchenObjectSO> validKitchenObjectSOList;
+    [SerializeField] private GameObject[] visualGameObjectArray;
 
 
     private List<KitchenObjectSO> _ingredientSOList;
@@ -53,6 +54,48 @@ public class TablewareKitchenObject : KitchenObject
     {
         return _ingredientSOList;
     }
+    public void InteractEvent(PlayerStateMachine playerStateMachine)
+    {
+        Debug.LogError("Table: InteractEvent called");
+        if (!playerStateMachine.HasKitchenObject())
+        {
+            // Player is not carrying anything
 
-    
+        }
+        else
+        {
+
+        }
+    }
+
+    public void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
+    {
+
+    }
+
+    public void OnSelected()
+    {
+        Show();
+    }
+
+    public void OnDeselected()
+    {
+        Hide();
+    }
+
+    public void Show()
+    {
+        foreach (var visualGameObject in visualGameObjectArray)
+        {
+            visualGameObject.SetActive(true);
+        }
+
+    }
+    public void Hide()
+    {
+        foreach (var visualGameObject in visualGameObjectArray)
+        {
+            visualGameObject.SetActive(false);
+        }
+    }
 }

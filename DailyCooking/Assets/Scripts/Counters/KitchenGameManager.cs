@@ -128,10 +128,10 @@ public class KitchenGameManager : MonoBehaviour
             {
                 //Win game
 
+                playerDay++;
                 GameManager.Instance.GameData.PlayerStats.UpdatePlayedDay(playerDay);
                 GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins((int)earnCount);
                 GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(playerDay * PLAYER_EXP_MULTIPLIER);
-                playerDay++;
             }
 
         }
@@ -209,9 +209,9 @@ public class KitchenGameManager : MonoBehaviour
         }
     }
 
-    public void ServeFood(FoodSO waitingRecipeSO)
+    public void ServeFood(long foodPrice)
     {
-        earnCount += waitingRecipeSO.price;
+        earnCount += foodPrice;
         serveCount++;
         OnServeFood.Invoke(this,EventArgs.Empty);
 

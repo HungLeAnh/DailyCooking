@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Table : MonoBehaviour, IUpgradeable, IInteractable
+public class Table : MonoBehaviour, IInteractable
 {
-    [SerializeField] private TableUpgradeDataList upgradeDataList;
     [SerializeField] private List<Transform> seats = new List<Transform>();
     [SerializeField] private List<Transform> kitchenObjectFollowPoints = new List<Transform>();
     [SerializeField] private GameObject[] visualGameObjectArray;
@@ -13,11 +12,9 @@ public class Table : MonoBehaviour, IUpgradeable, IInteractable
 
     public int Level { get; set; } = 1;
 
-    private GenericUpgrader upgrader;
 
     private void Awake()
     {
-        upgrader = GetComponent<GenericUpgrader>();
     }
 
     private void Start()
@@ -28,45 +25,12 @@ public class Table : MonoBehaviour, IUpgradeable, IInteractable
     private void OnEnable()
     {
         TableManager.Instance.RegisterTable(this);
-        UpgradeManager.Instance.Register(this);
     }
 
     private void OnDisable()
     {
         TableManager.Instance.UnregisterTable(this);
-        UpgradeManager.Instance.Unregister(this);
     }
-
-    public void Upgrade()
-    {
-        if (Level >= upgradeDataList.upgradeDataList.Count)
-        {
-            Debug.Log("Max level reached!");
-            return;
-        }
-
-        TableUpgradeData upgradeData = upgradeDataList.upgradeDataList[Level];
-
-        // TODO: Implement cost handling
-        // if (player.money < upgradeData.cost) {
-        //     return;
-        // }
-        // player.money -= upgradeData.cost;
-
-        Level++;
-        Debug.Log($"{gameObject.name} upgraded to level {Level}");
-
-        AddSeats(upgradeData.seatsToAdd);
-
-        if (upgradeData.upgradedPrefab != null)
-        {
-            Instantiate(upgradeData.upgradedPrefab, transform.position, transform.rotation, transform.parent);
-            Destroy(gameObject);
-        }
-
-        upgrader.Upgrade();
-    }
-
     public void AddSeats(int seatsToAdd)
     {
         for (int i = 0; i < seatsToAdd; i++)
@@ -111,7 +75,13 @@ public class Table : MonoBehaviour, IUpgradeable, IInteractable
             isSeatOccupied[seatIndex] = false;
         }
     }
-
+    public void ResetTable()
+    {
+        for (int i = 0; i < isSeatOccupied.Length; i++)
+        {
+            isSeatOccupied[i] = false;
+        }
+    }
     public Transform GetSeatTransform(int seatIndex)
     {
         if (seatIndex >= 0 && seatIndex < seats.Count)

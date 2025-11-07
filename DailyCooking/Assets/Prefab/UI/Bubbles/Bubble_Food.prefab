@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7082139957883277607}
   - component: {fileID: 1800524674617151499}
-  - component: {fileID: 6919882145565598973}
+  - component: {fileID: 1316174391034710457}
   - component: {fileID: 9196743136261158109}
   m_Layer: 2
   m_Name: Bubble_Food
@@ -52,7 +52,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Scripts::BubbleOrder
   dishPrefab: {fileID: 7402140757988232819, guid: 9cd86f35bbfb33445a27f6ccb570208e, type: 3}
   dishContainerTransform: {fileID: 7082139957883277607}
---- !u!114 &6919882145565598973
+--- !u!114 &1316174391034710457
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -61,21 +61,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 3170377630520842106}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
   m_Padding:
     m_Left: 10
     m_Right: 10
     m_Top: 10
     m_Bottom: 10
   m_ChildAlignment: 4
-  m_StartCorner: 0
-  m_StartAxis: 1
-  m_CellSize: {x: 100, y: 100}
-  m_Spacing: {x: 5, y: 5}
-  m_Constraint: 0
-  m_ConstraintCount: 2
+  m_Spacing: 10
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &9196743136261158109
 MonoBehaviour:
   m_ObjectHideFlags: 0

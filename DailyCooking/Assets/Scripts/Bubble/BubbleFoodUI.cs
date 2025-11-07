@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,18 +12,18 @@ public class BubbleFoodUI: MonoBehaviour
         dishPrefab.SetActive(false);
     }
 
-    public void SetOrder(Sprite[] foodSprites)
+    public void SetOrder(List<FoodSO> foods)
     {
         foreach (Transform child in dishContainerTransform)
         {
             Destroy(child.gameObject);
         }
-        foreach (var foodSprite in foodSprites)
+        foreach (var food in foods)
         {
             GameObject dishGO = Instantiate(dishPrefab, dishContainerTransform);
             dishGO.SetActive(true);
             BubbleFoodItemUI dishUI = dishGO.GetComponent<BubbleFoodItemUI>();
-            dishUI.SetFood(foodSprite);
+            dishUI.SetFood(food);
         }
     }
 }
