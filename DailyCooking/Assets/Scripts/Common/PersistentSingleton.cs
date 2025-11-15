@@ -18,16 +18,16 @@ public class PersistentSingleton<T> : MonoBehaviour where T : Component
                 s_Instance = FindFirstObjectByType<T>();
 
                 // Create a new GameObject with the Type T if it does not exist
-                if (s_Instance == null)
-                {
-                    GameObject singletonObject = new GameObject();
-                    s_Instance = singletonObject.AddComponent<T>();
+                //if (s_Instance == null)
+                //{
+                //    GameObject singletonObject = new GameObject();
+                //    s_Instance = singletonObject.AddComponent<T>();
 
-                    // Name the singleton instance for the Type
-                    singletonObject.name = typeof(T).ToString();
+                //    // Name the singleton instance for the Type
+                //    singletonObject.name = typeof(T).ToString();
 
-                    DontDestroyOnLoad(singletonObject);
-                }
+                //    DontDestroyOnLoad(singletonObject);
+                //}
             }
             return s_Instance;
         }

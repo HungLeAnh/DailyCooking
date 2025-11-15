@@ -29,12 +29,18 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
+        GameManager.Instance.OnPlayerSpawned += Instance_OnPlayerSpawned;
         GameInput.Instance.OnScrollPerformed += HandleZoomDesktop;
         GameInput.Instance.OnMousePanPerformed += OnPanMovedDesktop;
 
         GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingStart += OnBuildingStart;
         GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
         
+    }
+
+    private void Instance_OnPlayerSpawned(object sender, EventArgs e)
+    {
+        _cinemachineCamera.Follow = PlayerStateMachine.Instance.transform;
     }
 
     private void Update()

@@ -12,20 +12,20 @@ public abstract class SimpleSingleton<T> : MonoBehaviour where T : Component
             {
                 _instance = FindFirstObjectByType<T>();
 
-                if (_instance == null)
-                {
-                    GameObject gameObject = new GameObject(nameof(T));
-                    _instance = gameObject.AddComponent<T>();
+                //if (_instance == null)
+                //{
+                //    GameObject gameObject = new GameObject(nameof(T));
+                //    _instance = gameObject.AddComponent<T>();
 
-                    gameObject.name = typeof(T).ToString();
-                }
+                //    gameObject.name = typeof(T).ToString();
+                //}
             }
             return _instance;
 
         }
     }
 
-    private void Awake()
+    protected virtual void Awake()
     {
         if (_instance == null)
             _instance = this as T;
