@@ -19,6 +19,7 @@ public class EatingState : BotState
         if (eatingTimer <= 0)
         {
             stateMachine.SetState(new LeavingState(stateMachine));
+            stateMachine.GetBotController().FinishEating();
         }
     }
 }

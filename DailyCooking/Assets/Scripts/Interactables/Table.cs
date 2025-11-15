@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Table : MonoBehaviour, IInteractable
+public class Table : MonoBehaviour,IKitchenObjectParent
 {
     [SerializeField] private List<Transform> seats = new List<Transform>();
     [SerializeField] private List<Transform> kitchenObjectFollowPoints = new List<Transform>();
@@ -12,14 +12,10 @@ public class Table : MonoBehaviour, IInteractable
 
     public int Level { get; set; } = 1;
 
-
-    private void Awake()
-    {
-    }
-
     private void Start()
     {
         isSeatOccupied = new bool[seats.Count];
+        kitchenObjects = new KitchenObject[seats.Count];
     }
 
     private void OnEnable()
@@ -30,19 +26,6 @@ public class Table : MonoBehaviour, IInteractable
     private void OnDisable()
     {
         TableManager.Instance.UnregisterTable(this);
-    }
-    public void AddSeats(int seatsToAdd)
-    {
-        for (int i = 0; i < seatsToAdd; i++)
-        {
-            // This is a simple way to add seats, you might want to have a more sophisticated way to determine the position of the new seats
-            Vector3 newPosition = seats[seats.Count - 1].position + new Vector3(1.5f, 0, 0);
-            GameObject newSeat = new GameObject("Seat");
-            newSeat.transform.position = newPosition;
-            newSeat.transform.parent = transform;
-            seats.Add(newSeat.transform);
-        }
-        isSeatOccupied = new bool[seats.Count];
     }
 
     public int GetAvailableSeat()
@@ -68,13 +51,6 @@ public class Table : MonoBehaviour, IInteractable
         return true;
     }
 
-    public void VacateSeat(int seatIndex)
-    {
-        if (seatIndex >= 0 && seatIndex < seats.Count)
-        {
-            isSeatOccupied[seatIndex] = false;
-        }
-    }
     public void ResetTable()
     {
         for (int i = 0; i < isSeatOccupied.Length; i++)
@@ -91,24 +67,24 @@ public class Table : MonoBehaviour, IInteractable
         return null;
     }
 
-    public Transform GetKitchenObjectFollowTransform(int index)
+    public Transform GetKitchenObjectFollowTransform(int index = 0)
     {
-        if (kitchenObjectFollowPoints != null && index >= 0 && index < kitchenObjects.Length)
+        if (kitchenObjectFollowPoints != null && index >= 0 && index < kitchenObjectFollowPoints.Count)
         {
             return kitchenObjectFollowPoints[index];
         }
         return null;
     }
 
-    public void SetKitchenObject(KitchenObject kitchenObject, int index)
+    public void SetKitchenObject(KitchenObject kitchenObject, int index = 0)
     {
-        if (kitchenObjects != null && index >= 0 && index < kitchenObjects.Length)
+        if (kitchenObjects != null && index >= 0 && index < kitchenObjectFollowPoints.Count)
         {
             kitchenObjects[index] = kitchenObject;
         }
     }
 
-    public KitchenObject GetKitchenObject(int index)
+    public KitchenObject GetKitchenObject(int index = 0)
     {
         if (kitchenObjects != null && index >= 0 && index < kitchenObjects.Length)
         {
@@ -117,61 +93,38 @@ public class Table : MonoBehaviour, IInteractable
         return null;
     }
 
-    public void ClearKitchenObject(int index)
+    public void ClearKitchenObject(int index = 0)
     {
-        if(kitchenObjects != null && index >= 0 && index < kitchenObjects.Length)
+        if(kitchenObjects != null && index >= 0 && 
+            index < kitchenObjects.Length && 
+            index < seats.Count)
         {
             kitchenObjects[index] = null;
+            isSeatOccupied[index] = false;
+
         }
     }
 
-    public bool HasKitchenObject()
+    public bool HasKitchenObject(int index = 0)
     {
-        return kitchenObjects != null && kitchenObjects.Length > 0;
-    }
-
-    public void InteractEvent(PlayerStateMachine playerStateMachine)
-    {
-        Debug.LogError("Table: InteractEvent called");
-        if (!playerStateMachine.HasKitchenObject())
+        if(kitchenObjects != null && 
+            kitchenObjects.Length > 0 && 
+            index < kitchenObjects.Length)
         {
-            // Player is not carrying anything
-
+            return kitchenObjects[index] != null;
         }
         else
         {
-
+            return false;
         }
     }
-
-    public void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
+    public void SetEatenViual(int index)
     {
-        
-    }
+        var tablewareObject = kitchenObjects[index] as TablewareKitchenObject;
 
-    public void OnSelected()
-    {
-        Show();
-    }
-
-    public void OnDeselected()
-    {
-        Hide();
-    }
-
-    public void Show()
-    {
-        foreach (var visualGameObject in visualGameObjectArray)
+        if(tablewareObject != null)
         {
-            visualGameObject.SetActive(true);
-        }
-
-    }
-    public void Hide()
-    {
-        foreach (var visualGameObject in visualGameObjectArray)
-        {
-            visualGameObject.SetActive(false);
+            tablewareObject.SetEaten();
         }
     }
 }

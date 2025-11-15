@@ -154,38 +154,6 @@ public class GameInput : PersistentSingleton<GameInput>
         if (timeSinceLastTouch > touchTimeThreshold)
             isPanning = true;
     }
-
-    /*private void HandlePanAndTap()
-    {
-
-
-        CheckMove();
-        CheckTouch();
-    }
-
-    private void CheckMove()
-    {
-        float distance = Vector2.Distance(lastClickPosition, Input.GetTouch(0).position);
-        if (distance > dragThreshold)
-        {
-            
-        }
-    }
-
-    private void CheckTouch()
-    {
-        if (isPanning)
-            return;
-        if (timeSinceLastTouch > touchTimeThreshold)
-            return;
-
-
-        float distance = Vector2.Distance(lastClickPosition, Input.GetTouch(0).position);
-        if (distance > dragThreshold)
-            return;
-
-    }
-    */
     
     public bool IsMouseOverUI()
     {

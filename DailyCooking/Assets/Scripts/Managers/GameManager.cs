@@ -5,6 +5,8 @@ using UnityEngine;
 [DefaultExecutionOrder(-1)]
 public class GameManager : PersistentSingleton<GameManager>, IGameManager
 {
+    public event EventHandler OnPlayerSpawned;
+
     [SerializeField] private GameObject playerPrefab;
     private GameData gameData;
     private FileDataHandler dataHandler;
@@ -45,24 +47,12 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         currentState?.Update();
     }
 
-    private void OnDestroy()
-    {
-        if (gameData != null && gameData.PlayerStats != null)
-        {
-            gameData.PlayerStats.OnResourceChange -= SaveGame;
-            gameData.PlayerStats.OnLevelChange -= SaveGame;
-            gameData.PlayerStats.OnExpChange -= SaveGame;
-            gameData.InventoryData.OnInventoryDataChanged -= SaveGame;
-            gameData.GridData.OnGridDataChanged -= SaveGame;
-            gameData.TutorialData.OnTutorialDataChanged -= SaveGame;
-        }
-    }
-
     public void InitializePlayer()
     {
-        Vector3 placePosition = GridBuildingSystem.Instance.GridManager.GetFirstEmptyGridPos();
+        Vector3 placePosition = Vector3.zero;
 
         playerGameObject = Instantiate(playerPrefab, placePosition, Quaternion.identity);
+        OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
     }
 
     public void DestroyPlayer()

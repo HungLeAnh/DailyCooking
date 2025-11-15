@@ -39,31 +39,23 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
 
     }
 
-    public KitchenObject GetKitchenObject()
+    public KitchenObject GetKitchenObject(int index = 0)
     {
         return BaseCounterModel.KitchenObject;
     }
-    public void ClearKitchenObject()
+    public void ClearKitchenObject(int index = 0)
     {
         BaseCounterModel.ClearKitchenObject();
     }
-    public bool HasKitchenObject()
+    public bool HasKitchenObject(int index = 0)
     {
         return BaseCounterModel.KitchenObject != null;
     }
-    public virtual void InteractEvent(PlayerStateMachine playerStateMachine)
-    {
-    }
-
-    public virtual void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
-    {
-    }
-
-    public Transform GetKitchenObjectFollowTransform()
+    public Transform GetKitchenObjectFollowTransform(int index = 0)
     {
         return _baseCounterView.CounterTopPoint;
     }
-    public void SetKitchenObject(KitchenObject kitchenObject)
+    public void SetKitchenObject(KitchenObject kitchenObject, int index = 0)
     {
         BaseCounterModel.SetKitchenObject(kitchenObject);
 
@@ -79,7 +71,13 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
             );
         }
     }
+    public virtual void InteractEvent(PlayerStateMachine playerStateMachine)
+    {
+    }
 
+    public virtual void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
+    {
+    }
     public void OnSelected()
     {
         BaseCounterView.Show();

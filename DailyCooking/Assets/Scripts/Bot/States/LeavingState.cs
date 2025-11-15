@@ -12,7 +12,6 @@ public class LeavingState : BotState
         // TODO: Determine the exit point
         Vector3 exitPoint = new Vector3(10, 0, 0); // Placeholder
         stateMachine.GetBotController().NavMeshAgent.SetDestination(exitPoint);
-        stateMachine.GetBotController().ClearTargetTable();
     }
 
     public override void Update()

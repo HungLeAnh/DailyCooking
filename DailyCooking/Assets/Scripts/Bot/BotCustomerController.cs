@@ -82,7 +82,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
                 {
                     // Player delivered correct recipe 
                     KitchenGameManager.Instance.ServeFood(waitingFood.price);
-                    return true;
+                    return plateContentMathesRecipe;
                 }
             }
         }
@@ -141,11 +141,6 @@ public class BotCustomerController : MonoBehaviour,IInteractable
 
     }
 
-    public void ClearTargetTable()
-    {
-        TargetTable.VacateSeat(TargetSeatIndex);
-    }
-
     public void StopBubble()
     {
         bubbleEmotionUI.StopEmotion();
@@ -179,5 +174,12 @@ public class BotCustomerController : MonoBehaviour,IInteractable
         {
             visualGameObject.SetActive(false);
         }
+    }
+
+    public void FinishEating()
+    {
+        //KitchenObject.SpawnKitchenObject(,TargetSeatIndex);
+        //Debug.LogError("BotCustomerController: FinishEating called " + TargetSeatIndex);
+        TargetTable.SetEatenViual(TargetSeatIndex);
     }
 }

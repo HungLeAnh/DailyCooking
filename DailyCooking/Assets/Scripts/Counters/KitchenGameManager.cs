@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class KitchenGameManager : MonoBehaviour
+public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
 {
     private const string PLAYER_DAY = "PlayerDay";
     private const float COUNTDOWN_TO_START_TIMER_INITIAL = 3f;
@@ -11,7 +11,6 @@ public class KitchenGameManager : MonoBehaviour
     private const float TIME_SCALE_PAUSED = 0f;
     private const float TIME_SCALE_UNPAUSED = 1f;
 
-    public static KitchenGameManager Instance { get; private set; }
     
     public event EventHandler OnStateChanged;
 
@@ -61,7 +60,6 @@ public class KitchenGameManager : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
         state = State.Editing;
         unlockFoodList = new List<FoodSO>();
         unlockIngredient = new List<KitchenObjectSO>();
@@ -101,7 +99,6 @@ public class KitchenGameManager : MonoBehaviour
     public void StartGame()
     {
         CreateDailytask();
-        GameManager.Instance.InitializePlayer();
         kitchenManagerUI.SetActive(true);
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup);
         countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
@@ -110,7 +107,6 @@ public class KitchenGameManager : MonoBehaviour
     }
     public void EndGame()
     {
-        GameManager.Instance.DestroyPlayer();
         RewardPlayer();
         kitchenManagerUI.SetActive(false);
 

@@ -71,9 +71,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     private void Awake()
     {
-        // Get concrete instances of singletons
-        this.gameManager = GameManager.Instance;
-
+        gameManager = GameManager.Instance;
         ICounterModules counterModulesInstance = CounterModules.Instance;
         IUIPopupManager uiPopupManagerInstance = UIPopupManager.Instance;
 
@@ -101,7 +99,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         //gridInitializer.InitWallAndFloor();
         gridInitializer.InitPillar();
         gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList);
-        gridVisualizer.SetActiveGridGuide(false); // Moved from InitGridGuide()
+        gridVisualizer.SetActiveGridGuide(false);
 
 
         buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, counterModulesInstance, uiPopupManagerInstance);

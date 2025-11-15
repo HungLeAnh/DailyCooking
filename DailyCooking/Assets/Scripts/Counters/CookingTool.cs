@@ -122,28 +122,28 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
 
         }
     }
-    public virtual void SetKitchenObject(KitchenObject kitchenObject)
+    public virtual void SetKitchenObject(KitchenObject kitchenObject,int index = 0)
     {
         _kitchenObject = kitchenObject;
         progressBarUI.Hide();
         burnWarningUI.Hide();
     }
 
-    public Transform GetKitchenObjectFollowTransform()
+    public Transform GetKitchenObjectFollowTransform(int index=0)
     {
         return placePoint;
 }
-    public KitchenObject GetKitchenObject()
+    public KitchenObject GetKitchenObject(int index = 0)
     {
         return _kitchenObject;
     }
-    public void ClearKitchenObject()
+    public void ClearKitchenObject(int index = 0)
     {
         _kitchenObject = null;
         progressBarUI.Hide();
         burnWarningUI.Hide();
     }
-    public bool HasKitchenObject()
+    public bool HasKitchenObject(int index = 0)
     {
         return _kitchenObject != null;
     }

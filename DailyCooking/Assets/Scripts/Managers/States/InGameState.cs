@@ -10,5 +10,7 @@ public class InGameState : GameManagerBaseState
         {
             TutorialManager.Instance.ShowFirstTimeTutorial();
         }
+        GameManager.Instance.InitializePlayer();
+
     }
 }

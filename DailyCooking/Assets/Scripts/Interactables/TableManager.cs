@@ -10,10 +10,6 @@ public class TableManager : SimpleSingleton<TableManager>
     {
         KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
     }
-    private void OnDestroy()
-    {
-        KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
-    }
 
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {

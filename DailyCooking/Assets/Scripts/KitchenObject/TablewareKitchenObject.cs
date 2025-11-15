@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
 using UnityEngine;
-using UnityEngine.UI;
-using System.Linq;
 
 public class TablewareKitchenObject : KitchenObject, IInteractable
 {
@@ -11,13 +9,16 @@ public class TablewareKitchenObject : KitchenObject, IInteractable
     {
         public KitchenObjectSO KitchenObjectSO;
     }
+    public event EventHandler OnEaten;
+    public event EventHandler OnServed;
 
     [SerializeField] private List<KitchenObjectSO> validKitchenObjectSOList;
     [SerializeField] private GameObject[] visualGameObjectArray;
-
+    [SerializeField] private GameObject[] tablewareGameObjectArray;
+    [SerializeField] private GameObject[] eatenGameObjectArray;
 
     private List<KitchenObjectSO> _ingredientSOList;
-
+    private bool isEaten = false;
 
     private void Awake()
     {
@@ -56,15 +57,12 @@ public class TablewareKitchenObject : KitchenObject, IInteractable
     }
     public void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        Debug.LogError("Table: InteractEvent called");
+        if (!isEaten)
+            return;
+
         if (!playerStateMachine.HasKitchenObject())
         {
-            // Player is not carrying anything
-
-        }
-        else
-        {
-
+            SetKitchenObjectParent(playerStateMachine);
         }
     }
 
@@ -97,5 +95,23 @@ public class TablewareKitchenObject : KitchenObject, IInteractable
         {
             visualGameObject.SetActive(false);
         }
+    }
+    public void SetEaten()
+    {
+        isEaten = true;
+        foreach (var visualGameObject in tablewareGameObjectArray)
+        {
+            visualGameObject.SetActive(false);
+        }
+        foreach (var eatenGameObject in eatenGameObjectArray)
+        {
+            eatenGameObject.SetActive(true);
+        }
+        OnEaten?.Invoke(this, EventArgs.Empty);
+
+    }
+    public void Serve()
+    {
+        OnServed?.Invoke(this, EventArgs.Empty);
     }
 }
