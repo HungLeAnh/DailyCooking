@@ -14,8 +14,9 @@ public class BotManager : SimpleSingleton<BotManager>
 
     
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         botPool = new List<GameObject>();
     }
 

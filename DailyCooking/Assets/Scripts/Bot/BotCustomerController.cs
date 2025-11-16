@@ -95,6 +95,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     {
         //Debug.LogError("BotCustomerController: OnEmotionEnd called");   
         stateMachine.SetState(new LeavingState(stateMachine));
+        TargetTable.ClearKitchenObject(TargetSeatIndex);
         StopBubble();
     }
     public void OrderFood()

@@ -64,7 +64,8 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
 
     private void OnDestroy()
     {
-        GameInput.Instance.OnMouseClickPerformed -= PlayerStateMachine_OnMouseClickPerformed;
+        if(GameInput.Instance != null)
+            GameInput.Instance.OnMouseClickPerformed -= PlayerStateMachine_OnMouseClickPerformed;
 
         Context = null;
         _stateManager.Dispose();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,16 +17,24 @@ public class Table : MonoBehaviour,IKitchenObjectParent
     {
         isSeatOccupied = new bool[seats.Count];
         kitchenObjects = new KitchenObject[seats.Count];
-    }
-
-    private void OnEnable()
-    {
+        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
         TableManager.Instance.RegisterTable(this);
+
+
+    }
+    private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
+    {
+        if (KitchenGameManager.Instance.IsGameOver() ||
+            KitchenGameManager.Instance.IsEditing())
+        {
+            ResetTable();
+        }
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
-        TableManager.Instance.UnregisterTable(this);
+        if(TableManager.Instance != null)
+            TableManager.Instance.UnregisterTable(this);
     }
 
     public int GetAvailableSeat()
@@ -56,6 +65,15 @@ public class Table : MonoBehaviour,IKitchenObjectParent
         for (int i = 0; i < isSeatOccupied.Length; i++)
         {
             isSeatOccupied[i] = false;
+        }
+
+        for(int i = 0; i < kitchenObjects.Length; i++)
+        {
+            if(kitchenObjects[i] != null)
+            {
+                kitchenObjects[i].DestroySelf(i);
+                kitchenObjects[i] = null;
+            }
         }
     }
     public Transform GetSeatTransform(int seatIndex)

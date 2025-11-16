@@ -44,9 +44,9 @@ public class KitchenObject : MonoBehaviour
     {
         return kitchenObjectParent;
     }
-    public void DestroySelf()
+    public void DestroySelf(int index = 0)
     {
-        kitchenObjectParent.ClearKitchenObject();
+        kitchenObjectParent.ClearKitchenObject(index);
         Destroy(gameObject);
     }
 
