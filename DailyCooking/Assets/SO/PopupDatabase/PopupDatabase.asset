@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55710310a502bb94d8b2559c9c644038, type: 3}
   m_Name: PopupDatabase
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Scripts::PopupDatabase
   popups:
   - popupName: UIDayTaskPopup
     popupPrefab: {fileID: 5070651827575695774, guid: 8d8286be87669e049816bbc3c2db467d, type: 3}
@@ -31,6 +31,8 @@ MonoBehaviour:
     popupPrefab: {fileID: 3491339813780639128, guid: 8ef570a266a6fd04c9f0bd0a202b59aa, type: 3}
   - popupName: UIMainMenuPopup
     popupPrefab: {fileID: 3221737087262321086, guid: 507bc47c031e336479835b2f98a91e0c, type: 3}
+  - popupName: UIMenuPopup
+    popupPrefab: {fileID: 7599986913560296245, guid: 69ffd0e06a3ed0942a5799f2fc6d9f6e, type: 3}
   - popupName: UIOptionMenuPopup
     popupPrefab: {fileID: 8182451573929665765, guid: fa89928515aa5394283dfedcd92121ed, type: 3}
   - popupName: UISettingPopup

@@ -12,6 +12,8 @@ public enum UIHUDElements
     Play,
     Coin,
     Level,
+    Menu,
+
 }
 [Serializable]
 struct SerializableKeyValuePair<T1, T2>
@@ -74,6 +76,10 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
         HideAllUIElement();
         KitchenGameManager.Instance.StartGame();
 
+    }
+    public void OnMenuClicked()
+    {
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
     }
 
     public void HideAllUIElement()
