@@ -1,16 +1,35 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIMenuPopup : UIPopup
 {
-    [SerializeField] private Transform _shopParent;
-    [SerializeField] private GameObject _shopCategoryPrefab;
-    private List<UIShopCategoryItem> _shopCategoryItems = new List<UIShopCategoryItem>();
+    public Action<FoodType> OnCategoryItemClick;
+
+    [SerializeField]private Button btnClose;
+    [SerializeField] private TextMeshProUGUI totalDish;
+    [SerializeField] private Transform menuListContainer;
+    [SerializeField] private GameObject menuItemPrefab;
+
+    [SerializeField] private Transform categoryListContainer;
+    [SerializeField] private GameObject categoryItemPrefab;
+
+    [SerializeField] private Transform foodGridContainer;
+    [SerializeField] private GameObject foodItemPrefab;
+
+    private List<UIFoodItem> foodItemList= new List<UIFoodItem>();
 
     public void Awake()
     {
-        _shopCategoryPrefab.SetActive(false);
+        btnClose.onClick.AddListener(OnCloseClick);
+    }
+    private void Start()
+    {
+        Initialize();
 
     }
     public override void SetupPopup()
@@ -30,18 +49,99 @@ public class UIMenuPopup : UIPopup
     }
     public void Initialize()
     {
-        var categoryList = ConfigManager.Instance.ConfigShop.ShopItems.ToLookup(x => x.Category);
-        foreach (var category in categoryList)
+        foreach (Transform child in categoryListContainer)
         {
-            GameObject shopCategory = Instantiate(_shopCategoryPrefab, _shopParent);
-            shopCategory.gameObject.SetActive(true);
-            UIShopCategoryItem shopCategoryItem = shopCategory.GetComponent<UIShopCategoryItem>();
-            shopCategoryItem.SetCategory(category);
-            _shopCategoryItems.Add(shopCategoryItem);
+            Destroy(child.gameObject);
         }
+        foodItemList.Clear();
+
+        foreach (FoodType type in Enum.GetValues(typeof(FoodType)))
+        {
+            if (type == FoodType.None) continue;
+
+            GameObject menuCategory = Instantiate(categoryItemPrefab, categoryListContainer);
+            var item = menuCategory.GetComponent<UIMenuCategoryItem>();
+            item.SetCategory(type);
+            item.CategoryButton.onClick.AddListener(() =>
+            {
+                ShowMenuOfType(type);
+                OnCategoryItemClick?.Invoke(type);
+            });
+            if (type == FoodType.All)
+            {
+                item.SetSelected(true);
+            }
+            OnCategoryItemClick += item.OnCategoryItemClicked;
+        }
+
+        CreateMenuFoodItem(ConfigManager.Instance.ConfigFood.FoodItems);
+
+        totalDish.text = $"{GameManager.Instance.GameData.MenuData.unlockedDishes.Count}";
+
+        foreach (Transform child in menuListContainer)
+        {
+            Destroy(child.gameObject);
+        }
+        foreach (var dish in GameManager.Instance.GameData.MenuData.unlockedDishes)
+        {
+            CreateMenuItem(dish);
+        }
+    }
+
+    private void ShowMenuOfType(FoodType type)
+    {
+        foreach (Transform child in foodGridContainer)
+        {
+            Destroy(child.gameObject);
+        }
+        foodItemList.Clear();
+        List<FoodSO> menuItems = new List<FoodSO>();
+
+        if (type == FoodType.All)
+        {
+            menuItems = ConfigManager.Instance.ConfigFood.FoodItems;
+        }
+        else
+        {
+            menuItems = ConfigManager.Instance.ConfigFood.FoodItems
+                .Where(item => item.foodType == type)
+                .ToList();
+        }
+
+        CreateMenuFoodItem(menuItems);
+    }
+    private void CreateMenuFoodItem(List<FoodSO> menuItems)
+    {
+        foreach (var item in menuItems)
+        {
+            GameObject fooditem = Instantiate(foodItemPrefab, foodGridContainer);
+            fooditem.gameObject.SetActive(true);
+            UIFoodItem uifooditem = fooditem.GetComponent<UIFoodItem>();
+            foodItemList.Add(uifooditem);
+            uifooditem.SetMenuFoodItem(item);
+            uifooditem.FoodButton.onClick.AddListener(() =>
+            {
+                bool isAdded = GameManager.Instance.GameData.AddDishToMenu(item);
+
+                if(isAdded) 
+                    CreateMenuItem(item);
+            });
+        }
+    }    
+    private void CreateMenuItem(FoodSO dish)
+    {
+        GameObject menuCategory = Instantiate(menuItemPrefab, menuListContainer);
+        var item = menuCategory.GetComponent<UIMenuItem>();
+        item.SetMenuFoodItem(dish);
+        item.ButtonRemove.onClick.AddListener(() =>
+        {
+            GameManager.Instance.GameData.MenuData.RemoveDishFromMenu(dish);
+            Destroy(menuCategory);
+            totalDish.text = $"{GameManager.Instance.GameData.MenuData.unlockedDishes.Count}";
+        });
     }
     public void OnCloseClick()
     {
-        UIPopupManager.Instance.HidePopup(UIPopupType.UIShopPopup);
+        UIPopupManager.Instance.HidePopup(UIPopupType.UIMenuPopup);
     }
 }

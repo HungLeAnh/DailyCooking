@@ -6,6 +6,7 @@ using System.Linq;
 [Serializable]
 public class GridData
 {
+    [System.NonSerialized]
     public Action OnGridDataChanged;
 
     private int width;

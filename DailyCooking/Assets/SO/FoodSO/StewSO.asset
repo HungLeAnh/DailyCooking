@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40ab37e8500c2e54c9efa9096bbadac0, type: 3}
   m_Name: StewSO
   m_EditorClassIdentifier: 
+  _guid: 62129fd5079c12a43a0ee71c1e752c79
   kitchenObjectSOList:
   - {fileID: 11400000, guid: 8db8e26abfe69ea4580347aab1ee643a, type: 2}
   - {fileID: 11400000, guid: 6eb534ae42e3aba49925d40af5856cfb, type: 2}
   Sprite: {fileID: 21300000, guid: 1c8916a21f75fb54cb26acd694b2df47, type: 3}
   recipeName: Stew
+  price: 0
+  foodType: 3

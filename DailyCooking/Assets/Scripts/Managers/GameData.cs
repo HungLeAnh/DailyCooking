@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 [System.Serializable]
 public class GameData
 {
@@ -5,6 +8,7 @@ public class GameData
     public InventoryData InventoryData { get; private set; } = new InventoryData();
     public GridData GridData { get; private set; } = new GridData();
     public TutorialData TutorialData { get; private set; } = new TutorialData();
+    public MenuData MenuData { get; private set; } = new MenuData();
 
     public void UpdateGridData(GridXZ<GridObject> grid)
     {
@@ -26,7 +30,24 @@ public class GameData
     {
         InventoryData.Remove(id);
     }
-
+    public void AddDishToMenu(FoodSO dish)
+    {
+        MenuData.AddDishToMenu(dish);
+    }
 }
+public class MenuData
+{
+    [System.NonSerialized]
+    public Action OnMenuDataChanged;
+    public List<FoodSO> UnlockedDishes { get; private set; } = new List<FoodSO>();
 
+    public void AddDishToMenu(FoodSO dish)
+    {
+        if (!UnlockedDishes.Contains(dish))
+        {
+            UnlockedDishes.Add(dish);
+            OnMenuDataChanged?.Invoke();
+        }
+    }
+}
 

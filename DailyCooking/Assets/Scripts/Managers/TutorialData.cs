@@ -4,6 +4,7 @@ using System.Collections.Generic;
 [Serializable]
 public class TutorialData
 {
+    [System.NonSerialized]
     public Action OnTutorialDataChanged;
     private bool hasPlayedFirstTime = false;
     

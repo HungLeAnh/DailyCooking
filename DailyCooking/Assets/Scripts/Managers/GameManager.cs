@@ -38,7 +38,7 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         gameData.InventoryData.OnInventoryDataChanged += SaveGame;
         gameData.GridData.OnGridDataChanged += SaveGame;
         gameData.TutorialData.OnTutorialDataChanged += SaveGame;
-
+        gameData.MenuData.OnMenuDataChanged += SaveGame;
         SwitchState(new MainMenuState(this));
     }
 

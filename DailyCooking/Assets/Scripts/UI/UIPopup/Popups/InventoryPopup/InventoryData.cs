@@ -5,6 +5,7 @@ using UnityEngine;
 [Serializable]
 public class InventoryData
 {
+    [System.NonSerialized]
     public Action OnInventoryDataChanged;
     private List<ItemStack> _items = new List<ItemStack>();
     public List<ItemStack> Items => _items;
