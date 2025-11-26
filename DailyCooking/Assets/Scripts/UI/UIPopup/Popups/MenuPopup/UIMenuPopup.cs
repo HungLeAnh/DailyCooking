@@ -61,7 +61,7 @@ public class UIMenuPopup : UIPopup
 
             GameObject menuCategory = Instantiate(categoryItemPrefab, categoryListContainer);
             var item = menuCategory.GetComponent<UIMenuCategoryItem>();
-            item.SetCategory(type);
+            item.SetCategory(type,this);
             item.CategoryButton.onClick.AddListener(() =>
             {
                 ShowMenuOfType(type);
@@ -71,7 +71,6 @@ public class UIMenuPopup : UIPopup
             {
                 item.SetSelected(true);
             }
-            OnCategoryItemClick += item.OnCategoryItemClicked;
         }
 
         CreateMenuFoodItem(ConfigManager.Instance.ConfigFood.FoodItems);
@@ -123,8 +122,12 @@ public class UIMenuPopup : UIPopup
             {
                 bool isAdded = GameManager.Instance.GameData.AddDishToMenu(item);
 
-                if(isAdded) 
+                if(isAdded)
+                {
                     CreateMenuItem(item);
+                    totalDish.text = $"{GameManager.Instance.GameData.MenuData.unlockedDishes.Count}";
+
+                }
             });
         }
     }    

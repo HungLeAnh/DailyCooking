@@ -79,7 +79,7 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     }
     public void OnMenuClicked()
     {
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIMenuPopup);
     }
 
     public void HideAllUIElement()

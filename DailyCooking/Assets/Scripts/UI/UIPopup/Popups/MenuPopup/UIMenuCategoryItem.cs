@@ -12,6 +12,11 @@ public class UIMenuCategoryItem : MonoBehaviour
     [SerializeField] private Color selectedColor = Color.yellow;
     public Button CategoryButton { get => categoryButton; }
     private FoodType categoryType;
+    private UIMenuPopup menuPopup;
+    private void OnDestroy()
+    {
+        menuPopup.OnCategoryItemClick -= OnCategoryItemClicked;
+    }
     public void OnCategoryItemClicked(FoodType type)
     {
         if(type == categoryType)
@@ -24,10 +29,12 @@ public class UIMenuCategoryItem : MonoBehaviour
         }
     }
 
-    public void SetCategory(FoodType category)
+    public void SetCategory(FoodType category,UIMenuPopup menuPopup)
     {
         categoryNameText.text = category.ToString();
         categoryType = category;
+        this.menuPopup = menuPopup;
+        this.menuPopup.OnCategoryItemClick += OnCategoryItemClicked;
     }
     public void SetSelected(bool isSelected)
     {

@@ -34,7 +34,6 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     [SerializeField] private GameObject kitchenManagerUI;
     [SerializeField] private List<CuttingRecipeSO> cuttingRecipeSOList;
     [SerializeField] private List<FryingRecipeSO> fryingRecipeSOList;
-    [SerializeField] private List<FoodSO> FoodSOList;
 
     private State state;
     private float countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
@@ -240,7 +239,7 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
 
     private void GetUnlockFood()
     {
-        foreach (var foodSO in FoodSOList)
+        foreach (var foodSO in ConfigManager.Instance.ConfigFood.FoodItems)
         {
             bool isUnlocked = true;
             foreach (var ingredient in foodSO.kitchenObjectSOList)

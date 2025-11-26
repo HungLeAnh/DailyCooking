@@ -31,7 +31,8 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
     private void Start()
     {
         LoadGame();
-        
+        gameData.MenuData.LoadMenuData();
+
         gameData.PlayerStats.OnResourceChange += SaveGame;
         gameData.PlayerStats.OnLevelChange += SaveGame;
         gameData.PlayerStats.OnExpChange += SaveGame;

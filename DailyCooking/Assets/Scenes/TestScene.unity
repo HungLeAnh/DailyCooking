@@ -421,6 +421,7 @@ GameObject:
   - component: {fileID: 777514955}
   - component: {fileID: 777514954}
   - component: {fileID: 777514956}
+  - component: {fileID: 777514957}
   m_Layer: 0
   m_Name: ConfigManger
   m_TagString: Untagged
@@ -471,6 +472,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Scripts::GameManager
   playerPrefab: {fileID: 2018199230153267826, guid: 06cdd68e120dd8a45a8f0809aaa3bdec, type: 3}
   fileName: testdata
+--- !u!114 &777514957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777514953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8182444f1b9675041af178376a08ec87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::UIPopupManager
+  popupDatabase: {fileID: 11400000, guid: f33e26084af8ff44fa8d155242779853, type: 2}
+  popupContainer: {fileID: 737516350}
 --- !u!1001 &920419950
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -30,23 +30,51 @@ public class GameData
     {
         InventoryData.Remove(id);
     }
-    public void AddDishToMenu(FoodSO dish)
+    public bool AddDishToMenu(FoodSO dish)
     {
-        MenuData.AddDishToMenu(dish);
+        return MenuData.AddDishToMenu(dish);
     }
 }
 public class MenuData
 {
+
     [System.NonSerialized]
     public Action OnMenuDataChanged;
-    public List<FoodSO> UnlockedDishes { get; private set; } = new List<FoodSO>();
 
-    public void AddDishToMenu(FoodSO dish)
+    [System.NonSerialized]
+    public List<FoodSO> unlockedDishes = new List<FoodSO>();
+
+    public List<string> data = new List<string>();
+    public bool AddDishToMenu(FoodSO dish)
     {
-        if (!UnlockedDishes.Contains(dish))
+        if (!unlockedDishes.Contains(dish))
         {
-            UnlockedDishes.Add(dish);
+            unlockedDishes.Add(dish);
+            data.Add(dish.Guid);
             OnMenuDataChanged?.Invoke();
+            return true;
+        }
+        return false;
+    }    
+    public void RemoveDishFromMenu(FoodSO dish)
+    {
+        if (unlockedDishes.Contains(dish))
+        {
+            unlockedDishes.Remove(dish);
+            data.Remove(dish.Guid);
+            OnMenuDataChanged?.Invoke();
+        }
+    }
+    public void LoadMenuData()
+    {
+        unlockedDishes.Clear();
+        foreach (var guid in data)
+        {
+            var dish = ConfigManager.Instance.ConfigFood.FoodItems.Find(x => x.Guid == guid);
+            if (dish != null)
+            {
+                unlockedDishes.Add(dish);
+            }
         }
     }
 }
