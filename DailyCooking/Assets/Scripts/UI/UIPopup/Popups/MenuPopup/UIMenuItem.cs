@@ -15,6 +15,6 @@ public class UIMenuItem :MonoBehaviour
     {
         foodImage.sprite = item.Sprite;
         foodNameText.text = item.name;
-        foodPriceText.text = $"Price: ${item.price}";
+        foodPriceText.text = $"${item.price}";
     }
 }

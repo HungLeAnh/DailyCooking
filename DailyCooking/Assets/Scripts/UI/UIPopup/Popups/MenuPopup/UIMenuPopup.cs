@@ -70,10 +70,9 @@ public class UIMenuPopup : UIPopup
             if (type == FoodType.All)
             {
                 item.SetSelected(true);
+                item.CategoryButton.onClick.Invoke();
             }
         }
-
-        CreateMenuFoodItem(ConfigManager.Instance.ConfigFood.FoodItems);
 
         totalDish.text = $"{GameManager.Instance.GameData.MenuData.unlockedDishes.Count}";
 
