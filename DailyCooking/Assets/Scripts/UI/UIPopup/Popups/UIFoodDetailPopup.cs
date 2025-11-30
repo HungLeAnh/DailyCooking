@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,13 +15,17 @@ public class UIFoodDetailPopup : UIPopup
     [SerializeField] private TextMeshProUGUI foodNameText;
     [SerializeField] private TextMeshProUGUI foodTypeText;
     [SerializeField] private TextMeshProUGUI foodPriceText;
-    
+
+    [SerializeField] private GameObject ingredientTagPrefab;
+    [SerializeField] private Transform container;
+
     private FoodSO currentFoodSO;
-
-
-    private void Start()
+    private List<Transform> ingredientTransformList = new List<Transform>();
+    void Start()
     {
+        ingredientTagPrefab.SetActive(false);
         closeButton.onClick.AddListener(OnCloseClick);
+
     }
     public override void ShowPopup(object param)
     {
@@ -35,6 +40,28 @@ public class UIFoodDetailPopup : UIPopup
         foodImage.sprite = foodSO.Sprite;
         foodNameText.text = foodSO.recipeName;
         foodTypeText.text = foodSO.foodType.ToString();
+
+        GenerateTags(foodSO.kitchenObjectSOList);
+    }
+    public void GenerateTags(List<KitchenObjectSO> ingredients)
+    {
+        foreach (Transform child in ingredientTransformList)
+        {
+            Destroy(child.gameObject);
+        }
+        ingredientTransformList.Clear();
+        foreach (var ingredient in ingredients)
+        {
+            GameObject newTag = Instantiate(ingredientTagPrefab, container);
+            newTag.SetActive(true);
+            TextMeshProUGUI tagText = newTag.GetComponentInChildren<TextMeshProUGUI>();
+            if (tagText != null)
+            {
+                tagText.text = ingredient.objectName;
+            }
+            ingredientTransformList.Add(newTag.transform);
+        }
+
     }
     public void OnCloseClick()
     {
