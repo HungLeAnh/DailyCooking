@@ -18,19 +18,19 @@ public class FlexibleGridLayout : LayoutGroup
     }
 
     [Tooltip("How the grid determines the number of rows and columns if not wrapping.")]
-    public FitType fitType;
+    [SerializeField] private FitType fitType;
 
     [Tooltip("If TRUE, content will wrap to the next line when it exceeds the parent's width.")]
-    public bool wrapContent;
+    [SerializeField] private bool wrapContent;
 
     [Tooltip("Number of rows (used if Fit Type is Fixed Rows and not wrapping).")]
-    public int rows;
+    [SerializeField] private int rows;
 
     [Tooltip("Number of columns (used if Fit Type is Fixed Columns and not wrapping).")]
-    public int columns;
+    [SerializeField] private int columns;
 
     [Tooltip("Spacing between cells.")]
-    public Vector2 spacing;
+    [SerializeField] private Vector2 spacing;
 
     private int actualRows;
     private int actualColumns;
@@ -61,12 +61,7 @@ public class FlexibleGridLayout : LayoutGroup
             if (currentX + childWidth > parentWidth - padding.right && i > firstIndexOfCurrentRow)
             {
                 // Finalize heights for the completed row
-                for (int j = firstIndexOfCurrentRow; j < i; j++)
-                {
-                    Rect rect = cellRects[j];
-                    rect.height = currentRowMaxHeight;
-                    cellRects[j] = rect;
-                }
+                FinalizeRowHeight(currentRowMaxHeight, firstIndexOfCurrentRow, i);
 
                 // Start new row
                 currentX = padding.left;
@@ -81,16 +76,20 @@ public class FlexibleGridLayout : LayoutGroup
         }
 
         // Finalize heights for the last row
-        for (int j = firstIndexOfCurrentRow; j < rectChildren.Count; j++)
+        FinalizeRowHeight(currentRowMaxHeight, firstIndexOfCurrentRow, rectChildren.Count);
+
+        totalHeight = currentY + currentRowMaxHeight + padding.bottom;
+    }
+
+    private void FinalizeRowHeight(float currentRowMaxHeight, int firstIndexOfCurrentRow, int i)
+    {
+        for (int j = firstIndexOfCurrentRow; j < i; j++)
         {
             Rect rect = cellRects[j];
             rect.height = currentRowMaxHeight;
             cellRects[j] = rect;
         }
-
-        totalHeight = currentY + currentRowMaxHeight + padding.bottom;
     }
-
 
     public override void CalculateLayoutInputHorizontal()
     {
@@ -160,7 +159,7 @@ public class FlexibleGridLayout : LayoutGroup
         }
         else
         {
-             if (rectChildren.Count == 0)
+            if (rectChildren.Count == 0)
             {
                 SetLayoutInputForAxis(0, 0, 0, 1);
                 return;

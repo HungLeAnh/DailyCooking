@@ -40,7 +40,7 @@ public class UIFoodDetailPopup : UIPopup
         foodImage.sprite = foodSO.Sprite;
         foodNameText.text = foodSO.recipeName;
         foodTypeText.text = foodSO.foodType.ToString();
-
+        foodPriceText.text = $"${foodSO.price}";
         GenerateTags(foodSO.kitchenObjectSOList);
     }
     public void GenerateTags(List<KitchenObjectSO> ingredients)
