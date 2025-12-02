@@ -36,6 +36,15 @@ public class MenuData
         }
         return false;
     }
+    public bool AddUnlockedDish(FoodSO dish)
+    {
+        if (!unlockedDishes.Contains(dish))
+        {
+            unlockedDishes.Add(dish);
+            return true;
+        }
+        return false;
+    }
     public void LoadMenuData()
     {
         unlockedDishes.Clear();

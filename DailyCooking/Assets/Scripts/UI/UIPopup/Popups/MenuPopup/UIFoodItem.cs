@@ -4,8 +4,6 @@ using UnityEngine.UI;
 
 public class UIFoodItem :MonoBehaviour
 {
-    [SerializeField] private Image backgroundImage;
-    [SerializeField] private Image frameImage;
     [SerializeField] private Button infoButton;
     [SerializeField] private Button foodButton;
     [SerializeField] private Image foodImage;
@@ -13,11 +11,18 @@ public class UIFoodItem :MonoBehaviour
     [SerializeField] private TextMeshProUGUI foodPriceText;
     [SerializeField] private TextMeshProUGUI foodStatusText;
 
+    [Header("Background Setting")]
+    [SerializeField] private Image backgroundImage;
     [SerializeField] private Color selectedBackgroundColor;
     [SerializeField] private Color normalBackgroundColor;
+    [SerializeField] private Color lockedBackgroundColor;
 
+    [Header("Frame Setting")]
+    [SerializeField] private Image frameImage;
     [SerializeField] private Color selectedFrameColor;
     [SerializeField] private Color normalFrameColor;
+    [SerializeField] private Color lockedFrameColor;
+
 
     private FoodSO foodSO;
     public FoodSO FoodSO { get => foodSO; }
@@ -33,7 +38,23 @@ public class UIFoodItem :MonoBehaviour
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIFoodDetailPopup,
                 new UIFoodDetailPopup.Param { foodSO = item });
         });
-        SetSelectedState(isSelected);
+        if (!GameManager.Instance.GameData.MenuData.unlockedDishes.Contains(item))
+        {
+            SetLockState(true);
+        }
+        else
+        {
+            SetSelectedState(isSelected);
+
+        }
+    }
+
+    private void SetLockState(bool isLocked)
+    {
+        backgroundImage.color = isLocked ? lockedBackgroundColor : normalBackgroundColor;
+        frameImage.color = isLocked ? lockedFrameColor : normalFrameColor;
+        foodStatusText.text = isLocked ? "Locked" : "Add to Menu";
+        foodButton.interactable = !isLocked;
     }
 
     public void SetSelectedState(bool isSelected)

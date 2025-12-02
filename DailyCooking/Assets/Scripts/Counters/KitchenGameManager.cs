@@ -45,7 +45,6 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     private long earnCount;
     private long serveCount;
     private int playerDay = -1;
-    private List<FoodSO> unlockFoodList;
     private List<KitchenObjectSO> unlockIngredient;
 
     public long EarnCount => earnCount;
@@ -57,10 +56,10 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     public List<CuttingRecipeSO> CuttingRecipeSOList { get => cuttingRecipeSOList; set => cuttingRecipeSOList = value; }
     public List<FryingRecipeSO> FryingRecipeSOList { get => fryingRecipeSOList; set => fryingRecipeSOList = value; }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         state = State.Editing;
-        unlockFoodList = new List<FoodSO>();
         unlockIngredient = new List<KitchenObjectSO>();
 
         playerDay = GameManager.Instance.GameData.PlayerStats.playerData.DaysPlayed;
@@ -69,13 +68,14 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     }
     public void OnDestroy()
     {
-        unlockFoodList.Clear();
         unlockIngredient.Clear();
+    }
+    public void Start()
+    {
+        Init();
     }
     public void Init()
     {
-        unlockFoodList.Clear();
-        unlockFoodList.Clear();
         unlockIngredient.Clear();
         foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
         {
@@ -101,7 +101,6 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
         kitchenManagerUI.SetActive(true);
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup);
         countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
-        Init();
         BotManager.Instance.Initialize();
     }
     public void EndGame()
@@ -252,8 +251,8 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
             }
             if (isUnlocked)
             {
-                if (!unlockFoodList.Contains(foodSO))
-                    unlockFoodList.Add(foodSO);
+                GameManager.Instance.GameData.MenuData.AddUnlockedDish(foodSO);
+                 
             }
         }
     }
@@ -281,6 +280,8 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     }
     public FoodSO GetUnlockedFood()
     {
-        return unlockFoodList[UnityEngine.Random.Range(0, unlockFoodList.Count)];
+        return GameManager.Instance.GameData.
+            MenuData.menuDished[UnityEngine.Random.Range(0, 
+                GameManager.Instance.GameData.MenuData.menuDished.Count)];
     }
 }
