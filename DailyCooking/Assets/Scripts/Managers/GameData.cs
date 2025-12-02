@@ -34,9 +34,9 @@ public class GameData
     {
         return MenuData.AddDishToMenu(dish);
     }
-    public void RemoveDishFromMenu(FoodSO dish)
+    public bool RemoveDishFromMenu(FoodSO dish)
     {
-        MenuData.RemoveDishFromMenu(dish);
+        return MenuData.RemoveDishFromMenu(dish);
     }
 }
 

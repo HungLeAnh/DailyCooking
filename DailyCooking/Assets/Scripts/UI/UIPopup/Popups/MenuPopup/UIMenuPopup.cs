@@ -22,7 +22,6 @@ public class UIMenuPopup : UIPopup
     [SerializeField] private GameObject foodItemPrefab;
 
     private List<UIFoodItem> foodItemList= new List<UIFoodItem>();
-
     public void Awake()
     {
         btnClose.onClick.AddListener(OnCloseClick);
@@ -74,13 +73,13 @@ public class UIMenuPopup : UIPopup
             }
         }
 
-        totalDish.text = $"{GameManager.Instance.GameData.MenuData.unlockedDishes.Count}";
+        totalDish.text = $"{GameManager.Instance.GameData.MenuData.menuDished.Count}";
 
         foreach (Transform child in menuListContainer)
         {
             Destroy(child.gameObject);
         }
-        foreach (var dish in GameManager.Instance.GameData.MenuData.unlockedDishes)
+        foreach (var dish in GameManager.Instance.GameData.MenuData.menuDished)
         {
             CreateMenuItem(dish);
         }
@@ -116,7 +115,9 @@ public class UIMenuPopup : UIPopup
             fooditem.gameObject.SetActive(true);
             UIFoodItem uifooditem = fooditem.GetComponent<UIFoodItem>();
             foodItemList.Add(uifooditem);
-            uifooditem.SetMenuFoodItem(item);
+
+            uifooditem.SetMenuFoodItem(item, 
+                GameManager.Instance.GameData.MenuData.menuDished.Contains(item));
             uifooditem.FoodButton.onClick.AddListener(() =>
             {
                 bool isAdded = GameManager.Instance.GameData.AddDishToMenu(item);
@@ -124,8 +125,8 @@ public class UIMenuPopup : UIPopup
                 if(isAdded)
                 {
                     CreateMenuItem(item);
-                    totalDish.text = $"{GameManager.Instance.GameData.MenuData.unlockedDishes.Count}";
-
+                    totalDish.text = $"{GameManager.Instance.GameData.MenuData.menuDished.Count}";
+                    uifooditem.SetSelectedState(true);
                 }
             });
         }
@@ -137,9 +138,14 @@ public class UIMenuPopup : UIPopup
         item.SetMenuFoodItem(dish);
         item.ButtonRemove.onClick.AddListener(() =>
         {
-            GameManager.Instance.GameData.RemoveDishFromMenu(dish);
-            Destroy(menuCategory);
-            totalDish.text = $"{GameManager.Instance.GameData.MenuData.unlockedDishes.Count}";
+            bool isRemoved = GameManager.Instance.GameData.RemoveDishFromMenu(dish);
+            
+            if (isRemoved)
+            {
+                foodItemList.Find(x => x.FoodSO == dish ).SetSelectedState(false);
+                Destroy(menuCategory);
+                totalDish.text = $"{GameManager.Instance.GameData.MenuData.menuDished.Count}";
+            }
         });
     }
     public void OnCloseClick()
