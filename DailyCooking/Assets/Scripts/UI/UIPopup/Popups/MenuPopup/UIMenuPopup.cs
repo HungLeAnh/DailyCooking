@@ -137,7 +137,7 @@ public class UIMenuPopup : UIPopup
         item.SetMenuFoodItem(dish);
         item.ButtonRemove.onClick.AddListener(() =>
         {
-            GameManager.Instance.GameData.MenuData.RemoveDishFromMenu(dish);
+            GameManager.Instance.GameData.RemoveDishFromMenu(dish);
             Destroy(menuCategory);
             totalDish.text = $"{GameManager.Instance.GameData.MenuData.unlockedDishes.Count}";
         });
