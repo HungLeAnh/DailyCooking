@@ -10,6 +10,7 @@ public class UIFoodItem :MonoBehaviour
     [SerializeField] private TextMeshProUGUI foodNameText;
     [SerializeField] private TextMeshProUGUI foodPriceText;
     [SerializeField] private TextMeshProUGUI foodStatusText;
+    [SerializeField] private Image lockedOverlayImage;
 
     [Header("Background Setting")]
     [SerializeField] private Image backgroundImage;
@@ -22,6 +23,8 @@ public class UIFoodItem :MonoBehaviour
     [SerializeField] private Color selectedFrameColor;
     [SerializeField] private Color normalFrameColor;
     [SerializeField] private Color lockedFrameColor;
+
+
 
 
     private FoodSO foodSO;
@@ -44,6 +47,7 @@ public class UIFoodItem :MonoBehaviour
         }
         else
         {
+            SetLockState(false);
             SetSelectedState(isSelected);
 
         }
@@ -55,6 +59,7 @@ public class UIFoodItem :MonoBehaviour
         frameImage.color = isLocked ? lockedFrameColor : normalFrameColor;
         foodStatusText.text = isLocked ? "Locked" : "Add to Menu";
         foodButton.interactable = !isLocked;
+        lockedOverlayImage.gameObject.SetActive(isLocked);
     }
 
     public void SetSelectedState(bool isSelected)

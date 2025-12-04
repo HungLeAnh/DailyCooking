@@ -135,20 +135,24 @@ public class BuildingPlacementManager : IBuildingPlacementManager
 
     public Vector3 GetMouseWorldSnappedPosition()
     {
-        Vector3 interactPos = UtilsClass.GetTouchWorldPosition3D();
-        if(interactPos == -Vector3.one)
-            return -Vector3.one;
-        
-        gridManager.GetXZ(new Vector3(Mathf.RoundToInt(interactPos.x),
-                                Mathf.RoundToInt(interactPos.y),
-                                Mathf.RoundToInt(interactPos.z)), out int x, out int z);
-        Vector2Int placedObjectOrigin = new Vector2Int(x, z);
-        placedObjectOrigin = gridManager.ValidateGridPosition(placedObjectOrigin);
-        if (placedObjectTypeSO != null)
-        {
-            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-            Vector3 placedObjectWorldPosition = gridManager.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y);
-            return placedObjectWorldPosition;
+        Ray ray = Camera.main.ScreenPointToRay(GameInput.Instance.GetClickPosition());
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f))
+        {     
+            gridManager.GetXZ(new Vector3(Mathf.RoundToInt(raycastHit.point.x),
+                                    Mathf.RoundToInt(raycastHit.point.y),
+                                    Mathf.RoundToInt(raycastHit.point.z)), out int x, out int z);
+            Vector2Int placedObjectOrigin = new Vector2Int(x, z);
+            placedObjectOrigin = gridManager.ValidateGridPosition(placedObjectOrigin);
+            if (placedObjectTypeSO != null)
+            {
+                Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
+                Vector3 placedObjectWorldPosition = gridManager.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y);
+                return placedObjectWorldPosition;
+            }
+            else
+            {
+                return -Vector3.one;
+            }
         }
         else
         {
@@ -162,6 +166,9 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         gridVisualizer.SetActiveGridGuide(true);
         gridVisualizer.ShowWallShadow(true);
         isBuilding = true;
+
+        PlayerStateMachine.Instance.DisableInput(true);
+        GameManager.Instance.HidePlayer();
     }
 
     public void FireOnBuildingEndEvent()
@@ -170,11 +177,14 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         gridVisualizer.SetActiveGridGuide(false);
         gridVisualizer.ShowWallShadow(false);
         isBuilding = false;
+
+        PlayerStateMachine.Instance.DisableInput(false);
+        GameManager.Instance.ShowPlayer();  
     }
 
     public void HandleExistingObjectInteraction(PlacedObjectView targetPlaceObjectView,Vector3 objectPosition)
     {
-        // dir = targetPlaceObjectView.GetModel().Dir; // This was commented out in GridBuildingSystem, so keep it commented or remove if not needed
+        // dir = targetPlaceObjectView.GetModel().Dir; 
         SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO, objectPosition);
         var counterView = targetPlaceObjectView.GetComponent<BaseCounterView>();
         counterModules.DestroyCounter(counterView);

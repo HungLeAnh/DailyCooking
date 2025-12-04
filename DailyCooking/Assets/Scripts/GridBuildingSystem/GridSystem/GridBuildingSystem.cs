@@ -69,8 +69,9 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
 
     }
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         gameManager = GameManager.Instance;
         ICounterModules counterModulesInstance = CounterModules.Instance;
         IUIPopupManager uiPopupManagerInstance = UIPopupManager.Instance;
@@ -104,7 +105,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
         buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, counterModulesInstance, uiPopupManagerInstance);
         counterModulesInstance.Initialize();
-
+        
     }
     private void Start()
     {
@@ -119,7 +120,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         if (!BuildingPlacementManager.IsBuilding ||
             BuildingPlacementManager.PlacedObjectTypeSO != null)
             return; 
-
         float maxDistance = 999f;
         Ray ray = Camera.main.ScreenPointToRay(e);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance, counterLayerMask))

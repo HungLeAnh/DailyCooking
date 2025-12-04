@@ -75,6 +75,8 @@ public class CameraController : MonoBehaviour
     #region Pan
     private void OnPanMovedDesktop(object sender, Vector2 e)
     {
+        if (GameInput.Instance.IsTouchOverBuildingGhost)
+            return;
         panBounds = GridBuildingSystem.Instance.GridManager.GetGridSize();
         if (panBounds == Vector2Int.zero)
         {

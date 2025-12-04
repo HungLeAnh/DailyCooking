@@ -55,7 +55,13 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         playerGameObject = Instantiate(playerPrefab, placePosition, Quaternion.identity);
         OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
     }
-
+    public void HidePlayer()
+    {
+        playerGameObject.SetActive(false);
+    }public void ShowPlayer()
+    {
+        playerGameObject.SetActive(true);
+    }
     public void DestroyPlayer()
     {
         Destroy(playerGameObject);

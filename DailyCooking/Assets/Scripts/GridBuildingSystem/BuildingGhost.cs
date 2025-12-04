@@ -56,13 +56,21 @@ public class BuildingGhost : MonoBehaviour
         Ray ray = _camera.ScreenPointToRay(e);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayer))
         {
-            //Debug.Log("Touch Position: " + pos);
+            //Debug.Log("Touch Position: " + raycastHit.point);
             isDragging = true;
 
         }
         else
         {
             isDragging = false;
+        }
+
+        if (Physics.Raycast(ray, out RaycastHit raycastHitDebug, interactDistance))
+        { 
+            Debug.Log("Hit object: " + raycastHitDebug.transform.gameObject);
+        }
+        else
+        {
         }
     }
 

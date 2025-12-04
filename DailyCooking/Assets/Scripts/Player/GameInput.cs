@@ -28,10 +28,12 @@ public class GameInput : PersistentSingleton<GameInput>
     private Vector2 lastClickPosition = Vector2.zero;
     private bool isTouchOverUI = false;
     private int touchCount = 0;
+    private bool isTouchOverBuildingGhost = false;
 
     private float prevMagnitude = 0f;
     public PlayerAction PlayerAction { get => playerAction; }
-
+    public Vector2 LastClickPosition { get => lastClickPosition; }
+    public bool IsTouchOverBuildingGhost { get => isTouchOverBuildingGhost; }
     protected override void Awake()
     {
         base.Awake();
@@ -125,7 +127,7 @@ public class GameInput : PersistentSingleton<GameInput>
         lastClickPosition = playerAction.Player.Pan.ReadValue<Vector2>();
         isTouching = true;
         isPanning = false;
-
+        isTouchOverBuildingGhost = CheckTouchOverBuildingGhost(lastClickPosition);
         OnMouseClickPerformed?.Invoke(this, lastClickPosition);
     }
 
@@ -136,7 +138,7 @@ public class GameInput : PersistentSingleton<GameInput>
         isTouching = false;
         isPanning = false;
         isTouchOverUI = false;
-
+        isTouchOverBuildingGhost = false;
         OnMouseClickCanceled?.Invoke(this, EventArgs.Empty);
     }
     private void Update()
@@ -157,7 +159,7 @@ public class GameInput : PersistentSingleton<GameInput>
     
     public bool IsMouseOverUI()
     {
-        if(Touchscreen.current == null)
+        if(Touchscreen.current != null || Pointer.current != null)
             return EventSystem.current.IsPointerOverGameObject();
 
         foreach (var touch in Touchscreen.current.touches)
@@ -173,10 +175,8 @@ public class GameInput : PersistentSingleton<GameInput>
         }
         return false;
     }
-    public bool IsTouchOverBuildingGhost(Vector2 position)
+    public bool CheckTouchOverBuildingGhost(Vector2 position)
     {
-        bool isTouchOverBuildingGhost = false;
-        
         float interactDistance = INTERACT_DISTANCE_MAX;
         Ray ray = Camera.main.ScreenPointToRay(position);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayerMask))
@@ -184,15 +184,14 @@ public class GameInput : PersistentSingleton<GameInput>
             //Debug.Log("Touch Position: " + pos);
             if (raycastHit.transform.GetComponentInParent<BuildingGhost>() != null)
             {
-                isTouchOverBuildingGhost = true;
+                return true;
             }
             else
             {
-                isTouchOverBuildingGhost = false;
+                return false;
             }
         }
-
-        return isTouchOverBuildingGhost || EventSystem.current.IsPointerOverGameObject();
+        return false;
     }
     public Vector2 GetMovementVectorNormalized()
     {
@@ -201,5 +200,9 @@ public class GameInput : PersistentSingleton<GameInput>
         inputVector = inputVector.normalized;
 
         return inputVector;
+    }
+    public Vector2 GetClickPosition()
+    {
+        return playerAction.Player.Pan.ReadValue<Vector2>();
     }
 }

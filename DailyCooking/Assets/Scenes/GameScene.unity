@@ -290,12 +290,6 @@ MonoBehaviour:
   fryingRecipeSOList:
   - {fileID: 11400000, guid: 03a4633e975251e4bbcc10c49aa23b19, type: 2}
   - {fileID: 11400000, guid: 561cb208a595885409b71715b3d7984f, type: 2}
-  FoodSOList:
-  - {fileID: 11400000, guid: 49395a9a760952f409a3cfa5c1bf3c3b, type: 2}
-  - {fileID: 11400000, guid: 76925b9fc7bd54e49915c59dfbb69df2, type: 2}
-  - {fileID: 11400000, guid: 27c3a1f72918bc74ca53c23f48556f98, type: 2}
-  - {fileID: 11400000, guid: b9df040063576f745893f915f0232c86, type: 2}
-  - {fileID: 11400000, guid: 614a2c435fd3a2a46bc43782c863e397, type: 2}
 --- !u!1 &140795779
 GameObject:
   m_ObjectHideFlags: 0
@@ -382,7 +376,6 @@ GameObject:
   - component: {fileID: 143411105}
   - component: {fileID: 143411108}
   - component: {fileID: 143411107}
-  - component: {fileID: 143411106}
   - component: {fileID: 143411109}
   m_Layer: 7
   m_Name: BuildingGhostCanvas
@@ -411,23 +404,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 1}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &143411106
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 143411104}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 3
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 119
 --- !u!114 &143411107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3446,7 +3422,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
