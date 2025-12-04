@@ -9,14 +9,11 @@ public class UISettingsPopup : UIPopup
     private const int CHEAT_COIN_AMOUNT = 1000;
     private const int CHEAT_EXP_AMOUNT = 100;
 
-    [SerializeField] private Button soundEffectsButton;
-    [SerializeField] private Button musicButton;
+    [SerializeField] private Slider soundEffectsSlider;
+    [SerializeField] private Slider musicSlider;
     [SerializeField] private Button closeButton;
- 
-    [SerializeField] private TextMeshProUGUI soundEffectText;
-    [SerializeField] private TextMeshProUGUI musicText;
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     [Header("Cheat")]
     [SerializeField] private Transform cheatTransform;
 
@@ -46,48 +43,38 @@ public class UISettingsPopup : UIPopup
     }
 #endif
 
-    private Action onCloseButtonAction;
-
     private void Awake()
     {
-        soundEffectsButton.onClick.AddListener(() =>
+        soundEffectsSlider.onValueChanged.AddListener((newValue) =>
         {
-            SoundManager.Instance.ChangeVolume();
-            UpdateVisual();
-
+            SoundManager.Instance.ChangeVolume(newValue);
         });
 
-        musicButton.onClick.AddListener(() =>
+        musicSlider.onValueChanged.AddListener((newValue) =>
         {
-            MusicManager.Instance.ChangeVolume();
-            UpdateVisual();
+            MusicManager.Instance.ChangeVolume(newValue);
         });
+
         closeButton.onClick.AddListener(() =>
         {
-            Hide();
-            onCloseButtonAction?.Invoke();
+            UIPopupManager.Instance.HidePopup(UIPopupType.UISettingPopup);
         });
 
     }
-    private void Start()
+    public override void ShowPopup(object param = null)
     {
+        base.ShowPopup(param);
         UpdateVisual();
     }
+    public override void HidePopup(object param = null)
+    {
+        base.HidePopup(param);
 
+    }
     private void UpdateVisual()
     {
-        soundEffectText.text = "Sound Effects: " + Mathf.Round(SoundManager.Instance.GetVolume() * SOUND_VOLUME_MULTIPLIER);
-        musicText.text = "Music: " + Mathf.Round(MusicManager.Instance.GetVolume() * SOUND_VOLUME_MULTIPLIER);
+        soundEffectsSlider.value = SoundManager.Instance.GetVolume();
+        musicSlider.value = MusicManager.Instance.GetVolume();
 
-    }
-    public void Show(Action onCloseButtonAction)
-    {
-        this.onCloseButtonAction = onCloseButtonAction;
-        gameObject.SetActive(true);
-        soundEffectsButton.Select();
-    }
-    public void Hide()
-    {
-        base.HidePopup();
     }
 }

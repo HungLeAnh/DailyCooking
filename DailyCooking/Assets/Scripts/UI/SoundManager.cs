@@ -137,22 +137,13 @@ public class SoundManager : PersistentSingleton<SoundManager>
         }
     }
 
-    public void ChangeVolume()
+    public void ChangeVolume(float newVolume)
     {
-        volume += .1f;
-        if (volume > 1f)
-        {
-            volume = 0f;
-        }
-        SetVolume(volume);
-    }
-
-    public void SetVolume(float volume)
-    {
-        this.volume = Mathf.Clamp01(volume);
+        this.volume = newVolume;
         PlayerPrefs.SetFloat(PLAYER_SOUND_EFFECTS_VOLUME, this.volume);
         PlayerPrefs.Save();
     }
+
     public float GetVolume()
     {
         return volume;

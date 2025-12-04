@@ -16,13 +16,9 @@ public class MusicManager : PersistentSingleton<MusicManager>
         audioSource.volume = volume;
 
     }
-    public void ChangeVolume()
+    public void ChangeVolume(float newVolume)
     {
-        volume += .1f;
-        if (volume > 1f)
-        {
-            volume = 0f;
-        }
+        volume = newVolume;
         audioSource.volume = volume;
         PlayerPrefs.SetFloat(PLAYER_MUSIC_VOLUME, volume);
         PlayerPrefs.Save();
