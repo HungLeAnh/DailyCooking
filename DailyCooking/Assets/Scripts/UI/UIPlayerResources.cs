@@ -10,6 +10,7 @@ public class UIPlayerResources : MonoBehaviour
 {
     private const int EXP_PER_LEVEL_MULTIPLIER = 100;
 
+    [SerializeField] private TextMeshProUGUI gemText;
     [SerializeField] private TextMeshProUGUI coinText;
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI expText;
@@ -21,6 +22,7 @@ public class UIPlayerResources : MonoBehaviour
         GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChange;
         GameManager.Instance.GameData.PlayerStats.OnExpChange += OnExpChange;
 
+        gemText.text = GameManager.Instance.GameData.PlayerStats.playerData.Gems.ToString();
         coinText.text = GameManager.Instance.GameData.PlayerStats.playerData.Coins.ToString();
         levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
         expText.text = GameManager.Instance.GameData.PlayerStats.playerData.Exp.ToString() + "/" + GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER;
@@ -52,13 +54,16 @@ public class UIPlayerResources : MonoBehaviour
 
     private void OnResourceChange()
     {
-        UpdateResources(GameManager.Instance.GameData.PlayerStats.playerData.Coins);
+        UpdateResources(GameManager.Instance.GameData.PlayerStats.playerData.Coins,
+            GameManager.Instance.GameData.PlayerStats.playerData.Gems);
     }
 
-    public void UpdateResources(int coin)
+    public void UpdateResources(int coin, int gem)
     {
         if (coinText != null)
             coinText.text = coin.ToString();
-        
+        if (gemText != null)
+            gemText.text = gem.ToString();
+
     }
 }

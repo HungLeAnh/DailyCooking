@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: b83e2d151cee50a439e4eeeeec38dad3
+guid: 95a79a6d15829e747ac2ac77fe056a1a
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -110,7 +110,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: OnionSalad_0
+      name: DoubleTable_1
       rect:
         serializedVersion: 2
         x: 0
@@ -118,15 +118,15 @@ TextureImporter:
         width: 128
         height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6f8f4754a1f0517439751fb08c8af368
-      internalID: 2003364755
+      spriteID: 8817ac5f85d0d36478729de5dfaebac9
+      internalID: -1007613066
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5b963fd3c9060c34a9edd37e527a47fe
+    spriteID: 8ef7f64f7b5af01468d318f0ccb9b49c
     internalID: 0
     vertices: []
     indices: 
@@ -143,9 +143,12 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      OnionSalad_0: 2003364755
+      DoubleTable_0: 454231230
+      DoubleTable_1: -1007613066
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

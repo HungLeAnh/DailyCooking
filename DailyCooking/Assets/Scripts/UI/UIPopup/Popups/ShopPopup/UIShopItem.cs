@@ -59,10 +59,11 @@ public class UIShopItem : MonoBehaviour
     private void GetReward(Dictionary<string, int> parsedData)
     {
         var parsedDataList = parsedData.ToList();
-        if(parsedDataList.Count == 0) return;
+        if (parsedDataList.Count == 0) return;
         switch (itemCategory)
         {
-            case ShopItemCategory.Counters:
+            case ShopItemCategory.Counters :
+            case ShopItemCategory.Tables:
 
                 var placedObject = GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects
                     .Find(x => x.id == parsedDataList[0].Key);
