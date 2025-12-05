@@ -22,7 +22,7 @@ public class UIInventoryTab : MonoBehaviour
         _tabType = tabType;
         _tabImage.sprite = tabType.TabIcon;
         _tabText.text = tabType.TabType.ToString();
-        UpdateState(isSelected);
+        //UpdateState(isSelected);
     }
 
     public void UpdateState(bool isSelected)

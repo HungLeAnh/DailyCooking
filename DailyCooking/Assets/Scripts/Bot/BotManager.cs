@@ -26,6 +26,8 @@ public class BotManager : SimpleSingleton<BotManager>
     }
     private void OnDestroy()
     {
+        if (KitchenGameManager.Instance == null)
+            return;
         KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
         botPool.Clear();
     }

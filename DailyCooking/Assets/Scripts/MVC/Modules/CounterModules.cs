@@ -14,7 +14,7 @@ public class CounterModules : PersistentSingleton<CounterModules>, ICounterModul
     protected override void Awake()
     {
         base.Awake();
-        
+        baseCounterControllers = new List<BaseCounterController>();
     }
     public void Initialize()
     {
@@ -31,6 +31,8 @@ public class CounterModules : PersistentSingleton<CounterModules>, ICounterModul
     }
     public void DestroyCounter(BaseCounterView baseCounterView)
     {
+        if (baseCounterView == null) return;
+
         var controller = baseCounterControllers.FindLast(x => x.BaseCounterView == baseCounterView);
 
         if (controller != null)
@@ -42,6 +44,8 @@ public class CounterModules : PersistentSingleton<CounterModules>, ICounterModul
     public void AddCounterController(BaseCounterController controller)
     {
         baseCounterControllers.Add(controller);
+        KitchenGameManager.Instance.AddUnlockIngredient(controller);
+
     }
     private void RemoveCounterController(BaseCounterController controller)
     {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OptionalContainerCounterController : BaseCounterController, IHasOptionalSO
+public class OptionalContainerCounterController : BaseCounterController, IHasOptionalSO, IContainerCounter
 {
     [SerializeField] private List<KitchenObjectSO> kitchenObjectSOList;
 
@@ -52,5 +52,10 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
                 optionalList = kitchenObjectSOList
             }
         );
+    }
+
+    public List<KitchenObjectSO> GetContainerKitchenObjectType()
+    {
+        return kitchenObjectSOList;
     }
 }

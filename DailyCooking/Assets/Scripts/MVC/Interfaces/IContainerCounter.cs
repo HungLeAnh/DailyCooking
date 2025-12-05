@@ -1,4 +1,6 @@
+using System.Collections.Generic;
+
 public interface IContainerCounter
 {
-    public abstract KitchenObjectSO GetContainerKitchenObjectType();
+    public abstract List<KitchenObjectSO> GetContainerKitchenObjectType();
 }

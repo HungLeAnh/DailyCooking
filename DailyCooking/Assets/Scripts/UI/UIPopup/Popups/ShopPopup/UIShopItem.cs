@@ -15,11 +15,20 @@ public class UIShopItem : MonoBehaviour
     private ConfigShopItem configShopItem;
     private ShopItemCategory itemCategory;
     private Dictionary<string, int> parsedData = new Dictionary<string, int>();
+
+    private void OnDestroy()
+    {
+        if (GameManager.Instance == null)
+            return;
+        GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChanged;
+    }
     public void SetItem(ConfigShopItem item,ShopItemCategory itemCategory)
     {
         this.gameObject.SetActive(true);    
         this.configShopItem = item;
         this.itemCategory = itemCategory;
+
+        GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChanged;
 
         //imageIcon.sprite = item.Icon;
         textName.text = item.Name;
@@ -49,6 +58,18 @@ public class UIShopItem : MonoBehaviour
         }
         GetReward(parsedData);
 
+    }
+
+    private void OnLevelChanged()
+    {
+        if (configShopItem.UnlockLevel > GameManager.Instance.GameData.PlayerStats.playerData.Level)
+        {
+            lockTransform.gameObject.SetActive(true);
+        }
+        else
+        {
+            lockTransform.gameObject.SetActive(false);
+        }
     }
 
     private void OnClickButtonBuy()

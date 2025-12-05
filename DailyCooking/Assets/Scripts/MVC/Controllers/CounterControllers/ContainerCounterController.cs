@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ContainerCounterController : BaseCounterController, IContainerCounter
@@ -29,8 +30,8 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
         }
     }
 
-    public KitchenObjectSO GetContainerKitchenObjectType()
+    public List<KitchenObjectSO> GetContainerKitchenObjectType()
     {
-        return _kitchenObjectSO;
+        return new List<KitchenObjectSO> { _kitchenObjectSO };
     }
 }

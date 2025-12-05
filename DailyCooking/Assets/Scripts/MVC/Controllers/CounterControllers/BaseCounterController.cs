@@ -19,6 +19,8 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     }
     protected virtual void OnDestroy()
     {
+        if (KitchenGameManager.Instance == null)
+            return;
         KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
     }
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)

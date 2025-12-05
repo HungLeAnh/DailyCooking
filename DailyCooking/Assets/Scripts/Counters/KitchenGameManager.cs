@@ -226,11 +226,14 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
         IContainerCounter containerCounter = counterController as IContainerCounter;
         if (containerCounter == null) return;
 
-        KitchenObjectSO kitchenObjectSO = containerCounter.GetContainerKitchenObjectType();
-        if (kitchenObjectSO != null)
+        List<KitchenObjectSO> kitchenObjectSOList = containerCounter.GetContainerKitchenObjectType();
+        if (kitchenObjectSOList != null)
         {
-            if (!unlockIngredient.Contains(kitchenObjectSO))
-                unlockIngredient.Add(kitchenObjectSO);
+            foreach (var item in kitchenObjectSOList)
+            {
+                if (!unlockIngredient.Contains(item))
+                    unlockIngredient.Add(item);
+            }
         }
         GetUnlockFood();
 
