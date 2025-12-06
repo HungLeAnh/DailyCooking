@@ -177,6 +177,13 @@ public class BotCustomerController : MonoBehaviour,IInteractable
 
     public void FinishEating()
     {
-        TargetTable.SetEatenViual(TargetSeatIndex);
+        int cash = 0;
+        int exp = 0;
+        foreach (var food in waitingFood)
+        {
+            cash += (int)food.price;
+            exp += food.exp;
+        }
+        TargetTable.SetEatenViual(TargetSeatIndex,cash,exp);
     }
 }

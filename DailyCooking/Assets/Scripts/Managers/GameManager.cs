@@ -40,9 +40,20 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         gameData.GridData.OnGridDataChanged += SaveGame;
         gameData.TutorialData.OnTutorialDataChanged += SaveGame;
         gameData.MenuData.OnMenuDataChanged += SaveGame;
+
+        gameData.PlayerStats.OnLevelUp += ShowLevelUpPopup;
         SwitchState(new MainMenuState(this));
     }
 
+    private void ShowLevelUpPopup(int level)
+    {
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UILevelUpPopup,
+            new UILevelUpPopup.Param
+            {
+                reward = new RewardData[]
+            { new RewardData(UILevelUpPopup.RewardType.Coin.ToString(), level * 100) }
+            });
+    }
     private void Update()
     {
         currentState?.Update();

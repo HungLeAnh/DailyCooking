@@ -137,13 +137,14 @@ public class Table : MonoBehaviour,IKitchenObjectParent
             return false;
         }
     }
-    public void SetEatenViual(int index)
+    public void SetEatenViual(int index, int cash, int exp)
     {
+        
         var tablewareObject = kitchenObjects[index] as TablewareKitchenObject;
 
         if(tablewareObject != null)
         {
-            tablewareObject.SetEaten();
+            tablewareObject.SetEaten(cash, exp);
         }
     }
 }

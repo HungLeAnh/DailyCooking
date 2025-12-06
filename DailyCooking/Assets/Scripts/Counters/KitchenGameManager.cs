@@ -76,15 +76,6 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
         ChangeState(State.GamePlaying);
         BotManager.Instance.StartSpawnBot();
     }
-
-    //private void CreateDailytask()
-    //{
-    //    EarnGoal = playerDay * earnGoalMultiply;
-    //    ServeGoal = playerDay * serveGoalMultiply;
-    //    gamePlayingTimerMax = ServeGoal * gamePlayingTimeMultiply;
-    //    earnCount = 0;
-    //    serveCount = 0;
-    //}
     public void ChangeState(State newState)
     {
         state = newState;
@@ -101,7 +92,12 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
 
         ChangeState(State.Editing);
     }
+    public void CollectCash(int cash,int exp)
+    {
+        GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(cash);
+        GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(exp);
 
+    }
 
     private void Update()
     {

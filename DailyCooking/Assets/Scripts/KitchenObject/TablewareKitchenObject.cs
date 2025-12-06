@@ -20,6 +20,9 @@ public class TablewareKitchenObject : KitchenObject, IInteractable
     private List<KitchenObjectSO> _ingredientSOList;
     private bool isEaten = false;
 
+    private int cash;
+    private int exp;
+
     private void Awake()
     {
         _ingredientSOList = new List<KitchenObjectSO>();
@@ -63,6 +66,9 @@ public class TablewareKitchenObject : KitchenObject, IInteractable
         if (!playerStateMachine.HasKitchenObject())
         {
             SetKitchenObjectParent(playerStateMachine);
+            KitchenGameManager.Instance.CollectCash(cash,exp);
+            cash = 0;   
+            exp = 0;
         }
     }
 
@@ -96,8 +102,10 @@ public class TablewareKitchenObject : KitchenObject, IInteractable
             visualGameObject.SetActive(false);
         }
     }
-    public void SetEaten()
+    public void SetEaten(int cash, int exp)
     {
+        this.cash = cash;
+        this.exp = exp;
         isEaten = true;
         foreach (var visualGameObject in tablewareGameObjectArray)
         {
