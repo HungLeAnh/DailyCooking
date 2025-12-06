@@ -103,12 +103,13 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     }
 
     public void SetPlacedObjectTypeSO(PlacedObjectTypeSO placedObjectTypeSO, Vector3 objectPosition)
-    {
-        if(this.placedObjectTypeSO != null)
+    { 
+        if(placedObjectTypeSO == null)
         {
-            gameManager.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);
+            DeselectObjectType();
             gameManager.GameData.UpdateGridData(gridManager.Grid);
-            OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
+
+            return;
         }
         this.placedObjectTypeSO = placedObjectTypeSO;
         RefreshSelectedObjectType(objectPosition);
@@ -186,6 +187,12 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     {
         // dir = targetPlaceObjectView.GetModel().Dir; 
         SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO, objectPosition);
+        if (this.placedObjectTypeSO != null)
+        {
+            gameManager.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);
+            gameManager.GameData.UpdateGridData(gridManager.Grid);
+            OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
+        }
         var counterView = targetPlaceObjectView.GetComponent<BaseCounterView>();
         counterModules.DestroyCounter(counterView);
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,
