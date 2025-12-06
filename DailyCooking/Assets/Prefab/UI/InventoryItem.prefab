@@ -215,7 +215,6 @@ MonoBehaviour:
   _itemCount: {fileID: 5835953134161007149}
   _itemPreviewImage: {fileID: 6158252003228271818}
   _bgImage: {fileID: 9109143432589289660}
-  _bgInactiveImage: {fileID: 4272130663273607819}
   _itemButton: {fileID: 2061740237265613791}
 --- !u!114 &2061740237265613791
 MonoBehaviour:
@@ -305,11 +304,11 @@ RectTransform:
   - {fileID: 3883134396864883962}
   m_Father: {fileID: 9188839870597996403}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -10, y: 10}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 1, y: 0}
+  m_AnchorMin: {x: 0.7, y: 0.05}
+  m_AnchorMax: {x: 0.95, y: 0.3}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &4663056238143821125
 GameObject:
   m_ObjectHideFlags: 0
@@ -345,7 +344,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -40, y: -40}
+  m_SizeDelta: {x: -10, y: -10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8106151144245897139
 CanvasRenderer:
@@ -406,7 +405,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 18
+  m_fontSizeMin: 1
   m_fontSizeMax: 72
   m_fontStyle: 1
   m_HorizontalAlignment: 2
