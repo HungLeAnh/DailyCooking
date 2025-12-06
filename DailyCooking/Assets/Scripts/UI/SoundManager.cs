@@ -17,21 +17,6 @@ public class SoundManager : PersistentSingleton<SoundManager>
         audioSourcePool = new List<AudioSource>();
         volume = PlayerPrefs.GetFloat(PLAYER_SOUND_EFFECTS_VOLUME, 1f);
     }
-    private void Start()
-    {
-        SceneManager.sceneLoaded += SceneManager_sceneLoaded;
-    }
-
-    private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
-    {
-
-    }
-
-    private void OnDestroy()
-    {
-        SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
-
-    }
 
     private void TrashCounter_OnAnyObjectTrashed(object sender, System.EventArgs e)
     {

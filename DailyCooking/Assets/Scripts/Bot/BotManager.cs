@@ -20,33 +20,22 @@ public class BotManager : SimpleSingleton<BotManager>
         botPool = new List<GameObject>();
     }
 
-    private void Start()
-    {
-        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
-    }
     private void OnDestroy()
     {
-        if (KitchenGameManager.Instance == null)
-            return;
-        KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
         botPool.Clear();
     }
-
-    private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
+    public void StartSpawnBot()
     {
-        if (KitchenGameManager.Instance.IsGamePlaying())
+        StartCoroutine(SpawnBotRoutine());
+    }
+    public void StopSpawnBot()
+    {
+        StopCoroutine(SpawnBotRoutine());
+        foreach (var bot in botPool)
         {
-            StartCoroutine(SpawnBotRoutine());
-
+            bot.SetActive(false);
         }
-        else
-        {
-            StopCoroutine(SpawnBotRoutine());
-            foreach (var bot in botPool)
-            {
-                bot.SetActive(false);
-            }
-        }
+        
     }
 
     public void Initialize()

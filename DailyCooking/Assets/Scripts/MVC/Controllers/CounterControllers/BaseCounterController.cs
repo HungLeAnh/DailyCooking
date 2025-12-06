@@ -25,8 +25,7 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     }
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
-        if (KitchenGameManager.Instance.IsGameOver() ||
-            KitchenGameManager.Instance.IsEditing())
+        if (KitchenGameManager.Instance.IsEditing())
         {
             BaseCounterView.Hide();
             OnRestartGame(this, PlayerStateMachine.Instance);

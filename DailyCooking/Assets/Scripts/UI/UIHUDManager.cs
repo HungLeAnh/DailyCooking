@@ -71,12 +71,6 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     {
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
     }
-    public void OnPlayClicked()
-    {
-        HideAllUIElement();
-        KitchenGameManager.Instance.StartGame();
-
-    }
     public void OnMenuClicked()
     {
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIMenuPopup);

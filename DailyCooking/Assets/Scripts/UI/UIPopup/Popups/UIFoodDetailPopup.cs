@@ -15,6 +15,7 @@ public class UIFoodDetailPopup : UIPopup
     [SerializeField] private TextMeshProUGUI foodNameText;
     [SerializeField] private TextMeshProUGUI foodTypeText;
     [SerializeField] private TextMeshProUGUI foodPriceText;
+    [SerializeField] private TextMeshProUGUI foodEXPText;
 
     [SerializeField] private GameObject ingredientTagPrefab;
     [SerializeField] private Transform container;
@@ -41,6 +42,7 @@ public class UIFoodDetailPopup : UIPopup
         foodNameText.text = foodSO.recipeName;
         foodTypeText.text = foodSO.foodType.ToString();
         foodPriceText.text = $"${foodSO.price}";
+        foodEXPText.text = $"{foodSO.exp} XP";
         GenerateTags(foodSO.kitchenObjectSOList);
     }
     public void GenerateTags(List<KitchenObjectSO> ingredients)

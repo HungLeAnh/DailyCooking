@@ -8,5 +8,6 @@ public class FoodSO : SerializableScriptableObject
     public Sprite Sprite;
     public string recipeName;
     public long price;
+    public int exp;
     public FoodType foodType;
 }

@@ -80,8 +80,6 @@ public class BotCustomerController : MonoBehaviour,IInteractable
 
                 if (plateContentMathesRecipe)
                 {
-                    // Player delivered correct recipe 
-                    KitchenGameManager.Instance.ServeFood(waitingFood.price);
                     return plateContentMathesRecipe;
                 }
             }
@@ -179,8 +177,6 @@ public class BotCustomerController : MonoBehaviour,IInteractable
 
     public void FinishEating()
     {
-        //KitchenObject.SpawnKitchenObject(,TargetSeatIndex);
-        //Debug.LogError("BotCustomerController: FinishEating called " + TargetSeatIndex);
         TargetTable.SetEatenViual(TargetSeatIndex);
     }
 }

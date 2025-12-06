@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
 {
@@ -14,32 +15,22 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     
     public event EventHandler OnStateChanged;
 
-    public event EventHandler OnGamePaused;
-
-    public event EventHandler OnGameUnpaused;
-
     public event EventHandler OnServeFood;
 
     public enum State
     {
         Editing,
-        WaitingToStart,
-        CountdownToStart,
         GamePlaying,
-        GameOver,
     }
     [SerializeField] private long earnGoalMultiply = 1000;
     [SerializeField] private long serveGoalMultiply = 10;
     [SerializeField] private long gamePlayingTimeMultiply = 60;
-    [SerializeField] private GameObject kitchenManagerUI;
     [SerializeField] private List<CuttingRecipeSO> cuttingRecipeSOList;
     [SerializeField] private List<FryingRecipeSO> fryingRecipeSOList;
 
     private State state;
-    private float countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
     private float gamePlayingTimer;
     private float gamePlayingTimerMax = GAME_PLAYING_TIMER_MAX_INITIAL;
-    private bool isGamePaused = false;
     private long earnGoal;
     private long serveGoal;
     private long earnCount;
@@ -63,8 +54,6 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
         unlockIngredient = new List<KitchenObjectSO>();
 
         playerDay = GameManager.Instance.GameData.PlayerStats.playerData.DaysPlayed;
-        CreateDailytask();
-        kitchenManagerUI.SetActive(false);
     }
     public void OnDestroy()
     {
@@ -83,32 +72,19 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
                 continue;
             AddUnlockIngredient(counterController);
         }
-
+        BotManager.Instance.Initialize();        
+        ChangeState(State.GamePlaying);
+        BotManager.Instance.StartSpawnBot();
     }
 
-    private void CreateDailytask()
-    {
-        EarnGoal = playerDay * earnGoalMultiply;
-        ServeGoal = playerDay * serveGoalMultiply;
-        gamePlayingTimerMax = ServeGoal * gamePlayingTimeMultiply;
-        earnCount = 0;
-        serveCount = 0;
-    }
-
-    public void StartGame()
-    {
-        CreateDailytask();
-        kitchenManagerUI.SetActive(true);
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIDayTaskPopup);
-        countdownToStartTimer = COUNTDOWN_TO_START_TIMER_INITIAL;
-        BotManager.Instance.Initialize();
-    }
-    public void EndGame()
-    {
-        RewardPlayer();
-        kitchenManagerUI.SetActive(false);
-
-    }
+    //private void CreateDailytask()
+    //{
+    //    EarnGoal = playerDay * earnGoalMultiply;
+    //    ServeGoal = playerDay * serveGoalMultiply;
+    //    gamePlayingTimerMax = ServeGoal * gamePlayingTimeMultiply;
+    //    earnCount = 0;
+    //    serveCount = 0;
+    //}
     public void ChangeState(State newState)
     {
         state = newState;
@@ -116,19 +92,13 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     }
     private void RewardPlayer()
     {
-        if (state == State.GameOver)
-        {
-            if (serveGoal <= ServeCount && earnGoal <= earnCount)
-            {
-                //Win game
+        //Win game
 
-                playerDay++;
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayedDay(playerDay);
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins((int)earnCount);
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(playerDay * PLAYER_EXP_MULTIPLIER);
-            }
+        //playerDay++;
+        //GameManager.Instance.GameData.PlayerStats.UpdatePlayedDay(playerDay);
+        //GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins((int)earnCount);
+        //GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(playerDay * PLAYER_EXP_MULTIPLIER);
 
-        }
         ChangeState(State.Editing);
     }
 
@@ -137,26 +107,15 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     {
         switch (state)
         {
-            case State.WaitingToStart:
+            //ChangeState(State.GamePlaying);
+            //gamePlayingTimer = gamePlayingTimerMax;
 
-                break;
-            case State.CountdownToStart:
-                countdownToStartTimer -= Time.deltaTime;
-                if (countdownToStartTimer < 0f)
-                {
-                    ChangeState(State.GamePlaying);
-                    gamePlayingTimer = gamePlayingTimerMax;
-                }
-                break;
             case State.GamePlaying:
                 gamePlayingTimer -= Time.deltaTime;
                 if (gamePlayingTimer < 0f)
                 {
-                    ChangeState(State.GameOver);
-                    UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameOverPopup);
+
                 }
-                break;
-            case State.GameOver:
                 break;
         }
     }
@@ -164,22 +123,11 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     {
         return state == State.GamePlaying;
     }
-    public bool IsCountdownToStartActive()
-    {
-        return state == State.CountdownToStart;
-    }
-    public bool IsGameOver()
-    {
-        return state == State.GameOver;
-    }
+
     public bool IsEditing()
     {
         return state == State.Editing;
 
-    }
-    public float GetCountdownToStartTimer()
-    {
-        return countdownToStartTimer;
     }
 
     public float GetGamePlayingTimerNomalized()
@@ -187,37 +135,12 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
         return 1 - (gamePlayingTimer / gamePlayingTimerMax);
     }
 
-    public void TogglePauseGame()
-    {
-        isGamePaused = !isGamePaused;
-        if (isGamePaused)
-        {
-            Time.timeScale = TIME_SCALE_PAUSED;
-            OnGamePaused?.Invoke(this, EventArgs.Empty);
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGamePausePopup);
-        }
-        else
-        {
-            Time.timeScale = TIME_SCALE_UNPAUSED;
-            OnGameUnpaused?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
     public void ServeFood(long foodPrice)
     {
         earnCount += foodPrice;
         serveCount++;
-        OnServeFood.Invoke(this,EventArgs.Empty);
+        OnServeFood?.Invoke(this,EventArgs.Empty);
 
-        if (IsTaskComplete()) 
-        {
-            ChangeState(State.GameOver);
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameOverPopup);
-        }
-    }
-    public bool IsTaskComplete()
-    {
-        return earnCount >= earnGoal && serveCount >= serveGoal;
     }
 
 

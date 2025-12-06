@@ -24,8 +24,7 @@ public class Table : MonoBehaviour,IKitchenObjectParent
     }
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
-        if (KitchenGameManager.Instance.IsGameOver() ||
-            KitchenGameManager.Instance.IsEditing())
+        if (KitchenGameManager.Instance.IsEditing())
         {
             ResetTable();
         }
@@ -35,6 +34,8 @@ public class Table : MonoBehaviour,IKitchenObjectParent
     {
         if(TableManager.Instance != null)
             TableManager.Instance.UnregisterTable(this);
+        if(KitchenGameManager.Instance != null)
+            KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
     }
 
     public int GetAvailableSeat()

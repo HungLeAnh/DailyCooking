@@ -9,6 +9,7 @@ public class UIFoodItem :MonoBehaviour
     [SerializeField] private Image foodImage;
     [SerializeField] private TextMeshProUGUI foodNameText;
     [SerializeField] private TextMeshProUGUI foodPriceText;
+    [SerializeField] private TextMeshProUGUI foodEXPText;
     [SerializeField] private TextMeshProUGUI foodStatusText;
     [SerializeField] private Image lockedOverlayImage;
 
@@ -36,6 +37,7 @@ public class UIFoodItem :MonoBehaviour
         foodImage.sprite = item.Sprite;
         foodNameText.text = item.recipeName;
         foodPriceText.text = $"${item.price}";
+        foodEXPText.text = $"{item.exp} XP";
         infoButton.onClick.AddListener(() =>
         {
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIFoodDetailPopup,
