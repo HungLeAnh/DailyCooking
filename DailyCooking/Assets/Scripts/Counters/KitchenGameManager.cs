@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
+public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
 {
     private const string PLAYER_DAY = "PlayerDay";
     private const float COUNTDOWN_TO_START_TIMER_INITIAL = 3f;
@@ -53,8 +53,18 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
         state = State.Editing;
         unlockIngredient = new List<KitchenObjectSO>();
 
-        playerDay = GameManager.Instance.GameData.PlayerStats.playerData.DaysPlayed;
+        SceneManager.sceneLoaded += SceneManager_sceneLoaded;
     }
+
+    private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
+    {        
+        if(arg0.buildIndex == 0)
+            return;
+        BotManager.Instance.Initialize();        
+        ChangeState(State.GamePlaying);
+        BotManager.Instance.StartSpawnBot();
+    }
+
     public void OnDestroy()
     {
         unlockIngredient.Clear();
@@ -65,6 +75,8 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
     }
     public void Init()
     {
+        playerDay = GameManager.Instance.GameData.PlayerStats.playerData.DaysPlayed;
+
         unlockIngredient.Clear();
         foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
         {
@@ -72,9 +84,6 @@ public class KitchenGameManager : SimpleSingleton<KitchenGameManager>
                 continue;
             AddUnlockIngredient(counterController);
         }
-        BotManager.Instance.Initialize();        
-        ChangeState(State.GamePlaying);
-        BotManager.Instance.StartSpawnBot();
     }
     public void ChangeState(State newState)
     {

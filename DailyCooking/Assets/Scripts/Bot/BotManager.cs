@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BotManager : SimpleSingleton<BotManager>
+public class BotManager : PersistentSingleton<BotManager>
 {
     
 
@@ -26,7 +26,9 @@ public class BotManager : SimpleSingleton<BotManager>
     }
     public void StartSpawnBot()
     {
-        StartCoroutine(SpawnBotRoutine());
+        StartCoroutine(WaitForSecond(10, () => {
+            StartCoroutine(SpawnBotRoutine());
+        }));
     }
     public void StopSpawnBot()
     {
@@ -46,6 +48,11 @@ public class BotManager : SimpleSingleton<BotManager>
             bot.SetActive(false);
             botPool.Add(bot);
         }
+    }
+    private IEnumerator WaitForSecond(int seconds, Action action)
+    {
+        yield return new WaitForSeconds(seconds);
+        action?.Invoke();
     }
     private IEnumerator SpawnBotRoutine()
     {

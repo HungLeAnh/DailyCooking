@@ -154,64 +154,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &106792871
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 106792872}
-  - component: {fileID: 106792873}
-  m_Layer: 0
-  m_Name: KitchenGameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &106792872
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 106792871}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &106792873
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 106792871}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88afad0419b8b4c45a92023e7e03a5fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  earnGoalMultiply: 20
-  serveGoalMultiply: 2
-  gamePlayingTimeMultiply: 60
-  cuttingRecipeSOList:
-  - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
-  - {fileID: 11400000, guid: 03df2848847bcdc4fafa39a849b83e11, type: 2}
-  - {fileID: 11400000, guid: 8fb39336a1ea95c41a1b18b41daf020e, type: 2}
-  - {fileID: 11400000, guid: 82b52adef9815c6428fb367a3965fe0a, type: 2}
-  - {fileID: 11400000, guid: d92c3ca9c36cd9f4db431a6e4e3cdc8b, type: 2}
-  - {fileID: 11400000, guid: a38c3a45a63565442a408863dfe6a113, type: 2}
-  - {fileID: 11400000, guid: 1d02dc73db885f346a64d250880b7dd4, type: 2}
-  fryingRecipeSOList:
-  - {fileID: 11400000, guid: 03a4633e975251e4bbcc10c49aa23b19, type: 2}
-  - {fileID: 11400000, guid: 561cb208a595885409b71715b3d7984f, type: 2}
 --- !u!1 &143411104
 GameObject:
   m_ObjectHideFlags: 0
@@ -340,52 +282,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1853001321}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &296522275
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 296522277}
-  - component: {fileID: 296522276}
-  m_Layer: 0
-  m_Name: BotManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &296522276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 296522275}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72753700f71fa124fb628f51c92c797d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  botPrefab: {fileID: 2018199230153267826, guid: 01897d36f7464ae4a98e961b18e07733, type: 3}
-  poolSize: 10
---- !u!4 &296522277
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 296522275}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &398137375
 GameObject:
@@ -2434,8 +2330,6 @@ SceneRoots:
   - {fileID: 1678368735}
   - {fileID: 2130496731}
   - {fileID: 805335353}
-  - {fileID: 106792872}
   - {fileID: 997290952}
   - {fileID: 1853001321}
   - {fileID: 2070905293}
-  - {fileID: 296522277}
