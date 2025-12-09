@@ -1,12 +1,17 @@
 public class CuttingCounterModel: BaseCounterModel
 {
-    private int cuttingProgress;
-    private CuttingRecipeSO _cuttingRecipeSO;
+    private float cuttingProgress;
+    private CuttingRecipeSO cuttingRecipeSO;
 
-    public int CuttingProgress { get => cuttingProgress; set => cuttingProgress = value; }
-    public CuttingRecipeSO CuttingRecipeSO { get => _cuttingRecipeSO; set => _cuttingRecipeSO = value; }
+    public float CuttingProgress { get => cuttingProgress; set => cuttingProgress = value; }
+    public CuttingRecipeSO CuttingRecipeSO { get => cuttingRecipeSO; set => cuttingRecipeSO = value; }
     public float ProgressNormalized 
     { 
-        get => _cuttingRecipeSO != null ? (float)cuttingProgress / _cuttingRecipeSO.cuttingProgressMax: 0; 
+        get => cuttingRecipeSO != null ? (float)cuttingProgress / cuttingRecipeSO.cuttingProgressMax: -1; 
+    }
+    public void ResetModel()
+    {
+        cuttingProgress = -1;
+        cuttingRecipeSO = null;
     }
 }

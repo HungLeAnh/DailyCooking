@@ -4,7 +4,6 @@ public class PlayerStateContext
     public float defaultDistanceTarget = 0.5f;
     private bool _idDisableInput;
     private Animator _characterAnimator;
-    private float _movespeed;
     private bool _isWalking;
     private GameInput _gameInput;
     private Transform _playerTransform;
@@ -13,13 +12,11 @@ public class PlayerStateContext
     private Transform _kitchenObjectHoldPoint;
     private IInteractable _selectedInteactableObject;
     public PlayerStateContext(Animator animator, 
-        float moveSpeed,
         Transform playerTransform, LayerMask counterLayerMask, 
         Transform kitchenObjectHoldPoint)
     {
         _characterAnimator = animator;
         _gameInput = GameInput.Instance;
-        _movespeed = moveSpeed;
         _playerTransform = playerTransform;
         _counterLayermask = counterLayerMask;
         _kitchenObjectHoldPoint = kitchenObjectHoldPoint;

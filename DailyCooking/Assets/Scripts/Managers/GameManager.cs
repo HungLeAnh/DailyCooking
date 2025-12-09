@@ -36,7 +36,7 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         gameData.PlayerStats.OnResourceChange += SaveGame;
         gameData.PlayerStats.OnLevelChange += SaveGame;
         gameData.PlayerStats.OnExpChange += SaveGame;
-        gameData.InventoryData.OnInventoryDataChanged += SaveGame;
+        gameData.InventoryData.OnInventoryDataChanged += SaveGame; 
         gameData.GridData.OnGridDataChanged += SaveGame;
         gameData.TutorialData.OnTutorialDataChanged += SaveGame;
         gameData.MenuData.OnMenuDataChanged += SaveGame;

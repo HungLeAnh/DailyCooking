@@ -29,13 +29,23 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnPlayerSpawned += Instance_OnPlayerSpawned;
+        //GameManager.Instance.OnPlayerSpawned += Instance_OnPlayerSpawned;
         GameInput.Instance.OnScrollPerformed += HandleZoomDesktop;
         GameInput.Instance.OnMousePanPerformed += OnPanMovedDesktop;
 
         GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingStart += OnBuildingStart;
         GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
-        
+
+        UIHUDManager.Instance.OnRotateClicked += OnRotateClicked;
+    }
+
+    private void OnRotateClicked()
+    {
+        isRotating = true;
+
+        targetQuaternion = Quaternion.Euler(_cinemachineCamera.transform.localEulerAngles.x, 
+            _cinemachineCamera.transform.localEulerAngles.y + 90,
+            _cinemachineCamera.transform.localEulerAngles.z);
     }
 
     private void Instance_OnPlayerSpawned(object sender, EventArgs e)

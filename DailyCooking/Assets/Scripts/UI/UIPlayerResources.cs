@@ -22,11 +22,16 @@ public class UIPlayerResources : MonoBehaviour
         GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChange;
         GameManager.Instance.GameData.PlayerStats.OnExpChange += OnExpChange;
 
-        gemText.text = GameManager.Instance.GameData.PlayerStats.playerData.Gems.ToString();
-        coinText.text = GameManager.Instance.GameData.PlayerStats.playerData.Coins.ToString();
-        levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
-        expText.text = GameManager.Instance.GameData.PlayerStats.playerData.Exp.ToString() + "/" + GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER;
-        expSlider.value = (float)GameManager.Instance.GameData.PlayerStats.playerData.Exp / (GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER);
+        if(gemText!= null)
+            gemText.text = GameManager.Instance.GameData.PlayerStats.playerData.Gems.ToString();
+        if(coinText != null)
+            coinText.text = GameManager.Instance.GameData.PlayerStats.playerData.Coins.ToString();
+        if(levelText != null)
+            levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
+        if(expText != null)
+            expText.text = GameManager.Instance.GameData.PlayerStats.playerData.Exp.ToString() + "/" + GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER;
+        if(expSlider != null)
+            expSlider.value = (float)GameManager.Instance.GameData.PlayerStats.playerData.Exp / (GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER);
 
     }
     private void OnDestroy()
@@ -40,10 +45,10 @@ public class UIPlayerResources : MonoBehaviour
     private void OnExpChange()
     {
         if (expText != null)
-        {
             expText.text = GameManager.Instance.GameData.PlayerStats.playerData.Exp.ToString() + "/" + GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER;
+        
+        if (expSlider != null)
             expSlider.value = (float)GameManager.Instance.GameData.PlayerStats.playerData.Exp / (GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER);
-        }
     }
 
     private void OnLevelChange()

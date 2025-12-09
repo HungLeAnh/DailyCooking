@@ -45,6 +45,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                         {
                             GetKitchenObject().DestroySelf();
                             _cuttingCounterView.UpdateProgressBar(0f);
+                            _cuttingCounterModel.ResetModel();
                         }
                     }
                 }
@@ -52,6 +53,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                 {
                     GetKitchenObject().SetKitchenObjectParent(playerStateMachine);
                     _cuttingCounterView.UpdateProgressBar(0f);
+                    _cuttingCounterModel.ResetModel();
                 }
             }
         }
@@ -60,7 +62,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     {
         if (counter.HasKitchenObject() && HasRecipeWithInput(counter.GetKitchenObject().GetKitchenObjectSO()))
         {
-            model.CuttingProgress++;
+            model.CuttingProgress += (int)GameManager.Instance.GameData.PlayerStats.statsData.CookingSpeed;
 
             if (model.CuttingRecipeSO == null)
             {

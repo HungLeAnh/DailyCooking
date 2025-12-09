@@ -9,5 +9,6 @@ public enum UIPopupType
     UIMainMenuPopup,
     UIOptionMenuPopup,
     UISettingPopup,
-    UIShopPopup
+    UIShopPopup,
+    UIUpgradePopup
 }

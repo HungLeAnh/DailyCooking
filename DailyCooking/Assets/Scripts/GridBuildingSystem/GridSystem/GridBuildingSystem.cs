@@ -98,14 +98,15 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
         gridInitializer.InitRoad();
         //gridInitializer.InitWallAndFloor();
-        gridInitializer.InitPillar();
+        //gridInitializer.InitPillar();
         gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList);
         gridVisualizer.SetActiveGridGuide(false);
 
 
         buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, counterModulesInstance, uiPopupManagerInstance);
         counterModulesInstance.Initialize();
-        
+
+        KitchenGameManager.Instance.Init();
     }
     private void Start()
     {
@@ -145,6 +146,15 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             gridInitializer.InitDefaultCounters();
             gameManager.GameData.UpdateGridData(gridManager.Grid);
         }
+    }
+    public void ExpandGrid(float amount)
+    {
+        int newSize = GridManager.GetWidth() + (int)amount;
+        gridManager.UnlockGrid(newSize, newSize);
+        gameManager.GameData.UpdateGridData(gridManager.Grid);
+        gridInitializer.InitPillar();
+        gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList);
+
     }
     public PlacedObjectTypeSO GetPlacedObjectTypeSOByGuid(string Guid)
     {

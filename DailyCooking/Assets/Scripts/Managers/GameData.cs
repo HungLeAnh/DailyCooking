@@ -9,7 +9,7 @@ public class GameData
     public GridData GridData { get; private set; } = new GridData();
     public TutorialData TutorialData { get; private set; } = new TutorialData();
     public MenuData MenuData { get; private set; } = new MenuData();
-
+    public UpgradeData UpgradeData { get; private set; } = new UpgradeData();
     public void UpdateGridData(GridXZ<GridObject> grid)
     {
         GridData.UpdateGridData(grid);
@@ -37,6 +37,34 @@ public class GameData
     public bool RemoveDishFromMenu(FoodSO dish)
     {
         return MenuData.RemoveDishFromMenu(dish);
+    }
+
+    public bool PurchaseUpgrade(UpgradeSO upgradeData)
+    {
+        return UpgradeData.PurchaseUpgrade(upgradeData);
+    }
+}
+
+[System.Serializable]
+public class UpgradeData
+{
+
+    [System.NonSerialized]
+    public Action OnMenuDataChanged;
+
+    private List<string> purchasedUpgrades = new List<string>();
+
+    public List<string> PurchasedUpgrades => purchasedUpgrades;
+
+    public bool PurchaseUpgrade(UpgradeSO upgradeData)
+    {
+        if (!purchasedUpgrades.Contains(upgradeData.Guid))
+        {
+            purchasedUpgrades.Add(upgradeData.Guid);
+            OnMenuDataChanged?.Invoke();
+            return true;
+        }
+        return false;
     }
 }
 

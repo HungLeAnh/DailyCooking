@@ -71,7 +71,6 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
     }
     public void Start()
     {
-        Init();
     }
     public void Init()
     {

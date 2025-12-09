@@ -6,13 +6,8 @@ using UnityEngine;
 public enum UIHUDElements
 {
     Settings,
-    Pause,
-    Shop,
-    Inventory,
-    Play,
-    Coin,
-    Level,
-    Menu,
+    Resources,
+    BotTab,
 
 }
 [Serializable]
@@ -31,6 +26,8 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     [Header("HUD Elements")]
     [SerializeField] private List<SerializableKeyValuePair<UIHUDElements, GameObject>> uiHUDElementList = new List<SerializableKeyValuePair<UIHUDElements, GameObject>>();
     private Dictionary<UIHUDElements, GameObject> uiHUDElementDictionary = new Dictionary<UIHUDElements, GameObject>();
+
+    public Action OnRotateClicked;
 
     protected override void Awake()
     {
@@ -59,9 +56,9 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     {
         UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup);
     }
-    public void OnPauseClicked()
+    public void OnUpgradeClicked()
     {
-
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIUpgradePopup);
     }
     public void OnShopClicked()
     {
@@ -75,7 +72,10 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     {
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIMenuPopup);
     }
-
+    public void OnRotateClick()
+    {
+        OnRotateClicked?.Invoke();
+    }
     public void HideAllUIElement()
     {
         foreach (var item in uiHUDElementDictionary)

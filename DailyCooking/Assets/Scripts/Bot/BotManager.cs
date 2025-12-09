@@ -9,6 +9,7 @@ public class BotManager : PersistentSingleton<BotManager>
 
     [SerializeField] private GameObject botPrefab;
     [SerializeField] private int poolSize = 10;
+    [SerializeField] private Vector3 spawnPosition;
 
     private List<GameObject> botPool;
 
@@ -44,7 +45,7 @@ public class BotManager : PersistentSingleton<BotManager>
     {
         for (int i = 0; i < poolSize; i++)
         {
-            GameObject bot = Instantiate(botPrefab, transform.position, Quaternion.identity, transform);
+            GameObject bot = Instantiate(botPrefab,spawnPosition, Quaternion.identity, transform);
             bot.SetActive(false);
             botPool.Add(bot);
         }
@@ -70,13 +71,14 @@ public class BotManager : PersistentSingleton<BotManager>
         {
             if (!bot.gameObject.activeInHierarchy)
             {
+                bot.transform.position = spawnPosition;
                 bot.gameObject.SetActive(true);
                 return bot.gameObject;
             }
         }
 
         // If no inactive bot is found, create a new one
-        var newBot = Instantiate(botPrefab, transform.position, Quaternion.identity, transform);
+        var newBot = Instantiate(botPrefab, spawnPosition, Quaternion.identity, transform);
         botPool.Add(newBot);
         return newBot.gameObject;
     }

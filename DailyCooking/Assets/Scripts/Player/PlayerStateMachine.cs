@@ -25,8 +25,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         Holding_Walking,
     }
 
-    [SerializeField]
-    private float moveSpeed = 7f;
+
     [SerializeField]
     private LayerMask countersLayerMask;
     [SerializeField] 
@@ -38,15 +37,15 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     private StateManager<EPlayerState> _stateManager;
     private PlayerStateFactory _stateFactory;
 
+
     private void IntializeStates()
     {
-        Context = new PlayerStateContext(characterAnimator, moveSpeed,
+        Context = new PlayerStateContext(characterAnimator,
             this.transform, countersLayerMask, this.kitchenObjectHoldPoint);
 
         var states = _stateFactory.CreateStates(this);
         _stateManager.SetStates(states, EPlayerState.Idle);
         _stateManager.Start();
-
     }
 
     protected override void Awake()
@@ -130,7 +129,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                 if (interactableObject != Context.SelectedInteactableObject)
                 {
                     SetInteractableObject(interactableObject);
-                    interactableObject.InteractEvent(PlayerStateMachine.Instance);
+                    Context.SelectedInteactableObject.InteractEvent(PlayerStateMachine.Instance);
                 }
                 else if (interactableObject == Context.SelectedInteactableObject)
                 {
@@ -145,14 +144,12 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                         else
                         {
 
-                            if (progress.IsDone())
+                            if (progress.IsDone() || progress.GetProgress() == -1)
                             {
                                 Context.SelectedInteactableObject.InteractEvent(PlayerStateMachine.Instance);
-
                             }
                             else
                             {
-
                                 Context.SelectedInteactableObject.InteractAlternateEvent(PlayerStateMachine.Instance);
                             }
                         }
@@ -176,7 +173,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
 
         Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
 
-        float moveDistance = moveSpeed * Time.deltaTime;
+        float moveDistance = GameManager.Instance.GameData.PlayerStats.statsData.MoveSpeed * Time.deltaTime;
         float playerRadius = 0.7f;
         bool canMove = !Physics.BoxCast(transform.position, Vector3.one * playerRadius, moveDir, Quaternion.identity, moveDistance, countersLayerMask);
 
