@@ -5,6 +5,7 @@ public class BotStateMachine
     private BotCustomerController botController;
     private BotState currentState;
 
+    public BotState CurrentState => currentState;
     public BotStateMachine(BotCustomerController botController)
     {
         this.botController = botController;

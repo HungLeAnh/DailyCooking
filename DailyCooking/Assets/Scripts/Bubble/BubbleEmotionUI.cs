@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class BubbleEmotionUI: MonoBehaviour
 {
     public Action<EmotionType> OnEmotionEnd;
+    public Action<EmotionType> OnEmotionChanged;
     [SerializeField] private Image imageEmotion;
     [SerializeField] private Image imageEmotionClock;
 
@@ -56,5 +57,6 @@ public class BubbleEmotionUI: MonoBehaviour
         clockTimer = 0f;
         imageEmotionClock.fillAmount = 1f;
         currentEmotion = nextEmotion;
+        OnEmotionChanged?.Invoke(currentEmotion);
     }
 }

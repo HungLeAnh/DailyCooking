@@ -15,8 +15,10 @@ public class OrderFoodState : BotState
 
     private void OnOrderComplete(PlayerStateMachine playerStateMachine)
     {
-        stateMachine.GetBotController().OrderFood();
-        stateMachine.SetState(new WaitingForFoodState(stateMachine));
+        if(stateMachine.GetBotController().OrderFood())
+        {
+            stateMachine.SetState(new WaitingForFoodState(stateMachine));
+        }
     }
 
     public override void Update()

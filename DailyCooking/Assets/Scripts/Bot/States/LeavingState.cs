@@ -9,8 +9,8 @@ public class LeavingState : BotState
         Debug.Log("Bot is leaving.");
         stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walk);
 
-        // TODO: Determine the exit point
-        Vector3 exitPoint = new Vector3(10, 0, 0); // Placeholder
+        
+        Vector3 exitPoint = new Vector3(3, 0, -3);
         stateMachine.GetBotController().NavMeshAgent.SetDestination(exitPoint);
     }
 
@@ -18,7 +18,7 @@ public class LeavingState : BotState
     {
         if (stateMachine.GetBotController().NavMeshAgent.remainingDistance <= stateMachine.GetBotController().NavMeshAgent.stoppingDistance)
         {
-            // Bot has reached the exit, destroy it
+            
             stateMachine.GetBotController().ResetBot();
 
             BotManager.Instance.ReturnBotToPool(stateMachine.GetBotController().gameObject);

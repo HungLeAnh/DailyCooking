@@ -210,8 +210,11 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
     }
     public FoodSO GetUnlockedFood()
     {
-        return GameManager.Instance.GameData.
-            MenuData.menuDished[UnityEngine.Random.Range(0, 
-                GameManager.Instance.GameData.MenuData.menuDished.Count)];
+        if(GameManager.Instance.GameData.MenuData.menuDished.Count == 0)
+            return null;
+        else
+            return GameManager.Instance.GameData.
+                MenuData.menuDished[UnityEngine.Random.Range(0,
+                    GameManager.Instance.GameData.MenuData.menuDished.Count)];
     }
 }

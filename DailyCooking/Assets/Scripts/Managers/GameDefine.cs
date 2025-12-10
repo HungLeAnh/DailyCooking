@@ -17,4 +17,7 @@ public class GameDefine : MonoBehaviour
     #region Emotion
     public const float EMOTION_DURATION = 15f;
     #endregion
+    #region Bot
+    public const float TIP_PERCENTAGE = 0.7f;
+    #endregion
 }

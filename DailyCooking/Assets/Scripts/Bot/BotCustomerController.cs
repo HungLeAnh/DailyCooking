@@ -21,10 +21,11 @@ public class BotCustomerController : MonoBehaviour,IInteractable
 
     private BotStateMachine stateMachine;
     private List<FoodSO> waitingFood;
+    private float tipPercentage;
 
     public Table TargetTable { get; set; }
     public int TargetSeatIndex { get; set; }
-
+    public float TipPercentage { get => tipPercentage; }
     public NavMeshAgent NavMeshAgent { get => navMeshAgent; }
 
     private void Awake()
@@ -37,6 +38,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
         BubbleFrame.SetActive(false);
         waitingFood = new List<FoodSO>();
         bubbleEmotionUI.OnEmotionEnd += OnEmotionEnd;
+        bubbleEmotionUI.OnEmotionChanged += OnEmotionChanged;
     }
 
     public void PlayAnimation(BotAnimation.State animationState)
@@ -96,9 +98,35 @@ public class BotCustomerController : MonoBehaviour,IInteractable
         TargetTable.ClearKitchenObject(TargetSeatIndex);
         StopBubble();
     }
-    public void OrderFood()
+    private void OnEmotionChanged(EmotionType type)
     {
-        waitingFood.Add(KitchenGameManager.Instance.GetUnlockedFood());
+        switch (type)
+        {
+            case EmotionType.Happy:
+                break;
+            case EmotionType.Sad:
+                tipPercentage -= tipPercentage * 0.2f;
+                break;
+            case EmotionType.Angry:
+                if (stateMachine.CurrentState is WaitingForFoodState)
+                    tipPercentage = 0f;
+                else
+                    tipPercentage -= tipPercentage * 0.5f;
+                break;
+        }
+    }
+    public bool OrderFood()
+    {
+        var food = KitchenGameManager.Instance.GetUnlockedFood();
+        if(food == null)
+        {
+            stateMachine.SetState(new LeavingState(stateMachine));
+            TargetTable.ClearKitchenObject(TargetSeatIndex);
+            StopBubble();
+            return false;
+        }
+
+        waitingFood.Add(food);
 
         BubbleFrame.SetActive(true);
         orderBubble.SetActive(false);
@@ -106,7 +134,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
 
         bubbleFoodUI.SetOrder(waitingFood);
         bubbleEmotionUI.StartEmotion();
-
+        return true;
     }
     public void ShowOrder()
     {
@@ -137,7 +165,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     public void InitBot()
     {
         stateMachine.SetState(new WaitForTableState(stateMachine));
-
+        tipPercentage = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.PlayerStats.statsData.TipIncrease;
     }
 
     public void StopBubble()
@@ -184,6 +212,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
             cash += (int)food.price;
             exp += food.exp;
         }
+        cash += (int)(cash * tipPercentage);
         TargetTable.SetEatenViual(TargetSeatIndex,cash,exp);
     }
 }
