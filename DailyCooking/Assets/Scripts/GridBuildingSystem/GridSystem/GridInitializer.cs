@@ -69,24 +69,24 @@ public class GridInitializer : IGridInitializer
 
     public void InitPillar()
     {
-        if(gridManager.GetWidth() == 0 || gridManager.GetHeight() == 0)
+        if(gridManager.GetWidthMax() == 0 || gridManager.GetHeightMax() == 0)
             return;
         GameObject botLeftPillar = GameObject.Instantiate(pillarPrefab, gridManager.GetWorldPosition(0, 0), Quaternion.identity);
         botLeftPillar.transform.SetParent(roadContainer);
         botLeftPillar.transform.rotation = Quaternion.Euler(0, 0, 0);
         gridWallList.Add(botLeftPillar.GetComponent<GridWall>());
 
-        GameObject botRightPillar = GameObject.Instantiate(pillarPrefab, gridManager.GetWorldPosition(0,gridManager.GetHeight() ), Quaternion.identity);
+        GameObject botRightPillar = GameObject.Instantiate(pillarPrefab, gridManager.GetWorldPosition(0,gridManager.GetHeightMax() ), Quaternion.identity);
         botRightPillar.transform.SetParent(roadContainer);  
         botRightPillar.transform.rotation = Quaternion.Euler(0, 90, 0);
         gridWallList.Add(botRightPillar.GetComponent<GridWall>());
 
-        GameObject topLeftPillar = GameObject.Instantiate(pillarPrefab, gridManager.GetWorldPosition(gridManager.GetWidth(), 0), Quaternion.identity);
+        GameObject topLeftPillar = GameObject.Instantiate(pillarPrefab, gridManager.GetWorldPosition(gridManager.GetWidthMax(), 0), Quaternion.identity);
         topLeftPillar.transform.SetParent(roadContainer);
         topLeftPillar.transform.rotation = Quaternion.Euler(0, 270, 0);
         gridWallList.Add(topLeftPillar.GetComponent<GridWall>());
 
-        GameObject topRightPillar = GameObject.Instantiate(pillarPrefab, gridManager.GetWorldPosition(gridManager.GetWidth(),gridManager.GetHeight()), Quaternion.identity);
+        GameObject topRightPillar = GameObject.Instantiate(pillarPrefab, gridManager.GetWorldPosition(gridManager.GetWidthMax(),gridManager.GetHeightMax()), Quaternion.identity);
         topRightPillar.transform.SetParent(roadContainer);
         topRightPillar.transform.rotation = Quaternion.Euler(0, 180, 0);
         gridWallList.Add(topRightPillar.GetComponent<GridWall>());
@@ -95,9 +95,9 @@ public class GridInitializer : IGridInitializer
 
     public void InitWallAndFloor()
     {
-        for (int x = 0; x < gridManager.GetWidth(); x++)
+        for (int x = 0; x < gridManager.GetWidthMax(); x++)
         {
-            for (int z = 0; z < gridManager.GetHeight(); z++)
+            for (int z = 0; z < gridManager.GetHeightMax(); z++)
             {
                 GameObject floor = GameObject.Instantiate(floorPrefab, gridManager.GetWorldPosition(x, z), Quaternion.identity);
                 floor.transform.SetParent(floorContainer);
@@ -105,9 +105,9 @@ public class GridInitializer : IGridInitializer
                 
                 if(x == doorPosition.x && z == doorPosition.y)
                     PlaceDoor(x, z);
-                else if (x == 0 || z == 0 || x == gridManager.GetWidth() - 1 || z == gridManager.GetHeight() - 1)
+                else if (x == 0 || z == 0 || x == gridManager.GetWidthMax() - 1 || z == gridManager.GetHeightMax() - 1)
                 {
-                    PlaceWall(x, z, gridManager.GetWidth(), gridManager.GetHeight());
+                    PlaceWall(x, z, gridManager.GetWidthMax(), gridManager.GetHeightMax());
                 }
             }
         }
@@ -124,7 +124,7 @@ public class GridInitializer : IGridInitializer
             door.transform.localPosition += new Vector3(-0.25f, 0, 0);
             door.transform.rotation = Quaternion.Euler(0, 270, 0);
         }
-        else if (x == gridManager.GetWidth() - 1) // Right border (facing left)
+        else if (x == gridManager.GetWidthMax() - 1) // Right border (facing left)
         {
             door.transform.localPosition -= new Vector3(-0.25f, 0, 0);
             door.transform.rotation = Quaternion.Euler(0, 90, 0);
@@ -134,7 +134,7 @@ public class GridInitializer : IGridInitializer
             door.transform.localPosition -= new Vector3(0, 0, 0.25f);
             door.transform.rotation = Quaternion.Euler(0, 180, 0);
         }
-        else if (z == gridManager.GetHeight() - 1) // Top border (facing up)
+        else if (z == gridManager.GetHeightMax() - 1) // Top border (facing up)
         {
             door.transform.localPosition += new Vector3(0, 0, 0.25f);
             door.transform.rotation = Quaternion.Euler(0, 0, 0);

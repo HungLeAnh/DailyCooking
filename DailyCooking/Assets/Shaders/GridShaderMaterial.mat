@@ -63,9 +63,13 @@ Material:
     - _Cull: 2
     - _DstBlend: 10
     - _DstBlendAlpha: 10
-    - _GridHeight: 5.01
+    - _GridHeight: 10
+    - _GridHeightMax: 10.01
+    - _GridHeightMin: 5
     - _GridThickness: 0.1
-    - _GridWidth: 5.01
+    - _GridWidth: 10
+    - _GridWidthMax: 10.01
+    - _GridWidthMin: 10
     - _QueueControl: 0
     - _QueueOffset: 0
     - _SrcBlend: 5

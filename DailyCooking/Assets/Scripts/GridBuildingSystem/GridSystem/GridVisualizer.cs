@@ -21,8 +21,10 @@ public class GridVisualizer : IGridVisualizer
     public void SetActiveGridGuide(bool isActive)
     {
         gridGuideObject.SetActive(isActive);
-        gridGuideMaterial.SetFloat("_GridWidth", gridManager.GetWidth() + GRID_OFFSET);
-        gridGuideMaterial.SetFloat("_GridHeight", gridManager.GetHeight() + GRID_OFFSET);
+        gridGuideMaterial.SetFloat("_GridWidthMax", gridManager.GetWidthMax() + GRID_OFFSET);
+        gridGuideMaterial.SetFloat("_GridHeightMax", gridManager.GetHeightMax() + GRID_OFFSET);
+        gridGuideMaterial.SetFloat("_GridHeightMin", gridManager.GetHeightMin());
+        gridGuideMaterial.SetFloat("_GridWidthMin", gridManager.GetWidthMin());
         gridGuideMaterial.SetVector("_CellSize", new Vector2(gridManager.GetCellSize(), gridManager.GetCellSize()));
     }
 

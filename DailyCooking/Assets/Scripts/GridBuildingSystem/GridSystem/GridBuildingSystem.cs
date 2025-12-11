@@ -149,11 +149,9 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     public void ExpandGrid(float amount)
     {
-        int newSize = GridManager.GetWidth() + (int)amount;
-        gridManager.UnlockGrid(newSize, newSize);
+        gridManager.ExpandGrid();
         gameManager.GameData.UpdateGridData(gridManager.Grid);
         gridInitializer.InitPillar();
-        gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList);
 
     }
     public PlacedObjectTypeSO GetPlacedObjectTypeSOByGuid(string Guid)

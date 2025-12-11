@@ -34,14 +34,21 @@ public class GridManager : IGridManager
         return grid.ValidateGridPosition(gridPosition);
     }
 
-    public int GetWidth()
+    public int GetWidthMax()
     {
-        return grid.GetWidth();
+        return grid.GetWidthMax();
     }
-
-    public int GetHeight()
+    public int GetWidthMin()
     {
-        return grid.GetHeight();
+        return grid.GetWidthMin();
+    }
+    public int GetHeightMax()
+    {
+        return grid.GetHeightMax();
+    }
+    public int GetHeightMin()
+    {
+        return grid.GetHeightMin();
     }
 
     public float GetCellSize()
@@ -53,6 +60,10 @@ public class GridManager : IGridManager
     { 
         grid.UnlockGrid(width, height);
     }
+    public void ExpandGrid() 
+    {
+        grid.Expand();
+    }
 
     public void AddGridObjectData(List<GridObjectData> gridObjectDataList)
     {
@@ -61,9 +72,9 @@ public class GridManager : IGridManager
 
     public Vector3 GetFirstEmptyGridPos()
     {
-        for (int x = 0; x < grid.GetWidth(); x++)
+        for (int x = 0; x < grid.GetWidthMax(); x++)
         {
-            for (int z = 0; z < grid.GetHeight(); z++)
+            for (int z = 0; z < grid.GetHeightMax(); z++)
             {
                 if (grid.GetGridObject(x, z).CanBuild())
                 {
@@ -95,6 +106,6 @@ public class GridManager : IGridManager
 
     public Vector2 GetGridSize()
     {
-        return new Vector2Int(grid.GetWidth(), grid.GetHeight());
+        return new Vector2Int(grid.GetWidthMax(), grid.GetHeightMax());
     }
 }

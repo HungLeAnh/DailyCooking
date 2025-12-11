@@ -13,9 +13,10 @@ public class GridXZ<TGridObject> {
         public int x;
         public int z;
     }
-
-    private int width;
-    private int height;
+    private int widthMin;
+    private int heightMin;
+    private int widthMax;
+    private int heightMax;
     private float cellSize;
     private Vector3 originPosition;
     private TGridObject[,] gridArray;
@@ -23,8 +24,10 @@ public class GridXZ<TGridObject> {
 
     public GridXZ(int width, int height, float cellSize, Vector3 originPosition, Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject)
     {
-        this.width = width;
-        this.height = height;
+        this.widthMin = 0;
+        this.heightMin = 0;
+        this.widthMax = width;
+        this.heightMax = height;
         this.cellSize = cellSize;
         this.originPosition = originPosition;
         this.createGridObject = createGridObject;
@@ -33,13 +36,15 @@ public class GridXZ<TGridObject> {
     }
     public GridXZ(GridData gridData, Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject)
     {
-        this.width = gridData.Width;
-        this.height = gridData.Height;
+        this.widthMin = gridData.WidthMin;
+        this.heightMin = gridData.HeightMin;
+        this.widthMax = gridData.WidthMax;
+        this.heightMax = gridData.HeightMax;
         this.cellSize = gridData.CellSize;
         this.originPosition = gridData.OriginPosition;
         this.createGridObject = createGridObject;
 
-        gridArray = new TGridObject[width, height];
+        gridArray = new TGridObject[Math.Max(widthMin,widthMax), Math.Max(heightMin,heightMax)];
 
         for (int x = 0; x < gridArray.GetLength(0); x++)
         {
@@ -56,7 +61,7 @@ public class GridXZ<TGridObject> {
         bool showDebug = false;
         if (showDebug)
         {
-            TextMesh[,] debugTextArray = new TextMesh[width, height];
+            TextMesh[,] debugTextArray = new TextMesh[widthMax, heightMax];
 
             for (int x = 0; x < gridArray.GetLength(0); x++)
             {
@@ -67,8 +72,8 @@ public class GridXZ<TGridObject> {
                     Debug.DrawLine(GetWorldPosition(x, z), GetWorldPosition(x + 1, z), Color.white, 100f);
                 }
             }
-            Debug.DrawLine(GetWorldPosition(0, height), GetWorldPosition(width, height), Color.white, 100f);
-            Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
+            Debug.DrawLine(GetWorldPosition(0, heightMax), GetWorldPosition(widthMax, heightMax), Color.white, 100f);
+            Debug.DrawLine(GetWorldPosition(widthMax, 0), GetWorldPosition(widthMax, heightMax), Color.white, 100f);
 
             OnGridObjectChanged += (object sender, OnGridObjectChangedEventArgs eventArgs) =>
             {
@@ -76,14 +81,21 @@ public class GridXZ<TGridObject> {
             };
         }
     }
-    public int GetWidth() 
+    public int GetWidthMin()
     {
-        return width;
+        return widthMin;
     }
-
-    public int GetHeight() 
+    public int GetHeightMin()
     {
-        return height;
+        return heightMin;
+    }
+    public int GetWidthMax()
+    {
+        return widthMax;
+    }
+    public int GetHeightMax()
+    {
+        return heightMax;
     }
 
     public float GetCellSize() 
@@ -109,18 +121,18 @@ public class GridXZ<TGridObject> {
         z = Mathf.FloorToInt((worldPosition - originPosition).z / cellSize);
         if (x < 0)
             x = 0;       
-        if (x >= width)
-            x = width-1;       
+        if (x >= widthMax)
+            x = widthMax-1;       
         if (z < 0)
             z = 0;
-        if (z >= height)
-            z = height-1;
+        if (z >= heightMax)
+            z = heightMax-1;
         
     }
 
     public void SetGridObject(int x, int z, TGridObject value) 
     {
-        if (x >= 0 && z >= 0 && x < width && z < height) {
+        if (x >= 0 && z >= 0 && x < widthMax && z < heightMax) {
             gridArray[x, z] = value;
             TriggerGridObjectChanged(x, z);
         }
@@ -139,7 +151,7 @@ public class GridXZ<TGridObject> {
 
     public TGridObject GetGridObject(int x, int z) 
     {
-        if (x >= 0 && z >= 0 && x < width && z < height) {
+        if (x >= 0 && z >= 0 && x < widthMax && z < heightMax) {
             return gridArray[x, z];
         } else {
             return default(TGridObject);
@@ -147,7 +159,7 @@ public class GridXZ<TGridObject> {
     }    
     public TGridObject GetGridObject(Vector2Int pos) 
     {
-        if (pos.x >= 0 && pos.y >= 0 && pos.x < width && pos.y < height) {
+        if (pos.x >= 0 && pos.y >= 0 && pos.x < widthMax && pos.y < heightMax) {
             return gridArray[pos.x, pos.y];
         } else {
             return default(TGridObject);
@@ -164,15 +176,17 @@ public class GridXZ<TGridObject> {
     public Vector2Int ValidateGridPosition(Vector2Int gridPosition) 
     {
         return new Vector2Int(
-            Mathf.Clamp(gridPosition.x, 0, width - 1),
-            Mathf.Clamp(gridPosition.y, 0, height - 1)
+            Mathf.Clamp(gridPosition.x, 0, widthMax - 1),
+            Mathf.Clamp(gridPosition.y, 0, heightMax - 1)
         );
     }
 
     public void UnlockGrid(int width, int height)
     {
-        this.width = width;
-        this.height = height;
+        this.widthMin = width;
+        this.heightMin = height;
+        this.widthMax = width;
+        this.heightMax = height;
 
         gridArray = Resize2DArray(gridArray, width, height);
         ShowDebug();
@@ -202,5 +216,35 @@ public class GridXZ<TGridObject> {
 
 
         return newArray;
+    }
+
+    public void Expand()
+    {
+        if (heightMax == widthMax)
+        {
+            if (widthMin < widthMax)
+            {
+                widthMin += 5;
+            }
+            else
+            {
+                widthMax += 5;
+                heightMin = 5;
+            }
+        }
+        else if (heightMax < widthMax)
+        {
+            if (heightMin < heightMax)
+            {
+                heightMin += 5;
+            }
+            else
+            {
+                heightMax += 5;
+                widthMin = 5;
+            }
+        }
+        gridArray = Resize2DArray(gridArray, widthMax, heightMax);
+
     }
 }
