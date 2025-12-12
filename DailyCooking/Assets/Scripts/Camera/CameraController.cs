@@ -23,8 +23,6 @@ public class CameraController : MonoBehaviour
         lastTouchPosition = Vector2.zero;
 
         panBounds = new Vector2Int(GameDefine.GridSize, GameDefine.GridSize);
-
-        ClampCameraPosition();
     }
 
     private void Start()
@@ -37,6 +35,9 @@ public class CameraController : MonoBehaviour
         GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
 
         UIHUDManager.Instance.OnRotateClicked += OnRotateClicked;
+        
+        ClampCameraPosition();
+
     }
 
     private void OnRotateClicked()
@@ -65,11 +66,9 @@ public class CameraController : MonoBehaviour
     }
     private void ClampCameraPosition()
     {
-        _cinemachineCamera.transform.position = new Vector3(
-            Mathf.Clamp(_cinemachineCamera.transform.position.x, 3, panBounds.x),
-            _cinemachineCamera.transform.position.y,
-            Mathf.Clamp(_cinemachineCamera.transform.position.z, -3, panBounds.y)
-        );
+        _cinemachineCamera.transform.position = new Vector3(Mathf.Clamp(_cinemachineCamera.transform.position.x, 3, panBounds.x),
+            _cinemachineCamera.transform.position.y, 
+            Mathf.Clamp(_cinemachineCamera.transform.position.z, -3, panBounds.y));
     }
 
     private void OnBuildingEnd(object sender, EventArgs e)
@@ -87,10 +86,11 @@ public class CameraController : MonoBehaviour
     {
         if (GameInput.Instance.IsTouchOverBuildingGhost)
             return;
-        panBounds = GridBuildingSystem.Instance.GridManager.GetGridSize();
+        panBounds = GridBuildingSystem.Instance.GridManager.GetGridSize()* 
+            GridBuildingSystem.Instance.GridManager.GetCellSize();
         if (panBounds == Vector2Int.zero)
         {
-            panBounds = new Vector2Int(GameDefine.GridSize, GameDefine.GridSize);
+            panBounds = new Vector2(GameDefine.GridSize, GameDefine.GridSize);
         }
 
         if (lastTouchPosition == Vector2.zero)
