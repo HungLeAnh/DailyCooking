@@ -21,12 +21,6 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     private bool isBuilding = false;
     private bool isPlacingWall = false;
 
-    public enum WallDirection
-    {
-        Horizontal,
-        Vertical
-    }
-
     public PlacedObjectTypeSO PlacedObjectTypeSO => placedObjectTypeSO;
 
     public bool IsBuilding => isBuilding;
@@ -113,42 +107,34 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             Vector3 cellOrigin = gridManager.GetWorldPosition(x, z);
             Vector3 clickOffset = position - cellOrigin; // Offset from bottom-left corner of the cell
 
-            WallDirection wallDir;
-            Quaternion wallRotation;
-            Vector3 wallWorldPosition;
-
+            Dir wallDir;
+            
             // Determine if horizontal or vertical wall and its position/rotation
             if (Mathf.Abs(clickOffset.x) < cellSize * 0.2f) // Near left edge (vertical)
             {
-                wallDir = WallDirection.Vertical;
-                wallRotation = Quaternion.Euler(0, 90, 0); // Rotate 90 degrees for vertical
-                wallWorldPosition = cellOrigin + new Vector3(0, 0, cellSize / 2f); // Snap to left edge
+                wallDir = Dir.Left; 
             }
             else if (Mathf.Abs(clickOffset.x - cellSize) < cellSize * 0.2f) // Near right edge (vertical)
             {
-                wallDir = WallDirection.Vertical;
-                wallRotation = Quaternion.Euler(0, 90, 0); // Rotate 90 degrees for vertical
-                wallWorldPosition = cellOrigin + new Vector3(cellSize, 0, cellSize / 2f); // Snap to right edge
+                wallDir = Dir.Right;
             }
             else if (Mathf.Abs(clickOffset.z) < cellSize * 0.2f) // Near bottom edge (horizontal)
             {
-                wallDir = WallDirection.Horizontal;
-                wallRotation = Quaternion.identity; // No rotation for horizontal
-                wallWorldPosition = cellOrigin + new Vector3(cellSize / 2f, 0, 0); // Snap to bottom edge
+                wallDir = Dir.Down;
             }
             else if (Mathf.Abs(clickOffset.z - cellSize) < cellSize * 0.2f) // Near top edge (horizontal)
             {
-                wallDir = WallDirection.Horizontal;
-                wallRotation = Quaternion.identity; // No rotation for horizontal
-                wallWorldPosition = cellOrigin + new Vector3(cellSize / 2f, 0, cellSize); // Snap to top edge
+                wallDir = Dir.Up;
             }
             else
             {
                 // If not near an edge, place in the center (default behavior)
-                wallDir = WallDirection.Horizontal; // Default to horizontal if not on edge
-                wallRotation = Quaternion.identity;
-                wallWorldPosition = cellOrigin + new Vector3(cellSize / 2f, 0, cellSize / 2f);
+                wallDir = Dir.Down; // Default to horizontal if not on edge
             }
+
+            Quaternion wallRotation = Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(wallDir), 0);
+            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(wallDir);
+            Vector3 wallWorldPosition = gridManager.GetWorldPosition(x, z) + new Vector3(rotationOffset.x, 0, rotationOffset.y) * cellSize;
             
             Transform wall = UnityEngine.Object.Instantiate(placedObjectTypeSO.prefab, wallWorldPosition, wallRotation).transform;
             return true;
