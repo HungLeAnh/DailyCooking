@@ -39,27 +39,6 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         this.counterModules = counterModules;
         this.uiPopupManager = uiPopupManager;
     }
-    
-    public void ToggleWallPlacementMode()
-    {
-        isPlacingWall = !isPlacingWall;
-        if (isPlacingWall)
-        {
-            GameInput.Instance.OnMouseClickPerformed += GameInput_OnMouseClickPerformed;
-        }
-        else
-        {
-            GameInput.Instance.OnMouseClickPerformed -= GameInput_OnMouseClickPerformed;
-        }
-    }
-    
-    private void GameInput_OnMouseClickPerformed(object sender, Vector2 e)
-    {
-        if (!isPlacingWall) return;
-
-        TryPlaceWall(GameInput.Instance.GetClickPosition());
-    }
-
     public void RotateBuildingObject()
     {
         dir = PlacedObjectTypeSO.GetNextDir(dir);
@@ -69,9 +48,9 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     {
         if (placedObjectTypeSO == null) return false;
 
-        gridManager.GetXZ(new Vector3(Mathf.RoundToInt(interactPos.x),
-                                Mathf.RoundToInt(interactPos.y),
-                                Mathf.RoundToInt(interactPos.z)), out int x, out int z);
+        gridManager.GetXZ(new Vector3(Mathf.FloorToInt(interactPos.x),
+                                Mathf.FloorToInt(interactPos.y),
+                                Mathf.FloorToInt(interactPos.z)), out int x, out int z);
 
         Vector2Int placedObjectOrigin = new Vector2Int(x, z);
         placedObjectOrigin = gridManager.ValidateGridPosition(placedObjectOrigin);
@@ -224,9 +203,9 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         Ray ray = Camera.main.ScreenPointToRay(GameInput.Instance.GetClickPosition());
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f))
         {     
-            gridManager.GetXZ(new Vector3(Mathf.RoundToInt(raycastHit.point.x),
-                                    Mathf.RoundToInt(raycastHit.point.y),
-                                    Mathf.RoundToInt(raycastHit.point.z)), out int x, out int z);
+            gridManager.GetXZ(new Vector3(Mathf.FloorToInt(raycastHit.point.x),
+                                    Mathf.FloorToInt(raycastHit.point.y),
+                                    Mathf.FloorToInt(raycastHit.point.z)), out int x, out int z);
             Vector2Int placedObjectOrigin = new Vector2Int(x, z);
             placedObjectOrigin = gridManager.ValidateGridPosition(placedObjectOrigin);
             if (placedObjectTypeSO != null)

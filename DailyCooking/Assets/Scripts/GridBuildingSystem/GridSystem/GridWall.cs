@@ -1,11 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GridWall : MonoBehaviour
+public class GridWall : MonoBehaviour, IPlaceable, IDestroyable
 {
     [SerializeField] private GameObject[] visualGameObjectArray;
     [SerializeField] private GameObject[] visualGameObjectShadowArray;
+    private bool isPlaced;
+    private Action onDestroySelf;
+    public bool IsPlaced { get => isPlaced; set => isPlaced = value; }
+    public Action OnDestroySelf { get => onDestroySelf; set => onDestroySelf += value; }
 
     private void Start()
     {
@@ -43,5 +48,10 @@ public class GridWall : MonoBehaviour
         {
             visualGameObject.SetActive(true);
         }
+    }
+
+    public void DestroySelf()
+    {
+        OnDestroySelf?.Invoke();
     }
 }

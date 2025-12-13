@@ -82,6 +82,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7592323735390405500}
   - component: {fileID: 7146335699747075372}
+  - component: {fileID: -8182936721872563588}
   m_Layer: 2
   m_Name: Wall
   m_TagString: Untagged
@@ -121,6 +122,18 @@ MonoBehaviour:
   - {fileID: 6929797020915611302}
   visualGameObjectShadowArray:
   - {fileID: 1269711505708457549}
+--- !u!114 &-8182936721872563588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6862675218130391429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29007807c35615c418883b54b6a23802, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::PlacedObjectView
 --- !u!1001 &2116553504451961628
 PrefabInstance:
   m_ObjectHideFlags: 0
