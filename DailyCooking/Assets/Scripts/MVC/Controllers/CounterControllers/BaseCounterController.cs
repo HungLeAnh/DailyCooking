@@ -1,17 +1,21 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInteractable
 {
-    [SerializeField] private BaseCounterView _baseCounterView;
-    private BaseCounterModel _baseCounterModel;
+    [SerializeField] private Transform counterTopPoint;
+    [SerializeField] private GameObject[] visualGameObjectArray;
 
-    public BaseCounterView BaseCounterView { get => _baseCounterView; set => _baseCounterView = value; }
-    public BaseCounterModel BaseCounterModel { get => _baseCounterModel; set => _baseCounterModel = value; }
-
-    
+    private KitchenObject _kitchenObject;
+    public KitchenObject KitchenObject
+    {
+        get => _kitchenObject;
+        private set
+        {
+            _kitchenObject = value;
+        }
+    }
 
     protected virtual void Start()
     {
@@ -27,38 +31,37 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     {
         if (KitchenGameManager.Instance.IsEditing())
         {
-            BaseCounterView.Hide();
+            Hide();
             OnRestartGame(this, PlayerStateMachine.Instance);
         }
     }
     protected virtual void OnRestartGame(object sender, PlayerStateMachine e)
     {
-        if (_baseCounterModel.KitchenObject != null)
-            _baseCounterModel.KitchenObject.DestroySelf();
+        if (KitchenObject != null)
+            KitchenObject.DestroySelf();
 
         ClearKitchenObject();
-
     }
 
     public KitchenObject GetKitchenObject(int index = 0)
     {
-        return BaseCounterModel.KitchenObject;
+        return KitchenObject;
     }
     public void ClearKitchenObject(int index = 0)
     {
-        BaseCounterModel.ClearKitchenObject();
+        KitchenObject = null;
     }
     public bool HasKitchenObject(int index = 0)
     {
-        return BaseCounterModel.KitchenObject != null;
+        return KitchenObject != null;
     }
     public Transform GetKitchenObjectFollowTransform(int index = 0)
     {
-        return _baseCounterView.CounterTopPoint;
+        return counterTopPoint;
     }
     public void SetKitchenObject(KitchenObject kitchenObject, int index = 0)
     {
-        BaseCounterModel.SetKitchenObject(kitchenObject);
+        KitchenObject = kitchenObject;
 
         if (kitchenObject != null && kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
         {
@@ -81,11 +84,27 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     }
     public void OnSelected()
     {
-        BaseCounterView.Show();
+        Show();
     }
 
     public void OnDeselected()
     {
-        BaseCounterView.Hide();
+        Hide();
+    }
+
+    public void Show()
+    {
+        foreach (var visualGameObject in visualGameObjectArray)
+        {
+            visualGameObject.SetActive(true);
+        }
+    }
+
+    public void Hide()
+    {
+        foreach (var visualGameObject in visualGameObjectArray)
+        {
+            visualGameObject.SetActive(false);
+        }
     }
 }

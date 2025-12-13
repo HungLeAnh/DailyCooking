@@ -10,12 +10,6 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
     private PlayerStateMachine _playerStateMachine;
 
-    private void Awake()
-    {
-        BaseCounterModel = new BaseCounterModel();
-
-    }
-
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         Debug.Log("Interact optional Counter");

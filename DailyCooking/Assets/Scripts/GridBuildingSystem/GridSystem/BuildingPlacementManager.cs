@@ -193,7 +193,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             gameManager.GameData.UpdateGridData(gridManager.Grid);
             OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
         }
-        var counterView = targetPlaceObjectView.GetComponent<BaseCounterView>();
+        var counterView = targetPlaceObjectView.GetComponent<BaseCounterController>();
         counterModules.DestroyCounter(counterView);
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,
             new UIInventoryPopup.Param { isPlacingObject = true });

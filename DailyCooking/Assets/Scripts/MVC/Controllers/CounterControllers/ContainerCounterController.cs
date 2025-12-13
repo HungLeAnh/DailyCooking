@@ -6,11 +6,6 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
 {
     [SerializeField] private KitchenObjectSO _kitchenObjectSO;
 
-    private void Awake()
-    {
-        BaseCounterModel = new BaseCounterModel();
-    }
-
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         if (!playerStateMachine.HasKitchenObject())

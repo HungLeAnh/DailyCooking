@@ -21,13 +21,13 @@ public class SoundManager : PersistentSingleton<SoundManager>
     private void TrashCounter_OnAnyObjectTrashed(object sender, System.EventArgs e)
     {
         TrashCounterController trashCounter = sender as TrashCounterController;
-        PlaySound(AudioClipRefsSO.objectDrop, trashCounter.BaseCounterView.transform.position);
+        PlaySound(AudioClipRefsSO.objectDrop, trashCounter.transform.position);
     }
 
     private void BaseCounter_OnAnyObjectPlacedHere(object sender, KitchenObjectSO e)
     {
         BaseCounterController baseCounter = sender as BaseCounterController;
-        PlaySound(AudioClipRefsSO.objectDrop, baseCounter.BaseCounterView.transform.position);
+        PlaySound(AudioClipRefsSO.objectDrop, baseCounter.transform.position);
     }
 
     private void Player_OnPickedSomething(object sender, System.EventArgs e)
@@ -38,7 +38,7 @@ public class SoundManager : PersistentSingleton<SoundManager>
     private void CuttingCounter_OnAnyCut(object sender, System.EventArgs e)
     {
         CuttingCounterController cuttingCounter = sender as CuttingCounterController;
-        PlaySound(AudioClipRefsSO.chop, cuttingCounter.BaseCounterView.transform.position);
+        PlaySound(AudioClipRefsSO.chop, cuttingCounter.transform.position);
     }
 
     private AudioSource GetPooledAudioSource()

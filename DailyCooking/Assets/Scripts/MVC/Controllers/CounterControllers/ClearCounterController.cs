@@ -1,10 +1,5 @@
 ﻿public class ClearCounterController : BaseCounterController
 {
-    private void Awake()
-    {
-        BaseCounterModel = new BaseCounterModel();
-    }
-
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         if (!HasKitchenObject() && playerStateMachine.HasKitchenObject())

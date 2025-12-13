@@ -19,26 +19,25 @@ public class CounterModules : PersistentSingleton<CounterModules>, ICounterModul
     public void Initialize()
     {
         isInited = true;
-        var counterViews = GridBuildingSystem.Instance.Container.GetComponentsInChildren<BaseCounterView>();
-        foreach (var counterView in counterViews)
+        var counterViews = GridBuildingSystem.Instance.Container.GetComponentsInChildren<BaseCounterController>();
+        foreach (var counter in counterViews)
         {
-            var controller = counterView.GetController<BaseCounterController>();
-            if (controller != null)
+            if (counter != null)
             {
-                baseCounterControllers.Add(controller);
+                baseCounterControllers.Add(counter);
             }
         }
     }
-    public void DestroyCounter(BaseCounterView baseCounterView)
+    public void DestroyCounter(BaseCounterController baseCounterController)
     {
-        if (baseCounterView == null) return;
+        if (baseCounterController == null) return;
 
-        var controller = baseCounterControllers.FindLast(x => x.BaseCounterView == baseCounterView);
+        var controller = baseCounterControllers.FindLast(x => x == baseCounterController);
 
         if (controller != null)
         {
             RemoveCounterController(controller);
-            GridBuildingSystem.Instance.DestroyPlaceObject(baseCounterView.GetComponent<PlacedObjectView>());
+            GridBuildingSystem.Instance.DestroyPlaceObject(baseCounterController.GetComponent<PlacedObjectView>());
         }
     }
     public void AddCounterController(BaseCounterController controller)

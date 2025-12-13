@@ -5,11 +5,6 @@ public class StoveCounterController : BaseCounterController
 {
     [SerializeField] private CookingTool _cookingTool;
 
-    private void Awake()
-    {
-        BaseCounterModel = new BaseCounterModel();
-    }
-
     protected override void OnRestartGame(object sender, PlayerStateMachine e)
     {
         base.OnRestartGame(sender, e);

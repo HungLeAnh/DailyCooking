@@ -3,6 +3,6 @@ using UnityEngine;
 public interface ICounterModules
 {
     void Initialize();
-    void DestroyCounter(BaseCounterView baseCounterView);
+    void DestroyCounter(BaseCounterController controller);
     void AddCounterController(BaseCounterController controller);
 }
