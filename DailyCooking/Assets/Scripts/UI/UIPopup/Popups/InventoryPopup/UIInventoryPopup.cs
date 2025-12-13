@@ -9,7 +9,8 @@ using UnityEngine.UI;
 public enum InventoryTabType
 {
     Counter,
-    Table
+    Table,
+    Wall
 }
 
 public class UIInventoryPopup : UIPopup

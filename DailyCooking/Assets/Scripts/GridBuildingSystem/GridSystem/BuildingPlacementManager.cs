@@ -19,6 +19,13 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     private PlacedObjectTypeSO placedObjectTypeSO;
     private Dir dir = Dir.Down;
     private bool isBuilding = false;
+    private bool isPlacingWall = false;
+
+    public enum WallDirection
+    {
+        Horizontal,
+        Vertical
+    }
 
     public PlacedObjectTypeSO PlacedObjectTypeSO => placedObjectTypeSO;
 
@@ -31,6 +38,26 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         this.gameManager = gameManager;
         this.counterModules = counterModules;
         this.uiPopupManager = uiPopupManager;
+    }
+    
+    public void ToggleWallPlacementMode()
+    {
+        isPlacingWall = !isPlacingWall;
+        if (isPlacingWall)
+        {
+            GameInput.Instance.OnMouseClickPerformed += GameInput_OnMouseClickPerformed;
+        }
+        else
+        {
+            GameInput.Instance.OnMouseClickPerformed -= GameInput_OnMouseClickPerformed;
+        }
+    }
+    
+    private void GameInput_OnMouseClickPerformed(object sender, Vector2 e)
+    {
+        if (!isPlacingWall) return;
+
+        TryPlaceWall(GameInput.Instance.GetClickPosition());
     }
 
     public void RotateBuildingObject()
@@ -93,6 +120,61 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         {
                return false;
         }
+    }
+    
+    public bool TryPlaceWall(Vector3 position)
+    {
+        if (placedObjectTypeSO == null || placedObjectTypeSO.itemType.TabType != InventoryTabType.Wall) return false;
+
+        gridManager.GetXZ(position, out int x, out int z);
+
+        if (gridManager.Grid.GetGridObject(x, z) != null)
+        {
+            float cellSize = gridManager.GetCellSize();
+            Vector3 cellOrigin = gridManager.GetWorldPosition(x, z);
+            Vector3 clickOffset = position - cellOrigin; // Offset from bottom-left corner of the cell
+
+            WallDirection wallDir;
+            Quaternion wallRotation;
+            Vector3 wallWorldPosition;
+
+            // Determine if horizontal or vertical wall and its position/rotation
+            if (Mathf.Abs(clickOffset.x) < cellSize * 0.2f) // Near left edge (vertical)
+            {
+                wallDir = WallDirection.Vertical;
+                wallRotation = Quaternion.Euler(0, 90, 0); // Rotate 90 degrees for vertical
+                wallWorldPosition = cellOrigin + new Vector3(0, 0, cellSize / 2f); // Snap to left edge
+            }
+            else if (Mathf.Abs(clickOffset.x - cellSize) < cellSize * 0.2f) // Near right edge (vertical)
+            {
+                wallDir = WallDirection.Vertical;
+                wallRotation = Quaternion.Euler(0, 90, 0); // Rotate 90 degrees for vertical
+                wallWorldPosition = cellOrigin + new Vector3(cellSize, 0, cellSize / 2f); // Snap to right edge
+            }
+            else if (Mathf.Abs(clickOffset.z) < cellSize * 0.2f) // Near bottom edge (horizontal)
+            {
+                wallDir = WallDirection.Horizontal;
+                wallRotation = Quaternion.identity; // No rotation for horizontal
+                wallWorldPosition = cellOrigin + new Vector3(cellSize / 2f, 0, 0); // Snap to bottom edge
+            }
+            else if (Mathf.Abs(clickOffset.z - cellSize) < cellSize * 0.2f) // Near top edge (horizontal)
+            {
+                wallDir = WallDirection.Horizontal;
+                wallRotation = Quaternion.identity; // No rotation for horizontal
+                wallWorldPosition = cellOrigin + new Vector3(cellSize / 2f, 0, cellSize); // Snap to top edge
+            }
+            else
+            {
+                // If not near an edge, place in the center (default behavior)
+                wallDir = WallDirection.Horizontal; // Default to horizontal if not on edge
+                wallRotation = Quaternion.identity;
+                wallWorldPosition = cellOrigin + new Vector3(cellSize / 2f, 0, cellSize / 2f);
+            }
+            
+            Transform wall = UnityEngine.Object.Instantiate(placedObjectTypeSO.prefab, wallWorldPosition, wallRotation).transform;
+            return true;
+        }
+        return false;
     }
 
     public void DestroyPlaceObject(PlacedObjectView placedObjectView)
