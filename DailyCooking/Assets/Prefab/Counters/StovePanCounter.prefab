@@ -277,9 +277,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5120340976702731949}
-    - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6967601015886198059}
   m_SourcePrefab: {fileID: 100100000, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
 --- !u!4 &886707663028080637 stripped
 Transform:
@@ -313,24 +310,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dab21b58a88eee34aadf8efb8bb1df78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseCounterView: {fileID: 6967601015886198059}
-  _cookingTool: {fileID: 447210626167731086}
---- !u!114 &6967601015886198059
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5777116932338227740}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d00ab1d0c1a2e3440916026f3dc40a0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 886707663028080637}
   visualGameObjectArray:
   - {fileID: 1704534021329119347}
   - {fileID: 822681558580453437}
+  _cookingTool: {fileID: 447210626167731086}
 --- !u!1001 &7412777782712417633
 PrefabInstance:
   m_ObjectHideFlags: 0

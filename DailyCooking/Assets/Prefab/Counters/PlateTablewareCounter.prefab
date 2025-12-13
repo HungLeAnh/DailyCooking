@@ -303,10 +303,6 @@ PrefabInstance:
       value: PlateTablewareCounter
       objectReference: {fileID: 0}
     - target: {fileID: 3798217560897031268, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
-      propertyPath: baseCounter
-      value: 
-      objectReference: {fileID: 4613707733294792051}
-    - target: {fileID: 3798217560897031268, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
       propertyPath: visualGameObjectArray.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -396,9 +392,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4613707733294792051}
-    - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 6050601189291074793}
   m_SourcePrefab: {fileID: 100100000, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
 --- !u!4 &3444354065172779232 stripped
@@ -421,26 +414,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1422007882026835853, guid: 3c1941fef697f874fb7b16cdbebdb149, type: 3}
   m_PrefabInstance: {fileID: 6923571607344896652}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4613707733294792051
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8335752877465535745}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0224ca79f875653499e69b4985467962, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  counterTopPoint: {fileID: 3444354065172779232}
-  visualGameObjectArray:
-  - {fileID: 5814564096301845110}
-  - {fileID: 5885395211066086123}
-  _tablewareVisualPrefab: {fileID: -8679921383154817045, guid: 301d852ca02cb68468eaaabd929983b2, type: 3}
-  tablewareOffsetX: 0.1
-  tablewareOffsetY: 1
-  tablewareRotation: {x: 0, y: 0, z: 90}
 --- !u!114 &6050601189291074793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -453,7 +426,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ef6d8bf60f15aa4bb11b3d97bd7fd53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseCounterView: {fileID: 4613707733294792051}
+  counterTopPoint: {fileID: 3444354065172779232}
+  visualGameObjectArray:
+  - {fileID: 5814564096301845110}
+  - {fileID: 5885395211066086123}
   _tablewareKitchenObjectSO: {fileID: 11400000, guid: e4578b73d42e3f540bcf852eb01b658a, type: 2}
   _spawnTimerMax: 4
   _tablewareSpawnAmountMax: 4
+  _tablewareVisualPrefab: {fileID: 6154266614422445402, guid: 09bd130b37817084ab004c0136ea7897, type: 3}
+  tablewareOffsetX: 0.1
+  tablewareOffsetY: 0.5
+  tablewareRotation: {x: 0, y: 0, z: 90}
