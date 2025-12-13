@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6795039293475916442}
   - component: {fileID: 7016514192380450434}
   - component: {fileID: 1363876304547672533}
-  m_Layer: 2
+  m_Layer: 6
   m_Name: Anchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -83,7 +83,7 @@ GameObject:
   - component: {fileID: 7592323735390405500}
   - component: {fileID: 7146335699747075372}
   - component: {fileID: -8182936721872563588}
-  m_Layer: 2
+  m_Layer: 6
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -192,7 +192,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d8a4cda90241b1d46a17415b57b3e943, type: 3}
       propertyPath: m_Layer
-      value: 2
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -263,7 +263,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d8a4cda90241b1d46a17415b57b3e943, type: 3}
       propertyPath: m_Layer
-      value: 2
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

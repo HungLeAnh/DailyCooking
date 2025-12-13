@@ -117,8 +117,8 @@ public class GridXZ<TGridObject> {
 
     public void GetXZ(Vector3 worldPosition, out int x, out int z) 
     {
-        x = Mathf.FloorToInt((worldPosition - originPosition).x / cellSize);
-        z = Mathf.FloorToInt((worldPosition - originPosition).z / cellSize);
+        x = Mathf.RoundToInt((worldPosition - originPosition).x / cellSize);
+        z = Mathf.RoundToInt((worldPosition - originPosition).z / cellSize);
         if (x < 0)
             x = 0;       
         if (x >= widthMax)
