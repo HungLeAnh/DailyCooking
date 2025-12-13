@@ -24,6 +24,7 @@ public class CounterModules : PersistentSingleton<CounterModules>, ICounterModul
         {
             if (counter != null)
             {
+                counter.OnDestroySelf += ()=> DestroyCounter(counter);
                 baseCounterControllers.Add(counter);
             }
         }
@@ -37,7 +38,6 @@ public class CounterModules : PersistentSingleton<CounterModules>, ICounterModul
         if (controller != null)
         {
             RemoveCounterController(controller);
-            GridBuildingSystem.Instance.DestroyPlaceObject(baseCounterController.GetComponent<PlacedObjectView>());
         }
     }
     public void AddCounterController(BaseCounterController controller)

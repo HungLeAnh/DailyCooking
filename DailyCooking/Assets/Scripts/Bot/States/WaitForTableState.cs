@@ -13,7 +13,7 @@ public class WaitForTableState : BotState
     public override void Update()
     {
         Table availableTable = TableManager.Instance.GetAvailableTable();
-        if (availableTable != null)
+        if (availableTable != null && availableTable.IsPlaced)
         {
             int seatIndex = availableTable.GetAvailableSeat();
             if (seatIndex != -1)

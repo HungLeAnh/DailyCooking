@@ -113,6 +113,8 @@ public class BuildingGhost : MonoBehaviour
         if (placedObjectTypeSO != null)
         {
             PlacedObjectView placedObjectView = PlacedObjectFactory.Create(Vector3.zero, Vector2Int.zero, Dir.Down, placedObjectTypeSO);
+            placedObjectView.GetComponent<IPlaceable>().IsPlaced = false;
+
             visual = placedObjectView.transform;
             visual.parent = visualContainer;
             visual.localPosition = Vector3.zero;

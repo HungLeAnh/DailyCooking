@@ -31,5 +31,6 @@ public static class GridObjectSpawner
             var gridObject = grid.GetGridObject(gridPosition.x, gridPosition.y);
             gridObject?.SetPlacedObject(placedObject);
         }
+        placedObject.GetComponent<IPlaceable>().IsPlaced = true;
     }
 }

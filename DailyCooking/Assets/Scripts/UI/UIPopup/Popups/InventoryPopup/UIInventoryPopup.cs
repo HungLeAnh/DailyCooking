@@ -202,8 +202,8 @@ public class UIInventoryPopup : UIPopup
             }
 
         }
-
-        FillInventory(_selectedTab.TabType);
+        if(_selectedTab != null)
+            FillInventory(_selectedTab.TabType);
     }
     private void GridBuildingSystem_OnReturnPlaceObjectToInventory(object sender, PlacedObjectTypeSO e)
     {

@@ -73,8 +73,11 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             Vector3 placedObjectWorldPosition = gridManager.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
             PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
+            //register counter controller
             counterModules.AddCounterController(placedObject.GetComponent<BaseCounterController>());
-            
+
+            placedObject.GetComponent<IPlaceable>().IsPlaced = true;
+
             foreach (var gridPosition in gridPositionList)
             {
                 gridManager.Grid.GetGridObject(gridPosition.x, gridPosition.y).SetPlacedObject(placedObject);
@@ -193,8 +196,10 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             gameManager.GameData.UpdateGridData(gridManager.Grid);
             OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
         }
-        var counterView = targetPlaceObjectView.GetComponent<BaseCounterController>();
-        counterModules.DestroyCounter(counterView);
+        var destroyableObject = targetPlaceObjectView.GetComponent<IDestroyable>();
+        destroyableObject.DestroySelf();
+        GridBuildingSystem.Instance.DestroyPlaceObject(targetPlaceObjectView);
+
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,
             new UIInventoryPopup.Param { isPlacingObject = true });
     }

@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInteractable
+public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInteractable, IDestroyable,
+    IPlaceable
 {
+
     [SerializeField] private Transform counterTopPoint;
     [SerializeField] private GameObject[] visualGameObjectArray;
 
+    private Action onDestroySelf;
     private KitchenObject _kitchenObject;
+    private bool isPlaced = false;
     public KitchenObject KitchenObject
     {
         get => _kitchenObject;
@@ -16,6 +20,9 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
             _kitchenObject = value;
         }
     }
+
+    public Action OnDestroySelf { get =>onDestroySelf; set => onDestroySelf += value; }
+    public bool IsPlaced { get => isPlaced; set => isPlaced = value; }
 
     protected virtual void Start()
     {
@@ -106,5 +113,10 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
         {
             visualGameObject.SetActive(false);
         }
+    }
+
+    public void DestroySelf()
+    {
+        OnDestroySelf?.Invoke();
     }
 }
