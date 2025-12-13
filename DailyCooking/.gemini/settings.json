@@ -1,5 +1,9 @@
 {
   "general": {
     "previewFeatures": true
+  },
+  "git": {
+    "autoCommit": false,
+    "checkpointing": false // Often, the auto-commit is tied to a 'checkpointing' feature.
   }
 }
