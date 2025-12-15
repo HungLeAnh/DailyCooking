@@ -82,11 +82,11 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         }
         if (GameManager.Instance.GameData.GridData.GridArrayData == null)
         {
-            gridManager = new GridManager(0, 0, cellSize, Vector3.zero, (GridXZ<GridObject> grid, int x, int z) => new GridObject(grid, x, z));
+            gridManager = new GridManager(0, 0, cellSize, Vector3.zero, (GridXZ<GridObject> grid, int x, int z) => new List<GridObject> {new GridObject(grid, x, z) });
         }
         else
         {
-            gridManager = new GridManager(GameManager.Instance.GameData.GridData, (GridXZ<GridObject> grid, int x, int z) => new GridObject(grid, x, z));
+            gridManager = new GridManager(GameManager.Instance.GameData.GridData, (GridXZ<GridObject> grid, int x, int z) => new List<GridObject> { new GridObject(grid, x, z) });
 
         }
         gridInitializer = new GridInitializer(gridManager, this.gameManager, 
@@ -130,10 +130,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
                 BuildingPlacementManager.HandleExistingObjectInteraction(targetPlaceObjectView, raycastHit.transform.position);
             }
         }
-    }
-    public void DestroyPlaceObject(PlacedObjectView placedObjectView)
-    {
-        buildingPlacementManager.DestroyPlaceObject(placedObjectView);
     }
     public void UnlockGrid()
     {

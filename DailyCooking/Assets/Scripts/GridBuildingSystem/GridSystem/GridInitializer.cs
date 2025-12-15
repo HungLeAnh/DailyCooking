@@ -201,13 +201,9 @@ public class GridInitializer : IGridInitializer
 
     public void InitDefaultCounters()
     {
-        List<GridObjectData> gridObjectDataList = JsonConvert.DeserializeObject<List<GridObjectData>>(GameDefine.GridArrayDataInit,gameManager.DataHandler.Settings);
-        foreach (GridObjectData gridObject in gridObjectDataList)
-        {
-            if (gameManager.GameData.GridData.GridArrayData.Contains(gridObject))
-                continue;
-            gameManager.GameData.GridData.GridArrayData.Add(gridObject);
-        }
+        List<GridObjectData>[,] gridObjectDataList = 
+            JsonConvert.DeserializeObject<List<GridObjectData>[,]>
+            (GameDefine.GridArrayDataInit,gameManager.DataHandler.Settings);
         gridManager.AddGridObjectData(gridObjectDataList);
     }
 }

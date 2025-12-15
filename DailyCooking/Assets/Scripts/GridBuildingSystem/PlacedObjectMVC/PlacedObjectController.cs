@@ -18,15 +18,8 @@ public class PlacedObjectController
     {
         return model.GetGridPositionList();
     }
-    public void HandleTouch()
-    {
-        // Handle the click event
-        Debug.Log("PlacedObjectController.HandleClick() called!");
 
-        // Perform actions such as selecting the object, showing a menu, etc.
-    }
-
-    internal PlacedObjectModel GetModel()
+    public PlacedObjectModel GetModel()
     {
         return model;
     }

@@ -17,7 +17,7 @@ public interface IBuildingPlacementManager
     void DestroyPlaceObject(PlacedObjectView placedObjectView);
     void SetPlacedObjectTypeSO(PlacedObjectTypeSO placedObjectTypeSO, Vector3 objectPosition);
     Quaternion GetPlacedObjectRotation();
-    Vector3 GetPlacedObjectRotationOffset();
+    Vector3 GetPlacedObjectRotationOffset(InventoryTabType type);
     Vector3 GetMouseWorldSnappedPosition();
     void FireOnBuildingStartEvent();
     void FireOnBuildingEndEvent();

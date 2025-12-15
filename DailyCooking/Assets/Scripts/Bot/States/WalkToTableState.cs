@@ -6,14 +6,14 @@ public class WalkToTableState : BotState
 
     public override void Enter()
     {
-        Debug.Log("Bot is walking to the table.");
+        //Debug.Log("Bot is walking to the table.");
         stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walk);
 
         Table table = stateMachine.GetBotController().TargetTable;
         int seatIndex = stateMachine.GetBotController().TargetSeatIndex;
         Transform seatTransform = table.GetSeatTransform(seatIndex);
 
-        Debug.Log("Bot is walking to seat " + seatIndex + " at table " + table.name);
+        //Debug.Log("Bot is walking to seat " + seatIndex + " at table " + table.name);
         stateMachine.GetBotController().NavMeshAgent.SetDestination(seatTransform.position);
     }
 

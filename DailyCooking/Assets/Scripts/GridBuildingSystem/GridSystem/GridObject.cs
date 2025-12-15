@@ -19,10 +19,12 @@ public class GridObject
         this.x = x;
         this.z = z;
     }
-    public void SetPlacedObject(PlacedObjectView placedObject)
+    public GridObject(GridXZ<GridObject> grid, PlacedObjectView placedObject, int x, int z)
     {
+        this.grid = grid;
+        this.x = x;
+        this.z = z;
         this.placedObject = placedObject;
-        grid.TriggerGridObjectChanged(x,z);
     }
     public PlacedObjectView GetPlacedObject()
     {
@@ -31,12 +33,36 @@ public class GridObject
 
     public bool CanBuild()
     {
-        return placedObject == null;
+        if(placedObject != null)
+        {
+            if (placedObject.GetModel().InventoryTabType == InventoryTabType.Counter||
+                placedObject.GetModel().InventoryTabType == InventoryTabType.Table)
+                return false;
+            if (placedObject.GetModel().InventoryTabType == InventoryTabType.Wall)
+                return true;
+        }
+        return true;
     }
-    public void ClearPlacedObject()
+    public bool CanBuild(InventoryTabType type,Dir dir)
     {
-        placedObject = null;
-        grid.TriggerGridObjectChanged(x, z);
+        if (placedObject != null)
+        {
+            if(type == InventoryTabType.Wall &&
+                placedObject.GetModel().InventoryTabType == InventoryTabType.Wall)
+            {
+                if(dir != placedObject.GetModel().Dir)
+                    return true;
+                else
+                    return false;
+            }
+            else if(type == InventoryTabType.Wall && 
+                placedObject.GetModel().InventoryTabType != InventoryTabType.Wall)
+                return true;
+            else if(placedObject.GetModel().InventoryTabType == InventoryTabType.Counter || 
+                    placedObject.GetModel().InventoryTabType == InventoryTabType.Table)
+                return false;
+        }
+        return true;
     }
     public override string ToString()
     {

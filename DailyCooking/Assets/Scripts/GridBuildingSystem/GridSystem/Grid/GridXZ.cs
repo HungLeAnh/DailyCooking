@@ -19,10 +19,11 @@ public class GridXZ<TGridObject> {
     private int heightMax;
     private float cellSize;
     private Vector3 originPosition;
-    private TGridObject[,] gridArray;
-    private Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject;
+    private List<TGridObject>[,] gridArray;
+    private Func<GridXZ<TGridObject>, int, int, List<TGridObject>> createGridObject;
 
-    public GridXZ(int width, int height, float cellSize, Vector3 originPosition, Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject)
+    public GridXZ(int width, int height, float cellSize, Vector3 originPosition, 
+        Func<GridXZ<TGridObject>, int, int, List<TGridObject>> createGridObject)
     {
         this.widthMin = 0;
         this.heightMin = 0;
@@ -31,10 +32,10 @@ public class GridXZ<TGridObject> {
         this.cellSize = cellSize;
         this.originPosition = originPosition;
         this.createGridObject = createGridObject;
-        gridArray = new TGridObject[width, height];
+        gridArray = new List<TGridObject>[width, height];
         ShowDebug();
     }
-    public GridXZ(GridData gridData, Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject)
+    public GridXZ(GridData gridData, Func<GridXZ<TGridObject>, int, int, List<TGridObject>> createGridObject)
     {
         this.widthMin = gridData.WidthMin;
         this.heightMin = gridData.HeightMin;
@@ -44,7 +45,7 @@ public class GridXZ<TGridObject> {
         this.originPosition = gridData.OriginPosition;
         this.createGridObject = createGridObject;
 
-        gridArray = new TGridObject[Math.Max(widthMin,widthMax), Math.Max(heightMin,heightMax)];
+        gridArray = new List<TGridObject>[Math.Max(widthMin,widthMax), Math.Max(heightMin,heightMax)];
 
         for (int x = 0; x < gridArray.GetLength(0); x++)
         {
@@ -130,43 +131,41 @@ public class GridXZ<TGridObject> {
         
     }
 
-    public void SetGridObject(int x, int z, TGridObject value) 
-    {
-        if (x >= 0 && z >= 0 && x < widthMax && z < heightMax) {
-            gridArray[x, z] = value;
-            TriggerGridObjectChanged(x, z);
-        }
-    }
-
     public void TriggerGridObjectChanged(int x, int z) 
     {
         OnGridObjectChanged?.Invoke(this, new OnGridObjectChangedEventArgs { x = x, z = z });
     }
-
-    public void SetGridObject(Vector3 worldPosition, TGridObject value) 
+    public void AddGridObjectData(int x, int z, TGridObject gridObject)
     {
-        GetXZ(worldPosition, out int x, out int z);
-        SetGridObject(x, z, value);
+        if (x >= 0 && z >= 0 && x < widthMax && z < heightMax) 
+        {
+            if(gridArray[x, z] == null)
+            {
+                gridArray[x, z] = new List<TGridObject>();
+            }
+            gridArray[x, z].Add(gridObject);
+            TriggerGridObjectChanged(x, z);
+        }
     }
 
-    public TGridObject GetGridObject(int x, int z) 
+    public List<TGridObject> GetGridObject(int x, int z) 
     {
         if (x >= 0 && z >= 0 && x < widthMax && z < heightMax) {
             return gridArray[x, z];
         } else {
-            return default(TGridObject);
+            return default(List<TGridObject>);
         }
     }    
-    public TGridObject GetGridObject(Vector2Int pos) 
+    public List<TGridObject> GetGridObject(Vector2Int pos) 
     {
         if (pos.x >= 0 && pos.y >= 0 && pos.x < widthMax && pos.y < heightMax) {
             return gridArray[pos.x, pos.y];
         } else {
-            return default(TGridObject);
+            return default(List<TGridObject>);
         }
     }
 
-    public TGridObject GetGridObject(Vector3 worldPosition) 
+    public List<TGridObject> GetGridObject(Vector3 worldPosition) 
     {
         int x, z;
         GetXZ(worldPosition, out x, out z);
@@ -191,9 +190,9 @@ public class GridXZ<TGridObject> {
         gridArray = Resize2DArray(gridArray, width, height);
         ShowDebug();
     }
-    public  TGridObject[,] Resize2DArray(TGridObject[,] original, int newRows, int newCols)
+    public  List<TGridObject>[,] Resize2DArray(List<TGridObject>[,] original, int newRows, int newCols)
     {
-        var newArray = new TGridObject[newRows, newCols];
+        var newArray = new List<TGridObject>[newRows, newCols];
         int rowsToCopy = Math.Min(original.GetLength(0), newRows);
         int colsToCopy = Math.Min(original.GetLength(1), newCols);
 

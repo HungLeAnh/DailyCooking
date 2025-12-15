@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1101555713681805633}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 2, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -117,7 +117,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 2, y: 4, z: 0.5}
-  m_Center: {x: -1, y: 2, z: 0}
+  m_Center: {x: 1, y: 2, z: 0}
 --- !u!208 &9160137199725192606
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -132,7 +132,7 @@ NavMeshObstacle:
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
-  m_Center: {x: -1, y: 2, z: 0}
+  m_Center: {x: 1, y: 2, z: 0}
   m_TimeToStationary: 0.5
 --- !u!1001 &2116553504451961628
 PrefabInstance:

@@ -8,7 +8,7 @@ public class EatingState : BotState
 
     public override void Enter()
     {
-        Debug.Log("Bot is eating.");
+        //Debug.Log("Bot is eating.");
         stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Eat);
         eatingTimer = 5f; // Eat for 5 seconds
     }

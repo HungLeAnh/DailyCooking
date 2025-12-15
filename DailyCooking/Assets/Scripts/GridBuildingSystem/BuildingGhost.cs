@@ -196,7 +196,8 @@ public class BuildingGhost : MonoBehaviour
 
     private void OffsetRotation()
     {
-        visual.localPosition = GridBuildingSystem.Instance.BuildingPlacementManager.GetPlacedObjectRotationOffset();
+        visual.localPosition = GridBuildingSystem.Instance.BuildingPlacementManager
+            .GetPlacedObjectRotationOffset(placedObjectTypeSO.itemType.TabType);
     }
 }
 

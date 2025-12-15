@@ -6,7 +6,7 @@ public class LeavingState : BotState
 
     public override void Enter()
     {
-        Debug.Log("Bot is leaving.");
+        //Debug.Log("Bot is leaving.");
         stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walk);
 
         

@@ -11,6 +11,7 @@ public class PlacedObjectModel
     public Vector2Int Origin => origin; 
     public Dir Dir => dir;
     public PlacedObjectTypeSO PlacedObjectTypeSO => placedObjectTypeSO;
+    public InventoryTabType InventoryTabType => placedObjectTypeSO.itemType.TabType;
     public PlacedObjectModel(PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir)
     {
         this.placedObjectTypeSO = placedObjectTypeSO;
@@ -33,7 +34,7 @@ public class PlacedObjectModel
         return placedObjectTypeSO.nameString;
     }
 
-    internal string GetPlacedObjectTypeSOGuid()
+    public string GetPlacedObjectTypeSOGuid()
     {
         return placedObjectTypeSO.Guid;
     }

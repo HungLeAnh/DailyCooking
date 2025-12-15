@@ -6,7 +6,7 @@ public class WaitForTableState : BotState
 
     public override void Enter()
     {
-        Debug.Log("Bot is waiting for a table.");
+        //Debug.Log("Bot is waiting for a table.");
         stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Idle);
     }
 

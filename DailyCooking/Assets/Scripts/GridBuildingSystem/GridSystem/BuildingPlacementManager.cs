@@ -60,10 +60,19 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         foreach (var gridPosition in gridPositionList)
         {
             var gridObject = gridManager.Grid.GetGridObject(gridPosition.x, gridPosition.y);
-            if (gridObject == null || !gridObject.CanBuild())
+            if (gridObject == null)
             {
                 canBuild = false;
                 break;
+            }
+            foreach (var placedObject in gridObject)
+            {
+                if (placedObject == null || 
+                    !placedObject.CanBuild(placedObjectTypeSO.itemType.TabType, dir))
+                {
+                    canBuild = false;
+                    break;
+                }
             }
         }
 
@@ -80,7 +89,8 @@ public class BuildingPlacementManager : IBuildingPlacementManager
 
             foreach (var gridPosition in gridPositionList)
             {
-                gridManager.Grid.GetGridObject(gridPosition.x, gridPosition.y).SetPlacedObject(placedObject);
+                gridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y, 
+                    new GridObject(gridManager.Grid, placedObject, gridPosition.x, gridPosition.y));
 
             }
             OnObjectPlaced?.Invoke(this, EventArgs.Empty);
@@ -95,59 +105,18 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         }
     }
     
-    public bool TryPlaceWall(Vector3 position)
-    {
-        if (placedObjectTypeSO == null || placedObjectTypeSO.itemType.TabType != InventoryTabType.Wall) return false;
-
-        gridManager.GetXZ(position, out int x, out int z);
-
-        if (gridManager.Grid.GetGridObject(x, z) != null)
-        {
-            float cellSize = gridManager.GetCellSize();
-            Vector3 cellOrigin = gridManager.GetWorldPosition(x, z);
-            Vector3 clickOffset = position - cellOrigin; // Offset from bottom-left corner of the cell
-
-            Dir wallDir;
-            
-            // Determine if horizontal or vertical wall and its position/rotation
-            if (Mathf.Abs(clickOffset.x) < cellSize * 0.2f) // Near left edge (vertical)
-            {
-                wallDir = Dir.Left; 
-            }
-            else if (Mathf.Abs(clickOffset.x - cellSize) < cellSize * 0.2f) // Near right edge (vertical)
-            {
-                wallDir = Dir.Right;
-            }
-            else if (Mathf.Abs(clickOffset.z) < cellSize * 0.2f) // Near bottom edge (horizontal)
-            {
-                wallDir = Dir.Down;
-            }
-            else if (Mathf.Abs(clickOffset.z - cellSize) < cellSize * 0.2f) // Near top edge (horizontal)
-            {
-                wallDir = Dir.Up;
-            }
-            else
-            {
-                // If not near an edge, place in the center (default behavior)
-                wallDir = Dir.Down; // Default to horizontal if not on edge
-            }
-
-            Quaternion wallRotation = Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(wallDir), 0);
-            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(wallDir);
-            Vector3 wallWorldPosition = gridManager.GetWorldPosition(x, z) + new Vector3(rotationOffset.x, 0, rotationOffset.y) * cellSize;
-            
-            Transform wall = UnityEngine.Object.Instantiate(placedObjectTypeSO.prefab, wallWorldPosition, wallRotation).transform;
-            return true;
-        }
-        return false;
-    }
-
     public void DestroyPlaceObject(PlacedObjectView placedObjectView)
     {
         List<Vector2Int> gridPositionList = placedObjectView.GetGridPositionList();
         foreach (Vector2Int gridPosition in gridPositionList)
         {
-            gridManager.Grid.GetGridObject(gridPosition.x, gridPosition.y).ClearPlacedObject();
+            var gridObjectList = gridManager.Grid.GetGridObject(gridPosition.x, gridPosition.y);
+            var placeObject = gridObjectList.Find(x => x.GetPlacedObject() == placedObjectView);
+            if(placeObject!= null)
+            {
+                gridObjectList.Remove(placeObject);
+                gridManager.Grid.TriggerGridObjectChanged(gridPosition.x, gridPosition.y);
+            }
         }
         placedObjectView.DestroySelf();
     }
@@ -177,12 +146,29 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         }
     }
 
-    public Vector3 GetPlacedObjectRotationOffset()
+    public Vector3 GetPlacedObjectRotationOffset(InventoryTabType type)
     {
-        Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-        Vector3 positionOffset = new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
-        return positionOffset;
+        Vector2Int rotationOffset = Vector2Int.zero;
+        Vector3 positionOffset = Vector3.zero;
+        switch (type)
+        {
+            case InventoryTabType.Counter:
+            case InventoryTabType.Table:
+                rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
+                positionOffset = new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
+                return positionOffset;
+            case InventoryTabType.Wall:
+                rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
+                //Debug.LogError($"rotate offset: {rotationOffset} - dir: {dir}");
+                positionOffset = new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
+                return positionOffset;
+            default:
+                isPlacingWall = false;
+                return Vector3.zero;
+        }
+
     }
+
 
     public Vector3 GetMouseWorldSnappedPosition()
     {
@@ -245,7 +231,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         }
         var destroyableObject = targetPlaceObjectView.GetComponent<IDestroyable>();
         destroyableObject.DestroySelf();
-        GridBuildingSystem.Instance.DestroyPlaceObject(targetPlaceObjectView);
+        DestroyPlaceObject(targetPlaceObjectView);
 
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,
             new UIInventoryPopup.Param { isPlacingObject = true });

@@ -27,12 +27,4 @@ public class PlacedObjectView : MonoBehaviour
     {
         return placedObjectController.GetModel();
     }
-    public void OnTouch()
-    {
-        // Handle the click event
-        Debug.Log("PlacedObjectView clicked!");
-
-        // You can call a method on the controller or perform other actions here
-        placedObjectController.HandleTouch();
-    }
 }

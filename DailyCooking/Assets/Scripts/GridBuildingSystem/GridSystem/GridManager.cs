@@ -8,12 +8,14 @@ public class GridManager : IGridManager
 
     public GridXZ<GridObject> Grid => grid;
 
-    public GridManager(int width, int height, float cellSize, Vector3 originPosition, System.Func<GridXZ<GridObject>, int, int, GridObject> createGridObject)
+    public GridManager(int width, int height, float cellSize, Vector3 originPosition, 
+        System.Func<GridXZ<GridObject>, int, int, List<GridObject>> createGridObject)
     {
         grid = new GridXZ<GridObject>(width, height, cellSize, originPosition, createGridObject);
     }
 
-    public GridManager(GridData gridData, System.Func<GridXZ<GridObject>, int, int, GridObject> createGridObject)
+    public GridManager(GridData gridData, 
+        System.Func<GridXZ<GridObject>, int, int, List<GridObject>> createGridObject)
     {
         grid = new GridXZ<GridObject>(gridData, createGridObject);
         GridObjectSpawner.SpawnObjectsFromData(grid, gridData.GridArrayData);
@@ -65,7 +67,7 @@ public class GridManager : IGridManager
         grid.Expand();
     }
 
-    public void AddGridObjectData(List<GridObjectData> gridObjectDataList)
+    public void AddGridObjectData(List<GridObjectData>[,] gridObjectDataList)
     {
         GridObjectSpawner.SpawnObjectsFromData(grid, gridObjectDataList);
     }
@@ -76,7 +78,16 @@ public class GridManager : IGridManager
         {
             for (int z = 0; z < grid.GetHeightMax(); z++)
             {
-                if (grid.GetGridObject(x, z).CanBuild())
+                bool isEmpty = true;
+                foreach (var placedObject in grid.GetGridObject(x, z))
+                {
+                    if (!placedObject.CanBuild())
+                    {
+                        isEmpty = false;
+                        break;
+                    }
+                }
+                if (isEmpty)
                 {
                     return grid.GetWorldPosition(x, z);
                 }
