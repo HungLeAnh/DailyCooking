@@ -629,7 +629,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57.6
+  m_fontSize: 18
   m_fontSizeBase: 60
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -765,7 +765,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.1
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1398,7 +1398,7 @@ GameObject:
   m_Component:
   - component: {fileID: 833936152331792507}
   - component: {fileID: 5048325365720050373}
-  - component: {fileID: 7232444840832195096}
+  - component: {fileID: 7629778705775280603}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -1420,11 +1420,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1095176507317822132}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 1}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &5048325365720050373
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1437,9 +1437,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
-  m_HorizontalFit: 2
+  m_HorizontalFit: 0
   m_VerticalFit: 2
---- !u!114 &7232444840832195096
+--- !u!114 &7629778705775280603
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1448,21 +1448,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 3696630406931544770}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c35987db2dd3f94891976ee45b540dd, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
+  m_EditorClassIdentifier: Scripts::FlexibleGridLayout
   m_Padding:
     m_Left: 20
     m_Right: 20
     m_Top: 20
     m_Bottom: 20
   m_ChildAlignment: 0
-  m_StartCorner: 0
-  m_StartAxis: 0
-  m_CellSize: {x: 550, y: 200}
-  m_Spacing: {x: 20, y: 20}
-  m_Constraint: 1
-  m_ConstraintCount: 2
+  fitType: 4
+  wrapContent: 0
+  rows: 0
+  columns: 2
+  spacing: {x: 20, y: 20}
+  cellSize: {x: 201.225, y: 200}
+  fitX: 1
+  fitY: 0
 --- !u!1 &3856440214188527914
 GameObject:
   m_ObjectHideFlags: 0
@@ -2080,7 +2082,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36.45
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
