@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class PlacedObjectDatabaseTool 
 {
-    public static string scriptableObjectFolderPath = "Assets/SO/BuildingSO/Counters";
+    public static string scriptableObjectFolderPath = "Assets/SO/BuildingSO";
     public static string SavePlacedObjectDatabaseFolderPath = "Assets/SO/PlacedObjectDatabase/PlacedObjectDatabase.asset";
     public static string SavePlacedObjectCSVPath = "Assets/Configs/PlacedObject/PlacedObjectConfig.csv";
 

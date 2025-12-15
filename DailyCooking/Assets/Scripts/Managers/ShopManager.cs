@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ShopManager : PersistentSingleton<ShopManager>
 {
-    public void OnPurchase(ConfigShopItem item)
+    public void OnPurchase(ConfigShopItem item, Dictionary<string, int> parsedData)
     {
         if(item.Price > GameManager.Instance.GameData.PlayerStats.playerData.Coins)
         {
@@ -16,6 +16,19 @@ public class ShopManager : PersistentSingleton<ShopManager>
             return;
         }
         GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(-item.Price);
-        GameManager.Instance.GameData.AddInventoryData(InventoryItemData.CreateInventoryItem(item.Id.ToString()));
+        if(item.Type == ShopItemType.Item)
+        {
+            foreach (var pair in parsedData)
+            {
+                string itemId = pair.Key;
+                int amount = pair.Value;
+                for (int i = 0; i < amount; i++)
+                {
+                    GameManager.Instance.GameData.
+                        AddInventoryData(InventoryItemData.CreateInventoryItem(itemId,true));
+                }
+            }
+
+        }
     }
 }

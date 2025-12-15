@@ -74,7 +74,7 @@ public class UIShopItem : MonoBehaviour
 
     private void OnClickButtonBuy()
     {
-        ShopManager.Instance.OnPurchase(configShopItem);
+        ShopManager.Instance.OnPurchase(configShopItem, parsedData);
     }
 
     private void GetReward(Dictionary<string, int> parsedData)
@@ -85,9 +85,10 @@ public class UIShopItem : MonoBehaviour
         {
             case ShopItemCategory.Counters :
             case ShopItemCategory.Tables:
+            case ShopItemCategory.Walls:
 
                 var placedObject = GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects
-                    .Find(x => x.id == parsedDataList[0].Key);
+                    .Find(x => x.Guid == parsedDataList[0].Key);
                 if (placedObject == null)
                 {
                     gameObject.SetActive(false);
