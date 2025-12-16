@@ -22,20 +22,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
     [Header("Floor")]
     [SerializeField] private Transform floorContainer;
-    [SerializeField] private GameObject floorPrefab;
-
-    [Header("Wall")]
-    [SerializeField] private Transform wallContainer;
-    [SerializeField] private GameObject wallPrefab;
-    
-    [Header("Door")]
-    [SerializeField] private Transform doorContainer;
-    [SerializeField] private GameObject doorPrefab;
-    [SerializeField] private Vector2 doorPosition;
-
-    [Header("Pillar")]
-    [SerializeField] private Transform pillarContainer;
-    [SerializeField] private GameObject pillarPrefab;
+    [SerializeField] private GameObject floorPrefab;  
 
     [Header("Road")]
     [SerializeField] private Transform roadContainer;
@@ -95,14 +82,10 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         }
         gridInitializer = new GridInitializer(gridManager, this.gameManager, 
             roadContainer, roadPrefab, roadCornerPrefab, 
-            pillarContainer, pillarPrefab, 
-            wallContainer, wallPrefab, 
-            floorContainer, floorPrefab,
-            doorContainer, doorPrefab, doorPosition);
+            floorContainer, floorPrefab);
 
         gridInitializer.InitRoad();
-        //gridInitializer.InitWallAndFloor();
-        //gridInitializer.InitPillar();
+        gridInitializer.InitFloor();
         gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList);
         gridVisualizer.SetActiveGridGuide(false);
 
@@ -115,11 +98,13 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     private void Start()
     {
         GameInput.Instance.OnMouseClickPerformed += GameInput_OnMouseClickPerformed;
-        navMeshSurface.BuildNavMesh();
-
         SetBlocker();
+        BakeNavMesh();
     }
-
+    public void BakeNavMesh()
+    {
+        navMeshSurface.BuildNavMesh();
+    }
     private void SetBlocker()
     {
         blockerX.localPosition = new Vector3(0f, 0f, gridManager.GetHeightMax() * gridManager.GetCellSize() + 5f);
@@ -156,8 +141,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         gridManager.UnlockGrid(GameDefine.GridSize,GameDefine.GridSize);
         gameManager.GameData.UpdateGridData(gridManager.Grid);
-        //gridInitializer.InitWallAndFloor();
-        gridInitializer.InitPillar();
+        gridInitializer.InitFloor();
         if (!GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
         {
             gridInitializer.InitDefaultCounters();
@@ -169,7 +153,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         gridManager.ExpandGrid();
         gameManager.GameData.UpdateGridData(gridManager.Grid);
-        gridInitializer.InitPillar();
         SetBlocker();
 
     }
