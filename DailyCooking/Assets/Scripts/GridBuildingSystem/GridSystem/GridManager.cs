@@ -72,30 +72,6 @@ public class GridManager : IGridManager
         GridObjectSpawner.SpawnObjectsFromData(grid, gridObjectDataList);
     }
 
-    public Vector3 GetFirstEmptyGridPos()
-    {
-        for (int x = 0; x < grid.GetWidthMax(); x++)
-        {
-            for (int z = 0; z < grid.GetHeightMax(); z++)
-            {
-                bool isEmpty = true;
-                foreach (var placedObject in grid.GetGridObject(x, z))
-                {
-                    if (!placedObject.CanBuild())
-                    {
-                        isEmpty = false;
-                        break;
-                    }
-                }
-                if (isEmpty)
-                {
-                    return grid.GetWorldPosition(x, z);
-                }
-            }
-        }
-        return Vector3.zero;
-    }
-
     public int2 WorldPositionToGridPos(float x, float y)
     {
         if(grid.ValidateGridPosition(new Vector2Int(Mathf.RoundToInt(x), Mathf.RoundToInt(y))) != null)

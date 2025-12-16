@@ -44,7 +44,11 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
 
     [Header("Counter")]
     [SerializeField] private Transform counterContainer;
-    [SerializeField] private LayerMask counterLayerMask;    
+    [SerializeField] private LayerMask counterLayerMask;
+
+    [Header("Blocker")]
+    [SerializeField] private Transform blockerX;
+    [SerializeField] private Transform blockerZ;
 
     private IGridManager gridManager;
     private IGameManager gameManager;
@@ -110,9 +114,16 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     }
     private void Start()
     {
-
         GameInput.Instance.OnMouseClickPerformed += GameInput_OnMouseClickPerformed;
         navMeshSurface.BuildNavMesh();
+
+        SetBlocker();
+    }
+
+    private void SetBlocker()
+    {
+        blockerX.localPosition = new Vector3(0f, 0f, gridManager.GetHeightMax() * gridManager.GetCellSize() + 5f);
+        blockerZ.localPosition = new Vector3(gridManager.GetWidthMax() * gridManager.GetCellSize() + 5f, 0f, 0f);
     }
 
     private void GameInput_OnMouseClickPerformed(object sender, Vector2 e)
@@ -127,7 +138,17 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         {
             if (raycastHit.transform.TryGetComponent<PlacedObjectView>(out PlacedObjectView targetPlaceObjectView))
             {
-                BuildingPlacementManager.HandleExistingObjectInteraction(targetPlaceObjectView, raycastHit.transform.position);
+                if(targetPlaceObjectView.transform.GetComponent<IPlaceable>().CanRemove())
+                    BuildingPlacementManager.HandleExistingObjectInteraction(targetPlaceObjectView, raycastHit.transform.position);
+                else
+                {
+                    UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup,
+                        new UIGameNotiPopup.Param
+                        {
+                            Title = "warning",
+                            Message = "Item is used, cannot remove."
+                        });
+                }
             }
         }
     }
@@ -142,12 +163,14 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
             gridInitializer.InitDefaultCounters();
             gameManager.GameData.UpdateGridData(gridManager.Grid);
         }
+        SetBlocker();
     }
     public void ExpandGrid(float amount)
     {
         gridManager.ExpandGrid();
         gameManager.GameData.UpdateGridData(gridManager.Grid);
         gridInitializer.InitPillar();
+        SetBlocker();
 
     }
     public PlacedObjectTypeSO GetPlacedObjectTypeSOByGuid(string Guid)
@@ -164,9 +187,5 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     public PlacedObjectTypeSO GetPlacedObjectTypeSOById(string id)
     {
         return PlacedObjectDatabase.PlacedObjects.Find(x => x.id == id);
-    }
-    public void SaveGrid()
-    {
-        gameManager.GameData.UpdateGridData(gridManager.Grid);
     }
 }

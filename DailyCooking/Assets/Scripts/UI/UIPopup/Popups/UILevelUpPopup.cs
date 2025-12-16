@@ -54,6 +54,7 @@ public class UILevelUpPopup : UIPopup
         {
             Destroy(item.gameObject);
         }
+        rewardItems.Clear();
         if (_openParam != null)
         {
             Param popupParam = _openParam as Param;

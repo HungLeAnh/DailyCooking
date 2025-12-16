@@ -15,7 +15,6 @@ public interface IGridManager
     void UnlockGrid(int width, int height);
     void ExpandGrid();
     void AddGridObjectData(List<GridObjectData>[,] gridObjectDataList);
-    Vector3 GetFirstEmptyGridPos();
     int2 WorldPositionToGridPos(float x, float y);
     Vector3 GridPositionToWorldPosition(int2 int2);
     Vector2 GetGridSize();

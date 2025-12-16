@@ -119,4 +119,9 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     {
         OnDestroySelf?.Invoke();
     }
+
+    public bool CanRemove()
+    {
+        return !HasKitchenObject();
+    }
 }

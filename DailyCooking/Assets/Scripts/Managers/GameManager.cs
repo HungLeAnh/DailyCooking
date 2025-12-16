@@ -8,6 +8,7 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
     public event EventHandler OnPlayerSpawned;
 
     [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private Vector3 playerSpawnPosition;
     private GameData gameData;
     private FileDataHandler dataHandler;
     private GameManagerBaseState currentState;
@@ -61,9 +62,7 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
 
     public void InitializePlayer()
     {
-        Vector3 placePosition = Vector3.zero;
-
-        playerGameObject = Instantiate(playerPrefab, placePosition, Quaternion.identity);
+        playerGameObject = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
         OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
     }
     public void HidePlayer()

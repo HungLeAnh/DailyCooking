@@ -153,4 +153,19 @@ public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceabl
     {
         OnDestroySelf?.Invoke();
     }
+
+    public bool CanRemove()
+    {
+        for(int i = 0; i < isSeatOccupied.Length; i++)
+        {
+            if (isSeatOccupied[i])
+                return false;
+        }
+        for(int i = 0; i < kitchenObjects.Length; i++)
+        {
+            if (kitchenObjects[i] != null)
+                return false;
+        }
+        return true;
+    }
 }

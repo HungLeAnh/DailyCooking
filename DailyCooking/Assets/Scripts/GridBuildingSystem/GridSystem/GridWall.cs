@@ -54,4 +54,9 @@ public class GridWall : MonoBehaviour, IPlaceable, IDestroyable
     {
         OnDestroySelf?.Invoke();
     }
+
+    public bool CanRemove()
+    {
+        return true;
+    }
 }
