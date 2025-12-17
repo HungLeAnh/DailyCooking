@@ -154,7 +154,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         gridManager.ExpandGrid();
         gameManager.GameData.UpdateGridData(gridManager.Grid);
         SetBlocker();
-
+        gridInitializer.InitFloor();
     }
     public PlacedObjectTypeSO GetPlacedObjectTypeSOByGuid(string Guid)
     {

@@ -54,8 +54,9 @@ public class GridInitializer : IGridInitializer
         {
             for (int z = 0; z < gridManager.GetHeightMax(); z++)
             {
-                if ((z < gridManager.GetHeightMin() && x < gridManager.GetHeightMax()) ||
-                    (z >= gridManager.GetHeightMin() && x < gridManager.GetWidthMin() && z < gridManager.GetHeightMax()))
+                if ((z < gridManager.GetHeightMin() && x < gridManager.GetWidthMax()) ||
+                    (z >= gridManager.GetHeightMin() && x < gridManager.GetWidthMin() 
+                    && z < gridManager.GetHeightMax()))
                 {
                     GameObject floor = GameObject.Instantiate(floorPrefab, gridManager.GetWorldPosition(x, z), Quaternion.identity);
                     floor.transform.SetParent(floorContainer);
