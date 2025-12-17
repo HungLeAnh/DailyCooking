@@ -11,8 +11,10 @@ public class UIUpgradeItem : MonoBehaviour
     [SerializeField] private Image itemIconImage;
     [SerializeField] private Button upgradeButton;
     [SerializeField] private GameObject dimGameObject;
+    [SerializeField] private GameObject checkButton;
 
     private UpgradeSO upgradeData;
+    private bool isPurchased = false;
     private void Start()
     {
         GameManager.Instance.GameData.PlayerStats.OnLevelChange += PlayerStats_OnLevelChange;
@@ -20,6 +22,10 @@ public class UIUpgradeItem : MonoBehaviour
 
     private void PlayerStats_OnLevelChange()
     {
+        if(isPurchased)
+        {
+            return;
+        }
         var isLocked = GameManager.Instance.GameData.PlayerStats.playerData.Level < upgradeData.LevelUnlocked;
         dimGameObject.SetActive(isLocked);
     }
@@ -37,10 +43,30 @@ public class UIUpgradeItem : MonoBehaviour
         upgradeButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.AddListener(OnUpgradeButtonClick);
 
+        isPurchased = GameManager.Instance.GameData.IsUpgradePurchased(upgradeSO);
+        SetPurchased(isPurchased);
+    }
+    public void SetPurchased(bool isPurchased)
+    {
+        if(isPurchased)
+        {
+            dimGameObject.SetActive(true);
+            checkButton.SetActive(true);
+            upgradeButton.interactable = false;
+        }
+        else
+        {
+            checkButton.SetActive(false);
+            upgradeButton.interactable = true;
+        }
     }
 
     private void OnUpgradeButtonClick()
     {
-        UpgradeManager.Instance.PurchaseUpgrade(upgradeData);
+        if (UpgradeManager.Instance.PurchaseUpgrade(upgradeData))
+        {
+            SetPurchased(true);
+            isPurchased = true;
+        }
     }
 }

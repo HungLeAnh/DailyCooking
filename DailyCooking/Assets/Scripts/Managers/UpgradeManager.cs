@@ -3,7 +3,7 @@
 public class UpgradeManager : PersistentSingleton<UpgradeManager>
 {
     public event Action<UpgradeSO> OnUpgradePurchased;
-    public void PurchaseUpgrade(UpgradeSO upgrade)
+    public bool PurchaseUpgrade(UpgradeSO upgrade)
     {
         if(GameManager.Instance.GameData.PlayerStats.playerData.Coins >= upgrade.UpgradeCosts)
         {
@@ -12,8 +12,9 @@ public class UpgradeManager : PersistentSingleton<UpgradeManager>
                 GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(-upgrade.UpgradeCosts);
                 GetUpgradeReward(upgrade.UpgradeTarget, upgrade.UpgradeValue);
                 OnUpgradePurchased?.Invoke(upgrade);
+                return true;
             }
-
+            return false;
         }
         else
         {
@@ -23,7 +24,7 @@ public class UpgradeManager : PersistentSingleton<UpgradeManager>
                       Title = "warning",
                       Message = "Not enough money to buy this item."
                   });
-            return;
+            return false;
         }
     }
     public void GetUpgradeReward(UpgradeTarget upgradeTarget,float amount)

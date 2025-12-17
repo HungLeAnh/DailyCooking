@@ -13,8 +13,6 @@ public class GridInitializer : IGridInitializer
     private Transform floorContainer;
     private GameObject floorPrefab;
 
-    private List<GridWall> gridWallList = new List<GridWall>();
-
     public GridInitializer(IGridManager gridManager, IGameManager gameManager, 
         Transform roadContainer, GameObject roadPrefab, GameObject roadCornerPrefab, 
         Transform floorContainer, GameObject floorPrefab)

@@ -43,6 +43,10 @@ public class GameData
     {
         return UpgradeData.PurchaseUpgrade(upgradeData);
     }
+    public bool IsUpgradePurchased(UpgradeSO upgradeData)
+    {
+        return UpgradeData.PurchasedUpgrades.Contains(upgradeData.Guid);
+    }
 }
 
 [System.Serializable]
