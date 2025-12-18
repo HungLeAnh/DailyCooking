@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8fcb578547381d14a8cb105e1c4b0764, type: 3}
-  m_Name: Running Shoes
+  m_Name: Tip Boost
   m_EditorClassIdentifier: Scripts::UpgradeSO
-  _guid: 
-  upgradeName: Running Shoes
-  upgradeDescription: Increases server movement speed by 15%
-  upgradeIcon: {fileID: 0}
-  upgradeCosts: 450
-  levelUnlocked: 1
+  _guid: 9ed2f94e99e843a439dbcd49cab8b37a
+  upgradeName: Tip Boost
+  upgradeDescription: Increases tips from customers by 10%
+  upgradeIcon: {fileID: 21300000, guid: 66cc771903da37d4cba00de98fd27b3b, type: 3}
+  upgradeCosts: 800
+  levelUnlocked: 3
   upgradeType: 1
-  upgradeTarget: 0
-  upgradeValue: 0.15
+  upgradeTarget: 3
+  upgradeValue: 0.1
