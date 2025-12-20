@@ -6,11 +6,6 @@ public class InGameState : GameManagerBaseState
 
     public override void Enter()
     {
-        if (!gameManager.GameData.TutorialData.HasPlayedFirstTime)
-        {
-            TutorialManager.Instance.ShowFirstTimeTutorial();
-        }
         GameManager.Instance.InitializePlayer();
-
     }
 }

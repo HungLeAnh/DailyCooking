@@ -8,6 +8,10 @@ public enum UIHUDElements
     Settings,
     Resources,
     BotTab,
+    Upgrade,
+    Menu,
+    Build,
+    Shop,
 
 }
 [Serializable]
@@ -50,6 +54,14 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
         {
             value.SetActive(false);
         }
+    }
+    public Transform GetElementTransform(UIHUDElements element)
+    {
+        if (uiHUDElementDictionary.TryGetValue(element, out GameObject value))
+        {
+            return value.transform;
+        }
+        return null;
     }
     #region Click
     public void OnSettingsClicked()

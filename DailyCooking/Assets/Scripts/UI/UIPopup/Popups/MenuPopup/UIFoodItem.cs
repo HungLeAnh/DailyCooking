@@ -27,10 +27,12 @@ public class UIFoodItem :MonoBehaviour
 
 
 
-
+    private bool isLocked = false;
     private FoodSO foodSO;
     public FoodSO FoodSO { get => foodSO; }
     public Button FoodButton { get => foodButton; }
+    public bool IsLocked { get => isLocked; set => isLocked = value; }
+
     public void SetMenuFoodItem(FoodSO item, bool isSelected)
     {
         this.foodSO = item;
@@ -45,11 +47,13 @@ public class UIFoodItem :MonoBehaviour
         });
         if (!GameManager.Instance.GameData.MenuData.unlockedDishes.Contains(item))
         {
-            SetLockState(true);
+            isLocked = true;
+            SetLockState(isLocked);
         }
         else
         {
-            SetLockState(false);
+            isLocked = false;
+            SetLockState(isLocked);
             SetSelectedState(isSelected);
 
         }

@@ -3,116 +3,98 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 
-public enum TutorialPanelPosition
-{
-    TopLeft,
-    TopRight,
-    BottomLeft,
-    BottomRight,
-    Center
-}
 [System.Serializable]
 public class TutorialStep
 {
-    public int id;
-    public string content;
-    public TutorialPanelPosition panelPosition;
-    public Vector2 panelOffset;
-    public RectTransform elementToHighlight;
-    public bool isImportant;
+    [SerializeField] private int id;
+    [SerializeField] private string content;
+    [SerializeField] private RectTransform elementToHighlight;
+    [SerializeField] private bool isImportant;
+    [SerializeField] private bool isHidePanel;
+    [SerializeField] private UnityEvent onStepStart;
 
+    public int Id { get => id; set => id = value; }
+    public string Content { get => content; set => content = value; }
+    public RectTransform ElementToHighlight { get => elementToHighlight; set => elementToHighlight = value; }
+    public bool IsImportant { get => isImportant; set => isImportant = value; }
+    public bool IsHidePanel { get => isHidePanel; set => isHidePanel = value; }
+    public UnityEvent OnStepStart { get => onStepStart; set => onStepStart = value; }
 }
 public class TutorialPanel : MonoBehaviour
 {
     public event EventHandler OnTutorialClosed;
 
-    [SerializeField] private TutorialType panelType;
-    [SerializeField] private TextMeshProUGUI contentText;
-    [SerializeField] private Button nextButton;
-    [SerializeField] private Button previousButton;
-    [SerializeField] private Button closeButton;
-    [SerializeField] private Unmask highlightMask;
+    [SerializeField] protected Canvas parentCanvas;
+    [SerializeField] protected GameObject panelObject;
+    [SerializeField] protected TutorialType panelType;
+    [SerializeField] protected TextMeshProUGUI contentText;
+    [SerializeField] protected Button nextButton;
+    [SerializeField] protected Button previousButton;
+    [SerializeField] protected Button closeButton;
+
+    [SerializeField] protected Unmask highlightMask;
+    [SerializeField] protected GameObject highlightObject;
+    [SerializeField] protected Button hightLightButton;
 
     [SerializeField] private RectTransform panelRectTransform;
 
     [Header("Tutorial step")]
     [SerializeField] private List<TutorialStep> tutorialSteps = new List<TutorialStep>();
 
-    private int currentStepIndex = -1;
+    protected int currentStepIndex = -1;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         // Set up button listeners
         if (nextButton != null)
+        {
             nextButton.onClick.AddListener(OnNextButtonClicked);
+        }
 
         if (previousButton != null)
             previousButton.onClick.AddListener(OnPreviousButtonClicked);
 
         if (closeButton != null)
             closeButton.onClick.AddListener(OnCloseButtonClicked);
+
+        highlightObject.SetActive(false);
     }
 
-    public void HighlightElement(RectTransform elementToHighlight)
+    public void HighlightElement(RectTransform elementToHighlight,bool isActive = false)
     {
         // Create highlight around the specified element
+        highlightObject.SetActive(isActive);
         if (highlightMask != null && elementToHighlight != null)
         {
-            highlightMask.fitTarget = elementToHighlight;
+            highlightMask.FitTo(elementToHighlight);
+            var highLightRect = highlightMask.transform as RectTransform;
+            highLightRect.anchorMax = highLightRect.anchorMin = Vector2.zero;
+            highLightRect.pivot = new Vector2(0.5f, 0.5f);
+
+            var highLightButtonRect = hightLightButton.transform as RectTransform;
+            highLightButtonRect.position = highLightRect.position;
+            highLightButtonRect.sizeDelta = highLightRect.sizeDelta;
         }
     }
 
-    public void SetPosition(TutorialPanelPosition position, Vector2 offset)
-    {
-        // Position the panel based on the specified position
-        switch (position)
-        {
-            case TutorialPanelPosition.TopLeft:
-                panelRectTransform.anchorMin = new Vector2(0, 1);
-                panelRectTransform.anchorMax = new Vector2(0, 1);
-                panelRectTransform.pivot = new Vector2(0, 1);
-                break;
-            case TutorialPanelPosition.TopRight:
-                panelRectTransform.anchorMin = new Vector2(1, 1);
-                panelRectTransform.anchorMax = new Vector2(1, 1);
-                panelRectTransform.pivot = new Vector2(1, 1);
-                break;
-            case TutorialPanelPosition.BottomLeft:
-                panelRectTransform.anchorMin = new Vector2(0, 0);
-                panelRectTransform.anchorMax = new Vector2(1, 0);
-                panelRectTransform.pivot = new Vector2(0.5f, 0);
-                break;
-            case TutorialPanelPosition.BottomRight:
-                panelRectTransform.anchorMin = new Vector2(1, 0);
-                panelRectTransform.anchorMax = new Vector2(1, 0);
-                panelRectTransform.pivot = new Vector2(1, 0);
-                break;
-            case TutorialPanelPosition.Center:
-                panelRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-                panelRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-                panelRectTransform.pivot = new Vector2(0.5f, 0.5f);
-                break;
-        }
-
-        panelRectTransform.anchoredPosition = offset;
-    }
-    private void ShowCurrentStep()
+    protected void ShowCurrentStep()
     {
         TutorialStep step = tutorialSteps[currentStepIndex];
+        step.OnStepStart?.Invoke();
         // Set panel content
-        SetContent(step.content);
-
-        // Position the panel
-        SetPosition(step.panelPosition, step.panelOffset);
-
-        // Highlight element if specified
-        if (step.elementToHighlight != null)
+        if(step.IsHidePanel)
         {
-            HighlightElement(step.elementToHighlight);
+            panelObject.SetActive(false);
         }
+        else
+        {
+            panelObject.SetActive(true);
+        }
+        SetContent(step.Content);
     }
     public void SetContent(string content)
     {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public enum TutorialType
@@ -34,28 +35,23 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
                 panel.gameObject.SetActive(false);
             }
         }
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+    {
+        if(arg0.buildIndex != Loader.Scene.GameScene.GetHashCode())
+            return;
+        if (GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime == false)
+        {
+            ShowFirstTimeTutorial();
+        }
     }
 
     public void ShowFirstTimeTutorial()
     {
         UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].StartTutorial();
-        tutorialPanelDictionary[TutorialType.FirstTimePlaying].OnTutorialClosed += TutorialManager_OnTutorialClosed;
-
-    }
-
-    private void TutorialManager_OnTutorialClosed(object sender, EventArgs e)
-    {
-        TutorialPanel panel = (TutorialPanel)sender;
-        switch(panel.GetPanelType()){
-            case TutorialType.FirstTimePlaying:
-                GridBuildingSystem.Instance.UnlockGrid();
-                GameManager.Instance.GameData.TutorialData.SetHasPlayedFirstTime(true);
-                UIHUDManager.Instance.ShowAllUIElement();
-                break;
-            case TutorialType.GameMechanic:
-                break;
-        }
     }
 }
 

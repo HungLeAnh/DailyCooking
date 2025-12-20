@@ -22,6 +22,8 @@ public class UIMenuPopup : UIPopup
     [SerializeField] private GameObject foodItemPrefab;
 
     private List<UIFoodItem> foodItemList= new List<UIFoodItem>();
+
+    public Button BtnClose { get => btnClose; }
     public void Awake()
     {
         btnClose.onClick.AddListener(OnCloseClick);
@@ -151,5 +153,17 @@ public class UIMenuPopup : UIPopup
     public void OnCloseClick()
     {
         UIPopupManager.Instance.HidePopup(UIPopupType.UIMenuPopup);
+    }
+    public UIFoodItem GetFirstUnlockedFoodItem()
+    {
+        if(foodItemList.Count > 0)
+        {
+            foreach (var item in foodItemList)
+            {
+                if (!item.IsLocked)
+                    return item;
+            }
+        }
+        return null;
     }
 }
