@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class CounterModules : PersistentSingleton<CounterModules>, ICounterModules
+public class CounterModules : PersistentSingleton<CounterModules>, IModules
 {
     private List<BaseCounterController> baseCounterControllers = new List<BaseCounterController>();
-    private bool isInited = false;
-    public bool IsInited => isInited;
     public List<BaseCounterController> BaseCounterControllers { get => baseCounterControllers; set => baseCounterControllers = value; }
 
     protected override void Awake()
@@ -16,20 +14,7 @@ public class CounterModules : PersistentSingleton<CounterModules>, ICounterModul
         base.Awake();
         baseCounterControllers = new List<BaseCounterController>();
     }
-    public void Initialize()
-    {
-        isInited = true;
-        var counterViews = GridBuildingSystem.Instance.Container.GetComponentsInChildren<BaseCounterController>();
-        foreach (var counter in counterViews)
-        {
-            if (counter != null)
-            {
-                counter.OnDestroySelf += ()=> DestroyCounter(counter);
-                baseCounterControllers.Add(counter);
-            }
-        }
-    }
-    public void DestroyCounter(BaseCounterController baseCounterController)
+    public void DestroyItem(BaseCounterController baseCounterController)
     {
         if (baseCounterController == null) return;
 
@@ -40,10 +25,11 @@ public class CounterModules : PersistentSingleton<CounterModules>, ICounterModul
             RemoveCounterController(controller);
         }
     }
-    public void AddCounterController(BaseCounterController controller)
+    public void AddController(BaseCounterController controller)
     {
         baseCounterControllers.Add(controller);
         KitchenGameManager.Instance.AddUnlockIngredient(controller);
+        controller.OnDestroySelf += () => DestroyItem(controller);
 
     }
     private void RemoveCounterController(BaseCounterController controller)

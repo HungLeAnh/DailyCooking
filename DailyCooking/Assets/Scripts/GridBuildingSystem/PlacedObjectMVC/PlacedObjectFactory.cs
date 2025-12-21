@@ -10,9 +10,7 @@ public static class PlacedObjectFactory
         PlacedObjectController controller = new PlacedObjectController(model, placedObjectView);
         placedObjectView.Initialize(controller);
 
-        var counterController = placedObjectView.GetComponent<BaseCounterController>();
-        if(CounterModules.Instance.IsInited)
-            CounterModules.Instance.AddCounterController(counterController);
+        placedObjectView.GetComponent<IModuleItem>()?.RegisterItem();
 
         return placedObjectView;
     }

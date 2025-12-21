@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInteractable, IDestroyable,
-    IPlaceable
+    IPlaceable, IModuleItem
 {
 
     [SerializeField] private Transform counterTopPoint;
@@ -123,5 +123,10 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     public bool CanRemove()
     {
         return !HasKitchenObject();
+    }
+
+    public void RegisterItem()
+    {
+        CounterModules.Instance.AddController(this);
     }
 }

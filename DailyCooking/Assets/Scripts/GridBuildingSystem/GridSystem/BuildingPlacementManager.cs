@@ -14,7 +14,6 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     private IGridManager gridManager;
     private IGridVisualizer gridVisualizer;
     private IGameManager gameManager;
-    private ICounterModules counterModules;
     private IUIPopupManager uiPopupManager;
     private PlacedObjectTypeSO placedObjectTypeSO;
     private Dir dir = Dir.Down;
@@ -25,12 +24,11 @@ public class BuildingPlacementManager : IBuildingPlacementManager
 
     public bool IsBuilding => isBuilding;
 
-    public BuildingPlacementManager(IGridManager gridManager, IGridVisualizer gridVisualizer, IGameManager gameManager, ICounterModules counterModules, IUIPopupManager uiPopupManager)
+    public BuildingPlacementManager(IGridManager gridManager, IGridVisualizer gridVisualizer, IGameManager gameManager, IUIPopupManager uiPopupManager)
     {
         this.gridManager = gridManager;
         this.gridVisualizer = gridVisualizer;
         this.gameManager = gameManager;
-        this.counterModules = counterModules;
         this.uiPopupManager = uiPopupManager;
     }
     public void RotateBuildingObject()
@@ -82,9 +80,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             Vector3 placedObjectWorldPosition = gridManager.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
             PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
-            //register counter controller
-            counterModules.AddCounterController(placedObject.GetComponent<BaseCounterController>());
-
+            
             placedObject.GetComponent<IPlaceable>().IsPlaced = true;
 
             foreach (var gridPosition in gridPositionList)

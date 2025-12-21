@@ -20,10 +20,21 @@ public class BotManager : PersistentSingleton<BotManager>
         base.Awake();
         botPool = new List<GameObject>();
     }
+    private void Start()
+    {
+        GameManager.Instance.GameData.TutorialData.OnTutorialDataChanged += OnTutorialDataChanged;
+    }
+    private void OnTutorialDataChanged()
+    {
+        StartSpawnBot();
+    }
 
     private void OnDestroy()
     {
         botPool.Clear();
+        if(GameManager.Instance != null)
+            GameManager.Instance.GameData.TutorialData.OnTutorialDataChanged -= OnTutorialDataChanged;
+
     }
     public void StartSpawnBot()
     {

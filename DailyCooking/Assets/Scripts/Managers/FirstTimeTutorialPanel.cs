@@ -24,7 +24,6 @@ public class FirstTimeTutorialPanel : TutorialPanel
     public void OnBuildRestaurant()
     {
         GridBuildingSystem.Instance.UnlockGrid();
-        //GameManager.Instance.GameData.TutorialData.SetHasPlayedFirstTime(true);
         UIHUDManager.Instance.ShowAllUIElement();
         nextButton.onClick.RemoveListener(OnBuildRestaurant);
     }
@@ -60,6 +59,7 @@ public class FirstTimeTutorialPanel : TutorialPanel
         var popup = UIPopupManager.Instance.GetTopShownUIPopup() as UIMenuPopup;
         popup.BtnClose.onClick.Invoke();
         hightLightButton.onClick.RemoveAllListeners();
+        GameManager.Instance.GameData.TutorialData.SetHasPlayedFirstTime(true);
         NextStep();
     }
 }

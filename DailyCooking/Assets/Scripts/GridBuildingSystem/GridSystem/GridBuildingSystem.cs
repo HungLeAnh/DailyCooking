@@ -64,7 +64,6 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     {
         base.Awake();
         gameManager = GameManager.Instance;
-        ICounterModules counterModulesInstance = CounterModules.Instance;
         IUIPopupManager uiPopupManagerInstance = UIPopupManager.Instance;
 
         foreach (var placedObject in placedObjectDatabase.PlacedObjects)
@@ -90,8 +89,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         gridVisualizer.SetActiveGridGuide(false);
 
 
-        buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, counterModulesInstance, uiPopupManagerInstance);
-        counterModulesInstance.Initialize();
+        buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, uiPopupManagerInstance);
 
         KitchenGameManager.Instance.Init();
     }

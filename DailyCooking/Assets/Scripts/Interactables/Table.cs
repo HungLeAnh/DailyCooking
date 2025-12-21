@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceable
+public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceable, IModuleItem
 {
     [SerializeField] private List<Transform> seats = new List<Transform>();
     [SerializeField] private List<Transform> kitchenObjectFollowPoints = new List<Transform>();
@@ -20,8 +20,6 @@ public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceabl
         isSeatOccupied = new bool[seats.Count];
         kitchenObjects = new KitchenObject[seats.Count];
         KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
-        TableManager.Instance.RegisterTable(this);
-
     }
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
@@ -167,5 +165,10 @@ public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceabl
                 return false;
         }
         return true;
+    }
+
+    public void RegisterItem()
+    {
+        TableManager.Instance.RegisterTable(this);
     }
 }
