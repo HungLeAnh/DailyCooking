@@ -12,13 +12,17 @@ public class BotManager : PersistentSingleton<BotManager>
     [SerializeField] private Vector3 spawnPosition;
 
     private List<GameObject> botPool;
+    private bool isFirstSpawned = false;
+    private List<GameObject> activeBots;
 
-    
+    public List<GameObject> ActiveBots { get => activeBots; set => activeBots = value; }
 
     protected override void Awake()
     {
         base.Awake();
         botPool = new List<GameObject>();
+        ActiveBots = new List<GameObject>();
+        isFirstSpawned = false;
     }
     private void Start()
     {
@@ -72,6 +76,11 @@ public class BotManager : PersistentSingleton<BotManager>
         {
             var bot = GetBot();
             bot.GetComponent<BotCustomerController>().InitBot();
+            ActiveBots.Add(bot);
+            if (!isFirstSpawned)
+            {
+                TutorialManager.Instance.ShowGameMachanicTutorial();
+            }
             yield return new WaitForSeconds(20f);
         }
     }

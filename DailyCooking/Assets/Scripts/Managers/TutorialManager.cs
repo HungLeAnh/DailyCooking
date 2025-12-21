@@ -53,5 +53,10 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
         UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].StartTutorial();
     }
+    public void ShowGameMachanicTutorial()
+    {
+        UIHUDManager.Instance.HideAllUIElement();
+        tutorialPanelDictionary[TutorialType.GameMechanic].StartTutorial();
+    }
 }
 
