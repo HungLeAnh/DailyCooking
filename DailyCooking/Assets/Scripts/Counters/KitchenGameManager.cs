@@ -62,7 +62,10 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
             return;
         BotManager.Instance.Initialize();        
         ChangeState(State.GamePlaying);
-        BotManager.Instance.StartSpawnBot();
+        if(GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
+        {
+            BotManager.Instance.StartSpawnBot();
+        }
     }
 
     public void OnDestroy()
