@@ -67,6 +67,7 @@ public class UISettingsPopup : UIPopup
         {
             Loader.Load(Loader.Scene.MainMenuScene);
             GameManager.Instance.SwitchState(new MainMenuState(GameManager.Instance));
+            HidePopup();
         });
     }
     public override void ShowPopup(object param = null)
