@@ -81,7 +81,8 @@ public class GameInput : PersistentSingleton<GameInput>
 
     private void ToucContactCanceled(InputAction.CallbackContext obj)
     {
-        touchCount--; 
+        if(touchCount > 0)
+            touchCount--; 
         prevMagnitude = 0;
     }
     private void Touch1Pos_performed(InputAction.CallbackContext obj)

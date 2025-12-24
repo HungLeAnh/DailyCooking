@@ -28,7 +28,7 @@ public class CameraController : MonoBehaviour
     private void Start()
     {
         //GameManager.Instance.OnPlayerSpawned += Instance_OnPlayerSpawned;
-        GameInput.Instance.OnScrollPerformed += HandleZoomDesktop;
+        GameInput.Instance.OnScrollPerformed += HandleZoom;
         GameInput.Instance.OnMousePanPerformed += OnPanMovedDesktop;
 
         GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingStart += OnBuildingStart;
@@ -120,7 +120,7 @@ public class CameraController : MonoBehaviour
     #endregion
 
     #region Zoom
-    private void HandleZoomDesktop(object sender, float scrollValueY)
+    private void HandleZoom(object sender, float scrollValueY)
     {
         _cinemachineCamera.Lens.FieldOfView = Mathf.Clamp(
             _cinemachineCamera.Lens.FieldOfView - scrollValueY * zoomSpeed,
