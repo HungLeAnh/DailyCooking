@@ -6,6 +6,7 @@ using UnityEngine;
 public class GameManager : PersistentSingleton<GameManager>, IGameManager
 {
     public event EventHandler OnPlayerSpawned;
+    public event EventHandler OnStateChanged;
 
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Vector3 playerSpawnPosition;
@@ -20,7 +21,7 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
     public FileDataHandler DataHandler => dataHandler;
 
     public GameData GameData => gameData;
-    
+    public GameManagerBaseState State => currentState;
     protected override void Awake()
     {
         base.Awake();
@@ -97,5 +98,6 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         currentState?.Exit();
         currentState = newState;
         currentState.Enter();
+        OnStateChanged?.Invoke(this,EventArgs.Empty);
     }
 }

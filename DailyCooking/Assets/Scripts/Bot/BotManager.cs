@@ -25,7 +25,21 @@ public class BotManager : PersistentSingleton<BotManager>
     private void Start()
     {
         GameManager.Instance.GameData.TutorialData.OnTutorialDataChanged += OnTutorialDataChanged;
+        GameManager.Instance.OnStateChanged += GameManager_OnStateChanged;
     }
+
+    private void GameManager_OnStateChanged(object sender, EventArgs e)
+    {
+        foreach (var bot in ActiveBots)
+        {
+            if (bot != null)
+            {
+                bot.GetComponent<BotCustomerController>().ResetBot();
+                ReturnBotToPool(bot);
+            }
+        }
+    }
+
     private void OnTutorialDataChanged()
     {
         StartSpawnBot();
@@ -70,7 +84,7 @@ public class BotManager : PersistentSingleton<BotManager>
     }
     private IEnumerator SpawnBotRoutine()
     {
-        while (true)
+        while (GameManager.Instance.State is InGameState)
         {
             var bot = GetBot();
             bot.GetComponent<BotCustomerController>().InitBot();
