@@ -2,7 +2,7 @@
 using System;
 using UnityEngine;
 
-public class TablewareKitchenObject : KitchenObject, IInteractable
+public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightable
 {
     public event EventHandler<OnIngredientAddedEventArgs> OnIngredientAdded;
     public class OnIngredientAddedEventArgs : EventArgs

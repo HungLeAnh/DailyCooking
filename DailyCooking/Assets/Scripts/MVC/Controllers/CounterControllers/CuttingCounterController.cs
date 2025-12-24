@@ -109,8 +109,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
 
     public void SetOptionKitchenObjectSO(int index)
     {
-        // This logic needs to be moved to the service as well.
-        // For now, leaving it as is.
+
     }
 
     public bool IsDone()

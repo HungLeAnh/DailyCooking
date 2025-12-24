@@ -10,7 +10,9 @@ public class PlayerStateContext
     private LayerMask _counterLayermask;
     private KitchenObject _kitchenObject;
     private Transform _kitchenObjectHoldPoint;
-    private IInteractable _selectedInteactableObject;
+    private IInteractable _selectedInteractableObject;
+    private Vector3 _lastInteractDir;
+    private IHighlightable _highlightable;
     public PlayerStateContext(Animator animator, 
         Transform playerTransform, LayerMask counterLayerMask, 
         Transform kitchenObjectHoldPoint)
@@ -33,5 +35,7 @@ public class PlayerStateContext
     public bool IsDisableInput { get => _idDisableInput; set => _idDisableInput = value; }
     public bool IsWalking { get => _isWalking; set => _isWalking = value; }
     public KitchenObject KitchenObject { get => _kitchenObject; set => _kitchenObject = value; }
-    public IInteractable SelectedInteactableObject { get => _selectedInteactableObject; set => _selectedInteactableObject = value; }
+    public IInteractable SelectedInteractableObject { get => _selectedInteractableObject; set => _selectedInteractableObject = value; }
+    public Vector3 LastInteractDir { get => _lastInteractDir;  set=> _lastInteractDir = value; }
+    public IHighlightable Highlightable { get=>_highlightable; set=> _highlightable = value; }
 }

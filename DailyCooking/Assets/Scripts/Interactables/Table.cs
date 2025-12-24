@@ -7,7 +7,7 @@ public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceabl
     [SerializeField] private List<Transform> seats = new List<Transform>();
     [SerializeField] private List<Transform> kitchenObjectFollowPoints = new List<Transform>();
     [SerializeField] private GameObject[] visualGameObjectArray;
-
+    
     private bool[] isSeatOccupied;
     private KitchenObject[] kitchenObjects;
     private bool isPlaced = false;

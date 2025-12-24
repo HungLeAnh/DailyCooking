@@ -9,7 +9,8 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     public PlayerStateContext Context { get; set; }
 
     public event EventHandler OnPickedSomething;
-
+    public event EventHandler<Transform> OnObjectHighlighted;
+    public event EventHandler<Transform> OnSelectInteractable;
     public enum EPlayerState
     {
         // Top-level states
@@ -74,6 +75,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         _stateManager.Update();
 
         HandleMovement();
+        HandleInteractions();
     }
 
     public Transform GetKitchenObjectFollowTransform(int index = 0)
@@ -126,31 +128,31 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                     return;
 
 
-                if (interactableObject != Context.SelectedInteactableObject)
+                if (interactableObject != Context.SelectedInteractableObject)
                 {
-                    SetInteractableObject(interactableObject);
-                    Context.SelectedInteactableObject.InteractEvent(PlayerStateMachine.Instance);
+                    SetInteractableObject(interactableObject, raycastHit.transform);
+                    Context.SelectedInteractableObject.InteractEvent(PlayerStateMachine.Instance);
                 }
-                else if (interactableObject == Context.SelectedInteactableObject)
+                else if (interactableObject == Context.SelectedInteractableObject)
                 {
-                    if (Context.SelectedInteactableObject != null)
+                    if (Context.SelectedInteractableObject != null)
                     {
-                        IHasProgress progress = Context.SelectedInteactableObject as IHasProgress;
+                        IHasProgress progress = Context.SelectedInteractableObject as IHasProgress;
                         if (progress == null)
                         {
-                            SetInteractableObject(interactableObject);
-                            Context.SelectedInteactableObject.InteractEvent(PlayerStateMachine.Instance);
+                            SetInteractableObject(interactableObject, raycastHit.transform);
+                            Context.SelectedInteractableObject.InteractEvent(PlayerStateMachine.Instance);
                         }
                         else
                         {
 
                             if (progress.IsDone() || progress.GetProgress() == -1)
                             {
-                                Context.SelectedInteactableObject.InteractEvent(PlayerStateMachine.Instance);
+                                Context.SelectedInteractableObject.InteractEvent(PlayerStateMachine.Instance);
                             }
                             else
                             {
-                                Context.SelectedInteactableObject.InteractAlternateEvent(PlayerStateMachine.Instance);
+                                Context.SelectedInteractableObject.InteractAlternateEvent(PlayerStateMachine.Instance);
                             }
                         }
                     }
@@ -158,13 +160,50 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
             }
             else
             {
-                SetInteractableObject(null);
+                SetInteractableObject(null, null);
             }
         }
         else
         {
-            SetInteractableObject(null);
+            SetInteractableObject(null,null);
         }
+    }
+    private void HandleInteractions()
+    {
+        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
+
+
+        Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
+
+        if (moveDir != Vector3.zero)
+        {
+            Context.LastInteractDir = moveDir;
+        }
+
+        float interactDistance = 2f;
+        if (Physics.Raycast(transform.position, Context.LastInteractDir, out RaycastHit raycastHit, interactDistance, countersLayerMask))
+        {
+            if (raycastHit.transform.TryGetComponent(out IHighlightable highlightable))
+            {
+                if (Context.Highlightable != null)
+                    Context.Highlightable.OnDeselected();
+                Context.Highlightable = highlightable;
+                Context.Highlightable.OnSelected();
+                OnObjectHighlighted?.Invoke(this, raycastHit.transform);
+                
+            }
+            else
+            {
+                if (Context.Highlightable != null)
+                    Context.Highlightable.OnDeselected();
+            }
+        }
+        else
+        {
+            if (Context.Highlightable != null)
+                Context.Highlightable.OnDeselected();
+        }
+
     }
     private void HandleMovement()
     {
@@ -219,12 +258,10 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         float rotateSpeed = 10f;
         transform.forward = Vector3.Slerp(transform.forward, moveDir, rotateSpeed * Time.deltaTime);
     }
-    private void SetInteractableObject(IInteractable interactable)
+    private void SetInteractableObject(IInteractable interactable,Transform transform)
     {
-
-        //Context.SelectedInteactableObject?.OnDeselected();
-        //if (interactable != null)
-        //    interactable.OnSelected();
-        Context.SelectedInteactableObject = interactable;
+        Context.SelectedInteractableObject = interactable;
+        if (interactable != null)
+            OnSelectInteractable?.Invoke(this, transform);
     }
 }

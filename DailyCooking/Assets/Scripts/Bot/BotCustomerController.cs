@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class BotCustomerController : MonoBehaviour,IInteractable
+public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
 {
     public Action<PlayerStateMachine> OnInteract;
 
@@ -39,6 +39,8 @@ public class BotCustomerController : MonoBehaviour,IInteractable
         waitingFood = new List<FoodSO>();
         bubbleEmotionUI.OnEmotionEnd += OnEmotionEnd;
         bubbleEmotionUI.OnEmotionChanged += OnEmotionChanged;
+
+        OnDeselected();
     }
 
     public void PlayAnimation(BotAnimation.State animationState)
@@ -164,6 +166,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable
     }
     public void InitBot()
     {
+        navMeshAgent.isStopped = false;
         stateMachine.SetState(new WaitForTableState(stateMachine));
         tipPercentage = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.PlayerStats.statsData.TipIncrease;
     }
@@ -214,5 +217,17 @@ public class BotCustomerController : MonoBehaviour,IInteractable
         }
         cash += (int)(cash * tipPercentage);
         TargetTable.SetEatenViual(TargetSeatIndex,cash,exp);
+    }
+    public void StopNavMesh()
+    {
+        stateMachine.GetBotController().NavMeshAgent.isStopped = true;
+        stateMachine.GetBotController().NavMeshAgent.updatePosition = false;
+        stateMachine.GetBotController().NavMeshAgent.updateRotation = false;
+    }
+    public void StartNavMesh()
+    {
+        stateMachine.GetBotController().NavMeshAgent.isStopped = false;
+        stateMachine.GetBotController().NavMeshAgent.updatePosition = true;
+        stateMachine.GetBotController().NavMeshAgent.updateRotation = true;
     }
 }

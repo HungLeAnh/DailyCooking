@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInteractable, IDestroyable,
-    IPlaceable, IModuleItem
+    IPlaceable, IModuleItem,IHighlightable
 {
 
     [SerializeField] private Transform counterTopPoint;
