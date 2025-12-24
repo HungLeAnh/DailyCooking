@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 
 [System.Serializable]
@@ -16,6 +17,7 @@ public class TutorialStep
     [SerializeField] private bool isImportant;
     [SerializeField] private bool isHidePanel;
     [SerializeField] private UnityEvent onStepStart;
+    [SerializeField] private VideoClip clip;
 
     public int Id { get => id; set => id = value; }
     public string Content { get => content; set => content = value; }
@@ -23,6 +25,7 @@ public class TutorialStep
     public bool IsImportant { get => isImportant; set => isImportant = value; }
     public bool IsHidePanel { get => isHidePanel; set => isHidePanel = value; }
     public UnityEvent OnStepStart { get => onStepStart; set => onStepStart = value; }
+    public VideoClip Clip { get => clip; set => clip = value; }
 }
 public class TutorialPanel : MonoBehaviour
 {
@@ -40,10 +43,10 @@ public class TutorialPanel : MonoBehaviour
     [SerializeField] protected GameObject highlightObject;
     [SerializeField] protected Button hightLightButton;
 
-    [SerializeField] private RectTransform panelRectTransform;
+    [SerializeField] protected RectTransform panelRectTransform;
 
     [Header("Tutorial step")]
-    [SerializeField] private List<TutorialStep> tutorialSteps = new List<TutorialStep>();
+    [SerializeField] protected List<TutorialStep> tutorialSteps = new List<TutorialStep>();
 
     protected int currentStepIndex = -1;
 

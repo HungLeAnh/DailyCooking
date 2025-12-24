@@ -52,11 +52,26 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
     {
         UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].StartTutorial();
+        tutorialPanelDictionary[TutorialType.FirstTimePlaying].OnTutorialClosed
+            += TutorialManager_OnTutorialFirstTimePlayingClosed;
     }
+
+    private void TutorialManager_OnTutorialFirstTimePlayingClosed(object sender, EventArgs e)
+    {
+        TutorialManager.Instance.ShowGameMachanicTutorial();
+    }
+
     public void ShowGameMachanicTutorial()
     {
         UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.GameMechanic].StartTutorial();
+        tutorialPanelDictionary[TutorialType.GameMechanic].OnTutorialClosed
+            += TutorialManager_OnTutorialGameMechanicClosed;
+    }
+
+    private void TutorialManager_OnTutorialGameMechanicClosed(object sender, EventArgs e)
+    {
+        UIHUDManager.Instance.ShowAllUIElement();
     }
 }
 

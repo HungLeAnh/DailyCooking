@@ -37,7 +37,6 @@ public class Window_QuestPointer : MonoBehaviour {
 
         float borderSize = 100f;
         Vector3 targetPositionScreenPoint = Camera.main.WorldToScreenPoint(targetPosition);
-        Debug.Log("Target Position Screen Point: " + targetPositionScreenPoint);
         bool isOffScreen = targetPositionScreenPoint.x <= borderSize || targetPositionScreenPoint.x >= Screen.width - borderSize || targetPositionScreenPoint.y <= borderSize || targetPositionScreenPoint.y >= Screen.height - borderSize;
 
         if (isOffScreen)
@@ -51,14 +50,11 @@ public class Window_QuestPointer : MonoBehaviour {
             if (cappedTargetScreenPosition.y <= borderSize) cappedTargetScreenPosition.y = borderSize;
             if (cappedTargetScreenPosition.y >= Screen.height - borderSize) cappedTargetScreenPosition.y = Screen.height - borderSize;
 
-            //Vector3 pointerWorldPosition = Camera.main.ScreenToWorldPoint(cappedTargetScreenPosition);
             pointerRectTransform.position = cappedTargetScreenPosition;
             pointerRectTransform.localPosition = new Vector3(pointerRectTransform.localPosition.x, pointerRectTransform.localPosition.y, 0f);
         }
         else
         {
-            pointerImage.sprite = crossSprite;
-            //Vector3 pointerWorldPosition = Camera.main.ScreenToWorldPoint(targetPositionScreenPoint);
             pointerRectTransform.position = targetPositionScreenPoint;
             pointerRectTransform.localPosition = new Vector3(pointerRectTransform.localPosition.x, pointerRectTransform.localPosition.y, 0f);
 

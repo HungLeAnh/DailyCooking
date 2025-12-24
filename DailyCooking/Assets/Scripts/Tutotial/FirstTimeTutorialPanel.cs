@@ -12,6 +12,7 @@ public class FirstTimeTutorialPanel : TutorialPanel
         {
             nextButton.onClick.AddListener(OnBuildRestaurant);
         }
+        previousButton.transform.gameObject.SetActive(false);
     }
     public void OnGuideClickMenu()
     {
