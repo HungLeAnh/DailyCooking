@@ -12,7 +12,8 @@ public class UISettingsPopup : UIPopup
     [SerializeField] private Slider soundEffectsSlider;
     [SerializeField] private Slider musicSlider;
     [SerializeField] private Button closeButton;
-
+    [SerializeField] private Button guideButton;
+    [SerializeField] private Button quitButton;
 #if UNITY_EDITOR
     [Header("Cheat")]
     [SerializeField] private Transform cheatTransform;
@@ -59,7 +60,14 @@ public class UISettingsPopup : UIPopup
         {
             UIPopupManager.Instance.HidePopup(UIPopupType.UISettingPopup);
         });
-
+        guideButton.onClick.AddListener(() => {
+            TutorialManager.Instance.ShowGameMachanicTutorial();
+        });
+        quitButton.onClick.AddListener(() =>
+        {
+            Loader.Load(Loader.Scene.MainMenuScene);
+            GameManager.Instance.SwitchState(new MainMenuState(GameManager.Instance));
+        });
     }
     public override void ShowPopup(object param = null)
     {
