@@ -11,6 +11,8 @@ public class LeavingState : BotState
 
         
         Vector3 exitPoint = new Vector3(3, 0, -3);
+
+        stateMachine.GetBotController().StartNavMesh();
         stateMachine.GetBotController().NavMeshAgent.SetDestination(exitPoint);
     }
 
