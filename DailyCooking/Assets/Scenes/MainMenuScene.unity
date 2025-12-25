@@ -3012,6 +3012,7 @@ GameObject:
   - component: {fileID: 1533714589}
   - component: {fileID: 1533714590}
   - component: {fileID: 1533714591}
+  - component: {fileID: 1533714592}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -3131,6 +3132,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 796d6664e28a35b41ad85484fb7d8074, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Scripts::UpgradeManager
+--- !u!114 &1533714592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1533714583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a7641241701427439476277e9aad389, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::AdsManager
 --- !u!1 &1549601980
 GameObject:
   m_ObjectHideFlags: 0

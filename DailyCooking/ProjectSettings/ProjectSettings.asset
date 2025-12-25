@@ -258,13 +258,13 @@ PlayerSettings:
   clonedFromGUID: c0afd0d1d80e3634a9dac47e8a0426ea
   templatePackageId: com.unity.template.3d@8.1.3
   templateDefaultScene: Assets/Scenes/SampleScene.unity
-  useCustomMainManifest: 0
+  useCustomMainManifest: 1
   useCustomLauncherManifest: 0
-  useCustomMainGradleTemplate: 0
+  useCustomMainGradleTemplate: 1
   useCustomLauncherGradleManifest: 0
   useCustomBaseGradleTemplate: 0
-  useCustomGradlePropertiesTemplate: 0
-  useCustomGradleSettingsTemplate: 0
+  useCustomGradlePropertiesTemplate: 1
+  useCustomGradleSettingsTemplate: 1
   useCustomProguardFile: 0
   AndroidTargetArchitectures: 3
   AndroidSplashScreenScale: 0
@@ -865,7 +865,7 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Android: UNITY_PIPELINE_URP;DOTWEEN
+    Android: UNITY_PIPELINE_URP;DOTWEEN;LEVELPLAY_DEPENDENCIES_INSTALLED
     EmbeddedLinux: DOTWEEN
     GameCoreScarlett: DOTWEEN
     GameCoreXboxOne: DOTWEEN
@@ -1000,7 +1000,7 @@ PlayerSettings:
   cloudProjectId: 3d86f736-a8b8-4c2f-83ee-83c3b95b0ba0
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: DailyCooking 2024-10-03_21-55-46
+  projectName: My Restaurant
   organizationId: dungvanle747
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
