@@ -7,7 +7,7 @@ public abstract class GameManagerBaseState
         this.gameManager = gameManager;
     }
 
-    public virtual void Enter() { }
-    public virtual void Update() { }
-    public virtual void Exit() { }
+    public abstract void Enter();
+    public abstract void Update();
+    public abstract void Exit();
 }

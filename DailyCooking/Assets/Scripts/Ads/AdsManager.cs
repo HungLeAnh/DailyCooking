@@ -1,7 +1,18 @@
 using System;
 using Unity.Services.LevelPlay;
 using UnityEngine;
-using UnityEngine.Tilemaps;
+public enum AdsType
+{
+    // rewarded Ads
+    Free_Gem,
+    Free_Cash,
+
+    // intertitial ads
+    Break_Time,
+    AFK,
+
+    Unknown = 999
+}
 public class AdsManager : PersistentSingleton<AdsManager>
 {
     private const string APPKEY = "24b0ee825";
@@ -12,7 +23,8 @@ public class AdsManager : PersistentSingleton<AdsManager>
 #endif
     private LevelPlayRewardedAd rewardedAd;
     private LevelPlayInterstitialAd interstitialAd;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private Action callBackAction;
+
     public void Start()
     {
         // Register OnInitFailed and OnInitSuccess listeners
@@ -21,15 +33,20 @@ public class AdsManager : PersistentSingleton<AdsManager>
         LevelPlay.OnImpressionDataReady += ImpressionDataReadyEvent;
         // SDK init        
         LevelPlay.Init(APPKEY);
-        LevelPlay.SetMetaData("is_test_suite", "enable");
+        //LevelPlay.SetMetaData("is_test_suite", "enable");
         LevelPlay.SetMetaData("do_not_sell", "true");
         LevelPlay.SetConsent(true);
         LevelPlay.SetMetaData("is_child_directed", "true");
-
-        CreateRewardedAd();
-        CreateInterstitialAd();
-        LevelPlay.ValidateIntegration();
         
+
+    }
+    public bool IsRewardedAdsLoaded()
+    {
+        return rewardedAd.IsAdReady();
+    }
+    public bool IsInterstitialAdsLoaded()
+    {
+        return interstitialAd.IsAdReady();
     }
 
     private void CreateRewardedAd()
@@ -46,6 +63,8 @@ public class AdsManager : PersistentSingleton<AdsManager>
         rewardedAd.OnAdInfoChanged += RewardedOnAdInfoChangedEvent;
         
         rewardedAd.OnAdRewarded += RewardedOnAdRewardedEvent;
+        rewardedAd.LoadAd();
+
     }
     private void CreateInterstitialAd()
     {
@@ -59,8 +78,9 @@ public class AdsManager : PersistentSingleton<AdsManager>
         interstitialAd.OnAdClicked += InterstitialOnAdClickedEvent;
         interstitialAd.OnAdClosed += InterstitialOnAdClosedEvent;
         interstitialAd.OnAdInfoChanged += InterstitialOnAdInfoChangedEvent;
-    }
+        interstitialAd.LoadAd();
 
+    }
     private void ImpressionDataReadyEvent(LevelPlayImpressionData impressionData)
     {
         Debug.Log("unity-script: ImpressionDataReadyEvent impressionData = " + impressionData);
@@ -84,27 +104,24 @@ public class AdsManager : PersistentSingleton<AdsManager>
 
     private void SdkInitializationCompletedEvent(LevelPlayConfiguration configuration)
     {
-        LevelPlay.LaunchTestSuite();
+        Debug.Log("LevelPlay Initialized! Now it is safe to load ads.");
+        //LevelPlay.LaunchTestSuite();
+        CreateRewardedAd();
+        CreateInterstitialAd();
     }
-    public void LoadInterstitialAd()
-    {
-        interstitialAd.LoadAd();
-    }
-    public void PlayInterstitialAds(string placementName = null)
+
+    public void ShowInterstitialAds(string placementName = null)
     {
         if (interstitialAd.IsAdReady() && !LevelPlayInterstitialAd.IsPlacementCapped(placementName))
         {
             interstitialAd.ShowAd(placementName);
         }
     }
-    public void LoadRewardedAd()
-    {
-        rewardedAd.LoadAd();
-    }
-    public void PlayRewardedAds(string placementName = null)
+    public void ShowRewardedAds(string placementName = null, Action callback = null)
     {
         if (rewardedAd.IsAdReady() && !LevelPlayRewardedAd.IsPlacementCapped(placementName))
         {
+            callBackAction = callback;
             rewardedAd.ShowAd(placementName);
         }
     }
@@ -113,7 +130,10 @@ public class AdsManager : PersistentSingleton<AdsManager>
     private void RewardedOnAdLoadFailedEvent(LevelPlayAdError error) { }
     private void RewardedOnAdDisplayedEvent(LevelPlayAdInfo adInfo) { }
     private void RewardedOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError error) { }
-    private void RewardedOnAdRewardedEvent(LevelPlayAdInfo adInfo, LevelPlayReward adReward) { }
+    private void RewardedOnAdRewardedEvent(LevelPlayAdInfo adInfo, LevelPlayReward adReward) 
+    {
+        callBackAction?.Invoke();
+    }
     private void RewardedOnAdClosedEvent(LevelPlayAdInfo adInfo) { }
     private void RewardedOnAdClickedEvent(LevelPlayAdInfo adInfo) { }
     private void RewardedOnAdInfoChangedEvent(LevelPlayAdInfo adInfo) { }

@@ -8,4 +8,12 @@ public class MainMenuState : GameManagerBaseState
     {
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup);
     }
+
+    public override void Exit()
+    {
+    }
+
+    public override void Update()
+    {
+    }
 }
