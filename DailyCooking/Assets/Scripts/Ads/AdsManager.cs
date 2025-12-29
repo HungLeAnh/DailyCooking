@@ -134,7 +134,10 @@ public class AdsManager : PersistentSingleton<AdsManager>
     {
         callBackAction?.Invoke();
     }
-    private void RewardedOnAdClosedEvent(LevelPlayAdInfo adInfo) { }
+    private void RewardedOnAdClosedEvent(LevelPlayAdInfo adInfo) 
+    {
+        rewardedAd.LoadAd();
+    }
     private void RewardedOnAdClickedEvent(LevelPlayAdInfo adInfo) { }
     private void RewardedOnAdInfoChangedEvent(LevelPlayAdInfo adInfo) { }
     // Implement the InterstitialAds events
@@ -143,6 +146,9 @@ public class AdsManager : PersistentSingleton<AdsManager>
     private void InterstitialOnAdDisplayedEvent(LevelPlayAdInfo adInfo) { }
     private void InterstitialOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError error) { }
     private void InterstitialOnAdClickedEvent(LevelPlayAdInfo adInfo) { }
-    private void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo) { }
+    private void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo) 
+    {
+        interstitialAd.LoadAd();
+    }
     private void InterstitialOnAdInfoChangedEvent(LevelPlayAdInfo adInfo) { }
 }

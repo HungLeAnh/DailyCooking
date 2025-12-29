@@ -319,7 +319,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &79027321
 RectTransform:
   m_ObjectHideFlags: 0
@@ -355,8 +355,7 @@ MonoBehaviour:
   moveDistance: 100
   duration: 1.5
   scaleInitial: 0.5
-  textElement: {fileID: 982245827}
-  canvasGroup: {fileID: 665436567}
+  alertObject: {fileID: 665436565}
 --- !u!1 &142986997
 GameObject:
   m_ObjectHideFlags: 0
@@ -1464,7 +1463,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &665436566
 RectTransform:
   m_ObjectHideFlags: 0
