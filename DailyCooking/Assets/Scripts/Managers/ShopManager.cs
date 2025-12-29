@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class ShopManager : PersistentSingleton<ShopManager>
 {
+    [Header("Free Currency")]
+    [SerializeField] private List<DailyFreeCurrency> dailyFreeCurrency = new List<DailyFreeCurrency>();
+
+    public List<DailyFreeCurrency> DailyFreeCurrency { get => dailyFreeCurrency; set => dailyFreeCurrency = value; }
+
     public void OnPurchase(ConfigShopItem item, Dictionary<string, int> parsedData)
     {
         if(item.Price > GameManager.Instance.GameData.PlayerStats.playerData.Coins)
@@ -30,5 +35,5 @@ public class ShopManager : PersistentSingleton<ShopManager>
             }
 
         }
-    }
+    }   
 }

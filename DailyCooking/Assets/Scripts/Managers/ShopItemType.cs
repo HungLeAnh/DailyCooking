@@ -1,7 +1,8 @@
 public enum ShopItemType
 {
+    None,
     Item,
-    Currency,
         
-    None
+    Gem,
+    Coin,
 }

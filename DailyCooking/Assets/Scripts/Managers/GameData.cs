@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [System.Serializable]
 public class GameData
@@ -10,6 +11,7 @@ public class GameData
     public TutorialData TutorialData { get; private set; } = new TutorialData();
     public MenuData MenuData { get; private set; } = new MenuData();
     public UpgradeData UpgradeData { get; private set; } = new UpgradeData();
+    public ShopData ShopData { get; private set; } = new ShopData();
     public void UpdateGridData(GridXZ<GridObject> grid)
     {
         GridData.UpdateGridData(grid);
@@ -47,28 +49,70 @@ public class GameData
     {
         return UpgradeData.PurchasedUpgrades.Contains(upgradeData.Guid);
     }
-}
-
-[System.Serializable]
-public class UpgradeData
-{
-
-    [System.NonSerialized]
-    public Action OnMenuDataChanged;
-
-    private List<string> purchasedUpgrades = new List<string>();
-
-    public List<string> PurchasedUpgrades => purchasedUpgrades;
-
-    public bool PurchaseUpgrade(UpgradeSO upgradeData)
+    public void IncreaseShopDailyFreeWatchCount(ShopItemType type)
     {
-        if (!purchasedUpgrades.Contains(upgradeData.Guid))
+        switch (type)
         {
-            purchasedUpgrades.Add(upgradeData.Guid);
-            OnMenuDataChanged?.Invoke();
+            case ShopItemType.Coin:
+                ShopData.UpdateDailyFreeItemCoinCount();
+                break;
+            case ShopItemType.Gem:
+                ShopData.UpdateDailyFreeItemGemCount();
+                break;
+            default:
+                break;
+        }
+    }
+    public int GetShopDailyFreeWatchCount(ShopItemType id)
+    {
+        switch (id)
+        {
+            case ShopItemType.Gem:
+                return ShopData.DailyFreeItemGemCount;
+            case ShopItemType.Coin:
+                return ShopData.DailyFreeItemCoinCount;
+
+            default:
+                return -1;
+
+        }
+    }
+}
+[Serializable]
+public class ShopData
+{
+    [System.NonSerialized]
+    public Action OnResourceChange;
+
+    private DateTime _dateLastRefreshShopDailyFree;
+    private int dailyFreeItemCoinCount = 0;
+    private int dailyFreeItemGemCount = 0;
+
+    public int DailyFreeItemCoinCount { get => dailyFreeItemCoinCount; set => dailyFreeItemCoinCount = value; }
+    public int DailyFreeItemGemCount { get => dailyFreeItemGemCount; set => dailyFreeItemGemCount = value; }
+    public DateTime DateLastRefreshShopDailyFree { get => _dateLastRefreshShopDailyFree; set => _dateLastRefreshShopDailyFree = value; }
+
+    public void UpdateDailyFreeItemCoinCount()
+    {
+        dailyFreeItemCoinCount += 1;
+        OnResourceChange?.Invoke();
+    }
+    public void UpdateDailyFreeItemGemCount()
+    {
+        dailyFreeItemGemCount += 1;
+        OnResourceChange?.Invoke();
+    }
+    public bool RefreshDailyShopOffer()
+    {
+        if (GameManager.Instance.GameData.ShopData.DateLastRefreshShopDailyFree < DateTime.UtcNow)
+        {
+            GameManager.Instance.GameData.ShopData.DateLastRefreshShopDailyFree = DateTime.UtcNow;
+            dailyFreeItemCoinCount = 0;
+            dailyFreeItemGemCount = 0;
             return true;
         }
-        return false;
+        else
+            return false;
     }
 }
 

@@ -9,6 +9,6 @@ public class UILevelUpRewardItem : MonoBehaviour
     public void SetItem(Sprite icon, int amount)
     {
         rewardIcon.sprite = icon;
-        itemAmountText.text = amount.ToString();
+        itemAmountText.text = MathUtil.NumberFormat(amount);
     }
 }

@@ -15,7 +15,11 @@ public class PlayerStats
         playerData.Coins += addCoins;
         OnResourceChange?.Invoke();
     }
-
+    public void UpdatePlayerGems(int addGem)
+    {
+        playerData.Gems += addGem; 
+        OnResourceChange?.Invoke();
+    }
     public void UpdatePlayerExp(int addExp)
     {
         playerData.Exp += addExp;

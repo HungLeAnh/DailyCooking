@@ -1,18 +1,19 @@
-﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-
-public class UILevelUpPopup : UIPopup
+public class UIRewardPopup : UIPopup
 {
-
+    public enum RewardType
+    {
+        Coin,
+        Gem,
+    }
     public class Param
     {
         public RewardData[] reward;
     }
 
-    [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private GameObject RewardItemPrefab;
     [SerializeField] private RectTransform RewardContainer;
 
@@ -26,7 +27,6 @@ public class UILevelUpPopup : UIPopup
     {
         base.ShowPopup(param);
 
-        levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
         if (_openParam != null)
         {
             Param popupParam = _openParam as Param;
@@ -36,7 +36,7 @@ public class UILevelUpPopup : UIPopup
                 GameObject rewardItem = Instantiate(RewardItemPrefab, RewardContainer);
                 rewardItem.SetActive(true);
                 var item = rewardItem.GetComponent<UILevelUpRewardItem>();
-                item.SetItem(GetRewardIcon(data.id),data.amount);
+                item.SetItem(GetRewardIcon(data.id), data.amount);
                 rewardItems.Add(item);
             }
         }
@@ -54,14 +54,16 @@ public class UILevelUpPopup : UIPopup
         if (_openParam != null)
         {
             Param popupParam = _openParam as Param;
-            foreach(var item in popupParam.reward)
+            foreach (var item in popupParam.reward)
             {
-                if (item.id == nameof(RewardData.RewardType.Coin))
+                if (item.id == nameof(RewardType.Coin))
                 {
                     GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(item.amount);
                 }
-                else if (item.id == nameof(RewardData.RewardType.Gem))
+                else if (item.id == nameof(RewardType.Gem))
                 {
+                    GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(item.amount);
+
                 }
             }
         }
@@ -71,9 +73,9 @@ public class UILevelUpPopup : UIPopup
     {
         switch (rewardId)
         {
-            case nameof(RewardData.RewardType.Coin):
+            case nameof(RewardType.Coin):
                 return coinIcon;
-            case nameof(RewardData.RewardType.Gem):
+            case nameof(RewardType.Gem):
                 return gemIcon;
             default:
                 return coinIcon;
@@ -83,7 +85,6 @@ public class UILevelUpPopup : UIPopup
     public void OnCloseButtonClicked()
     {
         HidePopup();
-        AdsManager.Instance.ShowInterstitialAds("Level_Up");
     }
-    
+
 }

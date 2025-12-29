@@ -32,7 +32,7 @@ public class UIShopItem : MonoBehaviour
 
         //imageIcon.sprite = item.Icon;
         textName.text = item.Name;
-        textPrice.text = item.Price.ToString();
+        textPrice.text = MathUtil.NumberFormat(item.Price);
         buttonBuy.onClick.AddListener(OnClickButtonBuy);
         if(item.UnlockLevel > GameManager.Instance.GameData.PlayerStats.playerData.Level)
         {
