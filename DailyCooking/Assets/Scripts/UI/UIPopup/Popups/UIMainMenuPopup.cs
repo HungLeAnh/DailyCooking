@@ -26,5 +26,16 @@ public class UIMainMenuPopup : UIPopup
         });
 
     }
-    
+    public override void HidePopup(object param = null)
+    {
+        base.HidePopup(param);
+    }
+    public override void ShowPopup(object param = null)
+    {
+        base.ShowPopup(param);
+    }
+    public override void SetupPopup()
+    {
+        base.SetupPopup();
+    }
 }

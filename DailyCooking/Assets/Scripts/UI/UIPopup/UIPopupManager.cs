@@ -26,15 +26,17 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>, IUIPopupManag
         if(uiPopupDictionary.TryGetValue(popupType, out var value))
         {
             value.HidePopup(param);
-            if(visiblePopupList.Contains(value))
-                visiblePopupList.Remove(value);
         }
         else
         {
             Debug.LogWarning($"Popup '{popupType}' not found in the dictionary.");
         }
     }
-
+    public void RemoveFromeVisibleList(UIPopup value)
+    {
+        if (visiblePopupList.Contains(value))
+            visiblePopupList.Remove(value);
+    }
     public void ShowPopup(UIPopupType popupType,object param = null)
     {
         if (!uiPopupDictionary.ContainsKey(popupType))
@@ -87,4 +89,8 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>, IUIPopupManag
         return visiblePopupList[visiblePopupList.Count - 1];
     }
 
+    public bool IsShowingPopup()
+    {
+        return visiblePopupList.Count > 0;
+    }
 }

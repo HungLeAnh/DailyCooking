@@ -22,11 +22,19 @@ public class UIFoodDetailPopup : UIPopup
 
     private FoodSO currentFoodSO;
     private List<Transform> ingredientTransformList = new List<Transform>();
-    void Start()
+    private void Start()
     {
         ingredientTagPrefab.SetActive(false);
         closeButton.onClick.AddListener(OnCloseClick);
 
+    }
+    public override void HidePopup(object param = null)
+    {
+        base.HidePopup(param);
+    }
+    public override void SetupPopup()
+    {
+        base.SetupPopup();
     }
     public override void ShowPopup(object param)
     {

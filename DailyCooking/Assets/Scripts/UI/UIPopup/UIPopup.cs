@@ -14,6 +14,7 @@ public class UIPopup : MonoBehaviour
         //Debug.Log("HidePopup");
         gameObject.SetActive(false);
         _closeParam = param;
+        UIPopupManager.Instance.RemoveFromeVisibleList(this);
     }
 
     public virtual void ShowPopup(object param = null)

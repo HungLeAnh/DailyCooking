@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class InGameState : GameManagerBaseState
@@ -11,17 +12,20 @@ public class InGameState : GameManagerBaseState
         GameManager.Instance.InitializePlayer();
         interstitialCounter = interstitialInterval;
     }
-    public override void Update()
+    public override async void Update()
     {
         if (interstitialCounter > 0)
         {
             interstitialCounter -= Time.deltaTime;
+            return;
         }
-        else
-        {
-            interstitialCounter = interstitialInterval;
-            AdsManager.Instance.ShowInterstitialAds();
-        }
+
+        while (UIPopupManager.Instance.IsShowingPopup())
+            await Task.Yield(); 
+        
+        interstitialCounter = interstitialInterval;
+        AdsManager.Instance.ShowInterstitialAds();
+        
     }
     public override void Exit()
     {

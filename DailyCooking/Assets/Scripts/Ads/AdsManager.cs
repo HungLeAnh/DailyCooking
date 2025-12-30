@@ -21,6 +21,9 @@ public class AdsManager : PersistentSingleton<AdsManager>
     private const string RewardedAdUnitId = "4hamsbcysnxm8xlp";
     private const string BannerAdUnitId = "";
 #endif
+
+    private int interstitialRetryAttempt;
+    private int rewardedRetryAttempt;
     private LevelPlayRewardedAd rewardedAd;
     private LevelPlayInterstitialAd interstitialAd;
     private Action callBackAction;
@@ -48,7 +51,14 @@ public class AdsManager : PersistentSingleton<AdsManager>
     {
         return interstitialAd.IsAdReady();
     }
-
+    private void LoadIntertitialAds()
+    {
+        interstitialAd.LoadAd();
+    }
+    private void LoadRewardAds()
+    {
+        rewardedAd.LoadAd();
+    }
     private void CreateRewardedAd()
     {
         // Register to Rewarded events
@@ -126,8 +136,17 @@ public class AdsManager : PersistentSingleton<AdsManager>
         }
     }
     // Implement the RewardAds events
-    private void RewardedOnAdLoadedEvent(LevelPlayAdInfo adInfo) { }
-    private void RewardedOnAdLoadFailedEvent(LevelPlayAdError error) { }
+    private void RewardedOnAdLoadedEvent(LevelPlayAdInfo adInfo) 
+    {
+        rewardedRetryAttempt = 0;
+    }
+    private void RewardedOnAdLoadFailedEvent(LevelPlayAdError error) 
+    {
+        rewardedRetryAttempt++;
+        double retryDelay = Math.Pow(2, Math.Min(6, rewardedRetryAttempt));
+
+        Invoke(nameof(LoadRewardAds), (float)retryDelay);
+    }
     private void RewardedOnAdDisplayedEvent(LevelPlayAdInfo adInfo) { }
     private void RewardedOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError error) { }
     private void RewardedOnAdRewardedEvent(LevelPlayAdInfo adInfo, LevelPlayReward adReward) 
@@ -141,8 +160,17 @@ public class AdsManager : PersistentSingleton<AdsManager>
     private void RewardedOnAdClickedEvent(LevelPlayAdInfo adInfo) { }
     private void RewardedOnAdInfoChangedEvent(LevelPlayAdInfo adInfo) { }
     // Implement the InterstitialAds events
-    private void InterstitialOnAdLoadedEvent(LevelPlayAdInfo adInfo) { }
-    private void InterstitialOnAdLoadFailedEvent(LevelPlayAdError error) { }
+    private void InterstitialOnAdLoadedEvent(LevelPlayAdInfo adInfo) 
+    {
+        interstitialRetryAttempt = 0;
+    }
+    private void InterstitialOnAdLoadFailedEvent(LevelPlayAdError error) 
+    {
+        interstitialRetryAttempt++;
+        double retryDelay = Math.Pow(2, Math.Min(6, interstitialRetryAttempt));
+
+        Invoke(nameof(LoadIntertitialAds), (float)retryDelay);
+    }
     private void InterstitialOnAdDisplayedEvent(LevelPlayAdInfo adInfo) { }
     private void InterstitialOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError error) { }
     private void InterstitialOnAdClickedEvent(LevelPlayAdInfo adInfo) { }
