@@ -4,7 +4,7 @@ using UnityEngine;
 public class InGameState : GameManagerBaseState
 {
     private float interstitialCounter = 0;
-    private float interstitialInterval = 30f;
+    private float interstitialInterval = 180f;
     public InGameState(GameManager gameManager) : base(gameManager) { }
 
     public override void Enter()
