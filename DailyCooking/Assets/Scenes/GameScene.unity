@@ -1994,13 +1994,6 @@ MonoBehaviour:
   gridGuideMaterial: {fileID: 2100000, guid: 3077f760661a789459e2a175cc9eac66, type: 2}
   floorContainer: {fileID: 620875409}
   floorPrefab: {fileID: 6862675218130391429, guid: 98721bfc86e350e489641da42c709c78, type: 3}
-  wallContainer: {fileID: 639065543}
-  wallPrefab: {fileID: 6862675218130391429, guid: 495d0a1ab4afbc24ab42ff32ac53ddb5, type: 3}
-  doorContainer: {fileID: 1827430284}
-  doorPrefab: {fileID: 6862675218130391429, guid: a4d35a292ba67a64787d06f04df9d63e, type: 3}
-  doorPosition: {x: 2, y: 0}
-  pillarContainer: {fileID: 565428492}
-  pillarPrefab: {fileID: 6862675218130391429, guid: 7f8514c2698767146883472d8762952f, type: 3}
   roadContainer: {fileID: 188843614}
   roadPrefab: {fileID: 6862675218130391429, guid: c90f83a767765614ebc45e0fbdd997ed, type: 3}
   roadCornerPrefab: {fileID: 6862675218130391429, guid: 40108cecb4f9d97428ae524b6243cf68, type: 3}
@@ -2308,6 +2301,7 @@ MonoBehaviour:
     m_Bits: 128
   _camera: {fileID: 1373700686}
   visualContainer: {fileID: 1995011674}
+  confirmButton: {fileID: 1148412823}
 --- !u!4 &2070905293
 Transform:
   m_ObjectHideFlags: 0

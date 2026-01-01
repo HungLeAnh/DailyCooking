@@ -16,6 +16,8 @@ public class UIShopItem : MonoBehaviour
     private ShopItemCategory itemCategory;
     private Dictionary<string, int> parsedData = new Dictionary<string, int>();
 
+    public Button ButtonBuy => buttonBuy;
+    public ConfigShopItem ConfigShopItem => configShopItem;
     private void OnDestroy()
     {
         if (GameManager.Instance == null)
@@ -33,7 +35,7 @@ public class UIShopItem : MonoBehaviour
         //imageIcon.sprite = item.Icon;
         textName.text = item.Name;
         textPrice.text = MathUtil.NumberFormat(item.Price);
-        buttonBuy.onClick.AddListener(OnClickButtonBuy);
+        ButtonBuy.onClick.AddListener(OnClickButtonBuy);
         if(item.UnlockLevel > GameManager.Instance.GameData.PlayerStats.playerData.Level)
         {
             lockTransform.gameObject.SetActive(true);

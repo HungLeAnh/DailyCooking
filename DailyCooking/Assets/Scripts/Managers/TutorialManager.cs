@@ -11,7 +11,9 @@ public enum TutorialType
 {
     None,
     FirstTimePlaying,
-    GameMechanic
+    GameMechanic,
+    BuildingTutorial,
+    MenuTutorial,
 }
 
 
@@ -47,7 +49,6 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
             ShowFirstTimeTutorial();
         }
     }
-
     public void ShowFirstTimeTutorial()
     {
         UIHUDManager.Instance.HideAllUIElement();
@@ -58,9 +59,30 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
 
     private void TutorialManager_OnTutorialFirstTimePlayingClosed(object sender, EventArgs e)
     {
-        TutorialManager.Instance.ShowGameMachanicTutorial();
+        ShowBuildingTutorial();
+    }
+    public void ShowBuildingTutorial()
+    {
+        tutorialPanelDictionary[TutorialType.BuildingTutorial].StartTutorial();
+        tutorialPanelDictionary[TutorialType.BuildingTutorial].OnTutorialClosed += TutorialManager_OnBuildingTutorialClosed;
     }
 
+    private void TutorialManager_OnBuildingTutorialClosed(object sender, EventArgs e)
+    {
+        ShowMenuTutorial();
+    }
+
+    public void ShowMenuTutorial()
+    {
+        tutorialPanelDictionary[TutorialType.MenuTutorial].StartTutorial();
+        tutorialPanelDictionary[TutorialType.MenuTutorial].OnTutorialClosed
+            += TutorialManager_OnTutorialMenuClosed;
+    }
+
+    private void TutorialManager_OnTutorialMenuClosed(object sender, EventArgs e)
+    {
+        ShowGameMachanicTutorial();
+    }    
     public void ShowGameMachanicTutorial()
     {
         UIHUDManager.Instance.HideAllUIElement();

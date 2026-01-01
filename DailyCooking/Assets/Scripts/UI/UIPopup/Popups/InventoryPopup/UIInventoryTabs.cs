@@ -12,6 +12,7 @@ public class UIInventoryTabs : MonoBehaviour
     public event UnityAction<InventoryTab> TabChanged;
 
     bool isSet = false;
+    public List<UIInventoryTab> TabList => tabList;
     private void Awake()
     {
         isSet = false;

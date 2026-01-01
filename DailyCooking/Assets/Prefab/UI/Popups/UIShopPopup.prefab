@@ -10541,8 +10541,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e606a0fdeaaec0b42977046eeb266995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scrollRect: {fileID: 6077730741210098989}
   _shopParent: {fileID: 8328456141716559006}
   _shopCategoryPrefab: {fileID: 1074205535291393858, guid: 991e4c1fc9e7b924180c89de05931f1f, type: 3}
+  closeButton: {fileID: 7779504846677559071}
   timerText: {fileID: 8079491735272656452}
   _dailyOfferContainer: {fileID: 225640957032662060}
 --- !u!114 &643089105041502328
@@ -13156,9 +13158,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 250, y: 10}
+  m_AnchoredPosition: {x: 300, y: 62}
   m_SizeDelta: {x: 180, y: 110}
-  m_Pivot: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8987101558710791110
 CanvasRenderer:
   m_ObjectHideFlags: 0

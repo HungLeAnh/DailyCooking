@@ -34,6 +34,9 @@ public class UIInventoryPopup : UIPopup
     private bool isPlacingObject = false;
     private bool isShowItems = false;
 
+    public UIInventoryTabs InventoryTabs => _tabsPanel;
+    public List<UIInventoryItem> ItemList => _listItem;
+    public Button BackButton => backButton;
     public override void SetupPopup()
     {
         base.SetupPopup();

@@ -1,13 +1,15 @@
 ﻿using System;
 using UnityEngine;
-public class BuildingGhost : MonoBehaviour 
+using UnityEngine.UI;
+public class BuildingGhost : SimpleSingleton<BuildingGhost> 
 {
+    public Action<Vector3> OnBUildingDrag;
     [SerializeField] private GameObject buildingCanvas;
     [SerializeField] private GameObject buildingGhostCanvas;
     [SerializeField] private LayerMask buildingGhostLayer;
     [SerializeField] private Camera _camera = null;
     [SerializeField] private Transform visualContainer;
-
+    [SerializeField] private Button confirmButton;
 
     private Transform visual;
     private PlacedObjectTypeSO placedObjectTypeSO;
@@ -16,6 +18,7 @@ public class BuildingGhost : MonoBehaviour
     private bool isRotating = false;
     private Quaternion targetQuaternion;
 
+    public Button ConfirmButton => confirmButton;
     private void Start() 
     {
         RefreshVisual(-Vector3.one);
@@ -102,6 +105,8 @@ public class BuildingGhost : MonoBehaviour
         targetPosition.y = 1f;
         visualContainer.position = Vector3.Lerp(visualContainer.position, targetPosition, Time.deltaTime * 20f);
         visual.localRotation = Quaternion.Lerp(visual.localRotation, targetQuaternion, Time.deltaTime * 20f);
+
+        OnBUildingDrag?.Invoke(targetPosition);
     }
 
     private void RefreshVisual(Vector3 targetPosition) {
