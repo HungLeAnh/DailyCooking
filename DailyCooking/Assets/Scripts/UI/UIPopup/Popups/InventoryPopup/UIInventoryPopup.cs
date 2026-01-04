@@ -66,6 +66,7 @@ public class UIInventoryPopup : UIPopup
                 
             }
         });
+        titleText.text = TITLE;
     }
 
     public override void ShowPopup(object param = null)
@@ -80,7 +81,7 @@ public class UIInventoryPopup : UIPopup
 
         GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingStartEvent();
         UIHUDManager.Instance.HideAllUIElement();
-
+        GameManager.Instance.HideJoyStick();
     }
 
     public override void HidePopup(object param = null)
@@ -105,7 +106,7 @@ public class UIInventoryPopup : UIPopup
         {
             GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingEndEvent();
             UIHUDManager.Instance.ShowAllUIElement();
-
+            GameManager.Instance.ShowJoyStick();
         }
 
     }
