@@ -62,6 +62,7 @@ public class UILevelUpPopup : UIPopup
                 }
                 else if (item.id == nameof(RewardData.RewardType.Gem))
                 {
+                    GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(item.amount);
                 }
             }
         }
