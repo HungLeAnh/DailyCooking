@@ -10,6 +10,8 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
 
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Vector3 playerSpawnPosition;
+    [SerializeField] private UIJoyStick joyStick;
+
     private GameData gameData;
     private FileDataHandler dataHandler;
     private GameManagerBaseState currentState;
@@ -99,5 +101,14 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         currentState = newState;
         currentState.Enter();
         OnStateChanged?.Invoke(this,EventArgs.Empty);
+    }
+
+    public void HideJoyStick()
+    {
+       joyStick.gameObject.SetActive(false);
+    }
+    public void ShowJoyStick()
+    {
+        joyStick.gameObject.SetActive(true);
     }
 }

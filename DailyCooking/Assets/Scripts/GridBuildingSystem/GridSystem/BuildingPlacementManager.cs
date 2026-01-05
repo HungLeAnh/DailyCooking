@@ -89,8 +89,8 @@ public class BuildingPlacementManager : IBuildingPlacementManager
                     new GridObject(gridManager.Grid, placedObject, gridPosition.x, gridPosition.y));
 
             }
+            GameManager.Instance.GameData.RemoveInventoryData(placedObjectTypeSO.Guid);
             OnObjectPlaced?.Invoke(this, EventArgs.Empty);
-            
             gameManager.GameData.UpdateGridData(gridManager.Grid);
             DeselectObjectType();
             return true;
@@ -217,20 +217,23 @@ public class BuildingPlacementManager : IBuildingPlacementManager
 
     public void HandleExistingObjectInteraction(PlacedObjectView targetPlaceObjectView,Vector3 objectPosition)
     {
-        // dir = targetPlaceObjectView.GetModel().Dir; 
+        dir = targetPlaceObjectView.GetModel().Dir; 
         SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO, objectPosition);
-        if (this.placedObjectTypeSO != null)
-        {
-            gameManager.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);
-            gameManager.GameData.UpdateGridData(gridManager.Grid);
-            OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
-        }
         var destroyableObject = targetPlaceObjectView.GetComponent<IDestroyable>();
         destroyableObject.DestroySelf();
         DestroyPlaceObject(targetPlaceObjectView);
 
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,
             new UIInventoryPopup.Param { isPlacingObject = true });
+    }
+    public void ReturnObjectToInventory()
+    {
+        if (this.placedObjectTypeSO != null)
+        {
+            gameManager.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);
+            gameManager.GameData.UpdateGridData(gridManager.Grid);
+            OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
+        }
     }
 
     private void DeselectObjectType()

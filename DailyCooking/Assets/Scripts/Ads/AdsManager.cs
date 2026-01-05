@@ -122,14 +122,14 @@ public class AdsManager : PersistentSingleton<AdsManager>
 
     public void ShowInterstitialAds(string placementName = "")
     {
-        if (interstitialAd.IsAdReady() && !LevelPlayInterstitialAd.IsPlacementCapped(placementName))
+        if (interstitialAd.IsAdReady())
         {
             interstitialAd.ShowAd(placementName);
         }
     }
     public void ShowRewardedAds(string placementName = "", Action callback = null)
     {
-        if (rewardedAd.IsAdReady() && !LevelPlayRewardedAd.IsPlacementCapped(placementName))
+        if (rewardedAd.IsAdReady())
         {
             callBackAction = callback;
             rewardedAd.ShowAd(placementName);

@@ -66,6 +66,7 @@ public class UIInventoryPopup : UIPopup
                 
             }
         });
+        titleText.text = TITLE;
     }
 
     public override void ShowPopup(object param = null)
@@ -77,10 +78,12 @@ public class UIInventoryPopup : UIPopup
         {
             _listItem[i].ItemSelected += PlacingItem;
         }
+        if(!isShowItems)
+            listItemGameObject.SetActive(false);
 
         GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingStartEvent();
         UIHUDManager.Instance.HideAllUIElement();
-
+        GameManager.Instance.HideJoyStick();
     }
 
     public override void HidePopup(object param = null)
@@ -100,12 +103,12 @@ public class UIInventoryPopup : UIPopup
             _listItem[i].ItemSelected -= PlacingItem;
         }
 
-        //unsub switch tab here
+        
         if (!isPlacingObject)
         {
             GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingEndEvent();
             UIHUDManager.Instance.ShowAllUIElement();
-
+            GameManager.Instance.ShowJoyStick();
         }
 
     }
@@ -181,9 +184,9 @@ public class UIInventoryPopup : UIPopup
             selectedItemId = itemIndex;
         }
 
-        GameManager.Instance.GameData.RemoveInventoryData(itemToInspect.Guid);
 
-        GridBuildingSystem.Instance.BuildingPlacementManager.SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
+        GridBuildingSystem.Instance.BuildingPlacementManager
+            .SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
         isPlacingObject = true;
         HidePopup();
     }

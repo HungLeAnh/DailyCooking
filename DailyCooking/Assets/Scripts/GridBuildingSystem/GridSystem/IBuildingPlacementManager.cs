@@ -22,4 +22,5 @@ public interface IBuildingPlacementManager
     void FireOnBuildingStartEvent();
     void FireOnBuildingEndEvent();
     void HandleExistingObjectInteraction(PlacedObjectView targetPlaceObjectView,Vector3 objectPosition);
+    void ReturnObjectToInventory();
 }

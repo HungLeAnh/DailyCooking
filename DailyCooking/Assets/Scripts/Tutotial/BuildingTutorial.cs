@@ -146,6 +146,9 @@ public class BuildingTutorial : TutorialPanel
         if (Vector3.Distance(currentPos,targetPoint) < 0.5f)
         {
             BuildingGhost.Instance.OnBUildingDrag -= OnBuildingDrag;
+            BuildingGhost.Instance.IsDragging = false;
+            BuildingGhost.Instance.SnapTo(targetPoint);
+
             hand.gameObject.SetActive(false);
 
             HighlightElement(BuildingGhost.Instance.ConfirmButton.transform as RectTransform, true);
@@ -193,6 +196,8 @@ public class BuildingTutorial : TutorialPanel
         if (Vector3.Distance(currentPos, targetPoint) < 0.5f)
         {
             BuildingGhost.Instance.OnBUildingDrag -= OnBuildingDrag2;
+            BuildingGhost.Instance.IsDragging = false;
+            BuildingGhost.Instance.SnapTo(targetPoint);
             hand.gameObject.SetActive(false);
 
             HighlightElement(BuildingGhost.Instance.ConfirmButton.transform as RectTransform, true);

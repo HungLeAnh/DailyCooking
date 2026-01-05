@@ -63,7 +63,7 @@ public class UIDailyFreeItem : MonoBehaviour
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIRewardPopup, new UIRewardPopup.Param
             {
                 reward = new RewardData[]{ 
-                    new RewardData(RewardData.RewardType.Coin.ToString(),amount) 
+                    new RewardData(configItem.Id.ToString(),amount) 
                 }
             });
             GameManager.Instance.GameData.IncreaseShopDailyFreeWatchCount(configItem.Id);
