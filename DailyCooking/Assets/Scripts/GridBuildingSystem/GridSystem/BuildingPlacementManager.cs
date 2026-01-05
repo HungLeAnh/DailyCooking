@@ -89,8 +89,8 @@ public class BuildingPlacementManager : IBuildingPlacementManager
                     new GridObject(gridManager.Grid, placedObject, gridPosition.x, gridPosition.y));
 
             }
-            OnObjectPlaced?.Invoke(this, EventArgs.Empty);
             GameManager.Instance.GameData.RemoveInventoryData(placedObjectTypeSO.Guid);
+            OnObjectPlaced?.Invoke(this, EventArgs.Empty);
             gameManager.GameData.UpdateGridData(gridManager.Grid);
             DeselectObjectType();
             return true;

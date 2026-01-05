@@ -78,7 +78,8 @@ public class UIInventoryPopup : UIPopup
         {
             _listItem[i].ItemSelected += PlacingItem;
         }
-        listItemGameObject.SetActive(false);
+        if(!isShowItems)
+            listItemGameObject.SetActive(false);
 
         GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingStartEvent();
         UIHUDManager.Instance.HideAllUIElement();
