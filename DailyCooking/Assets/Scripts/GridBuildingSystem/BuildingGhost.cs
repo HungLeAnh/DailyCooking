@@ -186,8 +186,8 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
 
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
         ShowCanvas(false);
+        GridBuildingSystem.Instance.BuildingPlacementManager.ReturnObjectToInventory();
         GridBuildingSystem.Instance.BuildingPlacementManager.SetPlacedObjectTypeSO(null,-Vector3.one);
-
     }
     public void OnClickRotate()
     {

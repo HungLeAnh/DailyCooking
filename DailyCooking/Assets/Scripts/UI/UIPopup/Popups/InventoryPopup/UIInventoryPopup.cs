@@ -78,6 +78,7 @@ public class UIInventoryPopup : UIPopup
         {
             _listItem[i].ItemSelected += PlacingItem;
         }
+        listItemGameObject.SetActive(false);
 
         GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingStartEvent();
         UIHUDManager.Instance.HideAllUIElement();
@@ -101,7 +102,7 @@ public class UIInventoryPopup : UIPopup
             _listItem[i].ItemSelected -= PlacingItem;
         }
 
-        //unsub switch tab here
+        
         if (!isPlacingObject)
         {
             GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingEndEvent();
@@ -182,9 +183,9 @@ public class UIInventoryPopup : UIPopup
             selectedItemId = itemIndex;
         }
 
-        GameManager.Instance.GameData.RemoveInventoryData(itemToInspect.Guid);
 
-        GridBuildingSystem.Instance.BuildingPlacementManager.SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
+        GridBuildingSystem.Instance.BuildingPlacementManager
+            .SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
         isPlacingObject = true;
         HidePopup();
     }
