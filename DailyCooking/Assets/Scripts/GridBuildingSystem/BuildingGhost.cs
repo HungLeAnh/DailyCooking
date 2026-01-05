@@ -18,6 +18,7 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
     private bool isRotating = false;
     private Quaternion targetQuaternion;
 
+    public bool IsDragging { get => isDragging; set => isDragging = value; }
     public Button ConfirmButton => confirmButton;
     private void Start() 
     {
@@ -203,6 +204,14 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
     {
         visual.localPosition = GridBuildingSystem.Instance.BuildingPlacementManager
             .GetPlacedObjectRotationOffset(placedObjectTypeSO.itemType.TabType);
+    }
+
+    public void SnapTo(Vector3 targetPoint)
+    {
+        targetPoint.y = 1f;
+        visualContainer.position = targetPoint;
+        visual.localRotation =  targetQuaternion;
+
     }
 }
 

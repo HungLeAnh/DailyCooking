@@ -1,7 +1,7 @@
 [System.Serializable]
 public class PlayerData
 {
-    private const int DEFAULT_STARTING_COINS = 1000;
+    private const int DEFAULT_STARTING_COINS = 200;
 
     public int Level { get; set; } = 1;
     public int Exp { get; set; } = 0;
