@@ -86,6 +86,7 @@ public class BuildingTutorial : TutorialPanel
     }
     private void OnClickBuild()
     {
+        GridBuildingSystem.Instance.StopMoving = true;
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
         HighlightElement(transform as RectTransform, false);
         hightLightButton.onClick.RemoveListener(OnClickBuild);
@@ -126,6 +127,7 @@ public class BuildingTutorial : TutorialPanel
         hand.gameObject.SetActive(true);
         hand.SetHandDrag(screenCenter, screenCenterBottom);
         GameInput.Instance.OnMouseClickCanceled += OnFirstDrag;
+        GridBuildingSystem.Instance.StopMoving = false;
     }
 
     private void OnFirstDrag(object sender, EventArgs e)
