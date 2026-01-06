@@ -148,7 +148,8 @@ public class BuildingTutorial : TutorialPanel
             BuildingGhost.Instance.OnBUildingDrag -= OnBuildingDrag;
             BuildingGhost.Instance.IsDragging = false;
             BuildingGhost.Instance.SnapTo(targetPoint);
-
+            BuildingGhost.Instance.StopMoving = true;
+            GridBuildingSystem.Instance.StopMoving = true;
             hand.gameObject.SetActive(false);
 
             HighlightElement(BuildingGhost.Instance.ConfirmButton.transform as RectTransform, true);
@@ -160,6 +161,7 @@ public class BuildingTutorial : TutorialPanel
     private void OnPlaceObject()
     {
         BuildingGhost.Instance.ConfirmButton.onClick?.Invoke();
+
         NextStep();
     }
     public void OnClickSecondItem()
@@ -188,6 +190,8 @@ public class BuildingTutorial : TutorialPanel
         hand.SetHandDrag3D(BuildingGhost.Instance.transform, targetPoint);
 
         BuildingGhost.Instance.OnBUildingDrag += OnBuildingDrag2;
+        BuildingGhost.Instance.StopMoving = false;
+
     }
 
     private void OnBuildingDrag2(Vector3 currentPos)
@@ -198,6 +202,8 @@ public class BuildingTutorial : TutorialPanel
             BuildingGhost.Instance.OnBUildingDrag -= OnBuildingDrag2;
             BuildingGhost.Instance.IsDragging = false;
             BuildingGhost.Instance.SnapTo(targetPoint);
+            BuildingGhost.Instance.StopMoving = true;
+
             hand.gameObject.SetActive(false);
 
             HighlightElement(BuildingGhost.Instance.ConfirmButton.transform as RectTransform, true);
@@ -231,6 +237,8 @@ public class BuildingTutorial : TutorialPanel
     {
         var popup = UIPopupManager.Instance.GetTopShownUIPopup() as UIInventoryPopup;
         popup.BackButton.onClick?.Invoke();
+        BuildingGhost.Instance.StopMoving = false;
+        GridBuildingSystem.Instance.StopMoving = false;
         NextStep();
     }
 }

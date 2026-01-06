@@ -51,6 +51,7 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
     }
     public void ShowFirstTimeTutorial()
     {
+        GameManager.Instance.HideJoyStick();
         UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].StartTutorial();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].OnTutorialClosed

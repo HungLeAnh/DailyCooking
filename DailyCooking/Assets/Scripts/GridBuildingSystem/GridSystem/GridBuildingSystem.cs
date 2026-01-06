@@ -42,6 +42,8 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     private IBuildingPlacementManager buildingPlacementManager;
     private IGridInitializer gridInitializer;
     private IGridVisualizer gridVisualizer;
+
+    private bool stopMoving = false;
     private List<GridWall> gridWallList = new List<GridWall>();
 
     private Dictionary<string, PlacedObjectTypeSO> placedObjectTypeSODictionary = new Dictionary<string, PlacedObjectTypeSO>();
@@ -55,7 +57,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     public IBuildingPlacementManager BuildingPlacementManager { get => buildingPlacementManager; set => buildingPlacementManager = value; }
     public IGridInitializer GridInitializer { get => gridInitializer; set => gridInitializer = value; }
     public IGridVisualizer GridVisualizer { get => gridVisualizer; set => gridVisualizer = value; }
-
+    public bool StopMoving { get => stopMoving; set => stopMoving = value; }
     private void OnDestroy()
     {
 
@@ -112,6 +114,8 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     private void GameInput_OnMouseClickPerformed(object sender, Vector2 e)
     {
         // Check if in edit mode
+        if(GameInput.Instance.IsMouseOverUI() || stopMoving)
+            return;
         if (!BuildingPlacementManager.IsBuilding ||
             BuildingPlacementManager.PlacedObjectTypeSO != null)
             return; 

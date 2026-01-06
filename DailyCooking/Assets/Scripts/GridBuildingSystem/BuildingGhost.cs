@@ -16,9 +16,11 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
 
     private bool isDragging = false;
     private bool isRotating = false;
+    private bool stopMoving = false;
     private Quaternion targetQuaternion;
 
     public bool IsDragging { get => isDragging; set => isDragging = value; }
+    public bool StopMoving { get => stopMoving; set => stopMoving = value; }
     public Button ConfirmButton => confirmButton;
     private void Start() 
     {
@@ -50,7 +52,7 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
 
     private void OnPanStarted(object sender, Vector2 e)
     {
-        if (placedObjectTypeSO == null)
+        if (placedObjectTypeSO == null || GameInput.Instance.IsMouseOverUI())
         {
             return;
         }
@@ -67,14 +69,6 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
         else
         {
             isDragging = false;
-        }
-
-        if (Physics.Raycast(ray, out RaycastHit raycastHitDebug, interactDistance))
-        { 
-            Debug.Log("Hit object: " + raycastHitDebug.transform.gameObject);
-        }
-        else
-        {
         }
     }
 
@@ -96,7 +90,7 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
 
     private void HandleDraging()
     {
-        if (isDragging == false)
+        if (isDragging == false || stopMoving)
             return;
         Vector3 targetPosition = GridBuildingSystem.Instance.BuildingPlacementManager.GetMouseWorldSnappedPosition();
         //Debug.Log("Dragging Building Ghost target pos: "+ targetPosition);
@@ -211,7 +205,6 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
         targetPoint.y = 1f;
         visualContainer.position = targetPoint;
         visual.localRotation =  targetQuaternion;
-
     }
 }
 

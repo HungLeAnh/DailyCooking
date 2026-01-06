@@ -160,7 +160,7 @@ public class GameInput : PersistentSingleton<GameInput>
     
     public bool IsMouseOverUI()
     {
-        if(Touchscreen.current != null || Pointer.current != null)
+        if(Pointer.current != null)
             return EventSystem.current.IsPointerOverGameObject();
 
         foreach (var touch in Touchscreen.current.touches)
