@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,5 +36,20 @@ public class ShopManager : PersistentSingleton<ShopManager>
             }
 
         }
-    }   
+    }
+
+    public void BuyCurrency(ShopItemType type, int currencyAmount)
+    {
+        switch (type)
+        {
+            case ShopItemType.Coin:
+                GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(currencyAmount);
+                break;
+            case ShopItemType.Gem:
+                GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(currencyAmount);
+                break;
+            default:
+                break;
+        }
+    }
 }

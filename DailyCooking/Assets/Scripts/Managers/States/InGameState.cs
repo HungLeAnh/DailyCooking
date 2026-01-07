@@ -4,7 +4,8 @@ using UnityEngine;
 public class InGameState : GameManagerBaseState
 {
     private float interstitialCounter = 0;
-    private float interstitialInterval = 180f;
+    private float interstitialInterval = 300f;
+    private int interstitialLevelUnlock = 2;
     public InGameState(GameManager gameManager) : base(gameManager) { }
 
     public override void Enter()
@@ -14,6 +15,8 @@ public class InGameState : GameManagerBaseState
     }
     public override async void Update()
     {
+        if(GameManager.Instance.GameData.PlayerStats.playerData.Level < interstitialLevelUnlock)
+            return;
         if (interstitialCounter > 0)
         {
             interstitialCounter -= Time.deltaTime;
