@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Purchasing;
 using UnityEngine.UI;
 
 public class UIShopPopup : UIPopup
@@ -136,7 +137,6 @@ public class UIShopPopup : UIPopup
         StartCoroutine(_timer24HrsCoroutine);
     }
     private IEnumerator CountDown24Hours()
-
     {
         TimeSpan timeRemaining = _targetTime - DateTime.Now;
 
@@ -154,6 +154,10 @@ public class UIShopPopup : UIPopup
         yield return new WaitForSeconds(1);
         StopCoroutine(_timer24HrsCoroutine);
         SetUpShopDailyFree();
+    }
+    public void OnPurchase(int id)
+    {
+        IAPManager.Instance.BuyProduct((ProductKeys)id);
     }
 }
 [Serializable]
