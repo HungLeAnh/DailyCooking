@@ -158,10 +158,11 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
 
     public void ResetBot()
     {
+        if(TargetTable != null)
+            TargetTable.ClearKitchenObject(TargetSeatIndex);
         TargetTable = null;
         TargetSeatIndex = -1;
         waitingFood.Clear();
-
         stateMachine.SetState(new BotIdleState(stateMachine));
     }
     public void InitBot()

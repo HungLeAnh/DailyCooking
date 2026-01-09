@@ -12,6 +12,8 @@ public enum UIHUDElements
     Menu,
     Build,
     Shop,
+    Rotate,
+    Restaurant,
 
 }
 [Serializable]
@@ -87,6 +89,10 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     public void OnRotateClick()
     {
         OnRotateClicked?.Invoke();
+    }    
+    public void OnRestaurantClick()
+    {
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIRestaurantPopup);
     }
     public void HideAllUIElement()
     {
@@ -95,6 +101,7 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
             item.Value.SetActive(false);
         }
     }
+
     public void ShowAllUIElement()
     {
         foreach (var item in uiHUDElementDictionary)

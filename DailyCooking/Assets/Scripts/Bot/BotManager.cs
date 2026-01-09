@@ -86,10 +86,14 @@ public class BotManager : PersistentSingleton<BotManager>
     {
         while (GameManager.Instance.State is InGameState)
         {
-            var bot = GetBot();
-            bot.GetComponent<BotCustomerController>().InitBot();
-            ActiveBots.Add(bot);
-            yield return new WaitForSeconds(20f);
+            if(KitchenGameManager.Instance.CurrentState == KitchenGameManager.State.Open)
+            {
+                Debug.Log("Spawning Bot");
+                var bot = GetBot();
+                bot.GetComponent<BotCustomerController>().InitBot();
+                ActiveBots.Add(bot);
+            }
+            yield return new WaitForSeconds(5f);
         }
     }
 
@@ -114,5 +118,13 @@ public class BotManager : PersistentSingleton<BotManager>
     public void ReturnBotToPool(GameObject bot)
     {
         bot.SetActive(false);
+    }
+    public void KickAllBots()
+    {
+        foreach(var bot in activeBots)
+        {
+            bot.GetComponent<BotCustomerController>().ResetBot();
+            bot.SetActive(false);
+        }
     }
 }

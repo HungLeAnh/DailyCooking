@@ -15,12 +15,12 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
     
     public event EventHandler OnStateChanged;
 
-    public event EventHandler OnServeFood;
 
     public enum State
     {
         Editing,
-        GamePlaying,
+        Open,
+        Close
     }
     [SerializeField] private long earnGoalMultiply = 1000;
     [SerializeField] private long serveGoalMultiply = 10;
@@ -29,24 +29,21 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
     [SerializeField] private List<FryingRecipeSO> fryingRecipeSOList;
 
     private State state;
-    private float gamePlayingTimer;
-    private float gamePlayingTimerMax = GAME_PLAYING_TIMER_MAX_INITIAL;
+
     private long earnGoal;
     private long serveGoal;
     private long earnCount;
     private long serveCount;
-    private int playerDay = -1;
     private List<KitchenObjectSO> unlockIngredient;
 
     public long EarnCount => earnCount;
     public long ServeCount => serveCount;
     public long EarnGoal { get => earnGoal; set => earnGoal = value; }
     public long ServeGoal { get => serveGoal; set => serveGoal = value; }
-    public int PlayerDay => playerDay;
 
     public List<CuttingRecipeSO> CuttingRecipeSOList { get => cuttingRecipeSOList; set => cuttingRecipeSOList = value; }
     public List<FryingRecipeSO> FryingRecipeSOList { get => fryingRecipeSOList; set => fryingRecipeSOList = value; }
-
+    public State CurrentState => state;
     protected override void Awake()
     {
         base.Awake();
@@ -61,7 +58,7 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
         if(arg0.buildIndex == 0)
             return;
         BotManager.Instance.Initialize();        
-        ChangeState(State.GamePlaying);
+        ChangeState(State.Open);
         if(GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
         {
             BotManager.Instance.StartSpawnBot();
@@ -77,8 +74,6 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
     }
     public void Init()
     {
-        playerDay = GameManager.Instance.GameData.PlayerStats.playerData.DaysPlayed;
-
         unlockIngredient.Clear();
         foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
         {
@@ -92,17 +87,6 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
         state = newState;
         OnStateChanged?.Invoke(this, EventArgs.Empty);
     }
-    private void RewardPlayer()
-    {
-        //Win game
-
-        //playerDay++;
-        //GameManager.Instance.GameData.PlayerStats.UpdatePlayedDay(playerDay);
-        //GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins((int)earnCount);
-        //GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(playerDay * PLAYER_EXP_MULTIPLIER);
-
-        ChangeState(State.Editing);
-    }
     public void CollectCash(int cash,int exp)
     {
         GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(cash);
@@ -112,41 +96,19 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
 
     private void Update()
     {
-        switch (state)
-        {
-            //ChangeState(State.GamePlaying);
-            //gamePlayingTimer = gamePlayingTimerMax;
 
-            case State.GamePlaying:
-                gamePlayingTimer -= Time.deltaTime;
-                if (gamePlayingTimer < 0f)
-                {
-
-                }
-                break;
-        }
     }
-    public bool IsGamePlaying()
+    public bool IsOpening()
     {
-        return state == State.GamePlaying;
+        return state == State.Open;
     }
-
+    public bool IsClosing()
+    {
+        return state == State.Close;
+    }
     public bool IsEditing()
     {
         return state == State.Editing;
-
-    }
-
-    public float GetGamePlayingTimerNomalized()
-    {
-        return 1 - (gamePlayingTimer / gamePlayingTimerMax);
-    }
-
-    public void ServeFood(long foodPrice)
-    {
-        earnCount += foodPrice;
-        serveCount++;
-        OnServeFood?.Invoke(this,EventArgs.Empty);
 
     }
 
