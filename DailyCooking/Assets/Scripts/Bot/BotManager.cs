@@ -93,7 +93,7 @@ public class BotManager : PersistentSingleton<BotManager>
                 bot.GetComponent<BotCustomerController>().InitBot();
                 ActiveBots.Add(bot);
             }
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(15f);
         }
     }
 

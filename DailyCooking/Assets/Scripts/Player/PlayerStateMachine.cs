@@ -208,7 +208,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         }
         else
         {
-            
+            Context.Highlightable.Clear();
         }
 
 
