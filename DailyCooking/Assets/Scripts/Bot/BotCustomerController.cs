@@ -161,6 +161,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
         TargetTable = null;
         TargetSeatIndex = -1;
         waitingFood.Clear();
+        StopBubble();
         stateMachine.SetState(new BotIdleState(stateMachine));
     }
     public void InitBot()
