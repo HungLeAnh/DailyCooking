@@ -34,6 +34,9 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     [SerializeField] 
     private Animator characterAnimator;
 
+    [SerializeField] private float radius = 2f;
+    private float height = 2.0f;
+
 
     private StateManager<EPlayerState> _stateManager;
     private PlayerStateFactory _stateFactory;
@@ -123,8 +126,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         {
             if (raycastHit.transform.TryGetComponent(out IInteractable interactableObject))
             {
-                if (Vector3.Distance(raycastHit.transform.position, Context.PlayerTransform.position) >
-                    GameDefine.INTERACT_DISTANCE_MAX)
+                if (!Context.Highlightable.Contains(raycastHit.transform.GetComponent<IHighlightable>()))
                     return;
 
 
@@ -180,30 +182,42 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
             Context.LastInteractDir = moveDir;
         }
 
-        float interactDistance = 2f;
-        if (Physics.Raycast(transform.position, Context.LastInteractDir, out RaycastHit raycastHit, interactDistance, countersLayerMask))
+        Vector3 p1 = transform.position + Vector3.up * radius;
+        Vector3 p2 = transform.position + Vector3.up * (height - radius);
+
+        Collider[] colliderHitArray = Physics.OverlapCapsule(p1, p2, radius, countersLayerMask);
+        foreach (IHighlightable highlightable in Context.Highlightable)
         {
-            if (raycastHit.transform.TryGetComponent(out IHighlightable highlightable))
+            if(highlightable as UnityEngine.Object != null)
+                highlightable.OnDeselected();
+        }
+        if (colliderHitArray.Length > 0)
+        {
+            List<IHighlightable> newHighlightables = new List<IHighlightable>(Context.Highlightable);
+            foreach (Collider hit in colliderHitArray)
             {
-                if (Context.Highlightable != null)
-                    Context.Highlightable.OnDeselected();
-                Context.Highlightable = highlightable;
-                Context.Highlightable.OnSelected();
-                OnObjectHighlighted?.Invoke(this, raycastHit.transform);
-                
+                if (hit.transform.TryGetComponent(out IHighlightable highlightable))
+                {
+                    highlightable.OnSelected();
+                    newHighlightables.Add(highlightable);
+                }
             }
-            else
-            {
-                if (Context.Highlightable != null)
-                    Context.Highlightable.OnDeselected();
-            }
+            Context.Highlightable.Clear();
+            Context.Highlightable = newHighlightables;
+
         }
         else
         {
-            if (Context.Highlightable != null)
-                Context.Highlightable.OnDeselected();
+            
         }
 
+
+    }
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position + Vector3.up * radius , radius);
+        Gizmos.DrawWireSphere(transform.position + Vector3.up * (height - radius), radius);
     }
     private void HandleMovement()
     {

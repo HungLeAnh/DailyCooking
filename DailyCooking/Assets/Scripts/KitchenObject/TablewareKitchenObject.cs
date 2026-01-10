@@ -89,6 +89,8 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
 
     public void Show()
     {
+        if(visualGameObjectArray == null)
+            return;
         foreach (var visualGameObject in visualGameObjectArray)
         {
             visualGameObject.SetActive(true);
@@ -97,6 +99,8 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
     }
     public void Hide()
     {
+        if(visualGameObjectArray == null)
+            return;
         foreach (var visualGameObject in visualGameObjectArray)
         {
             visualGameObject.SetActive(false);

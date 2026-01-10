@@ -13,8 +13,6 @@ public class GameDefine : MonoBehaviour
     #endregion
 
     #region Player State Machine
-    public const float MIN_DISTANCE_TO_TARGET = 0.05f;
-    public const float INTERACT_DISTANCE_MAX = 3.5f;
     #endregion
 
     #region Emotion
