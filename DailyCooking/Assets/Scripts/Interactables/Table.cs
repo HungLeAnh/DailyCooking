@@ -41,7 +41,7 @@ public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceabl
     {
         for (int i = 0; i < seats.Count; i++)
         {
-            if (!isSeatOccupied[i])
+            if (!isSeatOccupied[i] && kitchenObjects[i] == null)
             {
                 return i;
             }
@@ -75,6 +75,14 @@ public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceabl
                 kitchenObjects[i] = null;
             }
         }
+    }
+    public void ResetSeat(int index)
+    {
+        if(index < 0 || index >= isSeatOccupied.Length)
+        {
+            return;
+        }
+        isSeatOccupied[index] = false;
     }
     public Transform GetSeatTransform(int seatIndex)
     {

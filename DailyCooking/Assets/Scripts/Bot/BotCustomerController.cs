@@ -97,7 +97,6 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
     {
         //Debug.LogError("BotCustomerController: OnEmotionEnd called");   
         stateMachine.SetState(new LeavingState(stateMachine));
-        TargetTable.ClearKitchenObject(TargetSeatIndex);
         StopBubble();
     }
     private void OnEmotionChanged(EmotionType type)
@@ -123,7 +122,6 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
         if(food == null)
         {
             stateMachine.SetState(new LeavingState(stateMachine));
-            TargetTable.ClearKitchenObject(TargetSeatIndex);
             StopBubble();
             return false;
         }
@@ -159,7 +157,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
     public void ResetBot()
     {
         if(TargetTable != null)
-            TargetTable.ClearKitchenObject(TargetSeatIndex);
+            TargetTable.ResetSeat(TargetSeatIndex);
         TargetTable = null;
         TargetSeatIndex = -1;
         waitingFood.Clear();
