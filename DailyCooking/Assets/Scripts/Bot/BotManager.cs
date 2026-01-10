@@ -88,7 +88,7 @@ public class BotManager : PersistentSingleton<BotManager>
         {
             if(KitchenGameManager.Instance.CurrentState == KitchenGameManager.State.Open)
             {
-                Debug.Log("Spawning Bot");
+                //Debug.Log("Spawning Bot");
                 var bot = GetBot();
                 bot.GetComponent<BotCustomerController>().InitBot();
                 ActiveBots.Add(bot);

@@ -5539,6 +5539,114 @@ PrefabInstance:
       propertyPath: parentCanvas
       value: 
       objectReference: {fileID: 1137642642}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].id
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[2].id
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].content
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[2].content
+      value: Great Name
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].isHidePanel
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[0].onStepStart.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].onStepStart.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[2].onStepStart.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[0].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[2].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[0].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6249500353981299333}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6249500353981299333}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[2].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6249500353981299333}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[0].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[2].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[0].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnFirstShow
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnInputNameComplete
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[2].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnUnlockGrid
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[0].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FirstTimeTutorialPanel, Scripts
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FirstTimeTutorialPanel, Scripts
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[2].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FirstTimeTutorialPanel, Scripts
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[0].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[1].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
+      propertyPath: tutorialSteps.Array.data[2].onStepStart.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 5200546132055692478, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1

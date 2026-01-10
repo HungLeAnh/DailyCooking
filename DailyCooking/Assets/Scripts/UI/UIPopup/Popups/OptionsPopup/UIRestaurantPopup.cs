@@ -34,10 +34,12 @@ public class UIRestaurantPopup : UIPopup
     private void Start()
     {
         KitchenGameManager.Instance.OnStateChanged += Instance_OnStateChanged;
+        GameManager.Instance.GameData.PlayerStats.OnResourceChange += Initialize;
     }
     private void OnDestroy()
     {
-        KitchenGameManager.Instance.OnStateChanged -= Instance_OnStateChanged;
+        if(KitchenGameManager.Instance != null)
+            KitchenGameManager.Instance.OnStateChanged -= Instance_OnStateChanged;
     }
 
     private void Instance_OnStateChanged(object sender, EventArgs e)
@@ -49,7 +51,7 @@ public class UIRestaurantPopup : UIPopup
 
             restaurantStatusText.text = "Restaurant Status: Opened";
         }
-        else
+        else if(KitchenGameManager.Instance.IsClosing())
         {
             restaurantStatusButtonText.text = "Open Restaurant";
             restaurantStatusButton.GetComponent<Image>().sprite = openButtonImage;
@@ -60,7 +62,7 @@ public class UIRestaurantPopup : UIPopup
 
     private void OnChangeRestaurantName()
     {
-
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInputNamePopup);
     }
 
     private void OnChangeRestaurantStatus()

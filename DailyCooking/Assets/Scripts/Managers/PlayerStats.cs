@@ -62,6 +62,11 @@ public class PlayerStats
         OnResourceChange?.Invoke();
 
     }
+    public void UpdateRestaurantName(string name)
+    {
+        statsData.RestaurantName = name;
+        OnResourceChange?.Invoke();
+    }
 }
 
 [Serializable]
