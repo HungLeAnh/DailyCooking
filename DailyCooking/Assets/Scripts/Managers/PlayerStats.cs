@@ -62,11 +62,17 @@ public class PlayerStats
         OnResourceChange?.Invoke();
 
     }
+    public void UpdateRestaurantName(string name)
+    {
+        statsData.RestaurantName = name;
+        OnResourceChange?.Invoke();
+    }
 }
 
 [Serializable]
 public class StatsData
 {
+    private string restaurantName = "";
     private float moveSpeed = 5f;
     private float cookingSpeed = 1f;
     private int carryingCapacity = 1;
@@ -76,4 +82,5 @@ public class StatsData
     public float CookingSpeed { get => cookingSpeed; set => cookingSpeed = value; }
     public int CarryingCapacity { get => carryingCapacity; set => carryingCapacity = value; }
     public float TipIncrease { get => tipIncrease; set => tipIncrease = value; }
+    public string RestaurantName { get => restaurantName; set => restaurantName = value; }
 }

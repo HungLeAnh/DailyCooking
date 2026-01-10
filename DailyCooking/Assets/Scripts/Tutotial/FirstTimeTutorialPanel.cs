@@ -8,10 +8,6 @@ public class FirstTimeTutorialPanel : TutorialPanel
     {
         base.Awake();
 
-        if(nextButton != null)
-        {
-            nextButton.onClick.AddListener(OnBuildRestaurant);
-        }
         previousButton.transform.gameObject.SetActive(false);
     }
     public void OnGuideClickMenu()
@@ -21,6 +17,23 @@ public class FirstTimeTutorialPanel : TutorialPanel
         hightLightButton.onClick.RemoveAllListeners();
         hightLightButton.onClick.AddListener(OnClickHighlightMenu);
         
+    }
+    public void OnFirstShow()
+    {
+        nextButton.onClick.AddListener(ShowInputNamePopup);
+
+    }
+
+    private void ShowInputNamePopup()
+    {
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInputNamePopup);
+        nextButton.onClick.RemoveListener(ShowInputNamePopup);
+        var popup = UIPopupManager.Instance.GetTopShownUIPopup() as UIInputNamePopup;
+        popup.OkButton.onClick.AddListener(NextStep);
+    }
+    public void OnUnlockGrid()
+    {
+        nextButton.onClick.AddListener(OnBuildRestaurant);
     }
     public void OnBuildRestaurant()
     {

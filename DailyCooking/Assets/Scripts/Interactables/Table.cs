@@ -19,7 +19,7 @@ public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceabl
     {
         isSeatOccupied = new bool[seats.Count];
         kitchenObjects = new KitchenObject[seats.Count];
-        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+        //KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
     }
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
@@ -33,8 +33,8 @@ public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceabl
     {
         if(TableManager.Instance != null)
             TableManager.Instance.UnregisterTable(this);
-        if(KitchenGameManager.Instance != null)
-            KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
+        //if(KitchenGameManager.Instance != null)
+        //    KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
     }
 
     public int GetAvailableSeat()
