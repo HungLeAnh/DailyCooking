@@ -9,11 +9,13 @@ public class UIInputNamePopup : UIPopup
     public class Param
     {
         public string Title;
+        public Action callback;
     }
 
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TMP_InputField inputField;
     [SerializeField] private Button okButton;
+    private Action callback;
     public Button OkButton { get => okButton; }
     public override void SetupPopup()
     {
@@ -44,6 +46,7 @@ public class UIInputNamePopup : UIPopup
         {
             Param notificationParam = _openParam as Param;
             titleText.text = notificationParam.Title;
+            callback = notificationParam.callback;
         }
         else
         {
@@ -53,6 +56,7 @@ public class UIInputNamePopup : UIPopup
     private void OnSubmit()
     {
         GameManager.Instance.GameData.PlayerStats.UpdateRestaurantName(inputField.text);
+        callback?.Invoke();
         HidePopup();
     }
 

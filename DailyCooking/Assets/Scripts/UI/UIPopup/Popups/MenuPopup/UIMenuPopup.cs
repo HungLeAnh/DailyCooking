@@ -36,7 +36,6 @@ public class UIMenuPopup : UIPopup
     public override void SetupPopup()
     {
         base.SetupPopup();
-        Initialize();
     }
     public override void HidePopup(object param)
     {
@@ -46,6 +45,8 @@ public class UIMenuPopup : UIPopup
     public override void ShowPopup(object param)
     {
         base.ShowPopup(param);
+        Initialize();
+
 
     }
     public void Initialize()

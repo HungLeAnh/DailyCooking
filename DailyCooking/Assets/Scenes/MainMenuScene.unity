@@ -5338,6 +5338,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2844842764061989885, guid: 68c881b800b2ec84f83059aa8ba68360, type: 3}
+      propertyPath: parentCanvas
+      value: 
+      objectReference: {fileID: 1137642642}
     - target: {fileID: 5200546132055692478, guid: 68c881b800b2ec84f83059aa8ba68360, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -5977,7 +5981,7 @@ PrefabInstance:
       objectReference: {fileID: 1137642642}
     - target: {fileID: 8072683954090204162, guid: 8d06f6350f1e51843bfd7ebb2a6dc546, type: 3}
       propertyPath: tutorialSteps.Array.data[0].content
-      value: Walk to customer
+      value: Click on customer
       objectReference: {fileID: 0}
     - target: {fileID: 8400285667752059993, guid: 8d06f6350f1e51843bfd7ebb2a6dc546, type: 3}
       propertyPath: m_AnchorMax.y

@@ -51,6 +51,7 @@ public class FirstTimeTutorialPanel : TutorialPanel
     public void OnAddDishToMenu()
     {
         var popup = UIPopupManager.Instance.GetTopShownUIPopup() as UIMenuPopup;
+        Canvas.ForceUpdateCanvases();
         var uiFoodItem = popup.GetFirstUnlockedFoodItem();
         Canvas.ForceUpdateCanvases();
         HighlightElement(uiFoodItem.transform as RectTransform, true);

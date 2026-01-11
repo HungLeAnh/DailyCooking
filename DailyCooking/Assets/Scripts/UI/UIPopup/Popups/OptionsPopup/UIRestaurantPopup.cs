@@ -62,7 +62,16 @@ public class UIRestaurantPopup : UIPopup
 
     private void OnChangeRestaurantName()
     {
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInputNamePopup);
+        HidePopup();
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInputNamePopup,
+            new UIInputNamePopup.Param
+            {
+                Title = "Input your restaurant name",
+                callback = () =>
+                {
+                    UIPopupManager.Instance.ShowPopup(UIPopupType.UIRestaurantPopup);
+                }
+            });
     }
 
     private void OnChangeRestaurantStatus()
