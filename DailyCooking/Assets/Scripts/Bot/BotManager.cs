@@ -123,6 +123,8 @@ public class BotManager : PersistentSingleton<BotManager>
     {
         foreach(var bot in activeBots)
         {
+            var botController = bot.GetComponent<BotCustomerController>();
+            botController.ResetSeat();
             bot.GetComponent<BotCustomerController>().ResetBot();
             bot.SetActive(false);
         }

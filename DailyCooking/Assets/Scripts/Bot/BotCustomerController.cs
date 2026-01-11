@@ -96,6 +96,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
     private void OnEmotionEnd(EmotionType emotionType)
     {
         //Debug.LogError("BotCustomerController: OnEmotionEnd called");   
+        ResetSeat();
         stateMachine.SetState(new LeavingState(stateMachine));
         StopBubble();
     }
@@ -121,6 +122,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
         var food = KitchenGameManager.Instance.GetUnlockedFood();
         if(food == null)
         {
+            ResetSeat();
             stateMachine.SetState(new LeavingState(stateMachine));
             StopBubble();
             return false;
@@ -156,8 +158,6 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
 
     public void ResetBot()
     {
-        if(TargetTable != null)
-            TargetTable.ResetSeat(TargetSeatIndex);
         TargetTable = null;
         TargetSeatIndex = -1;
         waitingFood.Clear();
@@ -217,6 +217,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
         }
         cash += (int)(cash * tipPercentage);
         TargetTable.SetEatenViual(TargetSeatIndex,cash,exp);
+        ResetSeat();
     }
     public void StopNavMesh()
     {
@@ -229,5 +230,11 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
         stateMachine.GetBotController().NavMeshAgent.isStopped = false;
         stateMachine.GetBotController().NavMeshAgent.updatePosition = true;
         stateMachine.GetBotController().NavMeshAgent.updateRotation = true;
+    }
+
+    public void ResetSeat()
+    {
+        if(TargetTable != null && TargetSeatIndex >= 0)
+            TargetTable.ResetSeat(TargetSeatIndex);
     }
 }
