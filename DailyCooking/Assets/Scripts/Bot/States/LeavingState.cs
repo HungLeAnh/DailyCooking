@@ -10,7 +10,7 @@ public class LeavingState : BotState
         stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walk);
 
         
-        Vector3 exitPoint = new Vector3(3, 0, -3);
+        Vector3 exitPoint = new Vector3(3, 0, -5);
 
         stateMachine.GetBotController().StartNavMesh();
         stateMachine.GetBotController().NavMeshAgent.SetDestination(exitPoint);            

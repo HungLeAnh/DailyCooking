@@ -45,6 +45,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
 
     public void PlayAnimation(BotAnimation.State animationState)
     {
+        animator.StopPlayback();
         animator.Play(animationState.ToString());
     }
 
@@ -96,9 +97,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
     private void OnEmotionEnd(EmotionType emotionType)
     {
         //Debug.LogError("BotCustomerController: OnEmotionEnd called");   
-        ResetSeat();
-        stateMachine.SetState(new LeavingState(stateMachine));
-        StopBubble();
+        Leave();
     }
     private void OnEmotionChanged(EmotionType type)
     {
@@ -122,9 +121,7 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
         var food = KitchenGameManager.Instance.GetUnlockedFood();
         if(food == null)
         {
-            ResetSeat();
-            stateMachine.SetState(new LeavingState(stateMachine));
-            StopBubble();
+            Leave();
             return false;
         }
 
@@ -221,15 +218,15 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
     }
     public void StopNavMesh()
     {
-        stateMachine.GetBotController().NavMeshAgent.isStopped = true;
-        stateMachine.GetBotController().NavMeshAgent.updatePosition = false;
-        stateMachine.GetBotController().NavMeshAgent.updateRotation = false;
+        NavMeshAgent.isStopped = true;
+        NavMeshAgent.updatePosition = false;
+        NavMeshAgent.updateRotation = false;
     }
     public void StartNavMesh()
     {
-        stateMachine.GetBotController().NavMeshAgent.isStopped = false;
-        stateMachine.GetBotController().NavMeshAgent.updatePosition = true;
-        stateMachine.GetBotController().NavMeshAgent.updateRotation = true;
+        NavMeshAgent.isStopped = false;
+        NavMeshAgent.updatePosition = true;
+        NavMeshAgent.updateRotation = true;    
     }
 
     public void ResetSeat()
@@ -237,4 +234,11 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
         if(TargetTable != null && TargetSeatIndex >= 0)
             TargetTable.ResetSeat(TargetSeatIndex);
     }
+    public void Leave()
+    {
+        ResetSeat();
+        stateMachine.SetState(new LeavingState(stateMachine));
+        StopBubble();
+    }
+
 }
