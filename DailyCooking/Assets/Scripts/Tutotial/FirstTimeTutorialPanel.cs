@@ -26,10 +26,11 @@ public class FirstTimeTutorialPanel : TutorialPanel
 
     private void ShowInputNamePopup()
     {
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInputNamePopup);
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIInputNamePopup, new UIInputNamePopup.Param
+        {
+            callback = NextStep,
+        });
         nextButton.onClick.RemoveListener(ShowInputNamePopup);
-        var popup = UIPopupManager.Instance.GetTopShownUIPopup() as UIInputNamePopup;
-        popup.OkButton.onClick.AddListener(NextStep);
     }
     public void OnUnlockGrid()
     {

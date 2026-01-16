@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -55,9 +56,16 @@ public class UIInputNamePopup : UIPopup
     }
     private void OnSubmit()
     {
-        GameManager.Instance.GameData.PlayerStats.UpdateRestaurantName(inputField.text);
-        callback?.Invoke();
-        HidePopup();
+        if (StringExtensions.ValidateInput(inputField.text))
+        {
+            GameManager.Instance.GameData.PlayerStats.UpdateRestaurantName(inputField.text);
+            callback?.Invoke();
+            HidePopup();
+        }
+        else
+        {
+            UIManager.Instance.ShowAlertMessage("Invalid Input! Please use only letters and numbers, max length 20 characters.");
+        }
     }
 
 }
