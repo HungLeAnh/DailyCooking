@@ -2,52 +2,54 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class UIPopupManager : PersistentSingleton<UIPopupManager>
+public class UIPopupManager : PersistentSingleton<UIPopupManager>, IUIPopupManager
 {
 
     [SerializeField] private PopupDatabase popupDatabase;
     [SerializeField] private RectTransform popupContainer;
 
-    private Dictionary<string,UIPopup> uiPopupDictionary = new Dictionary<string,UIPopup>();
+    private Dictionary<UIPopupType,UIPopup> uiPopupDictionary = new Dictionary<UIPopupType,UIPopup>();
     private List<UIPopup> visiblePopupList = new List<UIPopup>();
 
-    public void HidePopup(string popupName,object param = null)
+    public void HidePopup(UIPopupType popupType,object param = null)
     {
-        if (!uiPopupDictionary.ContainsKey(popupName))
+        if (!uiPopupDictionary.ContainsKey(popupType))
         {
-            Debug.LogWarning($"Popup '{popupName}' not found in the dictionary.");
+            Debug.LogWarning($"Popup '{popupType}' not found in the dictionary.");
             return;
         }
-        HideUIPopup(popupName,param);
+        HideUIPopup(popupType,param);
     }
 
-    private void HideUIPopup(string popupName, object param)
+    private void HideUIPopup(UIPopupType popupType, object param)
     {
-        if(uiPopupDictionary.TryGetValue(popupName, out var value))
+        if(uiPopupDictionary.TryGetValue(popupType, out var value))
         {
             value.HidePopup(param);
-            if(visiblePopupList.Contains(value))
-                visiblePopupList.Remove(value);
         }
         else
         {
-            Debug.LogWarning($"Popup '{popupName}' not found in the dictionary.");
+            Debug.LogWarning($"Popup '{popupType}' not found in the dictionary.");
         }
     }
-
-    public void ShowPopup(string popupName,object param = null)
+    public void RemoveFromeVisibleList(UIPopup value)
     {
-        if (!uiPopupDictionary.ContainsKey(popupName))
+        if (visiblePopupList.Contains(value))
+            visiblePopupList.Remove(value);
+    }
+    public void ShowPopup(UIPopupType popupType,object param = null)
+    {
+        if (!uiPopupDictionary.ContainsKey(popupType))
         {
-            CreatePopup(popupName);
+            CreatePopup(popupType);
         }
 
-        ShowUIPopup(popupName,param);
+        ShowUIPopup(popupType,param);
     }
 
-    private void ShowUIPopup(string popupName, object param)
+    private void ShowUIPopup(UIPopupType popupType, object param)
     {
-        if(uiPopupDictionary.TryGetValue(popupName, out var value))
+        if(uiPopupDictionary.TryGetValue(popupType, out var value))
         {
             value.ShowPopup(param);
             if (!visiblePopupList.Contains(value))
@@ -56,16 +58,16 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>
         }
         else
         {
-            Debug.LogWarning($"Popup '{popupName}' not found in the dictionary.");
+            Debug.LogWarning($"Popup '{popupType}' not found in the dictionary.");
         }
     }
 
-    public void CreatePopup(string name)
+    public void CreatePopup(UIPopupType popupType)
     {
-        var popupData = popupDatabase.GetPopup(name);
+        var popupData = popupDatabase.GetPopup(popupType.ToString());
         if(popupData == null)
         {
-            Debug.LogWarning($"Popup '{name}' not found in the database.");
+            Debug.LogWarning($"Popup '{popupType}' not found in the database.");
             return;
         }
         GameObject createPopupObject = Instantiate(popupData.popupPrefab, popupContainer);
@@ -73,11 +75,11 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>
         uiPopup.SetupPopup();
         try
         {
-            uiPopupDictionary.Add(name, uiPopup);
+            uiPopupDictionary.Add(popupType, uiPopup);
         }
         catch (System.Exception)
         {
-            Debug.LogWarning($"Popup '{name}' already exists in the dictionary.");
+            Debug.LogWarning($"Popup '{popupType}' already exists in the dictionary.");
         }
     }
     public UIPopup GetTopShownUIPopup()
@@ -87,4 +89,8 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>
         return visiblePopupList[visiblePopupList.Count - 1];
     }
 
+    public bool IsShowingPopup()
+    {
+        return visiblePopupList.Count > 0;
+    }
 }

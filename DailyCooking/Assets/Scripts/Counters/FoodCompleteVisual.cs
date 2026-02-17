@@ -17,12 +17,29 @@ public class FoodCompleteVisual : MonoBehaviour
     private void Start()
     {
         tablewareKitchenObject.OnIngredientAdded += TablewareKitchenObject_OnIngredientAdded;
+        tablewareKitchenObject.OnEaten += TablewareKitchenObject_OnEaten;
         foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in KitchenObjectSO_GameObjectList)
         {
             foreach (var item in kitchenObjectSOGameObject.GameObjectList)
             {
                 item.SetActive(false);
             } 
+        }
+    }
+    private void OnDestroy()
+    {
+        tablewareKitchenObject.OnIngredientAdded -= TablewareKitchenObject_OnIngredientAdded;
+        tablewareKitchenObject.OnEaten -= TablewareKitchenObject_OnEaten;
+    }
+
+    private void TablewareKitchenObject_OnEaten(object sender, EventArgs e)
+    {
+        foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in KitchenObjectSO_GameObjectList)
+        {
+            foreach (var item in kitchenObjectSOGameObject.GameObjectList)
+            {
+                item.SetActive(false);
+            }
         }
     }
 

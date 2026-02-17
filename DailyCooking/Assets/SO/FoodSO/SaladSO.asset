@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40ab37e8500c2e54c9efa9096bbadac0, type: 3}
   m_Name: SaladSO
   m_EditorClassIdentifier: 
+  _guid: b9df040063576f745893f915f0232c86
   kitchenObjectSOList:
   - {fileID: 11400000, guid: 39975ee7cb29cf344be5fbe2aac0aba1, type: 2}
   - {fileID: 11400000, guid: 3749fc0a854478f4f9547855651188ea, type: 2}
   Sprite: {fileID: 21300000, guid: c95e4f68349bf2a4fa8f2fa9c053d65c, type: 3}
   recipeName: Simple Salad
   price: 5
+  exp: 10
+  foodType: 2

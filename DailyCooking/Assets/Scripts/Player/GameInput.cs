@@ -1,192 +1,20 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.EnhancedTouch;
-using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch;
-
 
 public class GameInput : PersistentSingleton<GameInput>
 {
     private const string PLAYER_PREFS_BINDINGS = "InputBindings";
-    /*
-    //public event EventHandler OnInteractAction;
-    //public event EventHandler OnInteractAction2;
-    //public event EventHandler OnPauseAction;
-    //public event EventHandler OnBindingRebind;
-    //public enum Binding
-    //{
-    //    Move_Up,
-    //    Move_Down,
-    //    Move_Left,
-    //    Move_Right,
-    //    Interact,
-    //    Interact2,
-    //    Pause,
-    //    Gamepad_Interact,
-    //    Gamepad_Interact2,
-    //    Gamepad_Pause,
-    //}
+    private const float INTERACT_DISTANCE_MAX = 999f;
+    
+    public event EventHandler OnInteract1Performed;
+    public event EventHandler OnInteract2Performed;
 
-    //private PlayerAction _actions;
-
-    //private void Awake()
-    //{
-    //    _actions = new PlayerAction();
-    //    if (PlayerPrefs.HasKey(PLAYER_PREFS_BINDINGS))
-    //    {
-    //        _actions.LoadBindingOverridesFromJson(PlayerPrefs.GetString(PLAYER_PREFS_BINDINGS));
-    //    }
-
-    //    _actions.Player.Enable();
-        
-    //    _actions.Player.Interact.performed += Interact_performed;
-    //    _actions.Player.Interact2.performed += Interact2_performed;
-    //    _actions.Player.Pause.performed += Pause_performed;
-    //}
-    //private void OnDestroy()
-    //{
-    //    _actions.Player.Interact.performed -= Interact_performed;
-    //    _actions.Player.Interact2.performed -= Interact2_performed;
-    //    _actions.Player.Pause.performed -= Pause_performed;
-
-    //    _actions.Dispose();
-    //}
-    //private void Pause_performed(InputAction.CallbackContext context)
-    //{
-    //    OnPauseAction?.Invoke(this,EventArgs.Empty);
-    //}
-
-    //private void Interact2_performed(InputAction.CallbackContext context)
-    //{
-    //    OnInteractAction2?.Invoke(this,EventArgs.Empty);
-    //}
-
-    //private void Interact_performed(InputAction.CallbackContext context)
-    //{
-    //    OnInteractAction?.Invoke(this,EventArgs.Empty);
-    //}
-    //public Vector2 GetMovementVectorNormalized()
-    //{
-    //    Vector2 inputVector = _actions.Player.Move.ReadValue<Vector2>();
-
-    //    inputVector = inputVector.normalized;
-
-    //    return inputVector;
-    //}
-
-    //public string GetBindingText(Binding binding)
-    //{
-    //    switch (binding)
-    //    {
-    //        default:
-    //        case Binding.Move_Up:
-    //            return _actions.Player.Move.bindings[1].ToDisplayString();
-
-    //        case Binding.Move_Down:
-    //            return _actions.Player.Move.bindings[2].ToDisplayString();
-
-    //        case Binding.Move_Left:
-    //            return _actions.Player.Move.bindings[3].ToDisplayString();
-
-    //        case Binding.Move_Right:
-    //            return _actions.Player.Move.bindings[4].ToDisplayString();
-
-    //        case Binding.Interact:
-    //            return _actions.Player.Interact.bindings[0].ToDisplayString();
-
-    //        case Binding.Interact2:
-    //            return _actions.Player.Interact2.bindings[0].ToDisplayString();
-
-    //        case Binding.Pause:
-    //            return _actions.Player.Pause.bindings[0].ToDisplayString();
-
-
-    //        case Binding.Gamepad_Interact:
-    //            return _actions.Player.Interact.bindings[1].ToDisplayString();
-
-    //        case Binding.Gamepad_Interact2:
-    //            return _actions.Player.Interact2.bindings[1].ToDisplayString();
-
-    //        case Binding.Gamepad_Pause:
-    //            return _actions.Player.Pause.bindings[1].ToDisplayString();
-
-    //    }
-    //}
-    //public void RebindBinding(Binding binding, Action onActionRebound)
-    //{
-    //    _actions.Player.Disable();
-
-    //    InputAction inputAction;
-    //    int bindingIndex;
-
-    //    switch (binding)
-    //    {
-    //        default:
-    //        case Binding.Move_Up:
-    //            inputAction = _actions.Player.Move;
-    //            bindingIndex = 1;
-    //            break;
-    //        case Binding.Move_Down:
-    //            inputAction = _actions.Player.Move;
-    //            bindingIndex = 2;
-    //            break;
-    //        case Binding.Move_Left:
-    //            inputAction = _actions.Player.Move;
-    //            bindingIndex = 3;
-    //            break;
-    //        case Binding.Move_Right:
-    //            inputAction = _actions.Player.Move;
-    //            bindingIndex = 4;
-    //            break;
-    //        case Binding.Interact:
-    //            inputAction = _actions.Player.Interact;
-    //            bindingIndex = 0;
-    //            break;
-    //        case Binding.Interact2:
-    //            inputAction = _actions.Player.Interact2;
-    //            bindingIndex = 0;
-    //            break;
-    //        case Binding.Pause:
-    //            inputAction = _actions.Player.Pause;
-    //            bindingIndex = 0;
-    //            break;
-    //        case Binding.Gamepad_Interact:
-    //            inputAction = _actions.Player.Interact;
-    //            bindingIndex = 1;
-    //            break;
-    //        case Binding.Gamepad_Interact2:
-    //            inputAction = _actions.Player.Interact2;
-    //            bindingIndex = 1;
-    //            break;
-    //        case Binding.Gamepad_Pause:
-    //            inputAction = _actions.Player.Pause;
-    //            bindingIndex = 1;
-    //            break;
-    //    }
-
-    //    inputAction.PerformInteractiveRebinding(bindingIndex)
-    //        .OnComplete(callback => {
-    //            callback.Dispose();
-    //            _actions.Player.Enable();
-    //            onActionRebound();
-
-    //            PlayerPrefs.SetString(PLAYER_PREFS_BINDINGS, _actions.SaveBindingOverridesAsJson());
-    //            PlayerPrefs.Save();
-
-    //            OnBindingRebind?.Invoke(this, EventArgs.Empty);
-    //        })
-    //        .Start();
-    //}
-    */
-    public event EventHandler<Finger> OnFingerDown;
-    public event EventHandler<Finger> OnFingerMoved;
-    public event EventHandler<Finger> OnFingerUp;
-    public event EventHandler<Finger> OnTouchPerformed;
-    public event EventHandler<Finger> OnDragPerformed;
-    public event EventHandler OnPintchPerformed;
+    public event EventHandler<Vector2> OnMousePanPerformed;
+    public event EventHandler<Vector2> OnMouseClickPerformed;
+    public event EventHandler OnMouseClickCanceled;
+    public event EventHandler<float> OnScrollPerformed;
 
 
     [SerializeField] private float touchTimeThreshold = 0.1f;
@@ -197,135 +25,185 @@ public class GameInput : PersistentSingleton<GameInput>
     private bool isTouching = false;
     private bool isPanning = false;
     private float timeSinceLastTouch = 0f;
-    private Vector2 lastTouchPosition = Vector2.zero;
+    private Vector2 lastClickPosition = Vector2.zero;
+    private bool isTouchOverUI = false;
+    private int touchCount = 0;
+    private bool isTouchOverBuildingGhost = false;
 
+    private float prevMagnitude = 0f;
     public PlayerAction PlayerAction { get => playerAction; }
-
+    public Vector2 LastClickPosition { get => lastClickPosition; }
+    public bool IsTouchOverBuildingGhost { get => isTouchOverBuildingGhost; }
     protected override void Awake()
     {
         base.Awake();
         playerAction = new PlayerAction();
+
+        if (PlayerPrefs.HasKey(PLAYER_PREFS_BINDINGS))
+        {
+            playerAction.LoadBindingOverridesFromJson(PlayerPrefs.GetString(PLAYER_PREFS_BINDINGS));
+        }
+
         playerAction.Player.Enable();
-        EnhancedTouchSupport.Enable();
-        TouchSimulation.Enable();
+        playerAction.Player.Zoom.performed += Zoom_performed;
+        playerAction.Player.Click.performed += ctx => StartClick();
+        playerAction.Player.Click.canceled += ctx => EndClick();
+        playerAction.Player.Pan.performed += ctx => PanCamera();
+        playerAction.Player.Interact1.performed += ctx => Interact1Performed();
+        playerAction.Player.Interact2.performed += ctx => Interact2Performed();
+        //Touch
+        playerAction.Player.Touch0Contact.performed += TouchContactPerformed;
+        playerAction.Player.Touch1Contact.performed += TouchContactPerformed;
+        playerAction.Player.Touch0Contact.canceled += ToucContactCanceled;
+        playerAction.Player.Touch1Contact.canceled += ToucContactCanceled;
 
+        playerAction.Player.Touch1Pos.performed += Touch1Pos_performed;
 
-        EnhancedTouch.Touch.onFingerDown += Touch_OnFingerDown;
-        EnhancedTouch.Touch.onFingerMove += Touch_OnFingerMoved;
-        EnhancedTouch.Touch.onFingerUp += Touch_OnFingerUp;
 
     }
 
-    private void OnDestroy()
+    private void Interact2Performed()
     {
-        //playerAction?.Player.Disable();
-        //playerAction?.Dispose();
-        //EnhancedTouchSupport.Enable();
-        //EnhancedTouch.Touch.onFingerMove -= Touch_OnFingerMoved;
-        //EnhancedTouch.Touch.onFingerUp -= Touch_OnFingerUp;
-        //EnhancedTouch.Touch.onFingerDown -= Touch_OnFingerDown;
-
-        //EnhancedTouchSupport.Disable();
-        //TouchSimulation.Disable();
-
+        OnInteract2Performed?.Invoke(this, EventArgs.Empty);
     }
 
-    private void Touch_OnFingerUp(Finger finger)
+    private void Interact1Performed()
     {
-        timeSinceLastTouch = 0f;
-        lastTouchPosition = Vector2.zero;
-        isTouching = false;
-        isPanning = false;
-        OnFingerUp?.Invoke(this, finger);
+        OnInteract1Performed?.Invoke(this, EventArgs.Empty);
     }
 
-    private void Touch_OnFingerMoved(Finger finger)
+    private void TouchContactPerformed(InputAction.CallbackContext obj)
     {
-        isPanning = true;
-        OnFingerMoved?.Invoke(this, finger);
+        if(isTouchOverUI)
+            return;
+        touchCount++;
     }
 
-    private void Touch_OnFingerDown(Finger finger)
+    private void ToucContactCanceled(InputAction.CallbackContext obj)
+    {
+        if(touchCount > 0)
+            touchCount--; 
+        prevMagnitude = 0;
+    }
+    private void Touch1Pos_performed(InputAction.CallbackContext obj)
+    {
+        if (touchCount < 2 || isTouchOverUI)
+            return;
+
+        var magnitude = (playerAction.Player.Touch0Pos.ReadValue<Vector2>() -
+            playerAction.Player.Touch1Pos.ReadValue<Vector2>()).magnitude;
+        if (prevMagnitude == 0)
+            prevMagnitude = magnitude;
+        var difference = magnitude - prevMagnitude;
+        prevMagnitude = magnitude;
+
+        OnScrollPerformed?.Invoke(this, difference);
+
+    }
+
+    //Bug not check on UI click yet on Mobile
+    private void PanCamera()
+    {
+        if (isPanning)
+        {
+            lastClickPosition = playerAction.Player.Pan.ReadValue<Vector2>();
+            OnMousePanPerformed?.Invoke(this, lastClickPosition);
+            //Debug.Log("panning... " + lastClickPosition);
+        }
+    }
+
+    private void Zoom_performed(InputAction.CallbackContext obj)
+    {
+        //Debug.LogError("Zoom: " + obj.ReadValue<Vector2>());
+        OnScrollPerformed?.Invoke(this, obj.ReadValue<Vector2>().y);
+    }
+    private void StartClick()
     {
         if (IsMouseOverUI())
+        {
+            isTouchOverUI = true;
             return;
+        }
         timeSinceLastTouch = 0f;
-        lastTouchPosition = finger.screenPosition;
+        lastClickPosition = playerAction.Player.Pan.ReadValue<Vector2>();
         isTouching = true;
-        OnFingerDown?.Invoke(this, finger);
+        isPanning = false;
+        isTouchOverBuildingGhost = CheckTouchOverBuildingGhost(lastClickPosition);
+        OnMouseClickPerformed?.Invoke(this, lastClickPosition);
+    }
+
+    private void EndClick()
+    {
+        timeSinceLastTouch = 0f;
+        lastClickPosition = Vector2.zero;
+        isTouching = false;
+        isPanning = false;
+        isTouchOverUI = false;
+        isTouchOverBuildingGhost = false;
+        OnMouseClickCanceled?.Invoke(this, EventArgs.Empty);
     }
     private void Update()
     {
         if (IsMouseOverUI())
-            return;
-        if (!isTouching)
-            return;
-        if (EnhancedTouch.Touch.activeFingers.Count == 0)
-            return;
-        if (EnhancedTouch.Touch.activeFingers.Count == 2)
         {
-            OnPintchPerformed?.Invoke(this, EventArgs.Empty);
-        }
-        else
-        {
-            timeSinceLastTouch += Time.deltaTime;
-            if (timeSinceLastTouch > touchTimeThreshold)
-                isPanning = true;
-
-            CheckMove();
-            CheckTouch();
-
-        }
-    }
-
-    private void CheckMove()
-    {
-        float distance = Vector2.Distance(lastTouchPosition, EnhancedTouch.Touch.activeFingers[0].screenPosition);
-        if (distance > dragThreshold)
-        {
-            OnDragPerformed?.Invoke(this, EnhancedTouch.Touch.activeFingers[0]);
-        }
-    }
-
-    private void CheckTouch()
-    {
-        if (isPanning)
+            isTouchOverUI = true;
             return;
+        }
+
+        if (!isTouching || isTouchOverUI)
+            return;
+
+        timeSinceLastTouch += Time.deltaTime;
         if (timeSinceLastTouch > touchTimeThreshold)
-            return;
-
-
-        float distance = Vector2.Distance(lastTouchPosition, EnhancedTouch.Touch.activeFingers[0].screenPosition);
-        if (distance > dragThreshold)
-            return;
-        OnTouchPerformed?.Invoke(this, EnhancedTouch.Touch.activeFingers[0]);
+            isPanning = true;
     }
-
+    
     public bool IsMouseOverUI()
     {
-        return EventSystem.current.IsPointerOverGameObject();
-    }
-    public bool IsTouchOverBuildingGhost(Finger finger)
-    {
-        bool isTouchOverBuildingGhost = false;
-        if (finger != null)
+        if(Pointer.current != null)
+            return EventSystem.current.IsPointerOverGameObject();
+
+        foreach (var touch in Touchscreen.current.touches)
         {
-            float interactDistance = 999f;
-            Ray ray = Camera.main.ScreenPointToRay(finger.screenPosition);
-            if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayerMask))
+            if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
             {
-                //Debug.Log("Touch Position: " + pos);
-                if (raycastHit.transform.GetComponentInParent<BuildingGhost>() != null)
+                int touchId = touch.touchId.ReadValue();
+                if (EventSystem.current.IsPointerOverGameObject(touchId))
                 {
-                    isTouchOverBuildingGhost = true;
-                }
-                else
-                {
-                    isTouchOverBuildingGhost = false;
+                    return true;
                 }
             }
-
         }
-        return isTouchOverBuildingGhost || EventSystem.current.IsPointerOverGameObject();
+        return false;
+    }
+    public bool CheckTouchOverBuildingGhost(Vector2 position)
+    {
+        float interactDistance = INTERACT_DISTANCE_MAX;
+        Ray ray = Camera.main.ScreenPointToRay(position);
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayerMask))
+        {
+            //Debug.Log("Touch Position: " + pos);
+            if (raycastHit.transform.GetComponentInParent<BuildingGhost>() != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return false;
+    }
+    public Vector2 GetMovementVectorNormalized()
+    {
+        Vector2 inputVector = playerAction.Player.Moving.ReadValue<Vector2>();
+
+        inputVector = inputVector.normalized;
+
+        return inputVector;
+    }
+    public Vector2 GetClickPosition()
+    {
+        return playerAction.Player.Pan.ReadValue<Vector2>();
     }
 }

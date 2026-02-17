@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40ab37e8500c2e54c9efa9096bbadac0, type: 3}
   m_Name: VegetableHamBurgerFullSO
   m_EditorClassIdentifier: 
+  _guid: 27c3a1f72918bc74ca53c23f48556f98
   kitchenObjectSOList:
   - {fileID: 11400000, guid: 1c94b7f0c13c51d4ab047c26f734bbff, type: 2}
   - {fileID: 11400000, guid: 3749fc0a854478f4f9547855651188ea, type: 2}
@@ -22,3 +23,5 @@ MonoBehaviour:
   Sprite: {fileID: 21300000, guid: 51814ba89ad35da459c6b13639b91999, type: 3}
   recipeName: Vegetable Hamburger Full
   price: 30
+  exp: 35
+  foodType: 3

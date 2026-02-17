@@ -2,7 +2,6 @@
 
 public class BurnWarningUI : MonoBehaviour
 {
-
     private void Start()
     {
         Hide();
@@ -31,7 +30,6 @@ public class BurnWarningUI : MonoBehaviour
     public void Hide()
     {
         gameObject.SetActive(false);
-
     }
 
 }

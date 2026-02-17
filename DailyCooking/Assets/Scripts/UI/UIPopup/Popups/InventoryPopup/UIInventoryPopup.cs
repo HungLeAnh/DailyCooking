@@ -8,43 +8,65 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 public enum InventoryTabType
 {
-    Customization,
-    CookingItem,
-    Recipe,
     Counter,
+    Table,
+    Wall
 }
 
 public class UIInventoryPopup : UIPopup
 {
+    private static string TITLE = "BUILD";
     public class Param
     {
         public bool isPlacingObject;
     }
-
+    [SerializeField] private TextMeshProUGUI titleText;
+    [SerializeField] private Button backButton;
     [SerializeField] private UIInventoryItem _itemPrefab = default;
     [SerializeField] private GameObject _contentParent = default;
     [SerializeField] private InventoryTabDatabase inventoryTabDatabase = default;
     [SerializeField] private UIInventoryTabs _tabsPanel = default;
+    [SerializeField] private GameObject listItemGameObject;
 
     private InventoryTab _selectedTab;
     private int selectedItemId = -1;
     private List<UIInventoryItem> _listItem = new List<UIInventoryItem>();
     private bool isPlacingObject = false;
+    private bool isShowItems = false;
+
+    public UIInventoryTabs InventoryTabs => _tabsPanel;
+    public List<UIInventoryItem> ItemList => _listItem;
+    public Button BackButton => backButton;
     public override void SetupPopup()
     {
         base.SetupPopup();
 
-        //foreach (var prefabSO in GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects)
-        foreach (var prefabSO in GameManager.Instance.GameData.inventoryData.Items)
+        foreach (var prefabSO in GameManager.Instance.GameData.InventoryData.Items)
         {
             CreateInventoryItem(prefabSO);
         }
         _tabsPanel.Setup(inventoryTabDatabase.TabTypesList);
-        _tabsPanel.SetTabs(inventoryTabDatabase.TabTypesList[0]);
-        _selectedTab = inventoryTabDatabase.TabTypesList[0];
-        FillInventory(_selectedTab.TabType);        
-        GridBuildingSystem.Instance.OnObjectPlaced += GridBuildingSystem_OnObjectPlaced;
-        GridBuildingSystem.Instance.OnReturnPlaceObjectToInventory += GridBuildingSystem_OnReturnPlaceObjectToInventory;
+
+        GridBuildingSystem.Instance.BuildingPlacementManager.OnObjectPlaced += GridBuildingSystem_OnObjectPlaced;
+        GridBuildingSystem.Instance.BuildingPlacementManager.OnReturnPlaceObjectToInventory += GridBuildingSystem_OnReturnPlaceObjectToInventory;
+
+
+        backButton.onClick.AddListener(() =>
+        {
+            if (!isShowItems)
+            {
+                ClosePopup();
+
+            }
+            else
+            {
+                listItemGameObject.SetActive(false);
+                isShowItems = false;
+                titleText.text = TITLE;
+                
+            }
+        });
+        titleText.text = TITLE;
     }
 
     public override void ShowPopup(object param = null)
@@ -56,11 +78,12 @@ public class UIInventoryPopup : UIPopup
         {
             _listItem[i].ItemSelected += PlacingItem;
         }
-        //sub switch tab here
-        FillInventory(_selectedTab.TabType);
-        GridBuildingSystem.Instance.FireOnBuildingStartEvent();
-        UIHUDManager.Instance.HideAllUIElement();
+        if(!isShowItems)
+            listItemGameObject.SetActive(false);
 
+        GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingStartEvent();
+        UIHUDManager.Instance.HideAllUIElement();
+        GameManager.Instance.HideJoyStick();
     }
 
     public override void HidePopup(object param = null)
@@ -80,18 +103,19 @@ public class UIInventoryPopup : UIPopup
             _listItem[i].ItemSelected -= PlacingItem;
         }
 
-        //unsub switch tab here
+        
         if (!isPlacingObject)
         {
-            GridBuildingSystem.Instance.FireOnBuildingEndEvent();
+            GridBuildingSystem.Instance.BuildingPlacementManager.FireOnBuildingEndEvent();
             UIHUDManager.Instance.ShowAllUIElement();
-
+            GameManager.Instance.ShowJoyStick();
         }
 
     }
 
     public void FillInventory(InventoryTabType _selectedTabType = InventoryTabType.Counter)
     {
+        listItemGameObject.SetActive(true);
         _selectedTab = inventoryTabDatabase.GetTabByType(_selectedTabType);
         if (_selectedTab == null)
         {
@@ -101,7 +125,7 @@ public class UIInventoryPopup : UIPopup
         if (_selectedTab != null)
         {
             List<ItemStack> listItemsToShow = new List<ItemStack>();
-            listItemsToShow = GameManager.Instance.GameData.inventoryData.Items.FindAll(o => o.Item.TabType == _selectedTab.TabType);
+            listItemsToShow = GameManager.Instance.GameData.InventoryData.Items.FindAll(o => o.Item.TabType == _selectedTab.TabType);
 
             FillInvetoryItems(listItemsToShow);
         }
@@ -160,10 +184,9 @@ public class UIInventoryPopup : UIPopup
             selectedItemId = itemIndex;
         }
 
-        GameManager.Instance.GameData.RemoveInventoryData(itemToInspect.Guid);
-        GameManager.Instance.SaveGame();
 
-        GridBuildingSystem.Instance.SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
+        GridBuildingSystem.Instance.BuildingPlacementManager
+            .SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
         isPlacingObject = true;
         HidePopup();
     }
@@ -171,8 +194,10 @@ public class UIInventoryPopup : UIPopup
 
     void OnChangeTab(InventoryTab inventoryTab)
     {
+        isShowItems = true;
+        titleText.text = inventoryTab.TabType.ToString();
         FillInventory(inventoryTab.TabType);
-        _tabsPanel.SetTabs(inventoryTab);
+        //_tabsPanel.SetTabs(inventoryTab);
     }
     private void GridBuildingSystem_OnObjectPlaced(object sender, EventArgs e)
     {
@@ -184,22 +209,19 @@ public class UIInventoryPopup : UIPopup
             }
 
         }
-
-        FillInventory(_selectedTab.TabType);
+        if(_selectedTab != null)
+            FillInventory(_selectedTab.TabType);
     }
     private void GridBuildingSystem_OnReturnPlaceObjectToInventory(object sender, PlacedObjectTypeSO e)
     {
-        FillInventory(_selectedTab.TabType);
+        if(_selectedTab != null && isShowItems)
+            FillInventory(_selectedTab.TabType);
 
-    }
-
-    public void SaveGrid()
-    {
-        GridBuildingSystem.Instance.SaveGrid();
     }
     public void ClosePopup()
     {
         isPlacingObject = false;
+        isShowItems = false;
         HidePopup();
     }
 }

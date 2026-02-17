@@ -77,13 +77,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6e2214d325ca1b458ebc2489315b2fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 7
   countersLayerMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1856
   kitchenObjectHoldPoint: {fileID: 1629193785908663024}
-  _characterAnimator: {fileID: 6338740962840866430}
-  placedObjectView: {fileID: 0}
+  characterAnimator: {fileID: 6338740962840866430}
+  radius: 1.5
 --- !u!1 &2260947745876742963
 GameObject:
   m_ObjectHideFlags: 0
@@ -444,7 +443,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &6338740962840866430
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -458,6 +457,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1

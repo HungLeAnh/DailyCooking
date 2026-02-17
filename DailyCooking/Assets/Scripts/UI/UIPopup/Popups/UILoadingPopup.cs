@@ -11,4 +11,12 @@ public class UILoadingPopup : UIPopup
         base.ShowPopup(param);
         _loadingCallback.UpdateCallBack();
     }
+    public override void HidePopup(object param = null)
+    {
+        base.HidePopup(param);
+    }
+    public override void SetupPopup()
+    {
+        base.SetupPopup();
+    }
 }

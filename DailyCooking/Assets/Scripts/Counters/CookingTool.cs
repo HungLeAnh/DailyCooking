@@ -1,11 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectParent
 {
-    public event EventHandler<OnStageChangeEventArgs> OnStageChanged;
-    public event EventHandler<IHasProgress.OnProgressChangedEventArgs> OnProgressChanged;
-
     public class OnStageChangeEventArgs : EventArgs
     {
         public State state;
@@ -21,13 +18,15 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     [SerializeField] private Transform placePoint;
     [SerializeField] private ProgressBarUI progressBarUI;
     [SerializeField] private BurnWarningUI burnWarningUI;
-
+    [SerializeField] private float burnShowProgressAmount = 0.5f;
     private State _state;
     private float _cookingTimer;
     private float _burningTimer;
     private float _cookingTimeMax;
     private float _burningTimeMax;
     private KitchenObject _kitchenObject;
+    private AudioSource cookingSound;
+    private AudioSource warningSound;
 
     public State CurrentState { get => _state; set => _state = value; }
     public float CookingTimer { get => _cookingTimer; set => _cookingTimer = value; }
@@ -41,27 +40,30 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
     public abstract KitchenObjectSO GetBurningOutput();
     public abstract void SetCookingRecipeSO();
     public abstract void SetBurningRecipeSO(KitchenObjectSO kitchenObjectSO);
-    public virtual void UpdateCookingState(State state,float cookingtime = 0)
+    public virtual void UpdateCookingState(State state)
     {
         CurrentState = state;
 
-        CookingTimer = cookingtime;
+        CookingTimer = 0;
+
+        BurningTimer = 0;
 
         FireOnStateChange();
     }
     public virtual void FireOnStateChange()
-    {
-        OnStageChanged?.Invoke(this, new OnStageChangeEventArgs
+    { 
+        if(CurrentState == State.Idle || CurrentState == State.Burned)
         {
-            state = CurrentState
-        });
-    }
-    public virtual void FireOnProgressChanged(float progressNormalized)
-    {
-        //OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-        //{
-        //    progressNormalized = progressNormalized
-        //});
+            SoundManager.Instance.StopSound(cookingSound);
+            SoundManager.Instance.StopSound(warningSound);
+        }
+        if (CurrentState == State.Cooking || CurrentState == State.Cooked)
+        {
+            if(cookingSound == null || !cookingSound.isPlaying)
+                cookingSound = SoundManager.Instance.PlayCookingSound(gameObject.transform.position);
+        }
+        
+
     }
     private void Update()
     {
@@ -74,7 +76,6 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
                 case CookingTool.State.Cooking:
                     CookingTimer += Time.deltaTime;
 
-                    FireOnProgressChanged(CookingTimer / CookingTimeMax);
                     progressBarUI.OnProgressChanged(CookingTimer / CookingTimeMax);
                     if (CookingTimer > CookingTimeMax)
                     {
@@ -93,9 +94,14 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
                 case CookingTool.State.Cooked:
                     BurningTimer += Time.deltaTime;
 
-                    FireOnProgressChanged(BurningTimer / BurningTimeMax);
                     progressBarUI.OnProgressChanged(BurningTimer / BurningTimeMax);
-                    burnWarningUI.OnProgressChanged(this,BurningTimer / BurningTimeMax);
+                    burnWarningUI.OnProgressChanged(this, BurningTimer / BurningTimeMax);
+
+                    if (GetProgress() >= burnShowProgressAmount && ( warningSound == null || !warningSound.isPlaying))
+                    {
+                        warningSound = SoundManager.Instance.PlayWarningSound(gameObject.transform.position);
+                    }
+
                     if (BurningTimer > BurningTimeMax)
                     {
                         //Fried
@@ -105,8 +111,6 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
                         CurrentState = CookingTool.State.Burned;
 
                         FireOnStateChange();
-
-                        FireOnProgressChanged(0f);
 
                     }
                     break;
@@ -118,28 +122,28 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
 
         }
     }
-    public virtual void SetKitchenObject(KitchenObject kitchenObject)
+    public virtual void SetKitchenObject(KitchenObject kitchenObject,int index = 0)
     {
         _kitchenObject = kitchenObject;
         progressBarUI.Hide();
         burnWarningUI.Hide();
     }
 
-    public Transform GetKitchenObjectFollowTransform()
+    public Transform GetKitchenObjectFollowTransform(int index=0)
     {
         return placePoint;
 }
-    public KitchenObject GetKitchenObject()
+    public KitchenObject GetKitchenObject(int index = 0)
     {
         return _kitchenObject;
     }
-    public void ClearKitchenObject()
+    public void ClearKitchenObject(int index = 0)
     {
         _kitchenObject = null;
         progressBarUI.Hide();
         burnWarningUI.Hide();
     }
-    public bool HasKitchenObject()
+    public bool HasKitchenObject(int index = 0)
     {
         return _kitchenObject != null;
     }
@@ -148,8 +152,19 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
         return CurrentState == CookingTool.State.Cooked;   
     }
 
-    public int GetProgress()
+    public float GetProgress()
     {
-        throw new NotImplementedException();
+        if(CurrentState == CookingTool.State.Cooking)
+        {
+            return CookingTimer / CookingTimeMax;
+        }
+        else if (CurrentState == CookingTool.State.Cooked)
+        {
+            return BurningTimer / BurningTimeMax;
+        }
+        else
+        {
+            return 0;
+        }
     }
 }

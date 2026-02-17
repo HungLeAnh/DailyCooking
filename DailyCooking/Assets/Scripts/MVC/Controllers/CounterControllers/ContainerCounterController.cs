@@ -1,38 +1,32 @@
-﻿using System;
-using System.Drawing.Text;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public class ContainerCounterController : BaseCounterController
+public class ContainerCounterController : BaseCounterController, IContainerCounter
 {
-    public event EventHandler OnPlayreGrabbedObject;
+    [SerializeField] private KitchenObjectSO _kitchenObjectSO;
 
-    public ContainerCounterController(ContainerCounterView view, ContainerCounterModel model) : base(view,model)
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-
-    }
-
-    public override void Interact(PlayerStateMachine playerStateMachine)
-    {
-        var view = (ContainerCounterView)BaseCounterView;
         if (!playerStateMachine.HasKitchenObject())
         {
-            //Player is not carrying anything
-            KitchenObject.SpawnKitchenObject(view.KitchenObjectSO, playerStateMachine);
-
-
-            OnPlayreGrabbedObject?.Invoke(this, EventArgs.Empty);
+            KitchenObject.SpawnKitchenObject(_kitchenObjectSO, playerStateMachine);
         }
         else
         {
-            //Player is carrying something
             if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
             {
-                //Player is holding a plate
-                if (tablewareKitchenObject.TryAddIngredient(view.KitchenObjectSO))
+                if (tablewareKitchenObject.TryAddIngredient(_kitchenObjectSO))
                 {
+                    // Indicate ingredient added to plate
+                    //OnSpawnKitchenObject?.Invoke(this, null); 
                 }
             }
         }
+    }
+
+    public List<KitchenObjectSO> GetContainerKitchenObjectType()
+    {
+        return new List<KitchenObjectSO> { _kitchenObjectSO };
     }
 }

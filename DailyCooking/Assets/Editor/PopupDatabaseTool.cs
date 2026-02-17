@@ -7,7 +7,6 @@ using System.Reflection;
 using System;
 using System.Text;
 using System.IO;
-using System.Text;
 public class PopupDatabaseTool
 {
     public static string PopupPrefabFolderPath = "Assets/Prefab/UI/Popups";

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,13 @@ public class FoodDetailUI : MonoBehaviour
     private void Start()
     {
         tablewareKitchenObject.OnIngredientAdded += TablewareKitchenObject_OnIngredientAdded;
+        tablewareKitchenObject.OnServed += TablewareKitchenObject_OnServed;
+
+    }
+    
+    private void TablewareKitchenObject_OnServed(object sender, EventArgs e)
+    {
+        _container.SetActive(false);
     }
 
     private void TablewareKitchenObject_OnIngredientAdded(object sender, TablewareKitchenObject.OnIngredientAddedEventArgs e)
@@ -26,6 +34,9 @@ public class FoodDetailUI : MonoBehaviour
     }
     private void OnDestroy()
     {
+        tablewareKitchenObject.OnIngredientAdded -= TablewareKitchenObject_OnIngredientAdded;
+        tablewareKitchenObject.OnServed -= TablewareKitchenObject_OnServed;
+
         foreach (var gameObject in foodIngredientIconGOList)
         {
             Destroy(gameObject);

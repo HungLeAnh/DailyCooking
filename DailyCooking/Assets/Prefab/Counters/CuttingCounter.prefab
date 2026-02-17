@@ -53,11 +53,11 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 576c6698a57d42040af8112020f3289d, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: -7511558181221131132, guid: 576c6698a57d42040af8112020f3289d, type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: 1a0afd856a35421469b28b916116fd9c, type: 2}
     - target: {fileID: 919132149155446097, guid: 576c6698a57d42040af8112020f3289d, type: 3}
@@ -96,15 +96,11 @@ PrefabInstance:
       value: CuttingCounter
       objectReference: {fileID: 0}
     - target: {fileID: 3798217560897031268, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
-      propertyPath: baseCounter
-      value: 
-      objectReference: {fileID: 6158020882091036308}
-    - target: {fileID: 3798217560897031268, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       propertyPath: visualGameObjectArray.Array.size
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3798217560897031268, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
-      propertyPath: visualGameObjectArray.Array.data[0]
+      propertyPath: 'visualGameObjectArray.Array.data[0]'
       value: 
       objectReference: {fileID: 3819329314662397923}
     - target: {fileID: 5278761787930030305, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
@@ -146,6 +142,10 @@ PrefabInstance:
     - target: {fileID: 5278761787930030305, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5298150198828485928, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
+      propertyPath: m_Center.y
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5753835007656200812, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       propertyPath: m_LocalPosition.y
@@ -206,7 +206,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 6158020882091036308}
+      addedObject: {fileID: 5483194497773665733}
   m_SourcePrefab: {fileID: 100100000, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
 --- !u!4 &780917685626107248 stripped
 Transform:
@@ -233,7 +233,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
   m_PrefabInstance: {fileID: 4870517238847358353}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &6158020882091036308
+--- !u!114 &5483194497773665733
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -242,20 +242,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 5777116932338227740}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e90ca24f88fd42f42845e1af64912b87, type: 3}
+  m_Script: {fileID: 11500000, guid: 1b18b45e73a099b4fb572b1d2a20ebc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   counterTopPoint: {fileID: 886707663028080637}
   visualGameObjectArray:
   - {fileID: 3819329314662397923}
-  cuttingRecipeSOArray:
-  - {fileID: 11400000, guid: 1d02dc73db885f346a64d250880b7dd4, type: 2}
-  - {fileID: 11400000, guid: a38c3a45a63565442a408863dfe6a113, type: 2}
-  - {fileID: 11400000, guid: d92c3ca9c36cd9f4db431a6e4e3cdc8b, type: 2}
-  - {fileID: 11400000, guid: 82b52adef9815c6428fb367a3965fe0a, type: 2}
+  _cuttingRecipeSOArray:
+  - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
   - {fileID: 11400000, guid: 03df2848847bcdc4fafa39a849b83e11, type: 2}
   - {fileID: 11400000, guid: 8fb39336a1ea95c41a1b18b41daf020e, type: 2}
-  - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
+  - {fileID: 11400000, guid: 82b52adef9815c6428fb367a3965fe0a, type: 2}
+  - {fileID: 11400000, guid: d92c3ca9c36cd9f4db431a6e4e3cdc8b, type: 2}
+  - {fileID: 11400000, guid: a38c3a45a63565442a408863dfe6a113, type: 2}
+  - {fileID: 11400000, guid: 1d02dc73db885f346a64d250880b7dd4, type: 2}
   progressBarUI: {fileID: 588416869854212033}
 --- !u!1001 &5109503152327724974
 PrefabInstance:

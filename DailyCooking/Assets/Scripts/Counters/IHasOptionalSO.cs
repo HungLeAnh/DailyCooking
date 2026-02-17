@@ -7,4 +7,6 @@ public interface IHasOptionalSO
     {
         return null;
     }
+    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList);
+
 }

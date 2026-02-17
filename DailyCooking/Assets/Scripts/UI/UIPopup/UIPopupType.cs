@@ -1,15 +1,17 @@
 public enum UIPopupType
 {
-    UIDayTaskPopup,
+    UIMenuPopup,
+    UIFoodDetailPopup,
     UIGameNotiPopup,
-    UIGameOverPopup,
-    UIGamePausePopup,
-    UIGameStartCountdownPopup,
+    UIInputNamePopup,
     UIInventoryPopup,
     UILevelUpPopup,
     UILoadingPopup,
     UIMainMenuPopup,
     UIOptionMenuPopup,
+    UIRestaurantPopup,
+    UIRewardPopup,
     UISettingPopup,
-    UIShopPopup
+    UIShopPopup,
+    UIUpgradePopup
 }

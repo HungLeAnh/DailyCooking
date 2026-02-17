@@ -10,11 +10,6 @@ public class PanCookingTool : CookingTool
     private FryingRecipeSO _fryingRecipeSO;
     private BurningRecipeSO _burningRecipeSO;
 
-
-    public override void UpdateCookingState(State state, float cookingtime = 0)
-    {
-        base.UpdateCookingState(state, cookingtime);
-    }
     public override bool HasRecipeWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
         FryingRecipeSO fryingRecipeSO = GetFryingRecipeSOWithInput(inputKitchenObjectSO);

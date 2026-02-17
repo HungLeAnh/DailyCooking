@@ -1,21 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
   <Class Name="CombineDetailUI" Collapsed="true">
-    <Position X="17" Y="10" Width="1.5" />
+    <Position X="5" Y="23.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAQAAABAAAAAAAAAAAACAAAAAAAAAAAAAAAAIAQEA=</HashCode>
       <FileName>Assets\Scripts\Counters\CombineDetailUI.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CombineRecipeSO" Collapsed="true">
-    <Position X="20" Y="10" Width="1.5" />
+    <Position X="8" Y="22.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAABABAAAAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\Counters\CombineRecipeSO.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CookingTool">
-    <Position X="34.75" Y="8" Width="4.5" />
+    <Position X="14.75" Y="17.5" Width="4.5" />
     <NestedTypes>
       <Class Name="CookingTool.OnStageChangeEventArgs" Collapsed="true">
         <TypeIdentifier>
@@ -29,18 +29,35 @@
       </Enum>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AMUCACAADCADEAIoAAgACGAEAAAiAAAYAAAAACIQACE=</HashCode>
+      <HashCode>AMUCICAADCADEAAoAAgACGAEAAACAABYAAAAACIQACE=</HashCode>
       <FileName>Assets\Scripts\Counters\CookingTool.cs</FileName>
     </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="_kitchenObject" />
-    </ShowAsAssociation>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="PanCookingTool">
-    <Position X="18" Y="18.75" Width="5.75" />
+    <Position X="20.5" Y="27.5" Width="5.75" />
+    <AssociationLine Name="fryingRecipeSOArray" Type="FryingRecipeSO">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.266" Y="0.605" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="burningRecipeSOArray" Type="BurningRecipeSO">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.377" Y="0.272" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="_fryingRecipeSO" Type="FryingRecipeSO">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.9" Y="0.205" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="_burningRecipeSO" Type="BurningRecipeSO">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.722" Y="0.516" />
+      </MemberNameLabel>
+    </AssociationLine>
     <TypeIdentifier>
-      <HashCode>EAEAAAAACAAAABBIAAAAACAEAAACAAABAAAAAAIEAAA=</HashCode>
+      <HashCode>EAEAAAAACAAAABBIAAAAACAEAAACAAABAAAAAAAEAAA=</HashCode>
       <FileName>Assets\Scripts\Counters\PanCookingTool.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -53,9 +70,29 @@
     </ShowAsCollectionAssociation>
   </Class>
   <Class Name="PotCookingTool">
-    <Position X="18" Y="11.75" Width="5.75" />
+    <Position X="5.75" Y="27.25" Width="5.75" />
+    <AssociationLine Name="combineRecipeSOArray" Type="CombineRecipeSO">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.043" Y="0.884" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="burningRecipeSOArray" Type="BurningRecipeSO">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.678" Y="0.394" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="_combineRecipeSO" Type="CombineRecipeSO">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.488" Y="0.194" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="_burningRecipeSO" Type="BurningRecipeSO">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.099" Y="0.984" />
+      </MemberNameLabel>
+    </AssociationLine>
     <TypeIdentifier>
-      <HashCode>EAEAAgAACAAAAgAMAAAAACAEAAQCCAAEgCAAAAIEAAA=</HashCode>
+      <HashCode>EAEAAgAACAAAAgAMAAAAACAEAAQCCAAEgGAAAAAEAAA=</HashCode>
       <FileName>Assets\Scripts\Counters\PotCookingTool.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -66,16 +103,28 @@
     <ShowAsCollectionAssociation>
       <Field Name="combineRecipeSOArray" />
       <Field Name="burningRecipeSOArray" />
-      <Field Name="kitchenObjectSOList" />
     </ShowAsCollectionAssociation>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="FoodSO">
-    <Position X="44.75" Y="19.5" Width="4.25" />
+    <Position X="20.25" Y="39.75" Width="4.25" />
+    <AssociationLine Name="kitchenObjectSOList" Type="KitchenObjectSO" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="22.25" Y="39.75" />
+        <Point X="22.25" Y="39.375" />
+        <Point X="24.875" Y="39.375" />
+        <Point X="24.875" Y="40.992" />
+        <Point X="27.062" Y="40.992" />
+        <Point X="27.062" Y="40.617" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAABAAAAAAAAAgAAAAAAAAAAAAAAAAAQAABAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\KitchenObject\FoodSO.cs</FileName>
     </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="kitchenObjectSOList" />
+    </ShowAsCollectionAssociation>
   </Class>
   <Class Name="KitchenObject">
     <Position X="43.5" Y="11.75" Width="7.25" />
@@ -84,12 +133,11 @@
       <FileName>Assets\Scripts\KitchenObject\KitchenObject.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Field Name="kitchenObjectSO" />
       <Field Name="kitchenObjectParent" />
     </ShowAsAssociation>
   </Class>
   <Class Name="TablewareKitchenObject">
-    <Position X="44.75" Y="15" Width="4.5" />
+    <Position X="44.75" Y="16" Width="4.5" />
     <NestedTypes>
       <Class Name="TablewareKitchenObject.OnIngredientAddedEventArgs" Collapsed="true">
         <TypeIdentifier>
@@ -101,108 +149,84 @@
       <HashCode>AAAEAAAAAAKAAAAAAACAAAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
       <FileName>Assets\Scripts\KitchenObject\TablewareKitchenObject.cs</FileName>
     </TypeIdentifier>
-    <ShowAsCollectionAssociation>
-      <Field Name="validKitchenObjectSOList" />
-      <Field Name="_ingredientSOList" />
-    </ShowAsCollectionAssociation>
   </Class>
   <Class Name="BaseCounterController">
-    <Position X="42.5" Y="28.75" Width="5.25" />
-    <NestedTypes>
-      <Class Name="BaseCounterController.OnShowCombineRecipeArgs" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Assets\Scripts\MVC\Controllers\BaseCounterController.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Class>
-      <Class Name="BaseCounterController.OnShowOptionalMenuArgs" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Assets\Scripts\MVC\Controllers\BaseCounterController.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Class>
-    </NestedTypes>
+    <Position X="39" Y="42" Width="5.25" />
     <TypeIdentifier>
-      <HashCode>AIACgAAAAAABAAAAgAAACAgAYwACgAAIAAEUgwAAACQ=</HashCode>
+      <HashCode>AIAjAAAABCABAAAACAAACAABAgAAgAAAAAAQAAAAAGQ=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\BaseCounterController.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="ClearCounterController">
-    <Position X="20.5" Y="35.75" Width="5" />
+    <Position X="17" Y="49" Width="5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\ClearCounterController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ContainerCounterController">
-    <Position X="26.25" Y="35.75" Width="5.75" />
+    <Position X="22.75" Y="49" Width="5.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAABAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAABAAABAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAEA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\ContainerCounterController.cs</FileName>
     </TypeIdentifier>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="CuttingCounterController">
-    <Position X="32.75" Y="35.75" Width="5.75" />
+    <Position X="29.25" Y="49" Width="5.75" />
     <TypeIdentifier>
-      <HashCode>AAAAACAACAABAAAAgAABAAAAIgAgCAAAAAAkBSAAAAA=</HashCode>
+      <HashCode>AAghACAACAABAEAAAAAAAAAAAAAADAIAAEAgBCAAAEA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\CuttingCounterController.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="DeliveryCounterController">
-    <Position X="39.25" Y="35.75" Width="5.5" />
+    <Position X="35.75" Y="49" Width="5.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAQAACAAAAAAA=</HashCode>
+      <HashCode>AAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAACAAAAAEA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\DeliveryCounterController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OptionalContainerCounterController">
-    <Position X="45.5" Y="35.75" Width="7.25" />
+    <Position X="42" Y="49" Width="7.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAIAABCAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAABAAAAAAAAAoAAAAAAAAAAAAABCAAAAEAAAAAAAEA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\OptionalContainerCounterController.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="TablewareCounterController">
-    <Position X="58" Y="35.75" Width="5.75" />
+    <Position X="54.5" Y="49" Width="5.75" />
     <TypeIdentifier>
-      <HashCode>AAQQAAgAAAAAAAAAQAAAAAAAIAAAEAAAAAAAAgAAJAA=</HashCode>
+      <HashCode>AAQBAAAAAAAAAAAAAAAAAAAAggAAEAAAAAAAAAAAIFA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\TablewareCounterController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TrashCounterController">
-    <Position X="64.5" Y="35.75" Width="5" />
+    <Position X="61" Y="49" Width="5" />
     <TypeIdentifier>
-      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAIAAAAAAAAAQAAQAAAAA=</HashCode>
+      <HashCode>AAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\TrashCounterController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BaseCounterModel">
-    <Position X="29.25" Y="14.75" Width="3" />
+    <Position X="53.5" Y="24.25" Width="3" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAIAAAAAAAAACA=</HashCode>
       <FileName>Assets\Scripts\MVC\Models\CounterModels\BaseCounterModel.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="_kitchenObject" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="ClearCounterModel">
-    <Position X="33.75" Y="16.5" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Models\CounterModels\ClearCounterModel.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ContainerCounterModel">
-    <Position X="36.25" Y="16.5" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Models\CounterModels\ContainerCounterModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CuttingCounterModel">
-    <Position X="39" Y="16.5" Width="3.25" />
+    <Position X="57.5" Y="27.25" Width="3.25" />
+    <InheritanceLine Type="BaseCounterModel" ManuallyRouted="true" FixedFromPoint="true">
+      <Path>
+        <Point X="55" Y="26.449" />
+        <Point X="55" Y="26.875" />
+        <Point X="59.125" Y="26.875" />
+        <Point X="59.125" Y="27.25" />
+      </Path>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAECAAABAAABAAAAAEAAAAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Models\CounterModels\CuttingCounterModel.cs</FileName>
@@ -211,153 +235,84 @@
       <Field Name="_cuttingRecipeSO" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="DeliveryCounterModel">
-    <Position X="19.25" Y="16.5" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Models\CounterModels\DeliveryCounterModel.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="OptionalContainerCounterModel">
-    <Position X="21.75" Y="16.5" Width="2.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Models\CounterModels\OptionalContainerCounterModel.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="StoveCounterModel">
-    <Position X="25" Y="16.5" Width="2.75" />
+    <Position X="49.75" Y="27.25" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAQAAAAAAAIAQAAAAQAAAAEAAIAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAQAAAAAAAIAQAAAAAAAAAEAAIAAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Models\CounterModels\StoveCounterModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TablewareCounterModel">
-    <Position X="28.5" Y="16.5" Width="2" />
+    <Position X="54" Y="27.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAQAAAAAAAAAAAAQACAAAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Models\CounterModels\TablewareCounterModel.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="TrashCounterModel">
-    <Position X="31.25" Y="16.5" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Models\CounterModels\TrashCounterModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BaseCounterView">
     <Position X="31.5" Y="19.75" Width="6.25" />
     <TypeIdentifier>
-      <HashCode>EAQAAQABBCAAEAAEGAAAAAgBAACEAAAggAAAAAEQAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAEEAAAAAEAAACEAAAAgAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Views\CounterViews\BaseCounterView.cs</FileName>
     </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="ClearCounterView">
-    <Position X="31" Y="26" Width="2.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Views\CounterViews\ClearCounterView.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ContainerCounterView">
-    <Position X="34.5" Y="26" Width="3" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAEAAAABQAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Views\CounterViews\ContainerCounterView.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="kitchenObjectSO" />
-    </ShowAsAssociation>
   </Class>
   <Class Name="CuttingCounterView">
-    <Position X="38.25" Y="26" Width="3.75" />
+    <Position X="35.75" Y="27" Width="3.75" />
     <TypeIdentifier>
-      <HashCode>AAgAIQAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <HashCode>AAAAIAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\MVC\Views\CounterViews\CuttingCounterView.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Field Name="progressBarUI" />
     </ShowAsAssociation>
-    <ShowAsCollectionAssociation>
-      <Field Name="cuttingRecipeSOArray" />
-    </ShowAsCollectionAssociation>
-  </Class>
-  <Class Name="DeliveryCounterView">
-    <Position X="42.75" Y="26" Width="2.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Views\CounterViews\DeliveryCounterView.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="OptionalContainerCounterView">
-    <Position X="46.25" Y="26" Width="3.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Views\CounterViews\OptionalContainerCounterView.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsCollectionAssociation>
-      <Field Name="kitchenObjectSOList" />
-    </ShowAsCollectionAssociation>
-  </Class>
-  <Class Name="StoveCounterView">
-    <Position X="19.5" Y="26" Width="2.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAACAAAAAQAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Views\CounterViews\StoveCounterView.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="_cookingTool" />
-    </ShowAsAssociation>
   </Class>
   <Class Name="TablewareCounterView">
-    <Position X="23" Y="26" Width="3.75" />
+    <Position X="29" Y="26.75" Width="3.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAACAAQAAA=</HashCode>
+      <HashCode>AAAAAAgAAAABAAAAAAAAgAADgEAAEAAAAAAAAAAAJEA=</HashCode>
       <FileName>Assets\Scripts\MVC\Views\CounterViews\TablewareCounterView.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="_tablewareKitchenObjectSO" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="TrashCounterView">
-    <Position X="27.5" Y="26" Width="2.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Views\CounterViews\TrashCounterView.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BurningRecipeSO" Collapsed="true">
-    <Position X="16" Y="16.25" Width="1.5" />
+    <Position X="16.25" Y="29" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAABAAAAAAAAAAAAg=</HashCode>
       <FileName>Assets\Scripts\SO\RecipeSO\BurningRecipeSO.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CuttingRecipeSO">
-    <Position X="43.25" Y="22.5" Width="2" />
+    <Position X="59" Y="23" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAABAABAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\SO\RecipeSO\CuttingRecipeSO.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FryingRecipeSO" Collapsed="true">
-    <Position X="20" Y="22.75" Width="1.5" />
+    <Position X="24.25" Y="20.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAABAQAAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\SO\RecipeSO\FryingRecipeSO.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="KitchenObjectOptionalProcessSO">
-    <Position X="39" Y="23.25" Width="3.25" />
+    <Position X="30.5" Y="39.75" Width="3.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAABAAA=</HashCode>
       <FileName>Assets\Scripts\SO\KitchenObjectSO\KitchenObjectOptionalProcessSO.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="KitchenObjectSO">
-    <Position X="39" Y="20.25" Width="3.25" />
+    <Position X="25.75" Y="39" Width="3.25" />
+    <AssociationLine Name="processSO" Type="KitchenObjectOptionalProcessSO" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="27.062" Y="40.617" />
+        <Point X="27.062" Y="40.992" />
+        <Point X="29.375" Y="40.992" />
+        <Point X="29.375" Y="39.375" />
+        <Point X="31.938" Y="39.375" />
+        <Point X="31.938" Y="39.75" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAIAAAAAAEAQAAAAIAAAAAA=</HashCode>
       <FileName>Assets\Scripts\SO\KitchenObjectSO\KitchenObjectSO.cs</FileName>
@@ -366,24 +321,17 @@
       <Field Name="processSO" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="ProgressBarUI" Collapsed="true">
-    <Position X="39.25" Y="28.5" Width="1.5" />
+  <Class Name="ProgressBarUI">
+    <Position X="36.5" Y="29" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAACAAAAAAEABAAAAAAAAkAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Assets\Scripts\UI\ProgressBarUI.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Observer.Observable">
-    <Position X="28.5" Y="11.75" Width="4.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAEAAAAQACAAAAQAAAAAAAAAA=</HashCode>
-      <FileName>Assets\Scripts\MVC\Models\CounterModels\CounterModel.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="StoveCounterController">
-    <Position X="53.5" Y="35.75" Width="3.75" />
+    <Position X="50" Y="49" Width="3.75" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAAAAAAACAAIQAAAAAAAAACAAAAAEA=</HashCode>
+      <HashCode>EAABAAAACAAAAAAACAAAEAAAAQAAAAAIACACAAAAAEA=</HashCode>
       <FileName>Assets\Scripts\MVC\Controllers\CounterControllers\StoveCounterController.cs</FileName>
     </TypeIdentifier>
   </Class>

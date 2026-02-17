@@ -2,21 +2,14 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
-
 
 public class UILevelUpPopup : UIPopup
 {
-    public enum RewardType
-    {
-        Coin,
-        Gem,
-    }
+
     public class Param
     {
-        public string reward;
+        public RewardData[] reward;
     }
 
     [SerializeField] private TextMeshProUGUI levelText;
@@ -28,47 +21,49 @@ public class UILevelUpPopup : UIPopup
     [SerializeReference] private Sprite gemIcon;
 
 
-    private Dictionary<string, int> parsedData = new Dictionary<string, int>();
     private List<UILevelUpRewardItem> rewardItems = new List<UILevelUpRewardItem>();
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
-        Show();
+
+        levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
+        if (_openParam != null)
+        {
+            Param popupParam = _openParam as Param;
+
+            foreach (var data in popupParam.reward)
+            {
+                GameObject rewardItem = Instantiate(RewardItemPrefab, RewardContainer);
+                rewardItem.SetActive(true);
+                var item = rewardItem.GetComponent<UILevelUpRewardItem>();
+                item.SetItem(GetRewardIcon(data.id),data.amount);
+                rewardItems.Add(item);
+            }
+        }
     }
 
     public override void HidePopup(object param = null)
     {
         base.HidePopup(param);
-        Hide();
-    }
 
-    private void Show()
-    {
-        levelText.text = GameManager.Instance.GameData.playerData.level.ToString();
+        foreach (var item in rewardItems)
+        {
+            Destroy(item.gameObject);
+        }
+        rewardItems.Clear();
         if (_openParam != null)
         {
-            Param param = _openParam as Param;
-            string[] pairs = param.reward.Split(';');
-
-            foreach (var pair in pairs)
+            Param popupParam = _openParam as Param;
+            foreach(var item in popupParam.reward)
             {
-                // Split each pair by '_' to get id and amount
-                string[] parts = pair.Split('_');
-                if (parts.Length == 2)
+                if (item.id == nameof(RewardData.RewardType.Coin))
                 {
-                    string id = parts[0];
-                    int amount = int.Parse(parts[1]);
-                    parsedData[id] = amount;
+                    GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(item.amount);
                 }
-            }
-
-            foreach (var data in parsedData)
-            {
-                GameObject rewardItem = Instantiate(RewardItemPrefab, RewardContainer);
-                rewardItem.SetActive(true);
-                var item = rewardItem.GetComponent<UILevelUpRewardItem>();
-                item.SetItem(GetRewardIcon(data.Key),data.Value);
-                rewardItems.Add(item);
+                else if (item.id == nameof(RewardData.RewardType.Gem))
+                {
+                    GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(item.amount);
+                }
             }
         }
     }
@@ -77,35 +72,19 @@ public class UILevelUpPopup : UIPopup
     {
         switch (rewardId)
         {
-            case nameof(RewardType.Coin):
+            case nameof(RewardData.RewardType.Coin):
                 return coinIcon;
-            case nameof(RewardType.Gem):
+            case nameof(RewardData.RewardType.Gem):
                 return gemIcon;
             default:
                 return coinIcon;
         }
     }
 
-    private void Hide()
-    {
-        foreach (var item in rewardItems)
-        {
-            Destroy(item.gameObject);
-        }
-        foreach(var item in parsedData)
-        {
-            if (item.Key == nameof(RewardType.Coin))
-            {
-                GameManager.Instance.GameData.UpdatePlayerResources(item.Value);
-            }
-            else if (item.Key == nameof(RewardType.Gem))
-            {
-            }
-        }
-    }
     public void OnCloseButtonClicked()
     {
         HidePopup();
+        AdsManager.Instance.ShowInterstitialAds("Level_Up");
     }
     
 }

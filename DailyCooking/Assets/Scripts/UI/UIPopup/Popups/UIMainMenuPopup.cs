@@ -14,11 +14,11 @@ public class UIMainMenuPopup : UIPopup
         playButton.onClick.AddListener(() =>
         {
             Loader.Load(Loader.Scene.GameScene);
-            GameManager.Instance.SwitchState(GameState.InGame);
-            UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup.ToString());
+            GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+            UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
         });
         optionsButton.onClick.AddListener(() => {
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup.ToString());
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup);
         });
         quitButton.onClick.AddListener(() =>
         {
@@ -26,5 +26,16 @@ public class UIMainMenuPopup : UIPopup
         });
 
     }
-    
+    public override void HidePopup(object param = null)
+    {
+        base.HidePopup(param);
+    }
+    public override void ShowPopup(object param = null)
+    {
+        base.ShowPopup(param);
+    }
+    public override void SetupPopup()
+    {
+        base.SetupPopup();
+    }
 }

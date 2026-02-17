@@ -15,17 +15,28 @@ public class UIShopItem : MonoBehaviour
     private ConfigShopItem configShopItem;
     private ShopItemCategory itemCategory;
     private Dictionary<string, int> parsedData = new Dictionary<string, int>();
+
+    public Button ButtonBuy => buttonBuy;
+    public ConfigShopItem ConfigShopItem => configShopItem;
+    private void OnDestroy()
+    {
+        if (GameManager.Instance == null)
+            return;
+        GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChanged;
+    }
     public void SetItem(ConfigShopItem item,ShopItemCategory itemCategory)
     {
         this.gameObject.SetActive(true);    
         this.configShopItem = item;
         this.itemCategory = itemCategory;
 
+        GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChanged;
+
         //imageIcon.sprite = item.Icon;
         textName.text = item.Name;
-        textPrice.text = item.Price.ToString();
-        buttonBuy.onClick.AddListener(OnClickButtonBuy);
-        if(item.UnlockLevel > GameManager.Instance.GameData.playerData.level)
+        textPrice.text = MathUtil.NumberFormat(item.Price);
+        ButtonBuy.onClick.AddListener(OnClickButtonBuy);
+        if(item.UnlockLevel > GameManager.Instance.GameData.PlayerStats.playerData.Level)
         {
             lockTransform.gameObject.SetActive(true);
         }
@@ -51,32 +62,35 @@ public class UIShopItem : MonoBehaviour
 
     }
 
+    private void OnLevelChanged()
+    {
+        if (configShopItem.UnlockLevel > GameManager.Instance.GameData.PlayerStats.playerData.Level)
+        {
+            lockTransform.gameObject.SetActive(true);
+        }
+        else
+        {
+            lockTransform.gameObject.SetActive(false);
+        }
+    }
+
     private void OnClickButtonBuy()
     {
-        if(configShopItem.Price > GameManager.Instance.GameData.playerData.coins)
-        {
-            Debug.Log("Not enough coins to buy this item.");
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup.ToString(), 
-                new UIGameNotiPopup.Param {Title = "warning", 
-                                            Message = "Not enough coins to buy this item."
-                });
-            return;
-        }
-        GameManager.Instance.GameData.UpdatePlayerResources(-configShopItem.Price);
-        GameManager.Instance.GameData.AddInventoryData(InventoryItemData.CreateInventoryItem(configShopItem.Id.ToString()));
-        GameManager.Instance.SaveGame();
+        ShopManager.Instance.OnPurchase(configShopItem, parsedData);
     }
 
     private void GetReward(Dictionary<string, int> parsedData)
     {
         var parsedDataList = parsedData.ToList();
-        if(parsedDataList.Count == 0) return;
+        if (parsedDataList.Count == 0) return;
         switch (itemCategory)
         {
-            case ShopItemCategory.Counters:
+            case ShopItemCategory.Counters :
+            case ShopItemCategory.Tables:
+            case ShopItemCategory.Walls:
 
                 var placedObject = GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects
-                    .Find(x => x.id == parsedDataList[0].Key);
+                    .Find(x => x.Guid == parsedDataList[0].Key);
                 if (placedObject == null)
                 {
                     gameObject.SetActive(false);

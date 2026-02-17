@@ -1,46 +1,74 @@
-﻿using System;
+
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-[Serializable]
+
 public class TablewareCounterController : BaseCounterController
 {
-    public TablewareCounterController(TablewareCounterView view,TablewareCounterModel model) : base(view,model)
-    {
+    [SerializeField] private KitchenObjectSO _tablewareKitchenObjectSO;
+    [SerializeField] private float _spawnTimerMax = 4f;
+    [SerializeField] private int _tablewareSpawnAmountMax = 4;
+    [SerializeField] private Transform _tablewareVisualPrefab;
+    [SerializeField] float tablewareOffsetX = .1f;
+    [SerializeField] float tablewareOffsetY = 0.5f;
+    [SerializeField] Vector3 tablewareRotation = Vector3.zero;
 
-    }
-    protected override void BaseCounterView_OnUpdate()
+    private List<GameObject> _tablewareVisualGameObjectList;
+    private float _spawnTimer;
+    private int _tablewareSpawnAmount;
+
+    public int TablewareSpawnAmount { get => _tablewareSpawnAmount; set => _tablewareSpawnAmount = value; }
+    public float SpawnTimer { get => _spawnTimer; set => _spawnTimer = value; }
+
+    private void Awake()
     {
-        base.BaseCounterView_OnUpdate();
-        Update();
+        _tablewareVisualGameObjectList = new List<GameObject>();
     }
+
     private void Update()
     {
-        var view = (TablewareCounterView)BaseCounterView;
-        var model = (TablewareCounterModel)BaseCounterModel;
-        if (model.TablewareSpawnAmount < view.TablewareSpawnAmountMax)
+        if (TablewareSpawnAmount < _tablewareSpawnAmountMax)
         {
-            model.SpawnTimer += Time.deltaTime;
-            if (model.SpawnTimer >= view.SpawnTimerMax)
+            SpawnTimer += Time.deltaTime;
+            if (SpawnTimer >= _spawnTimerMax)
             {
-                model.SpawnTimer = 0f;
-                model.TablewareSpawnAmount++;
-                view.FireOnTablewareSpawned();
+                SpawnTimer = 0f;
+                TablewareSpawnAmount++;
+                OnTablewareSpawned();
             }
         }
     }
-    public override void Interact(PlayerStateMachine playerStateMachine)
+
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        var view = (TablewareCounterView)BaseCounterView;
-        var model = (TablewareCounterModel)BaseCounterModel;
         if (!playerStateMachine.HasKitchenObject())
         {
-            //Player is empty handed
-            if (model.TablewareSpawnAmount > 0)
+            if (TablewareSpawnAmount > 0)
             {
-                //There is at least one tableware
-                model.TablewareSpawnAmount--;
-                KitchenObject.SpawnKitchenObject(view.TablewareKitchenObjectSO, playerStateMachine);
-                view.FireOnTablewareRemoved();
+                TablewareSpawnAmount--;
+                KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
+                OnTablewareRemoved();
             }
         }
+    }
+
+    public void OnTablewareRemoved()
+    {
+        if (_tablewareVisualGameObjectList == null ||
+            _tablewareVisualGameObjectList.Count < 0)
+            return;
+
+        GameObject tablewareGameObject = _tablewareVisualGameObjectList[_tablewareVisualGameObjectList.Count - 1];
+        _tablewareVisualGameObjectList.Remove(tablewareGameObject);
+        Destroy(tablewareGameObject);
+    }
+
+    public void OnTablewareSpawned()
+    {
+        Transform tablewareVisualTransform = Instantiate(_tablewareVisualPrefab, GetKitchenObjectFollowTransform());
+
+        tablewareVisualTransform.localPosition = new Vector3(tablewareOffsetX * _tablewareVisualGameObjectList.Count, tablewareOffsetY, 0);
+        tablewareVisualTransform.Rotate(tablewareRotation);
+        _tablewareVisualGameObjectList.Add(tablewareVisualTransform.gameObject);
     }
 }

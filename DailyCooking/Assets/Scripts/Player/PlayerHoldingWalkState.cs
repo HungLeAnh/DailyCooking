@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-public class PlayerHoldingWalkState : PlayerHoldingState
+public class PlayerHoldingWalkState : PlayerBaseState
 {
     public PlayerHoldingWalkState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
@@ -27,5 +27,7 @@ public class PlayerHoldingWalkState : PlayerHoldingState
 
     public override void UpdateState()
     {
+        base.UpdateState();
+        _subStateMachine.Update();
     }
 }

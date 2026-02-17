@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6154266614422445402}
   - component: {fileID: 8121191103929895968}
   m_Layer: 0
-  m_Name: Bowl
+  m_Name: bowl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -50,8 +50,9 @@ MonoBehaviour:
   kitchenObjectSO: {fileID: 11400000, guid: 3f9a28b714814864a8748e005522c083, type: 2}
   validKitchenObjectSOList:
   - {fileID: 11400000, guid: dc7c037e72c847c4a9d02a63d275f3d5, type: 2}
-  tablewareFoodSOList:
-  - {fileID: 11400000, guid: 62129fd5079c12a43a0ee71c1e752c79, type: 2}
+  visualGameObjectArray: []
+  tablewareGameObjectArray: []
+  eatenGameObjectArray: []
 --- !u!1 &8622493025619112790
 GameObject:
   m_ObjectHideFlags: 0
@@ -266,7 +267,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2273084929310679199, guid: 89afe0938e303f94b97e34ba5b109ae7, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 52
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2273084929310679199, guid: 89afe0938e303f94b97e34ba5b109ae7, type: 3}
       propertyPath: m_SizeDelta.y
@@ -274,11 +275,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2273084929310679199, guid: 89afe0938e303f94b97e34ba5b109ae7, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 60
+      value: 36
       objectReference: {fileID: 0}
     - target: {fileID: 2273084929310679199, guid: 89afe0938e303f94b97e34ba5b109ae7, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -170
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 2714646881204500297, guid: 89afe0938e303f94b97e34ba5b109ae7, type: 3}
       propertyPath: tablewareKitchenObject

@@ -1,146 +1,62 @@
-﻿using Observer;
 using System;
 using UnityEngine;
 
-[Serializable]
 public class StoveCounterController : BaseCounterController
 {
-    public StoveCounterController(StoveCounterView view,StoveCounterModel model) : base(view,model)
+    [SerializeField] private CookingTool _cookingTool;
+
+    protected override void OnRestartGame(object sender, PlayerStateMachine e)
     {
-        Init();
-    }
-    protected override void BaseCounterView_OnUpdate()
-    {
-        base.BaseCounterView_OnUpdate();
-        Update();
-    }
-    protected override void BaseCounterView_OnRestartGame(object sender, PlayerStateMachine e)
-    {
-        base.BaseCounterView_OnRestartGame(sender, e);
+        base.OnRestartGame(sender, e);
 
-        var view = (StoveCounterView)BaseCounterView;
+        if (_cookingTool.HasKitchenObject())
+            _cookingTool.GetKitchenObject().DestroySelf();
 
-        if (view.CookingTool.HasKitchenObject())
-            view.CookingTool.GetKitchenObject().DestroySelf();
-
-        view.CookingTool.ClearKitchenObject();
-        BaseCounterModel.NotifySubscribers(EObserverEvent.ModelChange);
-
-    }
-    private void Init()
-    {
-        var view = (StoveCounterView)BaseCounterView;
-        view.CookingTool.CurrentState = CookingTool.State.Idle;
-        view.CookingTool.OnStageChanged += CookingTool_OnStageChanged;
-        view.CookingTool.OnProgressChanged += StoveCounter_OnProgressChanged;
-
-        var model = (StoveCounterModel)BaseCounterModel;
-        model.AudioSource = view.GetComponent<AudioSource>();
+        _cookingTool.ClearKitchenObject();
     }
 
-    public override void Interact(PlayerStateMachine playerStateMachine)
+    public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        var view = (StoveCounterView)BaseCounterView;
-
-        if (!view.CookingTool.HasKitchenObject())
+        if (!_cookingTool.HasKitchenObject())
         {
-            //There is no kitchen object
             if (playerStateMachine.HasKitchenObject())
             {
-                KitchenObjectSO kitchenObjectSO = playerStateMachine.GetKitchenObject().GetKitchenObjectSO();
-                //Player is carrying something
-                if (view.CookingTool.HasRecipeWithInput(kitchenObjectSO))
+                if (_cookingTool.HasRecipeWithInput(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
                 {
-                    //Player is carrying something that can be fried
-                    //IHasOptionalSO option = (IHasOptionalSO)_cookingTool;
-                    //if (option != null)
-                    //{
-                    //    FireOnShowCombineRecipe(option.GetListKitchenObjectList(kitchenObjectSO));
-                    //}
-
-                    playerStateMachine.GetKitchenObject().SetKitchenObjectParent(view.CookingTool);
-
-                    view.CookingTool.SetCookingRecipeSO();
-
-                    view.CookingTool.UpdateCookingState(CookingTool.State.Cooking, 0f);
-                    view.CookingTool.FireOnProgressChanged(view.CookingTool.CookingTimer / view.CookingTool.CookingTimeMax);
+                    playerStateMachine.GetKitchenObject().SetKitchenObjectParent(_cookingTool);
+                    _cookingTool.SetCookingRecipeSO();
+                    _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
                 }
-            }
-            else
-            {
-                //Player is not carrying anything
             }
         }
         else
         {
-            //There is kitchen object here
             if (playerStateMachine.HasKitchenObject())
             {
-                //Player is carrying something
                 if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject plateKitchenObject))
                 {
-                    //Player is holding a plate
-                    if (plateKitchenObject.TryAddIngredient(view.CookingTool.GetKitchenObject().GetKitchenObjectSO()))
+                    if (plateKitchenObject.TryAddIngredient(_cookingTool.GetKitchenObject().GetKitchenObjectSO()))
                     {
-                        view.CookingTool.GetKitchenObject().DestroySelf();
-
-                        view.CookingTool.UpdateCookingState(CookingTool.State.Idle, 0f);
-                        view.CookingTool.FireOnProgressChanged(0f);
+                        _cookingTool.GetKitchenObject().DestroySelf();
+                        _cookingTool.UpdateCookingState(CookingTool.State.Idle);
                     }
                 }
             }
             else
             {
-                //Player is not carrying anything
-                view.CookingTool.GetKitchenObject().SetKitchenObjectParent(playerStateMachine);
-
-                view.CookingTool.UpdateCookingState(CookingTool.State.Idle, 0f);
-
-                view.CookingTool.FireOnProgressChanged(0f);
-
+                _cookingTool.GetKitchenObject().SetKitchenObjectParent(playerStateMachine);
+                _cookingTool.UpdateCookingState(CookingTool.State.Idle);
             }
         }
     }
-    private void CookingTool_OnStageChanged(object sender, CookingTool.OnStageChangeEventArgs e)
+
+    public float GetProgress()
     {
-        var model = (StoveCounterModel)BaseCounterModel;
-        bool playSound = e.state == CookingTool.State.Cooking || e.state == CookingTool.State.Cooked;
-        if (playSound)
-        {
-            model.AudioSource.Play();
-        }
-        else
-        {
-            model.AudioSource.Pause();
-        }
+        return _cookingTool.GetProgress();
     }
 
-    private void StoveCounter_OnProgressChanged(object sender, IHasProgress.OnProgressChangedEventArgs e)
+    public bool IsDone()
     {
-        var model = (StoveCounterModel)BaseCounterModel;
-        var view = (StoveCounterView)BaseCounterView;
-
-        float burnShowProgressAmount = .5f;
-
-        model.PlayWarningSound = view.CookingTool.IsDone() && e.progressNormalized >= burnShowProgressAmount;
-
-    }
-
-    private void Update()
-    {
-        var model = (StoveCounterModel)BaseCounterModel;
-        var view = (StoveCounterView)BaseCounterView;
-
-        if (model.PlayWarningSound)
-        {
-            model.WarningSoundTimer -= Time.deltaTime;
-            if (model.WarningSoundTimer <= 0f)
-            {
-                float warningSoundTimerMax = .2f;
-                model.WarningSoundTimer = warningSoundTimerMax;
-                SoundManager.Instance.PlayWarningSound(view.transform.position);
-            }
-        }
-
+        return _cookingTool.IsDone();
     }
 }

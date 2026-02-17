@@ -1,102 +1,92 @@
-using Cinemachine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.AI;
 
-public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerState>, IKitchenObjectParent
+public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitchenObjectParent
 {
-    private static PlayerStateMachine _instance;
-
-    public static PlayerStateMachine Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = FindObjectOfType<PlayerStateMachine>();
-            }
-            return _instance;
-
-        }
-    }
-
-    public PlayerStateContext Context { get => _context; set => _context = value; }
+    public PlayerStateContext Context { get; set; }
 
     public event EventHandler OnPickedSomething;
-
+    public event EventHandler<Transform> OnObjectHighlighted;
+    public event EventHandler<Transform> OnSelectInteractable;
     public enum EPlayerState
     {
+        // Top-level states
         Idle, 
+        Holding,
+
+        // Sub-states for Idle
         Idle_Idle, 
         Idle_Walking,
-        Holding,
+
+        // Sub-states for Holding
         Holding_Idle,
         Holding_Walking,
     }
 
-    [SerializeField]
-    private float moveSpeed = 7f;
+
     [SerializeField]
     private LayerMask countersLayerMask;
     [SerializeField] 
     private Transform kitchenObjectHoldPoint;
     [SerializeField] 
-    private Animator _characterAnimator;
-    [SerializeField]
-    private PlacedObjectView placedObjectView;
+    private Animator characterAnimator;
 
-    private PlayerStateContext _context;
-
+    [SerializeField] private float radius = 2f;
+    private float height = 2.0f;
 
 
-    public void IntializeStates()
+    private StateManager<EPlayerState> _stateManager;
+    private PlayerStateFactory _stateFactory;
+
+
+    private void IntializeStates()
     {
-        Context = new PlayerStateContext(_characterAnimator,moveSpeed,
-            placedObjectView,Instance.transform,countersLayerMask, Instance.kitchenObjectHoldPoint);
+        Context = new PlayerStateContext(characterAnimator,
+            this.transform, countersLayerMask, this.kitchenObjectHoldPoint);
 
-        _states.Add(EPlayerState.Idle, new PlayerIdleState(EPlayerState.Idle));
-        _states.Add(EPlayerState.Holding,new PlayerHoldingState(EPlayerState.Holding));
-        foreach (var key in _states.Keys)
-        {
-            _states[key].IntializeStates();
-        }
-        _currentState = _states[EPlayerState.Idle];
+        var states = _stateFactory.CreateStates(this);
+        _stateManager.SetStates(states, EPlayerState.Idle);
+        _stateManager.Start();
     }
-    private void Awake()
+
+    protected override void Awake()
     {
-        if (_instance == null)
-            _instance = this as PlayerStateMachine;
-        else
-        {
-            if (_instance != this)
-            {
-                Destroy(gameObject);
-            }
-        }
+        base.Awake();
+        _stateManager = new StateManager<EPlayerState>();
+        _stateFactory = new PlayerStateFactory();
         IntializeStates();
+
     }
+    private void Start()
+    {
+        GameInput.Instance.OnMouseClickPerformed += PlayerStateMachine_OnMouseClickPerformed;
+    }
+
     private void OnDestroy()
     {
+        if(GameInput.Instance != null)
+            GameInput.Instance.OnMouseClickPerformed -= PlayerStateMachine_OnMouseClickPerformed;
+
         Context = null;
-        foreach (var state in _states)
-        {
-            state.Value.Dispose();
-        }
-        _states.Clear();
-        _currentState = null;
+        _stateManager.Dispose();
+    }
+    private void Update()
+    {
+        _stateManager.Update();
+
+        HandleMovement();
+        HandleInteractions();
     }
 
-
-    public Transform GetKitchenObjectFollowTransform()
+    public Transform GetKitchenObjectFollowTransform(int index = 0)
     {
         return kitchenObjectHoldPoint;
     }
 
-    public void SetKitchenObject(KitchenObject kitchenObject)
+    public void SetKitchenObject(KitchenObject kitchenObject, int index = 0)
     {
         Context.KitchenObject = kitchenObject;
 
@@ -106,17 +96,17 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
         }
     }
 
-    public KitchenObject GetKitchenObject()
+    public KitchenObject GetKitchenObject(int index = 0)
     {
         return Context.KitchenObject;
     }
 
-    public void ClearKitchenObject()
+    public void ClearKitchenObject(int index = 0)
     {
         Context.KitchenObject = null;
     }
 
-    public bool HasKitchenObject()
+    public bool HasKitchenObject(int index = 0)
     {
         return Context.KitchenObject != null;
     }
@@ -124,11 +114,168 @@ public class PlayerStateMachine : MonoStateManager<PlayerStateMachine.EPlayerSta
     {
         Context.IsDisableInput = isDisable;
     }
-    public void SetPlayerPath(List<int2> pathList)
+    private void PlayerStateMachine_OnMouseClickPerformed(object sender, Vector2 e)
     {
-        pathList.Reverse();
-        var state = _currentState as PlayerBaseState;
-        state.MoveTowardsTarget(pathList);
 
+        if (Context.IsDisableInput)
+            return;
+
+        float maxDistance = 999f;
+        Ray ray = Camera.main.ScreenPointToRay(e);
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance))
+        {
+            if (raycastHit.transform.TryGetComponent(out IInteractable interactableObject))
+            {
+                if (!Context.Highlightable.Contains(raycastHit.transform.GetComponent<IHighlightable>()))
+                    return;
+
+
+                if (interactableObject != Context.SelectedInteractableObject)
+                {
+                    SetInteractableObject(interactableObject, raycastHit.transform);
+                    Context.SelectedInteractableObject.InteractEvent(PlayerStateMachine.Instance);
+                }
+                else if (interactableObject == Context.SelectedInteractableObject)
+                {
+                    if (Context.SelectedInteractableObject != null)
+                    {
+                        IHasProgress progress = Context.SelectedInteractableObject as IHasProgress;
+                        if (progress == null)
+                        {
+                            SetInteractableObject(interactableObject, raycastHit.transform);
+                            Context.SelectedInteractableObject.InteractEvent(PlayerStateMachine.Instance);
+                        }
+                        else
+                        {
+
+                            if (progress.IsDone() || progress.GetProgress() == -1)
+                            {
+                                Context.SelectedInteractableObject.InteractEvent(PlayerStateMachine.Instance);
+                            }
+                            else
+                            {
+                                Context.SelectedInteractableObject.InteractAlternateEvent(PlayerStateMachine.Instance);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                SetInteractableObject(null, null);
+            }
+        }
+        else
+        {
+            SetInteractableObject(null,null);
+        }
+    }
+    private void HandleInteractions()
+    {
+        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
+
+
+        Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
+
+        if (moveDir != Vector3.zero)
+        {
+            Context.LastInteractDir = moveDir;
+        }
+
+        Vector3 p1 = transform.position + Vector3.up * radius;
+        Vector3 p2 = transform.position + Vector3.up * (height - radius);
+
+        Collider[] colliderHitArray = Physics.OverlapCapsule(p1, p2, radius, countersLayerMask);
+        foreach (IHighlightable highlightable in Context.Highlightable)
+        {
+            if(highlightable as UnityEngine.Object != null)
+                highlightable.OnDeselected();
+        }
+        if (colliderHitArray.Length > 0)
+        {
+            List<IHighlightable> newHighlightables = new List<IHighlightable>(Context.Highlightable);
+            foreach (Collider hit in colliderHitArray)
+            {
+                if (hit.transform.TryGetComponent(out IHighlightable highlightable))
+                {
+                    highlightable.OnSelected();
+                    newHighlightables.Add(highlightable);
+                }
+            }
+            Context.Highlightable.Clear();
+            Context.Highlightable = newHighlightables;
+
+        }
+        else
+        {
+            Context.Highlightable.Clear();
+        }
+
+
+    }
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position + Vector3.up * radius , radius);
+        Gizmos.DrawWireSphere(transform.position + Vector3.up * (height - radius), radius);
+    }
+    private void HandleMovement()
+    {
+        Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
+
+
+        Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
+
+        float moveDistance = GameManager.Instance.GameData.PlayerStats.statsData.MoveSpeed * Time.deltaTime;
+        float playerRadius = 0.7f;
+        bool canMove = !Physics.BoxCast(transform.position, Vector3.one * playerRadius, moveDir, Quaternion.identity, moveDistance, countersLayerMask);
+
+        if (!canMove)
+        {
+            //try to move on X
+            Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
+            canMove = (moveDir.x < -.5f || moveDir.x > .5f) && !Physics.BoxCast(transform.position, Vector3.one * playerRadius, moveDirX, Quaternion.identity, moveDistance, countersLayerMask);
+            if (canMove)
+            {
+                moveDir = moveDirX;
+
+            }
+            else
+            {
+                //can't move on X
+                //try to move on Z
+                Vector3 moveDirZ = new Vector3(0, 0, moveDir.z).normalized;
+                canMove = (moveDir.z < -.5f || moveDir.z > .5f) && !Physics.BoxCast(transform.position, Vector3.one * playerRadius, moveDirZ, Quaternion.identity, moveDistance, countersLayerMask);
+                if (canMove)
+                {
+                    //can move on Z
+                    moveDir = moveDirZ;
+                }
+                else
+                {
+                    //can't move at all
+                }
+            }
+
+
+        }
+
+        if (canMove)
+        {
+            transform.position += moveDir * moveDistance;
+
+        }
+
+
+        Context.IsWalking = moveDir != Vector3.zero;
+
+        float rotateSpeed = 10f;
+        transform.forward = Vector3.Slerp(transform.forward, moveDir, rotateSpeed * Time.deltaTime);
+    }
+    private void SetInteractableObject(IInteractable interactable,Transform transform)
+    {
+        Context.SelectedInteractableObject = interactable;
+        if (interactable != null)
+            OnSelectInteractable?.Invoke(this, transform);
     }
 }

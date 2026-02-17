@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40ab37e8500c2e54c9efa9096bbadac0, type: 3}
   m_Name: ChesseBurgerSO
   m_EditorClassIdentifier: 
+  _guid: 49395a9a760952f409a3cfa5c1bf3c3b
   kitchenObjectSOList:
   - {fileID: 11400000, guid: 1c94b7f0c13c51d4ab047c26f734bbff, type: 2}
   - {fileID: 11400000, guid: 45a0756a18761704b9e36a6a7d3f2d5f, type: 2}
   - {fileID: 11400000, guid: 8c2f67e06d0c9ed40b55258cfa2918ed, type: 2}
   Sprite: {fileID: 21300000, guid: 31c675091d794c04a849cbe7db65b1fd, type: 3}
   recipeName: Chesse Hamburger
-  price: 15
+  price: 20
+  exp: 25
+  foodType: 3

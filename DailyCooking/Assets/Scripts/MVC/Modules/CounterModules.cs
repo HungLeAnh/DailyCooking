@@ -1,71 +1,43 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
+using System.Linq;
 using UnityEngine;
 
-public class CounterModules : PersistentSingleton<CounterModules>
+public class CounterModules : PersistentSingleton<CounterModules>, IModules
 {
-    public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
-    public class OnSelectedCounterChangedEventArgs : EventArgs
-    {
-        public BaseCounterView selectedCounterView;
-    }
-
     private List<BaseCounterController> baseCounterControllers = new List<BaseCounterController>();
-    private bool isInited = false;
-    public bool IsInited => isInited;
     public List<BaseCounterController> BaseCounterControllers { get => baseCounterControllers; set => baseCounterControllers = value; }
 
-    public void Initialize()
+    protected override void Awake()
     {
-        isInited = true;
-        var counterViews = GridBuildingSystem.Instance.Container.GetComponentsInChildren<BaseCounterView>();
-        foreach (var counterView in counterViews)
-        {
-            //Debug.Log("Type: " + counterView.GetType());
-            var controller = counterView.CreateControllerFromView();
-            baseCounterControllers.Add(controller as BaseCounterController);
-        }
+        base.Awake();
+        baseCounterControllers = new List<BaseCounterController>();
     }
-    public void AddNewCounterController(BaseCounterView baseCounterView)
+    public void DestroyItem(BaseCounterController baseCounterController)
     {
-        var controller = baseCounterView.CreateControllerFromView()as BaseCounterController;
-        baseCounterControllers.Add(controller) ;
-        DeliveryManager.Instance.AddUnlockIngredient(controller);
-    }
-    public void DestroyCounter(BaseCounterView baseCounterView)
-    {
-       var controller =  baseCounterControllers.FindLast(x => x.BaseCounterView == baseCounterView);
+        if (baseCounterController == null) return;
 
+        var controller = baseCounterControllers.FindLast(x => x == baseCounterController);
 
-        if(controller != null)
+        if (controller != null)
         {
-            baseCounterControllers.Remove(controller);
-            controller.BaseCounterView.UnsubEvent();
-            controller.BaseCounterModel.Unsubscribe(Observer.EObserverEvent.ModelChange, controller);
-            GridBuildingSystem.Instance.DestroyPlaceObject(baseCounterView.GetComponent<PlacedObjectView>());
+            RemoveCounterController(controller);
         }
     }
-    public void FireOnSelectedCounterChanged(OnSelectedCounterChangedEventArgs args)
+    public void AddController(BaseCounterController controller)
     {
-        OnSelectedCounterChanged?.Invoke(this, args);
+        baseCounterControllers.Add(controller);
+        KitchenGameManager.Instance.AddUnlockIngredient(controller);
+        controller.OnDestroySelf += () => DestroyItem(controller);
+
     }
-    public BaseCounterController GetCounterController(BaseCounterView baseCounterView)
+    private void RemoveCounterController(BaseCounterController controller)
     {
-        return baseCounterControllers.Find(x => x.BaseCounterView == baseCounterView);
+        baseCounterControllers.Remove(controller);    
     }
-    public bool TryGetCounterController(BaseCounterView baseCounterView, out BaseCounterController baseCounterController)
+    public bool IsContainerCounter(BaseCounterController controller)
     {
-        baseCounterController = baseCounterControllers.Find(x => x.BaseCounterView == baseCounterView);
-        if(baseCounterController != null)
-        {
-            return true;
-        }
-        else
-        {
-            baseCounterController = null;
-            return false;
-        }
+        return baseCounterControllers.Contains(controller);
     }
 }

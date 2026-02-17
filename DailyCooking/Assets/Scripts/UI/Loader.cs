@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.SceneManagement;
+﻿using UnityEngine.SceneManagement;
 
 public static class Loader
 {
@@ -7,7 +6,6 @@ public static class Loader
     {
         MainMenuScene,
         GameScene,
-        LoadingScene,
     }
 
     private static Scene targetScene;
@@ -15,13 +13,13 @@ public static class Loader
     public static void Load(Scene targetScene)
     {
         Loader.targetScene = targetScene;
-        UIPopupManager.Instance.ShowPopup(UIPopupType.UILoadingPopup.ToString());
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UILoadingPopup);
     }
     public static void LoaderCallback()
     {
         SceneManager.LoadScene(targetScene.ToString());
         if(targetScene == Scene.MainMenuScene)
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup.ToString());
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIMainMenuPopup);
 
     }
 }

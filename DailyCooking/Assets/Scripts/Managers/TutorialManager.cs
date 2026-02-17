@@ -4,13 +4,16 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public enum TutorialType
 {
     None,
     FirstTimePlaying,
-    GameMechanic
+    GameMechanic,
+    BuildingTutorial,
+    MenuTutorial,
 }
 
 
@@ -34,46 +37,64 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
                 panel.gameObject.SetActive(false);
             }
         }
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    private void Start()
+    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
     {
-        GameManager.Instance.OnStateChange += GameManager_OnStateChange;
-    }
-
-    private void GameManager_OnStateChange(object sender, EventArgs e)
-    {
-        if(GameManager.Instance.GameState == GameState.InGame)
+        if(arg0.buildIndex != Loader.Scene.GameScene.GetHashCode())
+            return;
+        if (GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime == false)
         {
-            if (!GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime)
-            {
-                ShowFirstTimeTutorial();
-            }
-
+            ShowFirstTimeTutorial();
         }
     }
-
-    private void ShowFirstTimeTutorial()
+    public void ShowFirstTimeTutorial()
     {
+        GameManager.Instance.HideJoyStick();
         UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].StartTutorial();
-        tutorialPanelDictionary[TutorialType.FirstTimePlaying].OnTutorialClosed += TutorialManager_OnTutorialClosed;
-
+        tutorialPanelDictionary[TutorialType.FirstTimePlaying].OnTutorialClosed
+            += TutorialManager_OnTutorialFirstTimePlayingClosed;
     }
 
-    private void TutorialManager_OnTutorialClosed(object sender, EventArgs e)
+    private void TutorialManager_OnTutorialFirstTimePlayingClosed(object sender, EventArgs e)
     {
-        TutorialPanel panel = (TutorialPanel)sender;
-        switch(panel.GetPanelType()){
-            case TutorialType.FirstTimePlaying:
-                GridBuildingSystem.Instance.UnlockGrid();
-                GameManager.Instance.GameData.tutorialData.HasPlayedFirstTime = true;
-                GameManager.Instance.SaveGame();
-                UIHUDManager.Instance.ShowAllUIElement();
-                break;
-            case TutorialType.GameMechanic:
-                break;
-        }
+        ShowBuildingTutorial();
+    }
+    public void ShowBuildingTutorial()
+    {
+        tutorialPanelDictionary[TutorialType.BuildingTutorial].StartTutorial();
+        tutorialPanelDictionary[TutorialType.BuildingTutorial].OnTutorialClosed += TutorialManager_OnBuildingTutorialClosed;
+    }
+
+    private void TutorialManager_OnBuildingTutorialClosed(object sender, EventArgs e)
+    {
+        ShowMenuTutorial();
+    }
+
+    public void ShowMenuTutorial()
+    {
+        tutorialPanelDictionary[TutorialType.MenuTutorial].StartTutorial();
+        tutorialPanelDictionary[TutorialType.MenuTutorial].OnTutorialClosed
+            += TutorialManager_OnTutorialMenuClosed;
+    }
+
+    private void TutorialManager_OnTutorialMenuClosed(object sender, EventArgs e)
+    {
+        ShowGameMachanicTutorial();
+    }    
+    public void ShowGameMachanicTutorial()
+    {
+        UIHUDManager.Instance.HideAllUIElement();
+        tutorialPanelDictionary[TutorialType.GameMechanic].StartTutorial();
+        tutorialPanelDictionary[TutorialType.GameMechanic].OnTutorialClosed
+            += TutorialManager_OnTutorialGameMechanicClosed;
+    }
+
+    private void TutorialManager_OnTutorialGameMechanicClosed(object sender, EventArgs e)
+    {
+        UIHUDManager.Instance.ShowAllUIElement();
     }
 }
 

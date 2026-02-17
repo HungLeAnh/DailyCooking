@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-public class PlayerIdleWalkState : PlayerIdleState
+public class PlayerIdleWalkState : PlayerBaseState
 {
     public PlayerIdleWalkState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
@@ -24,8 +24,9 @@ public class PlayerIdleWalkState : PlayerIdleState
         else
             return PlayerStateMachine.EPlayerState.Idle_Walking;
     }
-
     public override void UpdateState()
     {
+        base.UpdateState();
+        _subStateMachine.Update();
     }
 }

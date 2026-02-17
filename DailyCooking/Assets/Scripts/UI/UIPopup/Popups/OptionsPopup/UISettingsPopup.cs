@@ -1,67 +1,25 @@
-﻿using System;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UISettingsPopup : UIPopup
 {
-    [SerializeField] private Button soundEffectsButton;
-    [SerializeField] private Button musicButton;
-    [SerializeField] private Button closeButton;
- 
-    [SerializeField] private TextMeshProUGUI soundEffectText;
-    [SerializeField] private TextMeshProUGUI musicText;
+    private const float SOUND_VOLUME_MULTIPLIER = 10f;
+    private const int CHEAT_COIN_AMOUNT = 1000;
+    private const int CHEAT_EXP_AMOUNT = 100;
 
+    [SerializeField] private Slider soundEffectsSlider;
+    [SerializeField] private Slider musicSlider;
+    [SerializeField] private Button closeButton;
+    [SerializeField] private Button guideButton;
+    [SerializeField] private Button quitButton;
+#if UNITY_EDITOR
     [Header("Cheat")]
     [SerializeField] private Transform cheatTransform;
 
-    private Action onCloseButtonAction;
-
     private static int cheatTapCount = 0;
 
-
-    private void Awake()
-    {
-        soundEffectsButton.onClick.AddListener(() =>
-        {
-            SoundManager.Instance.ChangeVolume();
-            UpdateVisual();
-
-        });
-
-        musicButton.onClick.AddListener(() =>
-        {
-            MusicManager.Instance.ChangeVolume();
-            UpdateVisual();
-        });
-        closeButton.onClick.AddListener(() =>
-        {
-            Hide();
-            onCloseButtonAction?.Invoke();
-        });
-
-    }
-    private void Start()
-    {
-        UpdateVisual();
-    }
-
-    private void UpdateVisual()
-    {
-        soundEffectText.text = "Sound Effects: " + Mathf.Round(SoundManager.Instance.GetVolume() * 10f);
-        musicText.text = "Music: " + Mathf.Round(MusicManager.Instance.GetVolume() * 10f);
-
-    }
-    public void Show(Action onCloseButtonAction)
-    {
-        this.onCloseButtonAction = onCloseButtonAction;
-        gameObject.SetActive(true);
-        soundEffectsButton.Select();
-    }
-    public void Hide()
-    {
-        base.HidePopup();
-    }
     public void OnTitleClick()
     {
         cheatTapCount++;
@@ -78,10 +36,54 @@ public class UISettingsPopup : UIPopup
     }
     public void OnCheatCoin()
     {
-        GameManager.Instance.GameData.UpdatePlayerResources(1000);
+        GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(CHEAT_COIN_AMOUNT);
     }
     public void OnCheatExp()
     {
-        GameManager.Instance.GameData.UpdatePlayerExp(100);
+        GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(CHEAT_EXP_AMOUNT);
+    }
+#endif
+
+    private void Awake()
+    {
+        soundEffectsSlider.onValueChanged.AddListener((newValue) =>
+        {
+            SoundManager.Instance.ChangeVolume(newValue);
+        });
+
+        musicSlider.onValueChanged.AddListener((newValue) =>
+        {
+            MusicManager.Instance.ChangeVolume(newValue);
+        });
+
+        closeButton.onClick.AddListener(() =>
+        {
+            UIPopupManager.Instance.HidePopup(UIPopupType.UISettingPopup);
+        });
+        guideButton.onClick.AddListener(() => {
+            TutorialManager.Instance.ShowGameMachanicTutorial();
+        });
+        quitButton.onClick.AddListener(() =>
+        {
+            Loader.Load(Loader.Scene.MainMenuScene);
+            GameManager.Instance.SwitchState(new MainMenuState(GameManager.Instance));
+            HidePopup();
+        });
+    }
+    public override void ShowPopup(object param = null)
+    {
+        base.ShowPopup(param);
+        UpdateVisual();
+    }
+    public override void HidePopup(object param = null)
+    {
+        base.HidePopup(param);
+
+    }
+    private void UpdateVisual()
+    {
+        soundEffectsSlider.value = SoundManager.Instance.GetVolume();
+        musicSlider.value = MusicManager.Instance.GetVolume();
+
     }
 }

@@ -2,15 +2,15 @@
 
 public interface IKitchenObjectParent
 {
-    public Transform GetKitchenObjectFollowTransform();
+    public Transform GetKitchenObjectFollowTransform(int index = 0);
 
 
-    public void SetKitchenObject(KitchenObject kitchenObject);
+    public void SetKitchenObject(KitchenObject kitchenObject,int index = 0);
 
-    public KitchenObject GetKitchenObject();
+    public KitchenObject GetKitchenObject(int index = 0);
 
-    public void ClearKitchenObject();
+    public void ClearKitchenObject(int index = 0);
 
-    public bool HasKitchenObject();
+    public bool HasKitchenObject(int index = 0);
 
 }

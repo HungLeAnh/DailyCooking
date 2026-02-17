@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerIdleIdleState : PlayerIdleState
+public class PlayerIdleIdleState : PlayerBaseState
 {
     public PlayerIdleIdleState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
@@ -29,5 +29,7 @@ public class PlayerIdleIdleState : PlayerIdleState
 
     public override void UpdateState()
     {
+        base.UpdateState();
+
     }
 }
