@@ -1,5 +1,7 @@
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class InGameState : GameManagerBaseState
 {
@@ -10,9 +12,21 @@ public class InGameState : GameManagerBaseState
 
     public override void Enter()
     {
-        GameManager.Instance.InitializePlayer();
         interstitialCounter = interstitialInterval;
+
+        SceneManager.sceneLoaded += SceneManager_sceneLoaded;
     }
+
+    private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
+    {
+        if(string.Equals(arg0.name,Loader.Scene.GameScene.ToString(), 
+            StringComparison.OrdinalIgnoreCase))
+        {
+            interstitialCounter = interstitialInterval;
+            //GameManager.Instance.InitializePlayer();
+        }
+    }
+
     public override async void Update()
     {
         if(GameManager.Instance.GameData.PlayerStats.playerData.Level < interstitialLevelUnlock)
@@ -32,5 +46,7 @@ public class InGameState : GameManagerBaseState
     }
     public override void Exit()
     {
+        SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
+
     }
 }

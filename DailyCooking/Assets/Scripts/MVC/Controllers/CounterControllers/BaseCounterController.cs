@@ -39,10 +39,10 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
         if (KitchenGameManager.Instance.IsEditing())
         {
             Hide();
-            OnRestartGame(this, PlayerStateMachine.Instance);
+            OnRestartGame(this);
         }
     }
-    protected virtual void OnRestartGame(object sender, PlayerStateMachine e)
+    protected virtual void OnRestartGame(object sender)
     {
         if (KitchenObject != null)
             KitchenObject.DestroySelf();

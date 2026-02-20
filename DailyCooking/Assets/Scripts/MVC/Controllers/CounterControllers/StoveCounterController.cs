@@ -5,9 +5,9 @@ public class StoveCounterController : BaseCounterController
 {
     [SerializeField] private CookingTool _cookingTool;
 
-    protected override void OnRestartGame(object sender, PlayerStateMachine e)
+    protected override void OnRestartGame(object sender)
     {
-        base.OnRestartGame(sender, e);
+        base.OnRestartGame(sender);
 
         if (_cookingTool.HasKitchenObject())
             _cookingTool.GetKitchenObject().DestroySelf();

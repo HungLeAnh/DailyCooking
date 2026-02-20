@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitchenObjectParent
+public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
 {
     public PlayerStateContext Context { get; set; }
 
@@ -52,9 +53,8 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
         _stateManager.Start();
     }
 
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
         _stateManager = new StateManager<EPlayerState>();
         _stateFactory = new PlayerStateFactory();
         IntializeStates();
@@ -75,6 +75,8 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
     }
     private void Update()
     {
+        if (!IsOwner) return;
+
         _stateManager.Update();
 
         HandleMovement();
@@ -133,7 +135,7 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                 if (interactableObject != Context.SelectedInteractableObject)
                 {
                     SetInteractableObject(interactableObject, raycastHit.transform);
-                    Context.SelectedInteractableObject.InteractEvent(PlayerStateMachine.Instance);
+                    Context.SelectedInteractableObject.InteractEvent(this);
                 }
                 else if (interactableObject == Context.SelectedInteractableObject)
                 {
@@ -143,18 +145,18 @@ public class PlayerStateMachine : PersistentSingleton<PlayerStateMachine>, IKitc
                         if (progress == null)
                         {
                             SetInteractableObject(interactableObject, raycastHit.transform);
-                            Context.SelectedInteractableObject.InteractEvent(PlayerStateMachine.Instance);
+                            Context.SelectedInteractableObject.InteractEvent(this);
                         }
                         else
                         {
 
                             if (progress.IsDone() || progress.GetProgress() == -1)
                             {
-                                Context.SelectedInteractableObject.InteractEvent(PlayerStateMachine.Instance);
+                                Context.SelectedInteractableObject.InteractEvent(this);
                             }
                             else
                             {
-                                Context.SelectedInteractableObject.InteractAlternateEvent(PlayerStateMachine.Instance);
+                                Context.SelectedInteractableObject.InteractAlternateEvent(this);
                             }
                         }
                     }

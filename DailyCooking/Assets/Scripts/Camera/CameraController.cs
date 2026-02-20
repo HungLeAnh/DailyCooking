@@ -51,7 +51,7 @@ public class CameraController : MonoBehaviour
 
     private void Instance_OnPlayerSpawned(object sender, EventArgs e)
     {
-        _cinemachineCamera.Follow = PlayerStateMachine.Instance.transform;
+        //_cinemachineCamera.Follow = PlayerStateMachine.Instance.transform;
     }
 
     private void Update()

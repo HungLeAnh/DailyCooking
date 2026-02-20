@@ -8,12 +8,28 @@ public class UIMainMenuPopup : UIPopup
     [SerializeField] private Button playButton;
     [SerializeField] private Button optionsButton;
     [SerializeField] private Button quitButton;
+    [SerializeField] private Button startHostingButton;
+    [SerializeField] private Button joinButton;
 
     private void Awake()
     {
         playButton.onClick.AddListener(() =>
         {
+            MultiplayerManager.Instance.StartSinglePlayer();
             Loader.Load(Loader.Scene.GameScene);
+            GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+            UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+        });
+        startHostingButton.onClick.AddListener(() =>
+        {
+            MultiplayerManager.Instance.StartHostedSession();
+            Loader.LoadNetwork(Loader.Scene.GameScene);
+            GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+            UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+        });
+        joinButton.onClick.AddListener(() =>
+        {
+            MultiplayerManager.Instance.StartClientSession();
             GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
         });

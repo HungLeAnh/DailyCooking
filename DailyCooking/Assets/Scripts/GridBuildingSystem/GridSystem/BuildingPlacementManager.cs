@@ -200,7 +200,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         gridVisualizer.ShowWallShadow(true);
         isBuilding = true;
 
-        PlayerStateMachine.Instance.DisableInput(true);
+        //PlayerStateMachine.Instance.DisableInput(true);
         GameManager.Instance.HidePlayer();
     }
 
@@ -211,7 +211,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         gridVisualizer.ShowWallShadow(false);
         isBuilding = false;
 
-        PlayerStateMachine.Instance.DisableInput(false);
+        //PlayerStateMachine.Instance.DisableInput(false);
         GameManager.Instance.ShowPlayer();  
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 [DefaultExecutionOrder(-1)]
@@ -66,6 +67,7 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
     public void InitializePlayer()
     {
         playerGameObject = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
+        playerGameObject.GetComponent<NetworkObject>().Spawn();
         OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
     }
     public void HidePlayer()

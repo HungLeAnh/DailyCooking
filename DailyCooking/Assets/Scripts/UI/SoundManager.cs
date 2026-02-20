@@ -30,9 +30,9 @@ public class SoundManager : PersistentSingleton<SoundManager>
         PlaySound(AudioClipRefsSO.objectDrop, baseCounter.transform.position);
     }
 
-    private void Player_OnPickedSomething(object sender, System.EventArgs e)
+    private void Player_OnPickedSomething(object sender, Transform sourceTransform)
     {
-        PlaySound(AudioClipRefsSO.objectPickup, PlayerStateMachine.Instance.transform.position);
+        PlaySound(AudioClipRefsSO.objectPickup, sourceTransform.position);
     }
 
     private void CuttingCounter_OnAnyCut(object sender, System.EventArgs e)
