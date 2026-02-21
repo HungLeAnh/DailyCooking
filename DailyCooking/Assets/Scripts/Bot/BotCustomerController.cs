@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
+public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightable
 {
     public Action<PlayerStateMachine> OnInteract;
-
-    [SerializeField] private Animator animator;
+    [SerializeField] private NetworkAnimator networkAnimator;
     [SerializeField] private NavMeshAgent navMeshAgent;
     [SerializeField] private GameObject foodBubble;
     [SerializeField] private GameObject orderBubble;
@@ -17,17 +18,28 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
     [SerializeField] private BubbleEmotionUI bubbleEmotionUI;
     [SerializeField] private BubbleFoodUI bubbleFoodUI;
 
-    [SerializeField] private GameObject[] visualGameObjectArray;
+    [SerializeField] private GameObject visual;
+    [SerializeField] private GameObject[] highlightGameObjectArray;
 
     private BotStateMachine stateMachine;
     private List<FoodSO> waitingFood;
     private float tipPercentage;
+    private NetworkVariable<bool> isActiveInGame = new NetworkVariable<bool>(false);
 
     public Table TargetTable { get; set; }
     public int TargetSeatIndex { get; set; }
     public float TipPercentage { get => tipPercentage; }
     public NavMeshAgent NavMeshAgent { get => navMeshAgent; }
+    public NetworkVariable<bool> IsActiveInGame { get => isActiveInGame; set => isActiveInGame = value; }
 
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        IsActiveInGame.OnValueChanged += (oldVal, newVal) => {
+            SetVisualActive(newVal);
+        };
+        SetVisualActive(IsActiveInGame.Value);
+    }
     private void Awake()
     {
         stateMachine = new BotStateMachine(this);
@@ -45,8 +57,9 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
 
     public void PlayAnimation(BotAnimation.State animationState)
     {
-        animator.StopPlayback();
-        animator.Play(animationState.ToString());
+        if (!IsHost || !IsServer) return;
+        networkAnimator.Animator.StopPlayback();
+        networkAnimator.Animator.Play(animationState.ToString());
     }
 
     private void Update()
@@ -180,27 +193,31 @@ public class BotCustomerController : MonoBehaviour,IInteractable,IHighlightable
 
     public void OnSelected()
     {
-        Show();
+        ShowHighlight();
     }
 
     public void OnDeselected()
     {
-        Hide();
+        HideHighlight();
     }
-    public void Show()
+    public void ShowHighlight()
     {
-        foreach (var visualGameObject in visualGameObjectArray)
+        foreach (var visualGameObject in highlightGameObjectArray)
         {
             visualGameObject.SetActive(true);
         }
 
     }
-    public void Hide()
+    public void HideHighlight()
     {
-        foreach (var visualGameObject in visualGameObjectArray)
+        foreach (var visualGameObject in highlightGameObjectArray)
         {
             visualGameObject.SetActive(false);
         }
+    }
+    public void SetVisualActive(bool active)
+    {
+        visual.SetActive(active);
     }
 
     public void FinishEating()

@@ -1,17 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-public class BotManager : PersistentSingleton<BotManager>
+public class BotManager : NetworkPersistentSingleton<BotManager>
 {
-    
-
     [SerializeField] private GameObject botPrefab;
     [SerializeField] private int poolSize = 10;
     [SerializeField] private Vector3 spawnPosition;
 
-    private List<GameObject> botPool;
+    private NetworkList<NetworkObjectReference> botPool = new NetworkList<NetworkObjectReference>();
     private List<GameObject> activeBots;
 
     public List<GameObject> ActiveBots { get => activeBots; set => activeBots = value; }
@@ -19,11 +19,18 @@ public class BotManager : PersistentSingleton<BotManager>
     protected override void Awake()
     {
         base.Awake();
-        botPool = new List<GameObject>();
+        botPool = new NetworkList<NetworkObjectReference>();
         ActiveBots = new List<GameObject>();
     }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+    }
+
     private void Start()
     {
+        if(!IsHost||!IsServer) return;
+
         GameManager.Instance.GameData.TutorialData.OnTutorialDataChanged += OnTutorialDataChanged;
         GameManager.Instance.OnStateChanged += GameManager_OnStateChanged;
     }
@@ -54,29 +61,48 @@ public class BotManager : PersistentSingleton<BotManager>
     }
     public void StartSpawnBot()
     {
+        if (!IsHost || !IsServer) return;
+
         StartCoroutine(WaitForSecond(10, () => {
             StartCoroutine(SpawnBotRoutine());
         }));
     }
     public void StopSpawnBot()
     {
+        if (!IsHost || !IsServer) return;
+
         StopCoroutine(SpawnBotRoutine());
         foreach (var bot in botPool)
         {
-            bot.SetActive(false);
+            if(bot.TryGet(out NetworkObject networkObject))
+            {
+                GameObject botGameObject = networkObject.gameObject;
+                ReturnBotToPool(botGameObject);
+            }
         }
-        
+
     }
 
     public void Initialize()
     {
+        if (!IsHost || !IsServer) return;
+
         for (int i = 0; i < poolSize; i++)
         {
             GameObject bot = Instantiate(botPrefab,spawnPosition, Quaternion.identity, transform);
-            bot.SetActive(false);
-            botPool.Add(bot);
+            bot.GetComponent<NetworkObject>().Spawn();
+            AddBotToPool(bot);
+
         }
     }
+
+    public void AddBotToPool(GameObject bot)
+    {
+        bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
+        botPool.Add(bot);
+        
+    }
+
     private IEnumerator WaitForSecond(int seconds, Action action)
     {
         yield return new WaitForSeconds(seconds);
@@ -90,8 +116,8 @@ public class BotManager : PersistentSingleton<BotManager>
             {
                 //Debug.Log("Spawning Bot");
                 var bot = GetBot();
-                bot.GetComponent<BotCustomerController>().InitBot();
-                ActiveBots.Add(bot);
+                SpawnBot(bot);
+
             }
             yield return new WaitForSeconds(15f);
         }
@@ -99,25 +125,73 @@ public class BotManager : PersistentSingleton<BotManager>
 
     public GameObject GetBot()
     {
+        if (!IsHost || !IsServer) return null;
+
         foreach (var bot in botPool)
         {
-            if (!bot.gameObject.activeInHierarchy)
+            if(bot.TryGet(out NetworkObject networkObject))
             {
-                bot.transform.position = spawnPosition;
-                bot.gameObject.SetActive(true);
-                return bot.gameObject;
+                var botController = networkObject.GetComponent<BotCustomerController>();
+                if (!botController.IsActiveInGame.Value)
+                {
+                    return networkObject.gameObject;
+                }
+
             }
         }
 
         // If no inactive bot is found, create a new one
         var newBot = Instantiate(botPrefab, spawnPosition, Quaternion.identity, transform);
-        botPool.Add(newBot);
+        newBot.GetComponent<NetworkObject>().Spawn();
+        AddBotToPool(newBot);
         return newBot.gameObject;
+    }
+    public void SpawnBot(GameObject bot)
+    {
+        SpawnBotServerRpc(bot);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void SpawnBotServerRpc(NetworkObjectReference targetRef)
+    {
+        SpawnBotClientRpc(targetRef);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SpawnBotClientRpc(NetworkObjectReference targetRef)
+    {
+        if (targetRef.TryGet(out NetworkObject networkObject))
+        {
+            GameObject bot = networkObject.gameObject;
+            bot.transform.position = spawnPosition;
+    
+            if(IsHost||IsServer)
+                bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = true;
+            
+            bot.GetComponent<BotCustomerController>().InitBot();
+            ActiveBots.Add(bot);
+        }
     }
 
     public void ReturnBotToPool(GameObject bot)
     {
-        bot.SetActive(false);
+        ReturnBotToPoolServerRpc(bot);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ReturnBotToPoolServerRpc(NetworkObjectReference targetRef)
+    {
+        ReturnBotToPoolClientRpc(targetRef);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ReturnBotToPoolClientRpc(NetworkObjectReference targetRef)
+    {
+        if (targetRef.TryGet(out NetworkObject networkObject))
+        {
+            GameObject bot = networkObject.gameObject;
+            if(IsHost||IsServer)
+                bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
+            ActiveBots.Remove(bot);
+        }
     }
     public void KickAllBots()
     {
@@ -126,7 +200,7 @@ public class BotManager : PersistentSingleton<BotManager>
             var botController = bot.GetComponent<BotCustomerController>();
             botController.ResetSeat();
             bot.GetComponent<BotCustomerController>().ResetBot();
-            bot.SetActive(false);
+            bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
         }
     }
 }

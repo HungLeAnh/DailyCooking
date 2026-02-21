@@ -9,8 +9,6 @@ public class BotStateMachine
     public BotStateMachine(BotCustomerController botController)
     {
         this.botController = botController;
-        // Set initial state
-        SetState(new WaitForTableState(this));
     }
 
     public void SetState(BotState newState)
