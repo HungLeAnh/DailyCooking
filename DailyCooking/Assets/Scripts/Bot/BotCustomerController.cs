@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.WebSockets;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
@@ -7,6 +8,8 @@ using UnityEngine.AI;
 
 public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightable
 {
+    public Action<float> OnClockTimerChanged;
+    public Action<EmotionType> OnEmotionChanged;
     public Action<PlayerStateMachine> OnInteract;
     [SerializeField] private NetworkAnimator networkAnimator;
     [SerializeField] private NavMeshAgent navMeshAgent;
@@ -23,12 +26,18 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
     private BotStateMachine stateMachine;
     private List<FoodSO> waitingFood;
-    private float tipPercentage;
+    private float clockTimerMax = GameDefine.EMOTION_DURATION;
+    private NetworkVariable<float> clockTimer = new NetworkVariable<float>(0f);
+    private NetworkVariable<float> tipPercentage = new NetworkVariable<float>();
     private NetworkVariable<bool> isActiveInGame = new NetworkVariable<bool>(false);
-
+    private NetworkVariable<bool> isBubbleFrameActive = new NetworkVariable<bool>(false);
+    private NetworkVariable<bool> isFoodBubbleActive = new NetworkVariable<bool>(false);
+    private NetworkVariable<bool> isOrderBubbleActive = new NetworkVariable<bool>(false);
+    private NetworkVariable<bool> isEmotionBubbleActive = new NetworkVariable<bool>(false);
+    private NetworkVariable<bool> isNavMeshStopped = new NetworkVariable<bool>(false);
+    private NetworkVariable<EmotionType> currentEmotion = new NetworkVariable<EmotionType>(EmotionType.None);
     public Table TargetTable { get; set; }
     public int TargetSeatIndex { get; set; }
-    public float TipPercentage { get => tipPercentage; }
     public NavMeshAgent NavMeshAgent { get => navMeshAgent; }
     public NetworkVariable<bool> IsActiveInGame { get => isActiveInGame; set => isActiveInGame = value; }
 
@@ -38,19 +47,51 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         IsActiveInGame.OnValueChanged += (oldVal, newVal) => {
             SetVisualActive(newVal);
         };
+        isEmotionBubbleActive.OnValueChanged += (oldVal, newVal) => {
+            emotionBubble.SetActive(newVal);
+        };
+        isFoodBubbleActive.OnValueChanged += (oldVal, newVal) => {
+            foodBubble.SetActive(newVal);
+        };
+        isOrderBubbleActive.OnValueChanged += (oldVal, newVal) => {
+            orderBubble.SetActive(newVal);
+        };
+        isBubbleFrameActive.OnValueChanged += (oldVal, newVal) => {
+            BubbleFrame.SetActive(newVal);
+        };
+        isNavMeshStopped.OnValueChanged += (oldVal, newVal) => {
+            NavMeshAgent.isStopped = isNavMeshStopped.Value;
+            NavMeshAgent.updatePosition = !isNavMeshStopped.Value;
+            NavMeshAgent.updateRotation = !isNavMeshStopped.Value;
+            
+        };
+        currentEmotion.OnValueChanged += (oldVal, newVal) => {
+            OnEmotionChanged?.Invoke(newVal);
+        };
+        clockTimer.OnValueChanged += (oldVal, newVal) => {
+            OnClockTimerChanged?.Invoke((clockTimerMax - newVal) / clockTimerMax);
+        };
         SetVisualActive(IsActiveInGame.Value);
+        BubbleFrame.SetActive(isBubbleFrameActive.Value);
+        orderBubble.SetActive(isOrderBubbleActive.Value);
+        foodBubble.SetActive(isFoodBubbleActive.Value);
+        emotionBubble.SetActive(isEmotionBubbleActive.Value);
+
     }
     private void Awake()
     {
         stateMachine = new BotStateMachine(this);
 
-        foodBubble.SetActive(false);
-        orderBubble.SetActive(false);
-        emotionBubble.SetActive(false);
-        BubbleFrame.SetActive(false);
+        if(IsHost||IsServer)
+        {
+            isFoodBubbleActive.Value = false;
+            isOrderBubbleActive.Value = false;
+            isEmotionBubbleActive.Value = false;
+            isBubbleFrameActive.Value = false;
+
+        }
         waitingFood = new List<FoodSO>();
-        bubbleEmotionUI.OnEmotionEnd += OnEmotionEnd;
-        bubbleEmotionUI.OnEmotionChanged += OnEmotionChanged;
+
 
         OnDeselected();
     }
@@ -64,7 +105,20 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
     private void Update()
     {
+        if(!IsHost || !IsServer) return;
+
         stateMachine.Update();
+        if(currentEmotion.Value != EmotionType.None)
+        {
+            if (clockTimer.Value < clockTimerMax)
+            {
+                clockTimer.Value += Time.deltaTime;
+                if ((clockTimerMax - clockTimer.Value) / clockTimerMax <= 0)
+                {
+                    SetNextEmotion();
+                }
+            }
+        }
     }
     public bool IsServerCorrectFood(TablewareKitchenObject tablewareKitchenObject)
     {
@@ -107,25 +161,39 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         //Player did not deliver correct recipe
         return false;
     }
-    private void OnEmotionEnd(EmotionType emotionType)
+    private void SetNextEmotion()
     {
-        //Debug.LogError("BotCustomerController: OnEmotionEnd called");   
-        Leave();
+        EmotionType nextEmotion = EmotionManager.Instance.GetNextEmotion(currentEmotion.Value);
+        if (nextEmotion == EmotionType.None && currentEmotion.Value != EmotionType.None)
+        {
+            currentEmotion.Value = EmotionType.None;
+            Leave();
+            return;
+        }
+        if (currentEmotion.Value == EmotionType.None)
+        {
+            return;
+        }
+
+        clockTimer.Value = 0f;
+        currentEmotion.Value = nextEmotion;
+        UpdateTipPercentage(currentEmotion.Value);
     }
-    private void OnEmotionChanged(EmotionType type)
+
+    private void UpdateTipPercentage(EmotionType type)
     {
         switch (type)
         {
             case EmotionType.Happy:
                 break;
             case EmotionType.Sad:
-                tipPercentage -= tipPercentage * 0.2f;
+                tipPercentage.Value -= tipPercentage.Value * 0.2f;
                 break;
             case EmotionType.Angry:
                 if (stateMachine.CurrentState is WaitingForFoodState)
-                    tipPercentage = 0f;
+                    tipPercentage.Value = 0f;
                 else
-                    tipPercentage -= tipPercentage * 0.5f;
+                    tipPercentage.Value -= tipPercentage.Value * 0.5f;
                 break;
         }
     }
@@ -137,28 +205,45 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
             Leave();
             return false;
         }
+        var foodIndex = KitchenGameManager.Instance.GetFoodIndex(food);
+        OrderFoodClientRpc(foodIndex);
 
+        return true;
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void OrderFoodClientRpc(int foodIndex)
+    {
+        var food = KitchenGameManager.Instance.GetFoodByIndex(foodIndex);
         waitingFood.Add(food);
 
-        BubbleFrame.SetActive(true);
-        orderBubble.SetActive(false);
-        foodBubble.SetActive(true);
-
         bubbleFoodUI.SetOrder(waitingFood);
-        bubbleEmotionUI.StartEmotion();
-        return true;
+        if(IsServer || IsHost)
+        {
+            isBubbleFrameActive.Value = true;
+            isOrderBubbleActive.Value = false;
+            isFoodBubbleActive.Value = true;
+            currentEmotion.Value = EmotionType.Happy;
+            clockTimer.Value = 0f;
+        }
+
     }
     public void ShowOrder()
     {
-        BubbleFrame.SetActive(true);
-        orderBubble.SetActive(true);
-        emotionBubble.SetActive(true);
-        bubbleEmotionUI.StartEmotion();
-        
+        ShowOrderServerRpc();
+    }
+    [Rpc(SendTo.Server)]
+    private void ShowOrderServerRpc()
+    {
+        isBubbleFrameActive.Value = true;
+        isOrderBubbleActive.Value = true;
+        isEmotionBubbleActive.Value = true;
+        currentEmotion.Value = EmotionType.Happy;
     }
     public void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         OnInteract?.Invoke(playerStateMachine);
+        Debug.Log("Bot Interacted with player");
+        Debug.Log("Current Bot State: " + stateMachine.CurrentState.GetType().Name);
     }
 
     public void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
@@ -168,27 +253,30 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
     public void ResetBot()
     {
+        ResetBotClientRpc();
+        StopBubbleServerRpc();
+        SetStateMachineStateClientRpc(BotStateType.Idle);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ResetBotClientRpc()
+    {
+        waitingFood.Clear();
         TargetTable = null;
         TargetSeatIndex = -1;
-        waitingFood.Clear();
-        StopBubble();
-        stateMachine.SetState(new BotIdleState(stateMachine));
     }
     public void InitBot()
     {
-        navMeshAgent.isStopped = false;
-        stateMachine.SetState(new WaitForTableState(stateMachine));
-        tipPercentage = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.PlayerStats.statsData.TipIncrease;
+        isNavMeshStopped.Value = false;
+        SetStateMachineStateClientRpc(BotStateType.WaitForTable);
+        tipPercentage.Value = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.PlayerStats.statsData.TipIncrease;
     }
-
-    public void StopBubble()
+    [Rpc(SendTo.Server)]
+    public void StopBubbleServerRpc()
     {
-        bubbleEmotionUI.StopEmotion();
-
-        foodBubble.SetActive(false);
-        orderBubble.SetActive(false);
-        emotionBubble.SetActive(false);
-        BubbleFrame.SetActive(false);
+        isFoodBubbleActive.Value = false;
+        isOrderBubbleActive.Value = false;
+        isEmotionBubbleActive.Value = false;
+        isBubbleFrameActive.Value = false;
     }
 
     public void OnSelected()
@@ -229,21 +317,29 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
             cash += (int)food.price;
             exp += food.exp;
         }
-        cash += (int)(cash * tipPercentage);
+        cash += (int)(cash * tipPercentage.Value);
         TargetTable.SetEatenViual(TargetSeatIndex,cash,exp);
         ResetSeat();
     }
+    [Rpc(SendTo.Server)]
+    public void FinishEatingServerRpc()
+    {
+        FinishEatingClientRpc();
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void FinishEatingClientRpc()
+    {
+        FinishEating();
+    }
     public void StopNavMesh()
     {
-        NavMeshAgent.isStopped = true;
-        NavMeshAgent.updatePosition = false;
-        NavMeshAgent.updateRotation = false;
+        if (IsHost || IsServer)
+            isNavMeshStopped.Value = true;
     }
     public void StartNavMesh()
     {
-        NavMeshAgent.isStopped = false;
-        NavMeshAgent.updatePosition = true;
-        NavMeshAgent.updateRotation = true;    
+        if(IsHost || IsServer)
+            isNavMeshStopped.Value = false;    
     }
 
     public void ResetSeat()
@@ -254,8 +350,52 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     public void Leave()
     {
         ResetSeat();
-        stateMachine.SetState(new LeavingState(stateMachine));
-        StopBubble();
+        SetStateMachineStateClientRpc(BotStateType.Leaving);
+        StopBubbleServerRpc();
     }
-
+    [Rpc(SendTo.ClientsAndHost)]
+    public void SetStateMachineStateClientRpc(BotStateType botStateType)
+    {
+        switch (botStateType)
+        {
+            case BotStateType.Idle:
+                stateMachine.SetState(new BotIdleState(stateMachine));
+                break;
+            case BotStateType.WaitForTable:
+                stateMachine.SetState(new WaitForTableState(stateMachine));
+                break;
+            case BotStateType.WalkToTable:
+                stateMachine.SetState(new WalkToTableState(stateMachine));
+                break;
+            case BotStateType.OrderFood:
+                stateMachine.SetState(new OrderFoodState(stateMachine));
+                break;
+            case BotStateType.WaitingForFood:
+                stateMachine.SetState(new WaitingForFoodState(stateMachine));
+                break;
+            case BotStateType.Eating:
+                stateMachine.SetState(new EatingState(stateMachine));
+                break;
+            case BotStateType.Leaving:
+                stateMachine.SetState(new LeavingState(stateMachine));
+                break;
+        }
+    }
+    [Rpc(SendTo.Server)]
+    public void SetSeatServerRpc(NetworkBehaviourReference networkBehaviourReference, int seatIndex)
+    {
+        SetSeatClientRpc(networkBehaviourReference, seatIndex);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    public void SetSeatClientRpc(NetworkBehaviourReference networkBehaviourReference, int seatIndex)
+    {
+        if (networkBehaviourReference.TryGet(out Table table)) {
+            TargetTable = table.GetComponent<Table>();
+            TargetSeatIndex = seatIndex;
+        }
+        else
+        {
+            Debug.LogError("Failed to get Table from NetworkBehaviourReference");
+        }
+    }
 }

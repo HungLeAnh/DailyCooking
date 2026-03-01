@@ -13,7 +13,6 @@ public class WalkToTableState : BotState
     public override void Enter()
     {
         //Debug.Log("Bot is walking to the table.");
-
         table = stateMachine.GetBotController().TargetTable;
         seatIndex = stateMachine.GetBotController().TargetSeatIndex;
         seatTransform = table.GetSeatTransform(seatIndex);
@@ -44,7 +43,7 @@ public class WalkToTableState : BotState
                 stateMachine.GetBotController().transform.position = seatTransform.position;
                 Transform lookAtTransform = table.GetKitchenObjectFollowTransform(seatIndex);
                 stateMachine.GetBotController().transform.LookAt(lookAtTransform);
-                stateMachine.SetState(new OrderFoodState(stateMachine));
+                stateMachine.GetBotController().SetStateMachineStateClientRpc(BotStateType.OrderFood);
             }
 
         }

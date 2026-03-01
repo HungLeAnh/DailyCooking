@@ -182,4 +182,14 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
                 MenuData.menuDished[UnityEngine.Random.Range(0,
                     GameManager.Instance.GameData.MenuData.menuDished.Count)];
     }
+    public int GetFoodIndex(FoodSO foodSO)
+    {
+        return GameManager.Instance.GameData.MenuData.menuDished.IndexOf(foodSO);
+    }
+    public FoodSO GetFoodByIndex(int index)
+    {
+        if (index < 0 || index >= GameManager.Instance.GameData.MenuData.menuDished.Count)
+            return null;
+        return GameManager.Instance.GameData.MenuData.menuDished[index];
+    }
 }

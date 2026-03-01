@@ -1,5 +1,14 @@
 using UnityEngine;
-
+public enum BotStateType
+{
+    Idle,
+    WaitForTable,
+    OrderFood,
+    WalkToTable,
+    WaitingForFood,
+    Eating,
+    Leaving
+}
 public class BotStateMachine
 {
     private BotCustomerController botController;
@@ -24,6 +33,9 @@ public class BotStateMachine
 
     public void Update()
     {
+        if (!botController.IsHost || !botController.IsServer)
+            return; 
+
         if (currentState != null)
         {
             currentState.Update();

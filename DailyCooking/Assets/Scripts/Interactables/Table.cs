@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Table : MonoBehaviour,IKitchenObjectParent, IDestroyable, IPlaceable, IModuleItem
+public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlaceable, IModuleItem
 {
     [SerializeField] private List<Transform> seats = new List<Transform>();
     [SerializeField] private List<Transform> kitchenObjectFollowPoints = new List<Transform>();

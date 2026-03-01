@@ -8,19 +8,17 @@ using UnityEngine.UIElements;
 public class BotManager : NetworkPersistentSingleton<BotManager>
 {
     [SerializeField] private GameObject botPrefab;
-    [SerializeField] private int poolSize = 10;
+    [SerializeField] private int poolSize = 1;
     [SerializeField] private Vector3 spawnPosition;
 
     private NetworkList<NetworkObjectReference> botPool = new NetworkList<NetworkObjectReference>();
-    private List<GameObject> activeBots;
-
-    public List<GameObject> ActiveBots { get => activeBots; set => activeBots = value; }
+    private NetworkList<NetworkObjectReference> activeBots = new NetworkList<NetworkObjectReference>();
 
     protected override void Awake()
     {
         base.Awake();
         botPool = new NetworkList<NetworkObjectReference>();
-        ActiveBots = new List<GameObject>();
+        activeBots = new NetworkList<NetworkObjectReference>();
     }
     public override void OnNetworkSpawn()
     {
@@ -37,12 +35,16 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     private void GameManager_OnStateChanged(object sender, EventArgs e)
     {
-        foreach (var bot in ActiveBots)
+        foreach (var bot in activeBots)
         {
-            if (bot != null)
+            if(bot.TryGet(out NetworkObject networkObject))
             {
-                bot.GetComponent<BotCustomerController>().ResetBot();
-                ReturnBotToPool(bot);
+                if (networkObject.gameObject != null)
+                {
+                    networkObject.GetComponent<BotCustomerController>().ResetBot();
+                    ReturnBotToPool(bot);
+                }
+
             }
         }
     }
@@ -163,12 +165,14 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
         {
             GameObject bot = networkObject.gameObject;
             bot.transform.position = spawnPosition;
-    
-            if(IsHost||IsServer)
+
+            if (IsHost || IsServer)
+            {
                 bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = true;
-            
-            bot.GetComponent<BotCustomerController>().InitBot();
-            ActiveBots.Add(bot);
+                activeBots.Add(bot);
+                bot.GetComponent<BotCustomerController>().InitBot();
+            }
+
         }
     }
 
@@ -180,27 +184,25 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     [Rpc(SendTo.Server)]
     private void ReturnBotToPoolServerRpc(NetworkObjectReference targetRef)
     {
-        ReturnBotToPoolClientRpc(targetRef);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ReturnBotToPoolClientRpc(NetworkObjectReference targetRef)
-    {
         if (targetRef.TryGet(out NetworkObject networkObject))
         {
             GameObject bot = networkObject.gameObject;
-            if(IsHost||IsServer)
-                bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
-            ActiveBots.Remove(bot);
+            bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
+            activeBots.Remove(bot);            
         }
     }
     public void KickAllBots()
     {
         foreach(var bot in activeBots)
         {
-            var botController = bot.GetComponent<BotCustomerController>();
-            botController.ResetSeat();
-            bot.GetComponent<BotCustomerController>().ResetBot();
-            bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
+            if(bot.TryGet(out NetworkObject networkObject))
+            {
+                var botController = networkObject.GetComponent<BotCustomerController>();
+                botController.ResetSeat();
+                networkObject.GetComponent<BotCustomerController>().ResetBot();
+                networkObject.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
+
+            }
         }
     }
 }

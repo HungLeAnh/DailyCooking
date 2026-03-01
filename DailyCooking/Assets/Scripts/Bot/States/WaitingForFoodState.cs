@@ -22,8 +22,8 @@ public class WaitingForFoodState : BotState
             {
                 if (stateMachine.GetBotController().IsServerCorrectFood(tablewareKitchenObject))
                 {
-                    stateMachine.SetState(new EatingState(stateMachine));
-                    stateMachine.GetBotController().StopBubble();
+                    stateMachine.GetBotController().SetStateMachineStateClientRpc(BotStateType.Eating);
+                    stateMachine.GetBotController().StopBubbleServerRpc();
 
                     player.GetKitchenObject().SetKitchenObjectParent(stateMachine.GetBotController().TargetTable,
                         stateMachine.GetBotController().TargetSeatIndex);

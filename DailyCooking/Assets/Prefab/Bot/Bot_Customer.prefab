@@ -852,6 +852,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4658255632003976259, guid: dce64404f1e61a8439d3c1cee00cd1c5, type: 3}
+      propertyPath: botCustomerController
+      value: 
+      objectReference: {fileID: 7312859194079893484}
     - target: {fileID: 5783397874172409229, guid: dce64404f1e61a8439d3c1cee00cd1c5, type: 3}
       propertyPath: m_Layer
       value: 8
@@ -918,7 +922,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7082139957883277607, guid: dce64404f1e61a8439d3c1cee00cd1c5, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 45
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 7082139957883277607, guid: dce64404f1e61a8439d3c1cee00cd1c5, type: 3}
       propertyPath: m_AnchoredPosition.y

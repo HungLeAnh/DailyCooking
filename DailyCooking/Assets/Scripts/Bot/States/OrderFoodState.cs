@@ -17,7 +17,8 @@ public class OrderFoodState : BotState
     {
         if(stateMachine.GetBotController().OrderFood())
         {
-            stateMachine.SetState(new WaitingForFoodState(stateMachine));
+            stateMachine.GetBotController().SetStateMachineStateClientRpc(BotStateType.WaitingForFood);
+            Debug.Log("Bot has ordered food and is now waiting.");
         }
     }
 
