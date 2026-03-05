@@ -58,13 +58,44 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 86e3d16ddfca80d489fd2d7e022b15ec, type: 3}
       insertIndex: -1
+      addedObject: {fileID: -729529718208328144}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 86e3d16ddfca80d489fd2d7e022b15ec, type: 3}
+      insertIndex: -1
       addedObject: {fileID: -2513444162218817283}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 86e3d16ddfca80d489fd2d7e022b15ec, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -4897656988673506344}
   m_SourcePrefab: {fileID: 100100000, guid: 86e3d16ddfca80d489fd2d7e022b15ec, type: 3}
 --- !u!1 &3311958726816936799 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 86e3d16ddfca80d489fd2d7e022b15ec, type: 3}
   m_PrefabInstance: {fileID: 2393409472369298958}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &-729529718208328144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3311958726816936799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3621594412
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &-2513444162218817283
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77,4 +108,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aec14aebab31d7a429e0929eb5138ff7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   kitchenObjectSO: {fileID: 11400000, guid: c0e555111a5be2640a2cef3171b2b2e9, type: 2}
+--- !u!114 &-4897656988673506344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3311958726816936799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c1c84834a2d13840a33ecdbb5058b2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::FollowTransform

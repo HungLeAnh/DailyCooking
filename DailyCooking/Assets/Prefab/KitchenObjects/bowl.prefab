@@ -9,7 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6154266614422445402}
+  - component: {fileID: -1341167422320070893}
   - component: {fileID: 8121191103929895968}
+  - component: {fileID: -6831462771676512599}
   m_Layer: 0
   m_Name: bowl
   m_TagString: Untagged
@@ -35,6 +37,31 @@ Transform:
   - {fileID: 6809682713794788363}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-1341167422320070893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3639094113156401876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1219590223
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &8121191103929895968
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47,12 +74,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0805f4760bd7fd6469fc49d7c8172635, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   kitchenObjectSO: {fileID: 11400000, guid: 3f9a28b714814864a8748e005522c083, type: 2}
   validKitchenObjectSOList:
   - {fileID: 11400000, guid: dc7c037e72c847c4a9d02a63d275f3d5, type: 2}
   visualGameObjectArray: []
   tablewareGameObjectArray: []
   eatenGameObjectArray: []
+--- !u!114 &-6831462771676512599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3639094113156401876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c1c84834a2d13840a33ecdbb5058b2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::FollowTransform
 --- !u!1 &8622493025619112790
 GameObject:
   m_ObjectHideFlags: 0
