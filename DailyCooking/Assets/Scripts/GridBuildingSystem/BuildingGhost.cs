@@ -113,7 +113,7 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
         if (placedObjectTypeSO != null)
         {
             PlacedObjectView placedObjectView = PlacedObjectFactory.Create(Vector3.zero, Vector2Int.zero, Dir.Down, placedObjectTypeSO);
-            placedObjectView.GetComponent<IPlaceable>().IsPlaced = false;
+            placedObjectView.GetComponent<IPlaceable>().IsPlaced.Value = false;
 
             visual = placedObjectView.transform;
             visual.parent = visualContainer;

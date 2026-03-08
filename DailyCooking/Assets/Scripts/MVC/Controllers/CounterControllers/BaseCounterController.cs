@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInteractable, IDestroyable,
+public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IInteractable, IDestroyable,
     IPlaceable, IModuleItem,IHighlightable
 {
 
@@ -11,7 +12,7 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
 
     private Action onDestroySelf;
     private KitchenObject _kitchenObject;
-    private bool isPlaced = false;
+    private NetworkVariable<bool> isPlaced = new NetworkVariable<bool>(false);
     public KitchenObject KitchenObject
     {
         get => _kitchenObject;
@@ -22,7 +23,7 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     }
 
     public Action OnDestroySelf { get =>onDestroySelf; set => onDestroySelf += value; }
-    public bool IsPlaced { get => isPlaced; set => isPlaced = value; }
+    public NetworkVariable<bool> IsPlaced { get => isPlaced; set => isPlaced = value; }
 
     protected virtual void Start()
     {
@@ -128,5 +129,10 @@ public class BaseCounterController : MonoBehaviour, IKitchenObjectParent, IInter
     public void RegisterItem()
     {
         CounterModules.Instance.AddController(this);
+    }
+
+    public NetworkObject GetNetworkObject()
+    {
+        return NetworkObject;
     }
 }

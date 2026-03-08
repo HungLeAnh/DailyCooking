@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
 public class CuttingCounterController : BaseCounterController, IHasProgress, IHasOptionalSO
@@ -7,21 +9,35 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     [SerializeField] private CuttingRecipeSO[] _cuttingRecipeSOArray;
     [SerializeField] private ProgressBarUI progressBarUI;
 
-    private float cuttingProgress;
+    private NetworkVariable<float> cuttingProgress = new NetworkVariable<float>(-1);
     private CuttingRecipeSO cuttingRecipeSO;
 
-    public float CuttingProgress { get => cuttingProgress; set => cuttingProgress = value; }
+    public NetworkVariable<float> CuttingProgress { get => cuttingProgress; set => cuttingProgress = value; }
     public CuttingRecipeSO CuttingRecipeSO { get => cuttingRecipeSO; set => cuttingRecipeSO = value; }
     public float ProgressNormalized
     {
-        get => cuttingRecipeSO != null ? (float)cuttingProgress / cuttingRecipeSO.cuttingProgressMax : -1;
+        get => cuttingRecipeSO != null ? (float)cuttingProgress.Value / cuttingRecipeSO.cuttingProgressMax : -1;
     }
 
     private void Awake()
     {
         // No more model and view
     }
-
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        cuttingProgress.OnValueChanged += (oldvalue,newvalue) =>
+        {
+            if(CuttingRecipeSO != null)
+            {
+                UpdateProgressBar((float)CuttingProgress.Value / CuttingRecipeSO.cuttingProgressMax);
+            }
+            else
+            {
+                UpdateProgressBar(0f);
+            }
+        };
+    }
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         if (!HasKitchenObject())
@@ -31,15 +47,15 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                 if (HasRecipeWithInput(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
                 {
                     playerStateMachine.GetKitchenObject().SetKitchenObjectParent(this);
-                    CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
-                    CuttingProgress = 0;
-                    UpdateProgressBar((float)CuttingProgress / CuttingRecipeSO.cuttingProgressMax);
+                    int index = _cuttingRecipeSOArray.ToList().IndexOf(GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO()));
+                    SetCuttingRecipeSOServerRpc(index);
+                    SetCuttingProgressServerRpc(0f);
                 }
             }
         }
         else
         {
-            if (CuttingProgress == 0)
+            if (CuttingProgress.Value == 0)
             {
                 if (playerStateMachine.HasKitchenObject())
                 {
@@ -62,26 +78,53 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
             }
         }
     }
+    [Rpc(SendTo.Server)]
+    private void SetCuttingProgressServerRpc(float value)
+    {
+        cuttingProgress.Value = value;
+    }
+    [Rpc(SendTo.Server)]
+    private void SetCuttingRecipeSOServerRpc(int index)
+    {
+        SetCuttingRecipeSOClientRpc(index);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SetCuttingRecipeSOClientRpc(int index)
+    {
+        if(index < 0 || index >= _cuttingRecipeSOArray.Length)
+        {
+            CuttingRecipeSO = null;
+        }
+        else
+        {
+            CuttingRecipeSO = _cuttingRecipeSOArray[index];
+
+        }
+    }
     public void Cut()
+    {
+        CutServerRpc(GameManager.Instance.GameData.PlayerStats.statsData.CookingSpeed);
+    }
+    [Rpc(SendTo.Server)]
+    private void CutServerRpc(float coodingSpeed)
     {
         if (HasKitchenObject() && HasRecipeWithInput(GetKitchenObject().GetKitchenObjectSO()))
         {
-            CuttingProgress += (int)GameManager.Instance.GameData.PlayerStats.statsData.CookingSpeed;
+            CuttingProgress.Value += (int)coodingSpeed;
 
             if (CuttingRecipeSO == null)
             {
-                CuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
+                int index = _cuttingRecipeSOArray.ToList().IndexOf(GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO()));
+                SetCuttingRecipeSOServerRpc(index);
             }
 
-            UpdateProgressBar((float)CuttingProgress / CuttingRecipeSO.cuttingProgressMax);
 
-            if (CuttingProgress >= CuttingRecipeSO.cuttingProgressMax)
+            if (CuttingProgress.Value >= CuttingRecipeSO.cuttingProgressMax)
             {
                 GetKitchenObject().DestroySelf();
                 KitchenObject.SpawnKitchenObject(CuttingRecipeSO.output, this);
-                CuttingProgress = 0;
-                CuttingRecipeSO = null;
-                UpdateProgressBar(0f);
+                CuttingProgress.Value = 0;
+                SetCuttingRecipeSOServerRpc(-1);
             }
         }
     }
@@ -114,7 +157,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
 
     public bool IsDone()
     {
-        return CuttingProgress == 0 &&
+        return CuttingProgress.Value == 0 &&
                CuttingRecipeSO == null &&
                KitchenObject != null;
     }
@@ -136,7 +179,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
 
     public void ResetCuttingState()
     {
-        cuttingProgress = -1;
-        cuttingRecipeSO = null;
+        SetCuttingProgressServerRpc(-1f);
+        SetCuttingRecipeSOServerRpc(-1);
     }
 }

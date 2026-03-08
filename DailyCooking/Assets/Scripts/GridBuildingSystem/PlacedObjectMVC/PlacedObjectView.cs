@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 [Serializable]
-public class PlacedObjectView : MonoBehaviour
+public class PlacedObjectView : NetworkBehaviour
 {
     private PlacedObjectController placedObjectController;
 

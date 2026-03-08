@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
+public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
 {
     private const string PLAYER_DAY = "PlayerDay";
     private const float COUNTDOWN_TO_START_TIMER_INITIAL = 3f;
@@ -25,6 +26,7 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
     [SerializeField] private long earnGoalMultiply = 1000;
     [SerializeField] private long serveGoalMultiply = 10;
     [SerializeField] private long gamePlayingTimeMultiply = 60;
+    [SerializeField] private List<KitchenObjectSO> kitchenObjectSOList;
     [SerializeField] private List<CuttingRecipeSO> cuttingRecipeSOList;
     [SerializeField] private List<FryingRecipeSO> fryingRecipeSOList;
 
@@ -191,5 +193,72 @@ public class KitchenGameManager : PersistentSingleton<KitchenGameManager>
         if (index < 0 || index >= GameManager.Instance.GameData.MenuData.menuDished.Count)
             return null;
         return GameManager.Instance.GameData.MenuData.menuDished[index];
+    }
+    public int GetKitchenObjectSOIndex(KitchenObjectSO kitchenObjectSO)
+    {
+        return kitchenObjectSOList.IndexOf(kitchenObjectSO);
+    }
+    public KitchenObjectSO GetKitchenObjectSOFromIndex(int kitchenObjectSOIndex)
+    {
+        return kitchenObjectSOList[kitchenObjectSOIndex];
+
+    }
+    public void SpawnKitchenObject(KitchenObjectSO kitchenObjectSO, IKitchenObjectParent kitchenObjectParent, int index = 0)
+    {
+        SpawnKitchenObjectServerRpc(GetKitchenObjectSOIndex(kitchenObjectSO), kitchenObjectParent.GetNetworkObject(), index);
+    }
+    [Rpc(SendTo.Server)]
+    private void SpawnKitchenObjectServerRpc(int kitchenObjectSOIndex, NetworkObjectReference networkObjectReference, int index = 0)
+    {
+        KitchenObjectSO kitchenObjectSO = GetKitchenObjectSOFromIndex(kitchenObjectSOIndex);
+
+        networkObjectReference.TryGet(out NetworkObject kitchenObjectParentNetworkObject);
+        IKitchenObjectParent kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponent<IKitchenObjectParent>();
+
+        if (kitchenObjectParent.HasKitchenObject())
+        {
+            //Parent already spawn an object
+            return;
+        }
+
+        Transform kitchenObjectTransform = Instantiate(kitchenObjectSO.prefab);
+
+        NetworkObject kitchenObjectNetworkObject = kitchenObjectTransform.GetComponent<NetworkObject>();
+        kitchenObjectNetworkObject.Spawn(true);
+
+        KitchenObject kitchenObject = kitchenObjectTransform.GetComponent<KitchenObject>();
+
+        kitchenObject.SetKitchenObjectParent(kitchenObjectParent, index);
+    }
+
+    internal void DestroyKitchenObject(KitchenObject kitchenObject)
+    {
+        DestroyKitchenObjectServerRpc(kitchenObject.NetworkObject);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void DestroyKitchenObjectServerRpc(NetworkObjectReference kitchenObjectNetworkObjectReference)
+    {
+        kitchenObjectNetworkObjectReference.TryGet(out NetworkObject kitchenObjectNetworkObject);
+
+        if (kitchenObjectNetworkObject == null)
+        {
+            //This object is already destroyed
+            return;
+        }
+
+        KitchenObject kitchenObject = kitchenObjectNetworkObject.GetComponent<KitchenObject>();
+
+        ClearKitchenObjectOnParentClientRpc(kitchenObjectNetworkObjectReference);
+        kitchenObject.DestroySelf();
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ClearKitchenObjectOnParentClientRpc(NetworkObjectReference kitchenObjectNetworkObjectReference)
+    {
+        kitchenObjectNetworkObjectReference.TryGet(out NetworkObject kitchenObjectNetworkObject);
+
+        KitchenObject kitchenObject = kitchenObjectNetworkObject.GetComponent<KitchenObject>();
+
+        kitchenObject.ClearKitchenObjectOnParent();
     }
 }

@@ -14,7 +14,7 @@ public class ProgressBarUI : MonoBehaviour
     public void OnProgressChanged(float progressNormalized)
     {
         _barImage.fillAmount = progressNormalized;
-        if (progressNormalized == 0f || progressNormalized >= 1f)
+        if (progressNormalized <= 0f || progressNormalized >= 1f)
         {
             Hide();
         }

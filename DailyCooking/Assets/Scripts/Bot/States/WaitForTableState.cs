@@ -13,15 +13,15 @@ public class WaitForTableState : BotState
     public override void Update()
     {
         Table availableTable = TableManager.Instance.GetAvailableTable();
-        if (availableTable != null && availableTable.IsPlaced)
+        if (availableTable != null && availableTable.IsPlaced.Value)
         {
             int seatIndex = availableTable.GetAvailableSeat();
             if (seatIndex != -1)
             {
                 stateMachine.GetBotController().SetSeatServerRpc(availableTable, seatIndex);
 
-                availableTable.OccupySeat(seatIndex);
-                stateMachine.GetBotController().SetStateMachineStateClientRpc(BotStateType.WalkToTable);
+                availableTable.OccupySeatServerRpc(seatIndex);
+                stateMachine.GetBotController().SetCurrentStateServerRpc(BotStateType.WalkToTable);
             }
         }
     }

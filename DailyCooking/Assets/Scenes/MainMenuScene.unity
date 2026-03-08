@@ -4730,6 +4730,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1982984534}
+  - component: {fileID: 1982984535}
   - component: {fileID: 1982984533}
   m_Layer: 0
   m_Name: KitchenGameManager
@@ -4750,9 +4751,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88afad0419b8b4c45a92023e7e03a5fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   earnGoalMultiply: 20
   serveGoalMultiply: 2
   gamePlayingTimeMultiply: 60
+  kitchenObjectSOList:
+  - {fileID: 11400000, guid: 3f9a28b714814864a8748e005522c083, type: 2}
+  - {fileID: 11400000, guid: 1c94b7f0c13c51d4ab047c26f734bbff, type: 2}
+  - {fileID: 11400000, guid: 45a0756a18761704b9e36a6a7d3f2d5f, type: 2}
+  - {fileID: 11400000, guid: 48f1ee17242a91f438ecd0b5732ab0c7, type: 2}
+  - {fileID: 11400000, guid: 173872a3feebe344980d20f67d470122, type: 2}
+  - {fileID: 11400000, guid: 6eb534ae42e3aba49925d40af5856cfb, type: 2}
+  - {fileID: 11400000, guid: 0747001d6513483489782ac8424172a3, type: 2}
+  - {fileID: 11400000, guid: 8c2f67e06d0c9ed40b55258cfa2918ed, type: 2}
+  - {fileID: 11400000, guid: d20cbb9f2e2c062468b72931fb100a49, type: 2}
+  - {fileID: 11400000, guid: 3749fc0a854478f4f9547855651188ea, type: 2}
+  - {fileID: 11400000, guid: 218499c936f06474baddf67496bfef11, type: 2}
+  - {fileID: 11400000, guid: 6e0c660f3ba0c0e4d81fd0f58ec6a4bd, type: 2}
+  - {fileID: 11400000, guid: c0e555111a5be2640a2cef3171b2b2e9, type: 2}
+  - {fileID: 11400000, guid: e4578b73d42e3f540bcf852eb01b658a, type: 2}
+  - {fileID: 11400000, guid: 8db8e26abfe69ea4580347aab1ee643a, type: 2}
+  - {fileID: 11400000, guid: 1205af07248d60d49a3f7cd4bfb18656, type: 2}
+  - {fileID: 11400000, guid: dd9b1be3a963350418676757e8b4edd8, type: 2}
+  - {fileID: 11400000, guid: d7c9c246a5410424a8ec36deac97df3f, type: 2}
+  - {fileID: 11400000, guid: dc7c037e72c847c4a9d02a63d275f3d5, type: 2}
+  - {fileID: 11400000, guid: 39975ee7cb29cf344be5fbe2aac0aba1, type: 2}
+  - {fileID: 11400000, guid: 7c50a37b03b268d49af100bd6bfd4e0c, type: 2}
+  - {fileID: 11400000, guid: 8fea54ee7aaa8544e8fe6a99d41d6689, type: 2}
+  - {fileID: 11400000, guid: 20168b59800919e44a5e0ae2e13985a1, type: 2}
+  - {fileID: 11400000, guid: 8615f37fccba7a649baec0d3c7c7c568, type: 2}
   cuttingRecipeSOList:
   - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
   - {fileID: 11400000, guid: 03df2848847bcdc4fafa39a849b83e11, type: 2}
@@ -4779,6 +4806,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1982984535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982984532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1838826243
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1993379928
 GameObject:
   m_ObjectHideFlags: 0

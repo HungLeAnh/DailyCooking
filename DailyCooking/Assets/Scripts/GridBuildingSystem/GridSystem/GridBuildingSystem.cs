@@ -3,8 +3,9 @@ using UnityEngine;
 using CodeMonkey.Utils;
 using System;
 using Unity.AI.Navigation;
+using Unity.Netcode;
 
-public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
+public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
 {    
     public class OnSelectedChangedArgs : EventArgs
     {
@@ -65,10 +66,16 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     protected override void Awake()
     {
         base.Awake();
+        
+    }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
         gameManager = GameManager.Instance;
-        IUIPopupManager uiPopupManagerInstance = UIPopupManager.Instance;
 
         foreach (var placedObject in placedObjectDatabase.PlacedObjects)
+
         {
             placedObjectTypeSODictionary[placedObject.Guid] = placedObject;
         }
@@ -79,6 +86,7 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         else
         {
             gridManager = new GridManager(GameManager.Instance.GameData.GridData, (GridXZ<GridObject> grid, int x, int z) => new List<GridObject> { new GridObject(grid, x, z) });
+            GridObjectSpawner.SpawnObjectsFromData(gridManager.Grid, GameManager.Instance.GameData.GridData.GridArrayData);
 
         }
         gridInitializer = new GridInitializer(gridManager, this.gameManager, 
@@ -90,16 +98,18 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
         gridVisualizer = new GridVisualizer(gridManager, gridGuideObject, gridGuideMaterial, gridWallList);
         gridVisualizer.SetActiveGridGuide(false);
 
-
+        IUIPopupManager uiPopupManagerInstance = UIPopupManager.Instance;
         buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, uiPopupManagerInstance);
 
-        KitchenGameManager.Instance.Init();
+
+        KitchenGameManager.Instance.Init();        
+        BakeNavMesh();
+
     }
     private void Start()
     {
         GameInput.Instance.OnMouseClickPerformed += GameInput_OnMouseClickPerformed;
         SetBlocker();
-        BakeNavMesh();
     }
     public void BakeNavMesh()
     {
@@ -172,5 +182,42 @@ public class GridBuildingSystem : SimpleSingleton<GridBuildingSystem>
     public PlacedObjectTypeSO GetPlacedObjectTypeSOById(string id)
     {
         return PlacedObjectDatabase.PlacedObjects.Find(x => x.id == id);
+    }
+
+    [Rpc(SendTo.Server)]
+    public void SpawnObjectServerRpc(string placedObjectTypeSOGuid,Vector2Int origin,Dir dir)
+    {
+        PlacedObjectTypeSO placedObjectTypeSO = GetPlacedObjectTypeSOByGuid(placedObjectTypeSOGuid);
+        if (placedObjectTypeSO == null) return;
+
+        List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(origin, dir);
+        Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
+        Vector3 placedObjectWorldPosition = gridManager.Grid.GetWorldPosition(origin) +
+            new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.Grid.GetCellSize();
+        if (!GridObjectSpawner.IsObjectPlaced(gridManager.Grid, placedObjectTypeSO, origin,dir))
+        {
+            return;
+        }
+        
+        PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, origin, dir, placedObjectTypeSO);
+        SpawnObjectClientRpc(gridPositionList.ToArray(), placedObject);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SpawnObjectClientRpc(Vector2Int[] gridPositionList, NetworkBehaviourReference networkBehaviourReference)
+    {
+        if(networkBehaviourReference.TryGet<PlacedObjectView>(out PlacedObjectView placedObject))
+        {
+            foreach (var gridPosition in gridPositionList)
+            {
+                gridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y,
+                    new GridObject(gridManager.Grid, placedObject, gridPosition.x, gridPosition.y));
+            }
+            placedObject.GetComponent<IPlaceable>().IsPlaced.Value = true;
+
+        }
+        else
+        {
+            Debug.LogError("Failed to spawn object on client.");
+        }
     }
 }

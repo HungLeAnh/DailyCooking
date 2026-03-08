@@ -280,4 +280,9 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         if (interactable != null)
             OnSelectInteractable?.Invoke(this, transform);
     }
+
+    public NetworkObject GetNetworkObject()
+    {
+        return NetworkObject;
+    }
 }

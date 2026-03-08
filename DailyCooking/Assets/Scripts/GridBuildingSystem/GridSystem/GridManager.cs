@@ -18,7 +18,6 @@ public class GridManager : IGridManager
         System.Func<GridXZ<GridObject>, int, int, List<GridObject>> createGridObject)
     {
         grid = new GridXZ<GridObject>(gridData, createGridObject);
-        GridObjectSpawner.SpawnObjectsFromData(grid, gridData.GridArrayData);
     }
 
     public Vector3 GetWorldPosition(int x, int z)

@@ -27,27 +27,27 @@ public class TablewareCounterController : BaseCounterController
 
     private void Update()
     {
-        if (TablewareSpawnAmount < _tablewareSpawnAmountMax)
-        {
-            SpawnTimer += Time.deltaTime;
-            if (SpawnTimer >= _spawnTimerMax)
-            {
-                SpawnTimer = 0f;
-                TablewareSpawnAmount++;
-                OnTablewareSpawned();
-            }
-        }
+        //if (TablewareSpawnAmount < _tablewareSpawnAmountMax)
+        //{
+        //    SpawnTimer += Time.deltaTime;
+        //    if (SpawnTimer >= _spawnTimerMax)
+        //    {
+        //        SpawnTimer = 0f;
+        //        TablewareSpawnAmount++;
+        //        OnTablewareSpawned();
+        //    }
+        //}
     }
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         if (!playerStateMachine.HasKitchenObject())
         {
+            KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
             if (TablewareSpawnAmount > 0)
             {
                 TablewareSpawnAmount--;
-                KitchenObject.SpawnKitchenObject(_tablewareKitchenObjectSO, playerStateMachine);
-                OnTablewareRemoved();
+                //OnTablewareRemoved();
             }
         }
     }

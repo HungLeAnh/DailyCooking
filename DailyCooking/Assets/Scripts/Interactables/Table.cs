@@ -11,11 +11,14 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     
     private bool[] isSeatOccupied;
     private KitchenObject[] kitchenObjects;
-    private bool isPlaced = false;
+    private NetworkVariable<bool> isPlaced = new NetworkVariable<bool>(false);
     private Action onDestroySelf;
     public Action OnDestroySelf { get => onDestroySelf;  set => onDestroySelf += value; }
-    public bool IsPlaced { get => isPlaced; set => isPlaced = value; }
-
+    public NetworkVariable<bool> IsPlaced { get => isPlaced; set => isPlaced = value; }
+    public override void OnNetworkSpawn()
+    {
+        
+    }
     private void Start()
     {
         isSeatOccupied = new bool[seats.Count];
@@ -60,7 +63,16 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
         isSeatOccupied[seatIndex] = true;
         return true;
     }
-
+    [Rpc(SendTo.Server)]
+    public void OccupySeatServerRpc(int seatIndex)
+    {
+        OccupySeatClientRpc(seatIndex);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void OccupySeatClientRpc(int seatIndex)
+    {
+        OccupySeat(seatIndex);
+    }
     public void ResetTable()
     {
         for (int i = 0; i < isSeatOccupied.Length; i++)
@@ -85,6 +97,16 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
         }
         isSeatOccupied[index] = false;
     }
+    [Rpc(SendTo.Server)]
+    public void ResetSeatServerRpc(int index)
+    {
+        ResetSeatClientRpc(index);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ResetSeatClientRpc(int index)
+    {
+        ResetSeat(index);
+    }
     public Transform GetSeatTransform(int seatIndex)
     {
         if (seatIndex >= 0 && seatIndex < seats.Count)
@@ -105,9 +127,23 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
 
     public void SetKitchenObject(KitchenObject kitchenObject, int index = 0)
     {
-        if (kitchenObjects != null && index >= 0 && index < kitchenObjectFollowPoints.Count)
+        SetKitchenObjectServerRpc(kitchenObject, index);
+    }
+    [Rpc(SendTo.Server)]
+    public void SetKitchenObjectServerRpc(NetworkBehaviourReference networkBehaviourReference, int index = 0)
+    {
+        SetKitchenObjectClientRpc(networkBehaviourReference, index);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SetKitchenObjectClientRpc(NetworkBehaviourReference networkBehaviourReference, int index = 0)
+    {
+        if(networkBehaviourReference.TryGet(out KitchenObject kitchenObject))
         {
-            kitchenObjects[index] = kitchenObject;
+            if (kitchenObjects != null && index >= 0 && index < kitchenObjectFollowPoints.Count)
+            {
+                kitchenObjects[index] = kitchenObject;
+            }
+
         }
     }
 
@@ -122,8 +158,18 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
 
     public void ClearKitchenObject(int index = 0)
     {
-        if(kitchenObjects != null && index >= 0 && 
-            index < kitchenObjects.Length && 
+        ClearKitchenObjectServerRpc(index);
+    }
+    [Rpc(SendTo.Server)]
+    private void ClearKitchenObjectServerRpc(int index = 0)
+    {
+        ClearKitchenObjectClientRpc(index);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ClearKitchenObjectClientRpc(int index = 0)
+    {
+        if (kitchenObjects != null && index >= 0 &&
+            index < kitchenObjects.Length &&
             index < seats.Count)
         {
             kitchenObjects[index] = null;
@@ -147,7 +193,6 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     }
     public void SetEatenViual(int index, int cash, int exp)
     {
-        
         var tablewareObject = kitchenObjects[index] as TablewareKitchenObject;
 
         if(tablewareObject != null)
@@ -155,7 +200,16 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
             tablewareObject.SetEaten(cash, exp);
         }
     }
-
+    [Rpc(SendTo.Server)]
+    public void SetEatenVisualServerRpc(int index, int cash, int exp)
+    {
+        SetEatenVisualClientRpc(index, cash, exp);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SetEatenVisualClientRpc(int index, int cash, int exp)
+    {
+        SetEatenViual(index, cash, exp);
+    }
     public void DestroySelf()
     {
         OnDestroySelf?.Invoke();
@@ -179,5 +233,10 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     public void RegisterItem()
     {
         TableManager.Instance.RegisterTable(this);
+    }
+
+    public NetworkObject GetNetworkObject()
+    {
+        return NetworkObject;
     }
 }

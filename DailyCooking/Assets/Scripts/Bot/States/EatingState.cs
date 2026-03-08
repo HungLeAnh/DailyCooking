@@ -19,7 +19,7 @@ public class EatingState : BotState
         if (eatingTimer <= 0)
         {
             stateMachine.GetBotController().FinishEatingServerRpc();
-            stateMachine.GetBotController().SetStateMachineStateClientRpc(BotStateType.Leaving);
+            stateMachine.GetBotController().SetCurrentStateServerRpc(BotStateType.Leaving);
         }
     }
 }

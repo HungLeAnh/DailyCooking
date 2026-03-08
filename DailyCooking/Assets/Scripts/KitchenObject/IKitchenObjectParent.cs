@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Netcode;
+using UnityEngine;
 
 public interface IKitchenObjectParent
 {
@@ -12,5 +13,6 @@ public interface IKitchenObjectParent
     public void ClearKitchenObject(int index = 0);
 
     public bool HasKitchenObject(int index = 0);
+    public NetworkObject GetNetworkObject();
 
 }

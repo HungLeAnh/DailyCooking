@@ -1,5 +1,7 @@
-﻿public interface IPlaceable
+﻿using Unity.Netcode;
+
+public interface IPlaceable
 {
-    public bool IsPlaced { get; set; }
+    public NetworkVariable<bool> IsPlaced { get; set; }
     public bool CanRemove();
 }

@@ -81,7 +81,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
             PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
             
-            placedObject.GetComponent<IPlaceable>().IsPlaced = true;
+            placedObject.GetComponent<IPlaceable>().IsPlaced.Value = true;
 
             foreach (var gridPosition in gridPositionList)
             {

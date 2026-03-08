@@ -23,8 +23,9 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
     private int cash;
     private int exp;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _ingredientSOList = new List<KitchenObjectSO>();
     }
 

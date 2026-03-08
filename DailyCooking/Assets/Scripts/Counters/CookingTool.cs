@@ -1,7 +1,8 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
-public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectParent
+public abstract class CookingTool: NetworkBehaviour, IHasProgress, IKitchenObjectParent
 {
     public class OnStageChangeEventArgs : EventArgs
     {
@@ -166,5 +167,10 @@ public abstract class CookingTool: MonoBehaviour, IHasProgress, IKitchenObjectPa
         {
             return 0;
         }
+    }
+
+    public NetworkObject GetNetworkObject()
+    {
+        return NetworkObject;
     }
 }

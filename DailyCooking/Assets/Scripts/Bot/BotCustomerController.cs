@@ -36,14 +36,17 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     private NetworkVariable<bool> isEmotionBubbleActive = new NetworkVariable<bool>(false);
     private NetworkVariable<bool> isNavMeshStopped = new NetworkVariable<bool>(false);
     private NetworkVariable<EmotionType> currentEmotion = new NetworkVariable<EmotionType>(EmotionType.None);
+    private NetworkVariable<BotStateType> currentStateType = new NetworkVariable<BotStateType>(BotStateType.Idle);
+
     public Table TargetTable { get; set; }
     public int TargetSeatIndex { get; set; }
     public NavMeshAgent NavMeshAgent { get => navMeshAgent; }
     public NetworkVariable<bool> IsActiveInGame { get => isActiveInGame; set => isActiveInGame = value; }
-
+    public NetworkVariable<BotStateType> CurrentStateType { get => currentStateType; set => currentStateType = value; }
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();
+        base.OnNetworkSpawn();        
+
         IsActiveInGame.OnValueChanged += (oldVal, newVal) => {
             SetVisualActive(newVal);
         };
@@ -71,18 +74,21 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         clockTimer.OnValueChanged += (oldVal, newVal) => {
             OnClockTimerChanged?.Invoke((clockTimerMax - newVal) / clockTimerMax);
         };
+        currentStateType.OnValueChanged += (oldVal, newVal) => {
+            SetStateMachineStateClientRpc(newVal);
+        };
         SetVisualActive(IsActiveInGame.Value);
         BubbleFrame.SetActive(isBubbleFrameActive.Value);
         orderBubble.SetActive(isOrderBubbleActive.Value);
         foodBubble.SetActive(isFoodBubbleActive.Value);
         emotionBubble.SetActive(isEmotionBubbleActive.Value);
-
+        SetStateMachineState(currentStateType.Value);
     }
     private void Awake()
     {
         stateMachine = new BotStateMachine(this);
 
-        if(IsHost||IsServer)
+        if (IsHost||IsServer)
         {
             isFoodBubbleActive.Value = false;
             isOrderBubbleActive.Value = false;
@@ -255,7 +261,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         ResetBotClientRpc();
         StopBubbleServerRpc();
-        SetStateMachineStateClientRpc(BotStateType.Idle);
+        currentStateType.Value = BotStateType.Idle;
     }
     [Rpc(SendTo.ClientsAndHost)]
     private void ResetBotClientRpc()
@@ -267,7 +273,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     public void InitBot()
     {
         isNavMeshStopped.Value = false;
-        SetStateMachineStateClientRpc(BotStateType.WaitForTable);
+        currentStateType.Value = BotStateType.WaitForTable;
         tipPercentage.Value = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.PlayerStats.statsData.TipIncrease;
     }
     [Rpc(SendTo.Server)]
@@ -318,7 +324,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
             exp += food.exp;
         }
         cash += (int)(cash * tipPercentage.Value);
-        TargetTable.SetEatenViual(TargetSeatIndex,cash,exp);
+        TargetTable.SetEatenVisualServerRpc(TargetSeatIndex,cash,exp);
         ResetSeat();
     }
     [Rpc(SendTo.Server)]
@@ -345,16 +351,25 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     public void ResetSeat()
     {
         if(TargetTable != null && TargetSeatIndex >= 0)
-            TargetTable.ResetSeat(TargetSeatIndex);
+            TargetTable.ResetSeatServerRpc(TargetSeatIndex);
     }
     public void Leave()
     {
         ResetSeat();
-        SetStateMachineStateClientRpc(BotStateType.Leaving);
+        currentStateType.Value = BotStateType.Leaving;
         StopBubbleServerRpc();
+    }
+    [Rpc(SendTo.Server)]
+    public void SetCurrentStateServerRpc(BotStateType botStateType)
+    {
+        CurrentStateType.Value = botStateType;
     }
     [Rpc(SendTo.ClientsAndHost)]
     public void SetStateMachineStateClientRpc(BotStateType botStateType)
+    {
+        SetStateMachineState(botStateType);
+    }
+    private void SetStateMachineState(BotStateType botStateType)
     {
         switch (botStateType)
         {

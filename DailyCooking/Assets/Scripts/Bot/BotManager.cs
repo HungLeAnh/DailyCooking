@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 public class BotManager : NetworkPersistentSingleton<BotManager>
 {
     [SerializeField] private GameObject botPrefab;
-    [SerializeField] private int poolSize = 1;
+    [SerializeField] private int poolSize = 10;
     [SerializeField] private Vector3 spawnPosition;
 
     private NetworkList<NetworkObjectReference> botPool = new NetworkList<NetworkObjectReference>();

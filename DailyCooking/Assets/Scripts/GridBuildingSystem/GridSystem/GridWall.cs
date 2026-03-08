@@ -1,15 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class GridWall : MonoBehaviour, IPlaceable, IDestroyable
+public class GridWall : NetworkBehaviour, IPlaceable, IDestroyable
 {
     [SerializeField] private GameObject[] visualGameObjectArray;
     [SerializeField] private GameObject[] visualGameObjectShadowArray;
-    private bool isPlaced;
+    private NetworkVariable<bool> isPlaced = new NetworkVariable<bool>(false);
     private Action onDestroySelf;
-    public bool IsPlaced { get => isPlaced; set => isPlaced = value; }
+    public NetworkVariable<bool> IsPlaced { get => isPlaced; set => isPlaced = value; }
     public Action OnDestroySelf { get => onDestroySelf; set => onDestroySelf += value; }
 
     private void Start()

@@ -1,8 +1,9 @@
 
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public static class GridObjectSpawner
+public class GridObjectSpawner
 {
     public static void SpawnObjectsFromData(GridXZ<GridObject> grid, List<GridObjectData>[,] gridObjectDataList)
     {
@@ -23,31 +24,14 @@ public static class GridObjectSpawner
 
     private static void SpawnObject(GridXZ<GridObject> grid, GridObjectData objectData)
     {
-        PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(objectData.PlacedObjectTypeSOGuid);
-        if (placedObjectTypeSO == null) return;
-
-        List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(objectData.Origin, objectData.Dir);
-        Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(objectData.Dir);
-        Vector3 placedObjectWorldPosition = grid.GetWorldPosition(objectData.Origin) +
-            new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
-        if (!IsObjectPlaced(grid,placedObjectTypeSO,objectData))
-        {
-            return;
-        }
-        PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, objectData.Origin, objectData.Dir, placedObjectTypeSO);
-
-        foreach (var gridPosition in gridPositionList)
-        {
-            grid.AddGridObjectData(gridPosition.x, gridPosition.y,
-                new GridObject(grid, placedObject, gridPosition.x, gridPosition.y));
-        }
-        placedObject.GetComponent<IPlaceable>().IsPlaced = true;
+        GridBuildingSystem.Instance.SpawnObjectServerRpc(objectData.PlacedObjectTypeSOGuid,objectData.Origin,objectData.Dir);
     }
-    public static bool IsObjectPlaced(GridXZ<GridObject> grid, PlacedObjectTypeSO placedObjectTypeSO, GridObjectData objectData)
+
+    public static bool IsObjectPlaced(GridXZ<GridObject> grid, PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir)
     {
         bool canBuild = true;
 
-        var gridObject = grid.GetGridObject((int)objectData.Origin.x, (int)objectData.Origin.y);
+        var gridObject = grid.GetGridObject((int)origin.x, (int)origin.y);
         if (gridObject == null)
         {
             canBuild = false;
@@ -56,7 +40,7 @@ public static class GridObjectSpawner
         foreach (var placedObject in gridObject)
         {
             if (placedObject == null ||
-                !placedObject.CanBuild(placedObjectTypeSO.itemType.TabType, objectData.Dir))
+                !placedObject.CanBuild(placedObjectTypeSO.itemType.TabType, dir))
             {
                 canBuild = false;
                 break;
@@ -64,4 +48,5 @@ public static class GridObjectSpawner
         }
         return canBuild;
     }
+
 }
