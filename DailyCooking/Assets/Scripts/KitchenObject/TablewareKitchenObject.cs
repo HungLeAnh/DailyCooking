@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 using UnityEngine;
+using Unity.Netcode;
 
 public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightable
 {
@@ -45,15 +46,27 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
             return false;
         }
         else
-        { 
-            _ingredientSOList.Add(kitchenObjectSO);
-            OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
-            {
-                KitchenObjectSO = kitchenObjectSO,
-                
-            });
+        {
+            int index = KitchenGameManager.Instance.GetKitchenObjectSOIndex(kitchenObjectSO);
+            TryAddIngredientServerRpc(index);
+
             return true;
         }
+    }
+    [Rpc(SendTo.Server)]
+    private void TryAddIngredientServerRpc(int kitchenObjectSOIndex)
+    {
+        TryAddIngredientClientRpc(kitchenObjectSOIndex);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TryAddIngredientClientRpc(int kitchenObjectSOIndex)
+    {
+        KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOFromIndex(kitchenObjectSOIndex);
+        _ingredientSOList.Add(kitchenObjectSO);
+        OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
+        {
+            KitchenObjectSO = kitchenObjectSO,
+        });
     }
     public List<KitchenObjectSO> GetKitchenObjectSOList()
     {

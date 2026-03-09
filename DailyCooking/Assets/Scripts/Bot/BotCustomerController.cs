@@ -405,7 +405,8 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     public void SetSeatClientRpc(NetworkBehaviourReference networkBehaviourReference, int seatIndex)
     {
         if (networkBehaviourReference.TryGet(out Table table)) {
-            TargetTable = table.GetComponent<Table>();
+            TargetTable = table;
+            Debug.Log("Bot " + gameObject.name + " is assigned to Table " + table.gameObject.name + " Seat Index: " + seatIndex);
             TargetSeatIndex = seatIndex;
         }
         else
