@@ -127,24 +127,11 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
 
     public void SetKitchenObject(KitchenObject kitchenObject, int index = 0)
     {
-        SetKitchenObjectServerRpc(kitchenObject, index);
-    }
-    [Rpc(SendTo.Server)]
-    public void SetKitchenObjectServerRpc(NetworkBehaviourReference networkBehaviourReference, int index = 0)
-    {
-        SetKitchenObjectClientRpc(networkBehaviourReference, index);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void SetKitchenObjectClientRpc(NetworkBehaviourReference networkBehaviourReference, int index = 0)
-    {
-        if(networkBehaviourReference.TryGet(out KitchenObject kitchenObject))
+        if (kitchenObjects != null && index >= 0 && index < kitchenObjectFollowPoints.Count)
         {
-            if (kitchenObjects != null && index >= 0 && index < kitchenObjectFollowPoints.Count)
-            {
-                kitchenObjects[index] = kitchenObject;
-            }
-
+            kitchenObjects[index] = kitchenObject;
         }
+
     }
 
     public KitchenObject GetKitchenObject(int index = 0)
@@ -180,10 +167,12 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
 
     public bool HasKitchenObject(int index = 0)
     {
+        Debug.Log("Table kitchen object length: " + kitchenObjects.Length);
         if(kitchenObjects != null && 
             kitchenObjects.Length > 0 && 
             index < kitchenObjects.Length)
         {
+            Debug.Log("Check kitchen object at index " + index + ": " + (kitchenObjects[index]));
             return kitchenObjects[index] != null;
         }
         else

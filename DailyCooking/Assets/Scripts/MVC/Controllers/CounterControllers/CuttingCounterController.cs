@@ -47,7 +47,8 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                 if (HasRecipeWithInput(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
                 {
                     playerStateMachine.GetKitchenObject().SetKitchenObjectParent(this);
-                    int index = _cuttingRecipeSOArray.ToList().IndexOf(GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO()));
+                    int index = _cuttingRecipeSOArray.ToList()
+                        .IndexOf(GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO()));
                     SetCuttingRecipeSOServerRpc(index);
                     SetCuttingProgressServerRpc(0f);
                 }

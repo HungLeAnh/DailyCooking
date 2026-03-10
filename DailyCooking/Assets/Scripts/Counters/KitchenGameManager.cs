@@ -249,16 +249,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
 
         KitchenObject kitchenObject = kitchenObjectNetworkObject.GetComponent<KitchenObject>();
 
-        ClearKitchenObjectOnParentClientRpc(kitchenObjectNetworkObjectReference);
+        kitchenObject.ClearKitchenObjectOnParentClientRpc();
         kitchenObject.DestroySelf();
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ClearKitchenObjectOnParentClientRpc(NetworkObjectReference kitchenObjectNetworkObjectReference)
-    {
-        kitchenObjectNetworkObjectReference.TryGet(out NetworkObject kitchenObjectNetworkObject);
-
-        KitchenObject kitchenObject = kitchenObjectNetworkObject.GetComponent<KitchenObject>();
-
-        kitchenObject.ClearKitchenObjectOnParent();
     }
 }

@@ -36,6 +36,7 @@ public class KitchenObject : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     private void SetKitchenObjectParentClientRpc(NetworkObjectReference networkObjectReference, int index = 0)
     {
+        Debug.Log("SetKitchenObjectParentClientRpc called with networkObjectReference: " + networkObjectReference.NetworkObjectId);
         networkObjectReference.TryGet(out NetworkObject kitchenObjectParentNetworkObject);
         IKitchenObjectParent kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponent<IKitchenObjectParent>();
 
@@ -47,7 +48,9 @@ public class KitchenObject : NetworkBehaviour
         this.kitchenObjectParent = kitchenObjectParent;
         if (kitchenObjectParent.HasKitchenObject(index))
         {
-            Debug.LogError("IKitchenObjectParent already has a KitchenObject!!");
+            Debug.LogError(this.gameObject.name + " already has a parent that has a kitchen object!! Parent: " 
+                + kitchenObjectParent.GetNetworkObject().name);
+            //Debug.LogError("IKitchenObjectParent already has a KitchenObject!!");
         }
         kitchenObjectParent.SetKitchenObject(this, index);
 
@@ -70,14 +73,9 @@ public class KitchenObject : NetworkBehaviour
         Destroy(gameObject);
     }
     [Rpc(SendTo.ClientsAndHost)]
-    private void ClearKitchenObjectOnParentClientRpc(int index = 0)
+    public void ClearKitchenObjectOnParentClientRpc(int index = 0)
     {
         kitchenObjectParent.ClearKitchenObject(index);
-    }
-    public void ClearKitchenObjectOnParent(int index = 0)
-    {
-        kitchenObjectParent.ClearKitchenObject(index);
-
     }
 
     public bool TryGetTableware(out TablewareKitchenObject tablewareKitchenObject)

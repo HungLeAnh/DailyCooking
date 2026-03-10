@@ -138,6 +138,11 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
     }
     public void Serve()
     {
+        ServeClientRpc();
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ServeClientRpc()
+    {
         OnServed?.Invoke(this, EventArgs.Empty);
     }
 }
