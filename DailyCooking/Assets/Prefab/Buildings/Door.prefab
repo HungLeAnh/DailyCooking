@@ -44,8 +44,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7592323735390405500}
-  - component: {fileID: 7146335699747075372}
   - component: {fileID: 1459224227440350911}
+  - component: {fileID: 7146335699747075372}
   - component: {fileID: -4880997507872323559}
   - component: {fileID: 9097643203986335929}
   - component: {fileID: 242971901284034471}
@@ -73,22 +73,6 @@ Transform:
   - {fileID: 6795039293475916442}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7146335699747075372
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6862675218130391429}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70d848c001fe55246bc71d6138fad2ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  visualGameObjectArray:
-  - {fileID: 6547497755814131430}
-  visualGameObjectShadowArray:
-  - {fileID: 4771237691428335918}
 --- !u!114 &1459224227440350911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114,6 +98,23 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &7146335699747075372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6862675218130391429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70d848c001fe55246bc71d6138fad2ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  visualGameObjectArray:
+  - {fileID: 6547497755814131430}
+  visualGameObjectShadowArray:
+  - {fileID: 4771237691428335918}
 --- !u!114 &-4880997507872323559
 MonoBehaviour:
   m_ObjectHideFlags: 0

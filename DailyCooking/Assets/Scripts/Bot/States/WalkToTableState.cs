@@ -14,7 +14,7 @@ public class WalkToTableState : BotState
     {
         //Debug.Log("Bot is walking to the table.");
         table = stateMachine.GetBotController().TargetTable;
-        seatIndex = stateMachine.GetBotController().TargetSeatIndex;
+        seatIndex = stateMachine.GetBotController().TargetSeatIndex.Value;
         seatTransform = table.GetSeatTransform(seatIndex);
 
         var destination = NavMeshExtention.FindNearestPointSmart(seatTransform.position, 5f);

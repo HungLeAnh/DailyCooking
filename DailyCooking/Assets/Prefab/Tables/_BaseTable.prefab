@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 5278761787930030305}
   - component: {fileID: 7329074391819375039}
-  - component: {fileID: 2134883695714913190}
   - component: {fileID: -1956326845680315942}
+  - component: {fileID: 2134883695714913190}
   - component: {fileID: 1585868403121102967}
   m_Layer: 6
   m_Name: _BaseTable
@@ -59,18 +59,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 1, y: 0, z: 1}
---- !u!114 &2134883695714913190
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1422007882026835853}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29007807c35615c418883b54b6a23802, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &-1956326845680315942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,6 +84,19 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &2134883695714913190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1422007882026835853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29007807c35615c418883b54b6a23802, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &1585868403121102967
 MonoBehaviour:
   m_ObjectHideFlags: 0

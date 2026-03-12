@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net.WebSockets;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
@@ -36,10 +35,23 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     private NetworkVariable<bool> isEmotionBubbleActive = new NetworkVariable<bool>(false);
     private NetworkVariable<bool> isNavMeshStopped = new NetworkVariable<bool>(false);
     private NetworkVariable<EmotionType> currentEmotion = new NetworkVariable<EmotionType>(EmotionType.None);
+    private NetworkVariable<int> targetSeatIndex = new NetworkVariable<int>(-1);
+    private NetworkVariable<ulong> targetTableNetworkVariable = new NetworkVariable<ulong>(0);
     private NetworkVariable<BotStateType> currentStateType = new NetworkVariable<BotStateType>(BotStateType.Idle);
 
-    public Table TargetTable { get; set; }
-    public int TargetSeatIndex { get; set; }
+    private Table targetTable = null;
+    public Table TargetTable { get => targetTable; set => targetTable = value; }
+    public NetworkVariable<ulong> TargetTableNetworkVariable 
+    { 
+        get => targetTableNetworkVariable;
+        set => targetTableNetworkVariable.Value = value.Value;
+         
+    }
+    public NetworkVariable<int> TargetSeatIndex 
+    { 
+        get => targetSeatIndex;
+        set => targetSeatIndex = value;
+    }
     public NavMeshAgent NavMeshAgent { get => navMeshAgent; }
     public NetworkVariable<bool> IsActiveInGame { get => isActiveInGame; set => isActiveInGame = value; }
     public NetworkVariable<BotStateType> CurrentStateType { get => currentStateType; set => currentStateType = value; }
@@ -74,14 +86,50 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         clockTimer.OnValueChanged += (oldVal, newVal) => {
             OnClockTimerChanged?.Invoke((clockTimerMax - newVal) / clockTimerMax);
         };
-        currentStateType.OnValueChanged += (oldVal, newVal) => {
-            SetStateMachineStateClientRpc(newVal);
+
+        targetTableNetworkVariable.OnValueChanged += (oldVal, newVal) =>
+        {
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetTableNetworkVariable.Value, out NetworkObject netObj))
+            {
+                if (netObj.TryGetComponent(out Table table))
+                {
+                    targetTable = table;
+                }
+                else
+                {
+                    targetTable = null;
+
+                }
+            }
+            else
+            {
+                targetTable = null;
+            }
+
         };
+        currentStateType.OnValueChanged += (oldVal, newVal) => {
+            SetStateMachineState(newVal);
+        };
+
         SetVisualActive(IsActiveInGame.Value);
         BubbleFrame.SetActive(isBubbleFrameActive.Value);
         orderBubble.SetActive(isOrderBubbleActive.Value);
         foodBubble.SetActive(isFoodBubbleActive.Value);
         emotionBubble.SetActive(isEmotionBubbleActive.Value);
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetTableNetworkVariable.Value, out NetworkObject netObj))
+        {
+            Debug.Log("Found object: " + netObj.name);
+            if (netObj.TryGetComponent(out Table table))
+            {
+                targetTable = table;
+                Debug.Log("Bot " + gameObject.name + " is assigned to Table " + table.gameObject.name + " Seat Index: " + TargetSeatIndex);
+            }
+            else
+            {
+                targetTable = null;
+
+            }
+        }
         SetStateMachineState(currentStateType.Value);
     }
     private void Awake()
@@ -259,6 +307,8 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
     public void ResetBot()
     {
+        targetTableNetworkVariable.Value = 0;
+        targetSeatIndex.Value = -1;
         ResetBotClientRpc();
         StopBubbleServerRpc();
         currentStateType.Value = BotStateType.Idle;
@@ -267,8 +317,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     private void ResetBotClientRpc()
     {
         waitingFood.Clear();
-        TargetTable = null;
-        TargetSeatIndex = -1;
+
     }
     public void InitBot()
     {
@@ -324,7 +373,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
             exp += food.exp;
         }
         cash += (int)(cash * tipPercentage.Value);
-        TargetTable.SetEatenVisualServerRpc(TargetSeatIndex,cash,exp);
+        targetTable.SetEatenVisualServerRpc(TargetSeatIndex.Value, cash, exp);
         ResetSeat();
     }
     [Rpc(SendTo.Server)]
@@ -350,8 +399,10 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
     public void ResetSeat()
     {
-        if(TargetTable != null && TargetSeatIndex >= 0)
-            TargetTable.ResetSeatServerRpc(TargetSeatIndex);
+        if(targetTable != null && TargetSeatIndex.Value >= 0)
+        {
+            targetTable.ResetSeatServerRpc(TargetSeatIndex.Value);
+        }
     }
     public void Leave()
     {
@@ -363,11 +414,6 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     public void SetCurrentStateServerRpc(BotStateType botStateType)
     {
         CurrentStateType.Value = botStateType;
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    public void SetStateMachineStateClientRpc(BotStateType botStateType)
-    {
-        SetStateMachineState(botStateType);
     }
     private void SetStateMachineState(BotStateType botStateType)
     {
@@ -399,19 +445,10 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     [Rpc(SendTo.Server)]
     public void SetSeatServerRpc(NetworkBehaviourReference networkBehaviourReference, int seatIndex)
     {
-        SetSeatClientRpc(networkBehaviourReference, seatIndex);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    public void SetSeatClientRpc(NetworkBehaviourReference networkBehaviourReference, int seatIndex)
-    {
-        if (networkBehaviourReference.TryGet(out Table table)) {
-            TargetTable = table;
-            Debug.Log("Bot " + gameObject.name + " is assigned to Table " + table.gameObject.name + " Seat Index: " + seatIndex);
-            TargetSeatIndex = seatIndex;
-        }
-        else
+        if (networkBehaviourReference.TryGet(out Table table))
         {
-            Debug.LogError("Failed to get Table from NetworkBehaviourReference");
-        }
+            targetTableNetworkVariable.Value = table.NetworkObjectId;
+            targetSeatIndex.Value = seatIndex;
+        }           
     }
 }

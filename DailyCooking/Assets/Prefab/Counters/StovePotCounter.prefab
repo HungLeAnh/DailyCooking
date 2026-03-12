@@ -250,6 +250,10 @@ PrefabInstance:
       propertyPath: m_Center.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 5570918290488039279, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3883673722
+      objectReference: {fileID: 0}
     - target: {fileID: 5753835007656200812, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       propertyPath: m_LocalPosition.y
       value: 1.5
@@ -380,7 +384,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4378806727168244762, guid: 7b2ab55e3c3904646b0f0a4a6e0c5418, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 52
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4378806727168244762, guid: 7b2ab55e3c3904646b0f0a4a6e0c5418, type: 3}
       propertyPath: m_SizeDelta.y

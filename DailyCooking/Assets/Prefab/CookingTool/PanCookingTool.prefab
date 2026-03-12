@@ -88,6 +88,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1001 &8669713075343259001
 PrefabInstance:
@@ -154,6 +155,9 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 3835830830082720915, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 3867961959400068751}
+    - targetCorrespondingSourceObject: {fileID: 3835830830082720915, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 6983875412975341295}
   m_SourcePrefab: {fileID: 100100000, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
 --- !u!114 &927980690929840512 stripped
@@ -193,6 +197,31 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3835830830082720915, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
   m_PrefabInstance: {fileID: 8669713075343259001}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3867961959400068751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5578440184501268970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3383804481
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &6983875412975341295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -205,6 +234,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30b1028be114bde439f8f15bd3d9d09e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   placePoint: {fileID: 2272796693335353773}
   progressBarUI: {fileID: 927980690929840512}
   burnWarningUI: {fileID: 1449230221004652872}
