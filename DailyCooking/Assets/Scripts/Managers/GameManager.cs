@@ -72,10 +72,10 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
     }
     public void HidePlayer()
     {
-        playerGameObject.SetActive(false);
+        //playerGameObject.SetActive(false);
     }public void ShowPlayer()
     {
-        playerGameObject.SetActive(true);
+        //playerGameObject.SetActive(true);
     }
     public void DestroyPlayer()
     {

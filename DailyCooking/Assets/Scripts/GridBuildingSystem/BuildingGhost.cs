@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
-public class BuildingGhost : SimpleSingleton<BuildingGhost> 
+public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost> 
 {
     public Action<Vector3> OnBUildingDrag;
     [SerializeField] private GameObject buildingCanvas;
@@ -18,6 +18,7 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
     private bool isRotating = false;
     private bool stopMoving = false;
     private Quaternion targetQuaternion;
+    private Vector3 targetPosition;
 
     public bool IsDragging { get => isDragging; set => isDragging = value; }
     public bool StopMoving { get => stopMoving; set => stopMoving = value; }
@@ -39,6 +40,7 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
         {
             return;
         }
+        targetPosition = args.position;
         targetQuaternion = GridBuildingSystem.Instance.BuildingPlacementManager.GetPlacedObjectRotation();
         isRotating = true;
         OffsetRotation();
@@ -82,7 +84,7 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
     {
         if (isRotating)
         {
-            visual.localRotation = Quaternion.Lerp(visual.localRotation,targetQuaternion, Time.deltaTime * 20f);
+            visual.rotation = Quaternion.Lerp(visual.localRotation,targetQuaternion, Time.deltaTime * 20f);
             if (Quaternion.Angle(visual.localRotation,targetQuaternion)< 0.5)
                 isRotating = false;
         }
@@ -92,14 +94,15 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
     {
         if (isDragging == false || stopMoving)
             return;
-        Vector3 targetPosition = GridBuildingSystem.Instance.BuildingPlacementManager.GetMouseWorldSnappedPosition();
+        targetPosition = GridBuildingSystem.Instance.BuildingPlacementManager.GetMouseWorldSnappedPosition();
         //Debug.Log("Dragging Building Ghost target pos: "+ targetPosition);
         if (targetPosition == -Vector3.one)
             return;
 
         targetPosition.y = 1f;
         visualContainer.position = Vector3.Lerp(visualContainer.position, targetPosition, Time.deltaTime * 20f);
-        visual.localRotation = Quaternion.Lerp(visual.localRotation, targetQuaternion, Time.deltaTime * 20f);
+        visual.position = Vector3.Lerp(visual.position, targetPosition, Time.deltaTime * 20f);
+        visual.rotation = Quaternion.Lerp(visual.localRotation, targetQuaternion, Time.deltaTime * 20f);
 
         OnBUildingDrag?.Invoke(targetPosition);
     }
@@ -116,18 +119,20 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
             placedObjectView.GetComponent<IPlaceable>().IsPlaced.Value = false;
 
             visual = placedObjectView.transform;
-            visual.parent = visualContainer;
-            visual.localPosition = Vector3.zero;
-            visual.localEulerAngles = Vector3.zero;
+            //visual.parent = visualContainer;
+            //visual.localPosition = Vector3.zero;
+            //visual.localEulerAngles = Vector3.zero;
             SetLayerRecursive(visual.gameObject, LayerMask.NameToLayer("BuildingGhost"));
             ShowCanvas(true);
             if (targetPosition != -Vector3.one)
             {
                 visualContainer.position = targetPosition;
+                visual.position = targetPosition;
             }
             else
             {
                 visualContainer.position = Vector3.zero;
+                visual.position = Vector3.zero;
             }
 
         }
@@ -196,7 +201,7 @@ public class BuildingGhost : SimpleSingleton<BuildingGhost>
 
     private void OffsetRotation()
     {
-        visual.localPosition = GridBuildingSystem.Instance.BuildingPlacementManager
+        visual.localPosition = targetPosition + GridBuildingSystem.Instance.BuildingPlacementManager
             .GetPlacedObjectRotationOffset(placedObjectTypeSO.itemType.TabType);
     }
 

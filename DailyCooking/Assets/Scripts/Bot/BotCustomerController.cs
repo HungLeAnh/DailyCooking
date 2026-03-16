@@ -41,17 +41,8 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
     private Table targetTable = null;
     public Table TargetTable { get => targetTable; set => targetTable = value; }
-    public NetworkVariable<ulong> TargetTableNetworkVariable 
-    { 
-        get => targetTableNetworkVariable;
-        set => targetTableNetworkVariable.Value = value.Value;
-         
-    }
-    public NetworkVariable<int> TargetSeatIndex 
-    { 
-        get => targetSeatIndex;
-        set => targetSeatIndex = value;
-    }
+    public NetworkVariable<ulong> TargetTableNetworkVariable { get => targetTableNetworkVariable; set => targetTableNetworkVariable.Value = value.Value;}
+    public NetworkVariable<int> TargetSeatIndex { get => targetSeatIndex; set => targetSeatIndex = value;}
     public NavMeshAgent NavMeshAgent { get => navMeshAgent; }
     public NetworkVariable<bool> IsActiveInGame { get => isActiveInGame; set => isActiveInGame = value; }
     public NetworkVariable<BotStateType> CurrentStateType { get => currentStateType; set => currentStateType = value; }
@@ -118,11 +109,11 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         emotionBubble.SetActive(isEmotionBubbleActive.Value);
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetTableNetworkVariable.Value, out NetworkObject netObj))
         {
-            Debug.Log("Found object: " + netObj.name);
+            //Debug.Log("Found object: " + netObj.name);
             if (netObj.TryGetComponent(out Table table))
             {
                 targetTable = table;
-                Debug.Log("Bot " + gameObject.name + " is assigned to Table " + table.gameObject.name + " Seat Index: " + TargetSeatIndex);
+                //Debug.Log("Bot " + gameObject.name + " is assigned to Table " + table.gameObject.name + " Seat Index: " + TargetSeatIndex);
             }
             else
             {
@@ -296,8 +287,8 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     public void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         OnInteract?.Invoke(playerStateMachine);
-        Debug.Log("Bot Interacted with player");
-        Debug.Log("Current Bot State: " + stateMachine.CurrentState.GetType().Name);
+        //Debug.Log("Bot Interacted with player");
+        //Debug.Log("Current Bot State: " + stateMachine.CurrentState.GetType().Name);
     }
 
     public void InteractAlternateEvent(PlayerStateMachine playerStateMachine)

@@ -245,7 +245,10 @@ public class BuildingPlacementManager : IBuildingPlacementManager
 
     private void RefreshSelectedObjectType(Vector3 targetPosition)
     {
-        OnSelectedChanged?.Invoke(this, new GridBuildingSystem.OnSelectedChangedArgs { placedObjectTypeSO = placedObjectTypeSO,
-                                            position = targetPosition});
+        OnSelectedChanged?.Invoke(this, new GridBuildingSystem.OnSelectedChangedArgs 
+        { 
+            placedObjectTypeSO = placedObjectTypeSO,
+            position = targetPosition
+        });
     }
 }

@@ -153,6 +153,9 @@ public class GameInput : PersistentSingleton<GameInput>
         if (!isTouching || isTouchOverUI)
             return;
 
+        if(isTouchOverBuildingGhost)
+            return;
+
         timeSinceLastTouch += Time.deltaTime;
         if (timeSinceLastTouch > touchTimeThreshold)
             isPanning = true;
@@ -182,15 +185,8 @@ public class GameInput : PersistentSingleton<GameInput>
         Ray ray = Camera.main.ScreenPointToRay(position);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayerMask))
         {
-            //Debug.Log("Touch Position: " + pos);
-            if (raycastHit.transform.GetComponentInParent<BuildingGhost>() != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            Debug.Log("Touch Position: " + raycastHit.transform.position);
+            return true;
         }
         return false;
     }
