@@ -220,4 +220,17 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             Debug.LogError("Failed to spawn object on client.");
         }
     }
+    [Rpc(SendTo.Server)]
+    public void HideObjectServerRpc(NetworkObjectReference networkObjectReference)
+    {
+        HideObjectClientRpc(networkObjectReference);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    public void HideObjectClientRpc(NetworkObjectReference networkObjectReference)
+    {
+        if(networkObjectReference.TryGet(out NetworkObject networkObject))
+        {
+            networkObject.gameObject.SetActive(false);
+        }
+    }
 }

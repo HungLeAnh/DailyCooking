@@ -18,8 +18,8 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     private PlacedObjectTypeSO placedObjectTypeSO;
     private Dir dir = Dir.Down;
     private bool isBuilding = false;
-    private bool isPlacingWall = false;
-
+    private bool isPlacingExistingObject = false;
+    private PlacedObjectView existingPlacedObjectView;
     public PlacedObjectTypeSO PlacedObjectTypeSO => placedObjectTypeSO;
 
     public bool IsBuilding => isBuilding;
@@ -83,13 +83,25 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             
             placedObject.GetComponent<IPlaceable>().IsPlaced.Value = true;
 
+            if(isPlacingExistingObject)
+            {
+                isPlacingExistingObject = false;
+                DestroyPlaceObject(existingPlacedObjectView);
+                var destroyableObject = existingPlacedObjectView.GetComponent<IDestroyable>();
+                destroyableObject.DestroySelf();
+            }
+            else
+            {
+                GameManager.Instance.GameData.RemoveInventoryData(placedObjectTypeSO.Guid);
+
+            }
+
             foreach (var gridPosition in gridPositionList)
             {
                 gridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y, 
                     new GridObject(gridManager.Grid, placedObject, gridPosition.x, gridPosition.y));
 
             }
-            GameManager.Instance.GameData.RemoveInventoryData(placedObjectTypeSO.Guid);
             OnObjectPlaced?.Invoke(this, EventArgs.Empty);
             gameManager.GameData.UpdateGridData(gridManager.Grid);
             DeselectObjectType();
@@ -114,7 +126,6 @@ public class BuildingPlacementManager : IBuildingPlacementManager
                 gridManager.Grid.TriggerGridObjectChanged(gridPosition.x, gridPosition.y);
             }
         }
-        placedObjectView.DestroySelf();
     }
 
     public void SetPlacedObjectTypeSO(PlacedObjectTypeSO placedObjectTypeSO, Vector3 objectPosition)
@@ -159,7 +170,6 @@ public class BuildingPlacementManager : IBuildingPlacementManager
                 positionOffset = new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
                 return positionOffset;
             default:
-                isPlacingWall = false;
                 return Vector3.zero;
         }
 
@@ -217,11 +227,11 @@ public class BuildingPlacementManager : IBuildingPlacementManager
 
     public void HandleExistingObjectInteraction(PlacedObjectView targetPlaceObjectView,Vector3 objectPosition)
     {
+        isPlacingExistingObject = true;
+        existingPlacedObjectView = targetPlaceObjectView;
         dir = targetPlaceObjectView.GetModel().Dir; 
         SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO, objectPosition);
-        var destroyableObject = targetPlaceObjectView.GetComponent<IDestroyable>();
-        destroyableObject.DestroySelf();
-        DestroyPlaceObject(targetPlaceObjectView);
+        GridBuildingSystem.Instance.HideObjectServerRpc(targetPlaceObjectView.NetworkObject);
 
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,
             new UIInventoryPopup.Param { isPlacingObject = true });

@@ -202,6 +202,8 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     public void DestroySelf()
     {
         OnDestroySelf?.Invoke();
+        NetworkObject.Despawn();
+        Destroy(this);
     }
 
     public bool CanRemove()

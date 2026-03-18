@@ -181,7 +181,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
     {
         isDragging = false;
         isRotating = false;
-        visual.gameObject.GetComponent<PlacedObjectView>().DestroySelf();
+        visual.gameObject.GetComponent<IDestroyable>().DestroySelf();
 
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
         ShowCanvas(false);

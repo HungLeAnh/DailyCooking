@@ -119,6 +119,8 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     public void DestroySelf()
     {
         OnDestroySelf?.Invoke();
+        NetworkObject.Despawn();
+        Destroy(this);
     }
 
     public bool CanRemove()

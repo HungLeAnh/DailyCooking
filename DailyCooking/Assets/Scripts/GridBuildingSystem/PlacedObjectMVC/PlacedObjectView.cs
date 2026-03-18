@@ -14,12 +14,6 @@ public class PlacedObjectView : NetworkBehaviour
     {
         placedObjectController = controller;
     }
-
-    public void DestroySelf()
-    {
-        Destroy(gameObject);
-    }
-
     public List<Vector2Int> GetGridPositionList()
     {
         return placedObjectController.GetGridPositionList();

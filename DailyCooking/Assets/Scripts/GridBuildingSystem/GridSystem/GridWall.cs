@@ -54,6 +54,8 @@ public class GridWall : NetworkBehaviour, IPlaceable, IDestroyable
     public void DestroySelf()
     {
         OnDestroySelf?.Invoke();
+        NetworkObject.Despawn();
+        Destroy(this);
     }
 
     public bool CanRemove()
