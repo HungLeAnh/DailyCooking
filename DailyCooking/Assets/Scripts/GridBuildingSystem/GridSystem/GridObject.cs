@@ -35,10 +35,10 @@ public class GridObject
     {
         if(placedObject != null)
         {
-            if (placedObject.GetModel().InventoryTabType == InventoryTabType.Counter||
-                placedObject.GetModel().InventoryTabType == InventoryTabType.Table)
+            if (placedObject.InventoryTabType == InventoryTabType.Counter||
+                placedObject.InventoryTabType == InventoryTabType.Table)
                 return false;
-            if (placedObject.GetModel().InventoryTabType == InventoryTabType.Wall)
+            if (placedObject.InventoryTabType == InventoryTabType.Wall)
                 return true;
         }
         return true;
@@ -48,18 +48,18 @@ public class GridObject
         if (placedObject != null)
         {
             if(type == InventoryTabType.Wall &&
-                placedObject.GetModel().InventoryTabType == InventoryTabType.Wall)
+                placedObject.InventoryTabType == InventoryTabType.Wall)
             {
-                if(dir != placedObject.GetModel().Dir)
+                if(dir != placedObject.Dir)
                     return true;
                 else
                     return false;
             }
             else if(type == InventoryTabType.Wall && 
-                placedObject.GetModel().InventoryTabType != InventoryTabType.Wall)
+                placedObject.InventoryTabType != InventoryTabType.Wall)
                 return true;
-            else if(placedObject.GetModel().InventoryTabType == InventoryTabType.Counter || 
-                    placedObject.GetModel().InventoryTabType == InventoryTabType.Table)
+            else if(placedObject.InventoryTabType == InventoryTabType.Counter || 
+                    placedObject.InventoryTabType == InventoryTabType.Table)
                 return false;
         }
         return true;

@@ -13,7 +13,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     private const float TIME_SCALE_PAUSED = 0f;
     private const float TIME_SCALE_UNPAUSED = 1f;
 
-    
+    public Action<NetworkObject> OnSpawnRequestCompleted;
     public event EventHandler OnStateChanged;
 
 
@@ -56,12 +56,12 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     }
 
     private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
-    {        
-        if(arg0.buildIndex == 0)
+    {
+        if (arg0.buildIndex == 0)
             return;
-        BotManager.Instance.Initialize();        
+        BotManager.Instance.Initialize();
         ChangeState(State.Open);
-        if(GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
+        if (GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
         {
             BotManager.Instance.StartSpawnBot();
         }
@@ -89,7 +89,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         state = newState;
         OnStateChanged?.Invoke(this, EventArgs.Empty);
     }
-    public void CollectCash(int cash,int exp)
+    public void CollectCash(int cash, int exp)
     {
         GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(cash);
         GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(exp);
@@ -149,7 +149,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
             if (isUnlocked)
             {
                 GameManager.Instance.GameData.MenuData.AddUnlockedDish(foodSO);
-                 
+
             }
         }
     }
@@ -177,7 +177,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     }
     public FoodSO GetUnlockedFood()
     {
-        if(GameManager.Instance.GameData.MenuData.menuDished.Count == 0)
+        if (GameManager.Instance.GameData.MenuData.menuDished.Count == 0)
             return null;
         else
             return GameManager.Instance.GameData.
@@ -231,7 +231,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         kitchenObject.SetKitchenObjectParent(kitchenObjectParent, index);
     }
 
-    internal void DestroyKitchenObject(KitchenObject kitchenObject)
+    public void DestroyKitchenObject(KitchenObject kitchenObject)
     {
         DestroyKitchenObjectServerRpc(kitchenObject.NetworkObject);
     }
@@ -252,4 +252,48 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         kitchenObject.ClearKitchenObjectOnParentClientRpc();
         kitchenObject.DestroySelf();
     }
+    [Rpc(SendTo.Server)]
+    public void CreatePlacedObjectViewServerRpc(Vector3 worldPosition, string placeObjectTypeSOGuid, 
+        Vector2Int origin, Dir dir, ulong targetClientId)
+    {
+        PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(placeObjectTypeSOGuid);
+        Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition, Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0), GridBuildingSystem.Instance.Container).transform;
+        var networkObject = placedObjectTransform.GetComponent<NetworkObject>();
+        PlacedObjectView placedObjectView = networkObject.GetComponent<PlacedObjectView>();
+        placedObjectView.GetComponent<IPlaceable>().IsPlaced.Value = false;
+        placedObjectView.Intialize(placeObjectTypeSOGuid, origin, dir);
+
+        networkObject.Spawn();
+        networkObject.ChangeOwnership(targetClientId);
+
+        Debug.Log("Object is created on server " + placeObjectTypeSOGuid +" pass to target "+ targetClientId);
+        NotifyClientOfSpawnClientRpc(networkObject, RpcTarget.Single(targetClientId,RpcTargetUse.Temp));
+
+    }
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void NotifyClientOfSpawnClientRpc(NetworkObjectReference spawnedObjectRef, 
+        RpcParams rpcParams)
+    {
+        if (spawnedObjectRef.TryGet(out NetworkObject netObj))
+        {
+            //Debug.Log($"Client received my new object: {netObj.name}");
+            OnSpawnRequestCompleted?.Invoke(netObj);
+        }
+    }
+    public void DestroyPlacedObject(NetworkObject networkObject)
+    {
+        DestroyPlacedObjectServerRpc(networkObject);
+    }
+    [Rpc(SendTo.Server)]
+    private void DestroyPlacedObjectServerRpc(NetworkObjectReference placedObjectNetworkObjectReference)
+    {
+        placedObjectNetworkObjectReference.TryGet(out NetworkObject placedObjectNetworkObject);
+        if (placedObjectNetworkObject == null)
+        {
+            //This object is already destroyed
+            return;
+        }
+        placedObjectNetworkObject.GetComponent<IDestroyable>().DestroySelf();
+    }
+
 }

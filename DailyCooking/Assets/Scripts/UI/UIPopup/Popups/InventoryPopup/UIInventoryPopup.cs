@@ -30,12 +30,12 @@ public class UIInventoryPopup : UIPopup
 
     private InventoryTab _selectedTab;
     private int selectedItemId = -1;
-    private List<UIInventoryItem> _listItem = new List<UIInventoryItem>();
+    private List<UIInventoryItem> listItem = new List<UIInventoryItem>();
     private bool isPlacingObject = false;
     private bool isShowItems = false;
 
     public UIInventoryTabs InventoryTabs => _tabsPanel;
-    public List<UIInventoryItem> ItemList => _listItem;
+    public List<UIInventoryItem> ItemList => listItem;
     public Button BackButton => backButton;
     public override void SetupPopup()
     {
@@ -72,11 +72,14 @@ public class UIInventoryPopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
+        //Debug.Log(listItem.Count + " Object Subscribe ItemSelected");
 
         _tabsPanel.TabChanged += OnChangeTab;
-        for (int i = 0; i < _listItem.Count; i++)
+        for (int i = 0; i < listItem.Count; i++)
         {
-            _listItem[i].ItemSelected += PlacingItem;
+            if(listItem[i] != null)
+                listItem[i].ItemSelected -= PlacingItem;
+            listItem[i].ItemSelected += PlacingItem;
         }
         if(!isShowItems)
             listItemGameObject.SetActive(false);
@@ -89,6 +92,7 @@ public class UIInventoryPopup : UIPopup
     public override void HidePopup(object param = null)
     {
         base.HidePopup(param);
+        //Debug.Log("Unsubscribe ItemSelected");
 
         Param paramData = param as Param;
         if (paramData != null)
@@ -98,9 +102,9 @@ public class UIInventoryPopup : UIPopup
 
         _tabsPanel.TabChanged -= OnChangeTab;
 
-        for (int i = 0; i < _listItem.Count; i++)
+        for (int i = 0; i < listItem.Count; i++)
         {
-            _listItem[i].ItemSelected -= PlacingItem;
+            listItem[i].ItemSelected -= PlacingItem;
         }
 
         
@@ -137,13 +141,13 @@ public class UIInventoryPopup : UIPopup
 
     void FillInvetoryItems(List<ItemStack> listItemsToShow)
     {
-        if (_listItem == null)
-            _listItem = new List<UIInventoryItem>();
+        if (listItem == null)
+            listItem = new List<UIInventoryItem>();
 
-        int maxCount = Mathf.Max(listItemsToShow.Count, _listItem.Count);
-        int diffCount = Mathf.Abs(listItemsToShow.Count - _listItem.Count);
+        int maxCount = Mathf.Max(listItemsToShow.Count, listItem.Count);
+        int diffCount = Mathf.Abs(listItemsToShow.Count - listItem.Count);
         selectedItemId = -1;
-        if( diffCount > 0 && _listItem.Count < listItemsToShow.Count)
+        if( diffCount > 0 && listItem.Count < listItemsToShow.Count)
         {
             for (int i = 0; i < diffCount; i++)
             {
@@ -154,12 +158,12 @@ public class UIInventoryPopup : UIPopup
         {
             if (i < listItemsToShow.Count)
             {
-                _listItem[i].SetItem(listItemsToShow[i], false);
+                listItem[i].SetItem(listItemsToShow[i], false);
 
             }
             else 
             {
-                _listItem[i].SetInactiveItem();
+                listItem[i].SetInactiveItem();
             }
 
         }
@@ -172,21 +176,21 @@ public class UIInventoryPopup : UIPopup
         item.ItemSelected += PlacingItem;
         item.SetItem(prefabSO, false);
         item.gameObject.SetActive(true);
-        _listItem.Add(item);
+        listItem.Add(item);
     }
 
     public void PlacingItem(PlacedObjectTypeSO itemToInspect)
     {
-        if (_listItem.Exists(o => o.PlacedObjectTypeSO == itemToInspect))
+        if (listItem.Exists(o => o.PlacedObjectTypeSO == itemToInspect))
         {
-            int itemIndex = _listItem.FindIndex(o => o.PlacedObjectTypeSO == itemToInspect);
+            int itemIndex = listItem.FindIndex(o => o.PlacedObjectTypeSO == itemToInspect);
 
             selectedItemId = itemIndex;
         }
 
 
         GridBuildingSystem.Instance.BuildingPlacementManager
-            .SetPlacedObjectTypeSO(_listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
+            .SetPlacedObjectTypeSO(listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
         isPlacingObject = true;
         HidePopup();
     }
@@ -201,7 +205,7 @@ public class UIInventoryPopup : UIPopup
     }
     private void GridBuildingSystem_OnObjectPlaced(object sender, EventArgs e)
     {
-        if (selectedItemId >= 0 && selectedItemId < _listItem.Count)
+        if (selectedItemId >= 0 && selectedItemId < listItem.Count)
         {
             if (selectedItemId >= 0)
             {

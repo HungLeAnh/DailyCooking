@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using CodeMonkey.Utils;
+using Unity.Netcode;
 
 public class BuildingPlacementManager : IBuildingPlacementManager
 {
@@ -79,40 +80,41 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
             Vector3 placedObjectWorldPosition = gridManager.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
-            PlacedObjectView placedObject = PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir, placedObjectTypeSO);
-            
-            placedObject.GetComponent<IPlaceable>().IsPlaced.Value = true;
+            KitchenGameManager.Instance.OnSpawnRequestCompleted = (spawnedObject) =>
+            {
+                Debug.Log("Event callback Guid: "+spawnedObject.GetComponent<PlacedObjectView>().GetPlacedObjectTypeSOGuid());
+                GridBuildingSystem.Instance.UpdateGridDataServerRpc(spawnedObject.GetComponent<NetworkObject>());
+                KitchenGameManager.Instance.OnSpawnRequestCompleted = null;
 
-            if(isPlacingExistingObject)
+            };
+
+            PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir,
+                placedObjectTypeSO, NetworkManager.Singleton.LocalClientId);
+            
+            if (isPlacingExistingObject)
             {
                 isPlacingExistingObject = false;
                 DestroyPlaceObject(existingPlacedObjectView);
-                var destroyableObject = existingPlacedObjectView.GetComponent<IDestroyable>();
-                destroyableObject.DestroySelf();
+                KitchenGameManager.Instance.DestroyPlacedObject(existingPlacedObjectView.GetComponent<NetworkObject>());
+                existingPlacedObjectView = null;
             }
             else
             {
                 GameManager.Instance.GameData.RemoveInventoryData(placedObjectTypeSO.Guid);
-
             }
 
-            foreach (var gridPosition in gridPositionList)
-            {
-                gridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y, 
-                    new GridObject(gridManager.Grid, placedObject, gridPosition.x, gridPosition.y));
-
-            }
             OnObjectPlaced?.Invoke(this, EventArgs.Empty);
             gameManager.GameData.UpdateGridData(gridManager.Grid);
             DeselectObjectType();
             return true;
+
         }
         else
         {
                return false;
         }
     }
-    
+
     public void DestroyPlaceObject(PlacedObjectView placedObjectView)
     {
         List<Vector2Int> gridPositionList = placedObjectView.GetGridPositionList();
@@ -123,7 +125,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             if(placeObject!= null)
             {
                 gridObjectList.Remove(placeObject);
-                gridManager.Grid.TriggerGridObjectChanged(gridPosition.x, gridPosition.y);
+                //gridManager.Grid.TriggerGridObjectChanged(gridPosition.x, gridPosition.y);
             }
         }
     }
@@ -229,8 +231,8 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     {
         isPlacingExistingObject = true;
         existingPlacedObjectView = targetPlaceObjectView;
-        dir = targetPlaceObjectView.GetModel().Dir; 
-        SetPlacedObjectTypeSO(targetPlaceObjectView.GetModel().PlacedObjectTypeSO, objectPosition);
+        dir = targetPlaceObjectView.Dir; 
+        SetPlacedObjectTypeSO(targetPlaceObjectView.PlacedObjectTypeSO, objectPosition);
         GridBuildingSystem.Instance.HideObjectServerRpc(targetPlaceObjectView.NetworkObject);
 
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,
@@ -255,9 +257,10 @@ public class BuildingPlacementManager : IBuildingPlacementManager
 
     private void RefreshSelectedObjectType(Vector3 targetPosition)
     {
+        //Debug.Log($"RefreshSelectedObjectType: {placedObjectTypeSO} - targetPosition: {targetPosition}");
         OnSelectedChanged?.Invoke(this, new GridBuildingSystem.OnSelectedChangedArgs 
         { 
-            placedObjectTypeSO = placedObjectTypeSO,
+            placedObjectTypeSO = this.placedObjectTypeSO,
             position = targetPosition
         });
     }

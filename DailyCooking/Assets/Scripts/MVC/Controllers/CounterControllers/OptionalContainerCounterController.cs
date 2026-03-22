@@ -38,14 +38,19 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
     public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
     {
-        UIPopupManager.Instance.ShowPopup(
+        if(GridBuildingSystem.Instance.BuildingPlacementManager.IsBuilding)
+            return;
+        if (IsPlaced.Value)
+        {
+            UIPopupManager.Instance.ShowPopup(
             UIPopupType.UIOptionMenuPopup,
             new UIOptionMenuPopup.Param
             {
                 sender = this,
                 optionalList = kitchenObjectSOList
-            }
-        );
+            });
+
+        }
     }
 
     public List<KitchenObjectSO> GetContainerKitchenObjectType()

@@ -144,7 +144,7 @@ public class GridXZ<TGridObject> {
                 gridArray[x, z] = new List<TGridObject>();
             }
             gridArray[x, z].Add(gridObject);
-            TriggerGridObjectChanged(x, z);
+            //TriggerGridObjectChanged(x, z);
         }
     }
 

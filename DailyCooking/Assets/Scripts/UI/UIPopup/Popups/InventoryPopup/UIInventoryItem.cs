@@ -1,16 +1,18 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class UIInventoryItem : MonoBehaviour
 {
+    public Action<PlacedObjectTypeSO> ItemSelected;
+    
     [SerializeField] private TextMeshProUGUI _itemCount = default;
     [SerializeField] private Image _itemPreviewImage = default;
     [SerializeField] private Image _bgImage = default;
     [SerializeField] public Button _itemButton = default;
 
-    public UnityAction<PlacedObjectTypeSO> ItemSelected;
 
     [HideInInspector] public ItemStack currentItem;
     private PlacedObjectTypeSO placedObjectTypeSO;
@@ -21,7 +23,7 @@ public class UIInventoryItem : MonoBehaviour
     public void SetItem(ItemStack itemStack, bool isSelected)
     {
         if (itemStack == null) return;
-        if (GridBuildingSystem.Instance.PlaceObjectTypeSODictionary.TryGetValue(itemStack.Item.PlacedObjectTypeSOGuid, out PlacedObjectTypeSO placedObject))
+        if (GridBuildingSystem.Instance.PlacedObjectTypeSODictionary.TryGetValue(itemStack.Item.PlacedObjectTypeSOGuid, out PlacedObjectTypeSO placedObject))
         {
             placedObjectTypeSO = placedObject;
             currentItem = itemStack;

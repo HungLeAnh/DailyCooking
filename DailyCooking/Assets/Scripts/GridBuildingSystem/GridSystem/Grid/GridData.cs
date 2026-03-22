@@ -45,17 +45,17 @@ public class GridData
 
                 foreach (var gridObjectItem in gridObject)
                 {
-                    var model = gridObjectItem.GetPlacedObject()?.GetModel();
-                    if (model == null)
+                    var placedObjectView = gridObjectItem.GetPlacedObject();
+                    if (placedObjectView == null)
                         continue;
                     if (GridArrayData[x, z] == null)
                         GridArrayData[x, z] = new List<GridObjectData>();
-                    if (GridArrayData[x,z].Any(y=>y.Origin == model.Origin && y.Dir == model.Dir &&
-                        y.PlacedObjectTypeSOGuid == model.GetPlacedObjectTypeSOGuid()))
+                    if (GridArrayData[x,z].Any(y=>y.Origin == placedObjectView.Origin && y.Dir == placedObjectView.Dir &&
+                        y.PlacedObjectTypeSOGuid == placedObjectView.GetPlacedObjectTypeSOGuid()))
                         continue;
 
 
-                    GridArrayData[x, z].Add(new GridObjectData(model.GetPlacedObjectTypeSOGuid(), model.Origin, model.Dir,model.PlacedObjectTypeSO.itemType.TabType));
+                    GridArrayData[x, z].Add(new GridObjectData(placedObjectView.GetPlacedObjectTypeSOGuid(), placedObjectView.Origin, placedObjectView.Dir,placedObjectView.InventoryTabType));
                 }
             }
         }
