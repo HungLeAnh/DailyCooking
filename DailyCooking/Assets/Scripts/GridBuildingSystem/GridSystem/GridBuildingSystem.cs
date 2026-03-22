@@ -67,18 +67,12 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     protected override void Awake()
     {
         base.Awake();
+        gameManager = GameManager.Instance;
+
         foreach (var placedObject in placedObjectDatabase.PlacedObjects)
         {
             placedObjectTypeSODictionary[placedObject.Guid] = placedObject;
         }
-
-    }
-    public override void OnNetworkSpawn()
-    {
-        base.OnNetworkSpawn();
-
-        gameManager = GameManager.Instance;
-
         if (GameManager.Instance.GameData.GridData.GridArrayData == null)
         {
             gridManager = new GridManager(0, 0, cellSize, Vector3.zero, (GridXZ<GridObject> grid, int x, int z) => new List<GridObject> { new GridObject(grid, x, z) });
@@ -87,10 +81,17 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         {
             gridManager = new GridManager(GameManager.Instance.GameData.GridData, (GridXZ<GridObject> grid, int x, int z) => new List<GridObject> { new GridObject(grid, x, z) });
 
-            if (IsHost || IsServer)
+        
+        }
+    }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        if (IsHost || IsServer)
                 GridObjectSpawner.SpawnObjectsFromData(gridManager.Grid, GameManager.Instance.GameData.GridData.GridArrayData);
 
-        }
+
         gridInitializer = new GridInitializer(gridManager, this.gameManager, 
             roadContainer, roadPrefab, roadCornerPrefab, 
             floorContainer, floorPrefab);
@@ -201,30 +202,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         }
         
         PlacedObjectFactory.Create(placedObjectWorldPosition, origin, dir,
-            placedObjectTypeSO,NetworkManager.Singleton.LocalClientId);
-    }
-    [Rpc(SendTo.Server)]
-    public void HideObjectServerRpc(NetworkObjectReference networkObjectReference)
-    {
-        HideObjectClientRpc(networkObjectReference);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    public void HideObjectClientRpc(NetworkObjectReference networkObjectReference)
-    {
-        if(networkObjectReference.TryGet(out NetworkObject networkObject))
-        {
-            networkObject.gameObject.SetActive(false);
-        }
-    }
-    [Rpc(SendTo.Server)]
-    public void AddPlaceObjectDataServerRpc(string placedObjectTypeSOGuid, Vector2Int origin, Dir dir)
-    {
-        AddPlaceObjectDataClientRpc(placedObjectTypeSOGuid, origin, dir);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void AddPlaceObjectDataClientRpc(string placedObjectTypeSOGuid, Vector2Int origin, Dir dir)
-    {
-        throw new NotImplementedException();
+            placedObjectTypeSO,NetworkManager.Singleton.LocalClientId,false);
     }
     [Rpc(SendTo.Server)]
     public void UpdateGridDataServerRpc(NetworkObjectReference networkObjectReference)
@@ -244,16 +222,17 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             PlacedObjectView placedObjectView = networkObject.GetComponent<PlacedObjectView>();
             Debug.Log("PlaceObjectType : "+placedObjectView.PlacedObjectTypeSO);
             Debug.Log("PlaceObjectTypeGuid : "+placedObjectView.GetPlacedObjectTypeSOGuid());
-            Debug.Log("GridManager : " + GridBuildingSystem.Instance.GridManager);
+            Debug.Log("GridManager : " + GridManager);
             List<Vector2Int> gridPositionList = placedObjectView.GetGridPositionList();
             foreach (var gridPosition in gridPositionList)
             {
-                GridBuildingSystem.Instance.GridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y,
-                    new GridObject(GridBuildingSystem.Instance.GridManager.Grid, placedObjectView, gridPosition.x, gridPosition.y));
+                GridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y,
+                    new GridObject(GridManager.Grid, placedObjectView, gridPosition.x, gridPosition.y));
             }
 
             this.GetComponent<IModuleItem>()?.RegisterItem();
-            GameManager.Instance.GameData.UpdateGridData(GridBuildingSystem.Instance.GridManager.Grid);
+
+            GameManager.Instance.GameData.UpdateGridData(GridManager.Grid);
 
         }
 

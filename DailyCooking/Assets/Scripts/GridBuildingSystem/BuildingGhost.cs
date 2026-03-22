@@ -141,7 +141,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
             };
 
             PlacedObjectFactory.Create(Vector3.zero, Vector2Int.zero, Dir.Down,
-                placedObjectTypeSO, NetworkManager.Singleton.LocalClientId);
+                placedObjectTypeSO, NetworkManager.Singleton.LocalClientId,true);
             
         }
         else

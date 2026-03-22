@@ -13,6 +13,7 @@ public class PlacedObjectView : NetworkBehaviour
     private NetworkVariable<FixedString64Bytes> placedObjectTypeSOGuid = new NetworkVariable<FixedString64Bytes>();
     private NetworkVariable<Vector2Int> origin = new NetworkVariable<Vector2Int>();
     private NetworkVariable<Dir> dir = new NetworkVariable<Dir>();
+    private NetworkVariable<bool> isPreview = new NetworkVariable<bool>();
     private PlacedObjectTypeSO placedObjectTypeSO;
     public Vector2Int Origin => origin.Value;
     public Dir Dir => dir.Value;
@@ -27,9 +28,25 @@ public class PlacedObjectView : NetworkBehaviour
         };
         this.placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(placedObjectTypeSOGuid.Value.ToString());
 
+        if(!isPreview.Value)
+        {
+            Debug.Log("PlaceObjectType : " + PlacedObjectTypeSO);
+            Debug.Log("PlaceObjectTypeGuid : " + GetPlacedObjectTypeSOGuid());
+            Debug.Log("GridManager : " + GridBuildingSystem.Instance.GridManager);
+            List<Vector2Int> gridPositionList = GetGridPositionList();
+            foreach (var gridPosition in gridPositionList)
+            {
+                GridBuildingSystem.Instance.GridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y,
+                    new GridObject(GridBuildingSystem.Instance.GridManager.Grid, this, gridPosition.x, gridPosition.y));
+            }
+
+            this.GetComponent<IModuleItem>()?.RegisterItem();
+        }
+
     }
-    public void Intialize(string placedObjectTypeSOGuid, Vector2Int origin, Dir dir)
+    public void Intialize(string placedObjectTypeSOGuid, Vector2Int origin, Dir dir,bool isPreview)
     {
+        this.isPreview.Value = isPreview;
         this.placedObjectTypeSOGuid.Value = placedObjectTypeSOGuid;
         this.origin.Value = origin;
         this.dir.Value = dir;

@@ -89,13 +89,12 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             };
 
             PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir,
-                placedObjectTypeSO, NetworkManager.Singleton.LocalClientId);
+                placedObjectTypeSO, NetworkManager.Singleton.LocalClientId,false);
             
             if (isPlacingExistingObject)
             {
                 isPlacingExistingObject = false;
-                DestroyPlaceObject(existingPlacedObjectView);
-                KitchenGameManager.Instance.DestroyPlacedObject(existingPlacedObjectView.GetComponent<NetworkObject>());
+               
                 existingPlacedObjectView = null;
             }
             else
@@ -115,7 +114,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         }
     }
 
-    public void DestroyPlaceObject(PlacedObjectView placedObjectView)
+    public void RemovePlacedObjectFromGrid(PlacedObjectView placedObjectView)
     {
         List<Vector2Int> gridPositionList = placedObjectView.GetGridPositionList();
         foreach (Vector2Int gridPosition in gridPositionList)
@@ -231,9 +230,10 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     {
         isPlacingExistingObject = true;
         existingPlacedObjectView = targetPlaceObjectView;
-        dir = targetPlaceObjectView.Dir; 
+        dir = targetPlaceObjectView.Dir;
+        RemovePlacedObjectFromGrid(existingPlacedObjectView);
+        KitchenGameManager.Instance.DestroyPlacedObject(existingPlacedObjectView.GetComponent<NetworkObject>());
         SetPlacedObjectTypeSO(targetPlaceObjectView.PlacedObjectTypeSO, objectPosition);
-        GridBuildingSystem.Instance.HideObjectServerRpc(targetPlaceObjectView.NetworkObject);
 
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,
             new UIInventoryPopup.Param { isPlacingObject = true });

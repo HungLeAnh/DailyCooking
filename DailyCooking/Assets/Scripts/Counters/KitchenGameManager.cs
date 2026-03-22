@@ -254,14 +254,14 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     }
     [Rpc(SendTo.Server)]
     public void CreatePlacedObjectViewServerRpc(Vector3 worldPosition, string placeObjectTypeSOGuid, 
-        Vector2Int origin, Dir dir, ulong targetClientId)
+        Vector2Int origin, Dir dir, ulong targetClientId, bool isPreview)
     {
         PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(placeObjectTypeSOGuid);
         Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition, Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0), GridBuildingSystem.Instance.Container).transform;
         var networkObject = placedObjectTransform.GetComponent<NetworkObject>();
         PlacedObjectView placedObjectView = networkObject.GetComponent<PlacedObjectView>();
         placedObjectView.GetComponent<IPlaceable>().IsPlaced.Value = false;
-        placedObjectView.Intialize(placeObjectTypeSOGuid, origin, dir);
+        placedObjectView.Intialize(placeObjectTypeSOGuid, origin, dir,isPreview);
 
         networkObject.Spawn();
         networkObject.ChangeOwnership(targetClientId);
