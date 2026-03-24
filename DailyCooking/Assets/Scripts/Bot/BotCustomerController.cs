@@ -314,7 +314,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         isNavMeshStopped.Value = false;
         currentStateType.Value = BotStateType.WaitForTable;
-        tipPercentage.Value = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.PlayerStats.statsData.TipIncrease;
+        tipPercentage.Value = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.PlayerStats.TipIncrease;
     }
     [Rpc(SendTo.Server)]
     public void StopBubbleServerRpc()
