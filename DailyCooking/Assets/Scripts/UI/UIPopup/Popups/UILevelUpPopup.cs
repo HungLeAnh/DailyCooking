@@ -26,7 +26,7 @@ public class UILevelUpPopup : UIPopup
     {
         base.ShowPopup(param);
 
-        levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
+        levelText.text = GameManager.Instance.GameData.RestaurantData.Level.ToString();
         if (_openParam != null)
         {
             Param popupParam = _openParam as Param;
@@ -58,11 +58,11 @@ public class UILevelUpPopup : UIPopup
             {
                 if (item.id == nameof(RewardData.RewardType.Coin))
                 {
-                    GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(item.amount);
+                    GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(item.amount);
                 }
                 else if (item.id == nameof(RewardData.RewardType.Gem))
                 {
-                    GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(item.amount);
+                    GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(item.amount);
                 }
             }
         }

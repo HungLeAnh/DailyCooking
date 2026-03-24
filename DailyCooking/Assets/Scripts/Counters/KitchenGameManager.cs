@@ -91,8 +91,8 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     }
     public void CollectCash(int cash, int exp)
     {
-        GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(cash);
-        GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(exp);
+        GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(cash);
+        GameManager.Instance.GameData.RestaurantData.UpdatePlayerExp(exp);
 
     }
 

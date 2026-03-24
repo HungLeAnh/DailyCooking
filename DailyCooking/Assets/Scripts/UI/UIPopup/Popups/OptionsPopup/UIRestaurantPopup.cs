@@ -99,7 +99,7 @@ public class UIRestaurantPopup : UIPopup
 
     private void Initialize()
     {
-        restaurantNameText.text = GameManager.Instance.GameData.PlayerStats.statsData.RestaurantName;
+        restaurantNameText.text = GameManager.Instance.GameData.RestaurantData.RestaurantName;
         moveSpeedText.text = GameManager.Instance.GameData.PlayerStats.statsData.MoveSpeed.ToString("F2");
         cookingSpeedText.text = GameManager.Instance.GameData.PlayerStats.statsData.CookingSpeed.ToString("F2");
         carryingCapacityText.text = GameManager.Instance.GameData.PlayerStats.statsData.CarryingCapacity.ToString();

@@ -38,15 +38,16 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         LoadGame();
         gameData.MenuData.LoadMenuData();
 
+        gameData.RestaurantData.OnLevelChange += SaveGame;
+        gameData.RestaurantData.OnExpChange += SaveGame;
+        gameData.RestaurantData.OnLevelUp += ShowLevelUpPopup;
+        gameData.RestaurantData.OnResourceChange += SaveGame;
         gameData.PlayerStats.OnResourceChange += SaveGame;
-        gameData.PlayerStats.OnLevelChange += SaveGame;
-        gameData.PlayerStats.OnExpChange += SaveGame;
-        gameData.InventoryData.OnInventoryDataChanged += SaveGame; 
+        gameData.InventoryData.OnInventoryDataChanged += SaveGame;
         gameData.GridData.OnGridDataChanged += SaveGame;
         gameData.TutorialData.OnTutorialDataChanged += SaveGame;
         gameData.MenuData.OnMenuDataChanged += SaveGame;
         gameData.ShopData.OnResourceChange += SaveGame;
-        gameData.PlayerStats.OnLevelUp += ShowLevelUpPopup;
         SwitchState(new MainMenuState(this));
     }
 

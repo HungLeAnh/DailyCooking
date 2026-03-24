@@ -29,7 +29,7 @@ public class InGameState : GameManagerBaseState
 
     public override async void Update()
     {
-        if(GameManager.Instance.GameData.PlayerStats.playerData.Level < interstitialLevelUnlock)
+        if(GameManager.Instance.GameData.RestaurantData.Level < interstitialLevelUnlock)
             return;
         if (interstitialCounter > 0)
         {

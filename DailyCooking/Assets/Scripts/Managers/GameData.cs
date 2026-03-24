@@ -6,6 +6,7 @@ using UnityEngine;
 public class GameData
 {
     public PlayerStats PlayerStats { get; private set; } = new PlayerStats();
+    public RestaurantData RestaurantData { get; private set; } = new RestaurantData();
     public InventoryData InventoryData { get; private set; } = new InventoryData();
     public GridData GridData { get; private set; } = new GridData();
     public TutorialData TutorialData { get; private set; } = new TutorialData();

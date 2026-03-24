@@ -36,11 +36,11 @@ public class UISettingsPopup : UIPopup
     }
     public void OnCheatCoin()
     {
-        GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(CHEAT_COIN_AMOUNT);
+        GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(CHEAT_COIN_AMOUNT);
     }
     public void OnCheatExp()
     {
-        GameManager.Instance.GameData.PlayerStats.UpdatePlayerExp(CHEAT_EXP_AMOUNT);
+        GameManager.Instance.GameData.RestaurantData.UpdatePlayerExp(CHEAT_EXP_AMOUNT);
     }
 #endif
 

@@ -17,7 +17,7 @@ public class UIUpgradeItem : MonoBehaviour
     private bool isPurchased = false;
     private void Start()
     {
-        GameManager.Instance.GameData.PlayerStats.OnLevelChange += PlayerStats_OnLevelChange;
+        GameManager.Instance.GameData.RestaurantData.OnLevelChange += PlayerStats_OnLevelChange;
     }
 
     private void PlayerStats_OnLevelChange()
@@ -26,7 +26,7 @@ public class UIUpgradeItem : MonoBehaviour
         {
             return;
         }
-        var isLocked = GameManager.Instance.GameData.PlayerStats.playerData.Level < upgradeData.LevelUnlocked;
+        var isLocked = GameManager.Instance.GameData.RestaurantData.Level < upgradeData.LevelUnlocked;
         dimGameObject.SetActive(isLocked);
     }
 
@@ -38,7 +38,7 @@ public class UIUpgradeItem : MonoBehaviour
         itemIconImage.sprite = upgradeSO.UpgradeIcon;
         upgradeCostText.text = upgradeSO.UpgradeCosts.ToString();
 
-        var isLocked = GameManager.Instance.GameData.PlayerStats.playerData.Level < upgradeSO.LevelUnlocked;
+        var isLocked = GameManager.Instance.GameData.RestaurantData.Level < upgradeSO.LevelUnlocked;
         dimGameObject.SetActive(isLocked);
         upgradeButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.AddListener(OnUpgradeButtonClick);

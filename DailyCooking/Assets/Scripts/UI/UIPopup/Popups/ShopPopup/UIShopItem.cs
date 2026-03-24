@@ -22,7 +22,7 @@ public class UIShopItem : MonoBehaviour
     {
         if (GameManager.Instance == null)
             return;
-        GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChanged;
+        GameManager.Instance.GameData.RestaurantData.OnLevelChange += OnLevelChanged;
     }
     public void SetItem(ConfigShopItem item,ShopItemCategory itemCategory)
     {
@@ -30,13 +30,13 @@ public class UIShopItem : MonoBehaviour
         this.configShopItem = item;
         this.itemCategory = itemCategory;
 
-        GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChanged;
+        GameManager.Instance.GameData.RestaurantData.OnLevelChange += OnLevelChanged;
 
         //imageIcon.sprite = item.Icon;
         textName.text = item.Name;
         textPrice.text = MathUtil.NumberFormat(item.Price);
         ButtonBuy.onClick.AddListener(OnClickButtonBuy);
-        if(item.UnlockLevel > GameManager.Instance.GameData.PlayerStats.playerData.Level)
+        if(item.UnlockLevel > GameManager.Instance.GameData.RestaurantData.Level)
         {
             lockTransform.gameObject.SetActive(true);
         }
@@ -64,7 +64,7 @@ public class UIShopItem : MonoBehaviour
 
     private void OnLevelChanged()
     {
-        if (configShopItem.UnlockLevel > GameManager.Instance.GameData.PlayerStats.playerData.Level)
+        if (configShopItem.UnlockLevel > GameManager.Instance.GameData.RestaurantData.Level)
         {
             lockTransform.gameObject.SetActive(true);
         }

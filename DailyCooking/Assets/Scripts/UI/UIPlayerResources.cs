@@ -18,49 +18,49 @@ public class UIPlayerResources : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.GameData.PlayerStats.OnResourceChange += OnResourceChange;
-        GameManager.Instance.GameData.PlayerStats.OnLevelChange += OnLevelChange;
-        GameManager.Instance.GameData.PlayerStats.OnExpChange += OnExpChange;
+        GameManager.Instance.GameData.RestaurantData.OnResourceChange += OnResourceChange;
+        GameManager.Instance.GameData.RestaurantData.OnLevelChange += OnLevelChange;
+        GameManager.Instance.GameData.RestaurantData.OnExpChange += OnExpChange;
 
         if(gemText!= null)
-            gemText.text = GameManager.Instance.GameData.PlayerStats.playerData.Gems.ToString();
+            gemText.text = GameManager.Instance.GameData.RestaurantData.Gems.ToString();
         if(coinText != null)
-            coinText.text = GameManager.Instance.GameData.PlayerStats.playerData.Coins.ToString();
+            coinText.text = GameManager.Instance.GameData.RestaurantData.Coins.ToString();
         if(levelText != null)
-            levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
+            levelText.text = GameManager.Instance.GameData.RestaurantData.Level.ToString();
         if(expText != null)
-            expText.text = GameManager.Instance.GameData.PlayerStats.playerData.Exp.ToString() + "/" + GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER;
+            expText.text = GameManager.Instance.GameData.RestaurantData.Exp.ToString() + "/" + GameManager.Instance.GameData.RestaurantData.Level * EXP_PER_LEVEL_MULTIPLIER;
         if(expSlider != null)
-            expSlider.value = (float)GameManager.Instance.GameData.PlayerStats.playerData.Exp / (GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER);
+            expSlider.value = (float)GameManager.Instance.GameData.RestaurantData.Exp / (GameManager.Instance.GameData.RestaurantData.Level * EXP_PER_LEVEL_MULTIPLIER);
 
     }
     private void OnDestroy()
     {
         if(GameManager.Instance == null || GameManager.Instance.GameData == null)
             return;
-        GameManager.Instance.GameData.PlayerStats.OnResourceChange -= OnResourceChange;
-        GameManager.Instance.GameData.PlayerStats.OnLevelChange -= OnLevelChange;
-        GameManager.Instance.GameData.PlayerStats.OnExpChange -= OnExpChange;
+        GameManager.Instance.GameData.RestaurantData.OnResourceChange -= OnResourceChange;
+        GameManager.Instance.GameData.RestaurantData.OnLevelChange -= OnLevelChange;
+        GameManager.Instance.GameData.RestaurantData.OnExpChange -= OnExpChange;
     }
     private void OnExpChange()
     {
         if (expText != null)
-            expText.text = GameManager.Instance.GameData.PlayerStats.playerData.Exp.ToString() + "/" + GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER;
+            expText.text = GameManager.Instance.GameData.RestaurantData.Exp.ToString() + "/" + GameManager.Instance.GameData.RestaurantData.Level * EXP_PER_LEVEL_MULTIPLIER;
         
         if (expSlider != null)
-            expSlider.value = (float)GameManager.Instance.GameData.PlayerStats.playerData.Exp / (GameManager.Instance.GameData.PlayerStats.playerData.Level * EXP_PER_LEVEL_MULTIPLIER);
+            expSlider.value = (float)GameManager.Instance.GameData.RestaurantData.Exp / (GameManager.Instance.GameData.RestaurantData.Level * EXP_PER_LEVEL_MULTIPLIER);
     }
 
     private void OnLevelChange()
     {        
         if (levelText != null)
-            levelText.text = GameManager.Instance.GameData.PlayerStats.playerData.Level.ToString();
+            levelText.text = GameManager.Instance.GameData.RestaurantData.Level.ToString();
     }  
 
     private void OnResourceChange()
     {
-        UpdateResources(GameManager.Instance.GameData.PlayerStats.playerData.Coins,
-            GameManager.Instance.GameData.PlayerStats.playerData.Gems);
+        UpdateResources(GameManager.Instance.GameData.RestaurantData.Coins,
+            GameManager.Instance.GameData.RestaurantData.Gems);
     }
 
     public void UpdateResources(int coin, int gem)

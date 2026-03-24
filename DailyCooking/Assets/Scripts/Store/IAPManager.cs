@@ -92,15 +92,15 @@ public class IAPManager : MonoBehaviour
         switch (productId)
         {
             case ProductIDs.GEMPACK1:
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(50);
+                GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(50);
                 break;
 
             case ProductIDs.GEMPACK2:
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(100);
+                GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(100);
                 break;
 
             case ProductIDs.GEMPACK3:
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(200);
+                GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(200);
                 break;
 
             default:

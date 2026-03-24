@@ -14,7 +14,7 @@ public class UICurrencyItem : MonoBehaviour
     }
     private void OnBuyClicked()
     {
-        if(GameManager.Instance.GameData.PlayerStats.playerData.Gems < cost)
+        if(GameManager.Instance.GameData.RestaurantData.Gems < cost)
         {
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup,
                 new UIGameNotiPopup.Param
@@ -24,7 +24,7 @@ public class UICurrencyItem : MonoBehaviour
                 });
             return;
         }
-        GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(-cost);
+        GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(-cost);
         ShopManager.Instance.BuyCurrency(type,currencyAmount);
     }
 

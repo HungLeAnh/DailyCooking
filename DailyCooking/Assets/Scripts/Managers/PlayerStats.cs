@@ -4,34 +4,10 @@ using System;
 public class PlayerStats
 {
     public event Action OnResourceChange;
-    public event Action OnLevelChange;
-    public event Action OnExpChange;
-    public event Action<int> OnLevelUp;
 
     public PlayerData playerData = new PlayerData();
     public StatsData statsData = new StatsData();
-    public void UpdatePlayerCoins(int addCoins)
-    {
-        playerData.Coins += addCoins;
-        OnResourceChange?.Invoke();
-    }
-    public void UpdatePlayerGems(int addGem)
-    {
-        playerData.Gems += addGem; 
-        OnResourceChange?.Invoke();
-    }
-    public void UpdatePlayerExp(int addExp)
-    {
-        playerData.Exp += addExp;
-        if (playerData.Exp >= playerData.Level * 100)
-        {
-            playerData.Exp = 0;
-            playerData.Level++;
-            OnLevelChange?.Invoke();
-            OnLevelUp?.Invoke(playerData.Level);
-        }        
-        OnExpChange?.Invoke();
-    }
+
     public void UpdatePlayedDay(int playerDay)
     {
         playerData.DaysPlayed = playerDay;
@@ -62,17 +38,11 @@ public class PlayerStats
         OnResourceChange?.Invoke();
 
     }
-    public void UpdateRestaurantName(string name)
-    {
-        statsData.RestaurantName = name;
-        OnResourceChange?.Invoke();
-    }
 }
 
 [Serializable]
 public class StatsData
 {
-    private string restaurantName = "";
     private float moveSpeed = 5f;
     private float cookingSpeed = 1f;
     private int carryingCapacity = 1;
@@ -82,5 +52,4 @@ public class StatsData
     public float CookingSpeed { get => cookingSpeed; set => cookingSpeed = value; }
     public int CarryingCapacity { get => carryingCapacity; set => carryingCapacity = value; }
     public float TipIncrease { get => tipIncrease; set => tipIncrease = value; }
-    public string RestaurantName { get => restaurantName; set => restaurantName = value; }
 }

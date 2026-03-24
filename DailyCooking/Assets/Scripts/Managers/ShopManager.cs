@@ -12,7 +12,7 @@ public class ShopManager : PersistentSingleton<ShopManager>
 
     public void OnPurchase(ConfigShopItem item, Dictionary<string, int> parsedData)
     {
-        if(item.Price > GameManager.Instance.GameData.PlayerStats.playerData.Coins)
+        if(item.Price > GameManager.Instance.GameData.RestaurantData.Coins)
         {
             Debug.Log("Not enough coins to buy this item.");
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup, 
@@ -21,7 +21,7 @@ public class ShopManager : PersistentSingleton<ShopManager>
                 });
             return;
         }
-        GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(-item.Price);
+        GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(-item.Price);
         if(item.Type == ShopItemType.Item)
         {
             foreach (var pair in parsedData)
@@ -43,10 +43,10 @@ public class ShopManager : PersistentSingleton<ShopManager>
         switch (type)
         {
             case ShopItemType.Coin:
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(currencyAmount);
+                GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(currencyAmount);
                 break;
             case ShopItemType.Gem:
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerGems(currencyAmount);
+                GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(currencyAmount);
                 break;
             default:
                 break;

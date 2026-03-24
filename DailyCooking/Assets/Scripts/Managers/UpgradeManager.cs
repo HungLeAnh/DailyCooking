@@ -5,11 +5,11 @@ public class UpgradeManager : PersistentSingleton<UpgradeManager>
     public event Action<UpgradeSO> OnUpgradePurchased;
     public bool PurchaseUpgrade(UpgradeSO upgrade)
     {
-        if(GameManager.Instance.GameData.PlayerStats.playerData.Coins >= upgrade.UpgradeCosts)
+        if(GameManager.Instance.GameData.RestaurantData.Coins >= upgrade.UpgradeCosts)
         {
             if (GameManager.Instance.GameData.PurchaseUpgrade(upgrade))
             {
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerCoins(-upgrade.UpgradeCosts);
+                GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(-upgrade.UpgradeCosts);
                 GetUpgradeReward(upgrade.UpgradeTarget, upgrade.UpgradeValue);
                 OnUpgradePurchased?.Invoke(upgrade);
                 return true;
