@@ -237,4 +237,14 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         }
 
     }
+    [Rpc(SendTo.Server)]
+    public void OnObjectPlacedEventServerRpc()
+    {
+        OnObjectPlacedEventClientRpc();
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void OnObjectPlacedEventClientRpc()
+    {
+        BuildingPlacementManager.FireOnObjectPlacedEvent();
+    }
 }

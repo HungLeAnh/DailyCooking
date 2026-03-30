@@ -21,7 +21,7 @@ public class ShopManager : PersistentSingleton<ShopManager>
                 });
             return;
         }
-        GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(-item.Price);
+        GameManager.Instance.UpdateRestaurantCoinServerRpc(-item.Price);
         if(item.Type == ShopItemType.Item)
         {
             foreach (var pair in parsedData)
@@ -30,8 +30,7 @@ public class ShopManager : PersistentSingleton<ShopManager>
                 int amount = pair.Value;
                 for (int i = 0; i < amount; i++)
                 {
-                    GameManager.Instance.GameData.
-                        AddInventoryData(InventoryItemData.CreateInventoryItem(itemId,true));
+                    GameManager.Instance.AddInventoryDataServerRpc(itemId);
                 }
             }
 
@@ -43,10 +42,10 @@ public class ShopManager : PersistentSingleton<ShopManager>
         switch (type)
         {
             case ShopItemType.Coin:
-                GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(currencyAmount);
+                GameManager.Instance.UpdateRestaurantCoinServerRpc(currencyAmount);
                 break;
             case ShopItemType.Gem:
-                GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(currencyAmount);
+                GameManager.Instance.UpdateRestaurantGemsServerRpc(currencyAmount);
                 break;
             default:
                 break;

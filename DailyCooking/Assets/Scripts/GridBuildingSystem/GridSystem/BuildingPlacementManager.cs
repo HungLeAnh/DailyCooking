@@ -99,10 +99,10 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             }
             else
             {
-                GameManager.Instance.GameData.RemoveInventoryData(placedObjectTypeSO.Guid);
+                GameManager.Instance.RemoveInventoryDataServerRpc(placedObjectTypeSO.Guid);
             }
 
-            OnObjectPlaced?.Invoke(this, EventArgs.Empty);
+            GridBuildingSystem.Instance.OnObjectPlacedEventServerRpc();
             gameManager.GameData.UpdateGridData(gridManager.Grid);
             DeselectObjectType();
             return true;
@@ -242,7 +242,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     {
         if (this.placedObjectTypeSO != null)
         {
-            gameManager.GameData.AddInventoryData(this.placedObjectTypeSO.Guid);
+            GameManager.Instance.AddInventoryDataServerRpc(this.placedObjectTypeSO.Guid);
             gameManager.GameData.UpdateGridData(gridManager.Grid);
             OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
         }
@@ -263,5 +263,10 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             placedObjectTypeSO = this.placedObjectTypeSO,
             position = targetPosition
         });
+    }
+
+    public void FireOnObjectPlacedEvent()
+    {
+        OnObjectPlaced?.Invoke(this, EventArgs.Empty);
     }
 }

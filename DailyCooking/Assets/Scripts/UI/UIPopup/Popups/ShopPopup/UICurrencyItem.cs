@@ -24,7 +24,7 @@ public class UICurrencyItem : MonoBehaviour
                 });
             return;
         }
-        GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(-cost);
+        GameManager.Instance.UpdateRestaurantGemsServerRpc(-cost);
         ShopManager.Instance.BuyCurrency(type,currencyAmount);
     }
 

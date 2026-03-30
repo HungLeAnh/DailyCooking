@@ -53,16 +53,19 @@ public class UILevelUpPopup : UIPopup
         rewardItems.Clear();
         if (_openParam != null)
         {
-            Param popupParam = _openParam as Param;
-            foreach(var item in popupParam.reward)
+            if (GameManager.Instance.IsHost || GameManager.Instance.IsServer)
             {
-                if (item.id == nameof(RewardData.RewardType.Coin))
+                Param popupParam = _openParam as Param;
+                foreach (var item in popupParam.reward)
                 {
-                    GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(item.amount);
-                }
-                else if (item.id == nameof(RewardData.RewardType.Gem))
-                {
-                    GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(item.amount);
+                    if (item.id == nameof(RewardData.RewardType.Coin))
+                    {
+                        GameManager.Instance.UpdateRestaurantCoinServerRpc(item.amount);
+                    }
+                    else if (item.id == nameof(RewardData.RewardType.Gem))
+                    {
+                        GameManager.Instance.UpdateRestaurantGemsServerRpc(item.amount);
+                    }
                 }
             }
         }

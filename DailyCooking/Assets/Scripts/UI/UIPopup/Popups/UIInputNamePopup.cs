@@ -58,7 +58,7 @@ public class UIInputNamePopup : UIPopup
     {
         if (StringExtensions.ValidateInput(inputField.text))
         {
-            GameManager.Instance.GameData.RestaurantData.UpdateRestaurantName(inputField.text);
+            GameManager.Instance.UpdateRestaurantNameServerRpc(inputField.text);
             callback?.Invoke();
             HidePopup();
         }

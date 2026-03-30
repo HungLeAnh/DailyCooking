@@ -7,9 +7,11 @@ public class UpgradeManager : PersistentSingleton<UpgradeManager>
     {
         if(GameManager.Instance.GameData.RestaurantData.Coins >= upgrade.UpgradeCosts)
         {
-            if (GameManager.Instance.GameData.PurchaseUpgrade(upgrade))
+            if (!GameManager.Instance.GameData.UpgradeData.PurchasedUpgrades.Contains(upgrade.Guid))
             {
-                GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(-upgrade.UpgradeCosts);
+                int index = ConfigManager.Instance.ConfigUpgrade.Upgrades.IndexOf(upgrade);
+                GameManager.Instance.PurchaseUpgradeServerRpc(index);
+                GameManager.Instance.UpdateRestaurantCoinServerRpc(-upgrade.UpgradeCosts);
                 GetUpgradeReward(upgrade.UpgradeTarget, upgrade.UpgradeValue);
                 OnUpgradePurchased?.Invoke(upgrade);
                 return true;

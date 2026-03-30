@@ -48,6 +48,7 @@ public class InventoryData
             if (id == currentItemStack.Item.PlacedObjectTypeSOGuid)
             {
                 currentItemStack.Amount += count;
+                OnInventoryDataChanged?.Invoke();
                 return;
             }
         }

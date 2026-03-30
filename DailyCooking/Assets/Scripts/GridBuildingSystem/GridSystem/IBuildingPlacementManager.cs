@@ -21,6 +21,7 @@ public interface IBuildingPlacementManager
     Vector3 GetMouseWorldSnappedPosition();
     void FireOnBuildingStartEvent();
     void FireOnBuildingEndEvent();
+    void FireOnObjectPlacedEvent();
     void HandleExistingObjectInteraction(PlacedObjectView targetPlaceObjectView,Vector3 objectPosition);
     void ReturnObjectToInventory();
 }

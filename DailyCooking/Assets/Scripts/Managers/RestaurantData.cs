@@ -25,17 +25,17 @@ public class RestaurantData
         restaurantName = name;
         OnResourceChange?.Invoke();
     }
-    public void UpdatePlayerCoins(int addCoins)
+    public void UpdateRestaurantCoins(int addCoins)
     {
         Coins += addCoins;
         OnResourceChange?.Invoke();
     }
-    public void UpdatePlayerGems(int addGem)
+    public void UpdateRestaurantGems(int addGem)
     {
         Gems += addGem;
         OnResourceChange?.Invoke();
     }
-    public void UpdatePlayerExp(int addExp)
+    public void UpdateRestaurantExp(int addExp)
     {
         Exp += addExp;
         if (Exp >= Level * 100)

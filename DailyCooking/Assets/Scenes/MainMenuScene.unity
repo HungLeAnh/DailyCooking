@@ -3915,6 +3915,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1533714588}
+  - component: {fileID: 1533714593}
   - component: {fileID: 1533714587}
   - component: {fileID: 1533714586}
   - component: {fileID: 1533714585}
@@ -3988,6 +3989,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe83902133312b641920d123984888d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   playerPrefab: {fileID: 2018199230153267826, guid: 06cdd68e120dd8a45a8f0809aaa3bdec, type: 3}
   playerSpawnPosition: {x: -3, y: 0, z: -3}
   joyStick: {fileID: 1211849093}
@@ -4062,6 +4064,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a7641241701427439476277e9aad389, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Scripts::AdsManager
+--- !u!114 &1533714593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1533714583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1464617159
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1549601980
 GameObject:
   m_ObjectHideFlags: 0

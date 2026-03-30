@@ -58,11 +58,11 @@ public class UIRewardPopup : UIPopup
             {
                 if (item.id == nameof(RewardType.Coin))
                 {
-                    GameManager.Instance.GameData.RestaurantData.UpdatePlayerCoins(item.amount);
+                    GameManager.Instance.UpdateRestaurantCoinServerRpc(item.amount);
                 }
                 else if (item.id == nameof(RewardType.Gem))
                 {
-                    GameManager.Instance.GameData.RestaurantData.UpdatePlayerGems(item.amount);
+                    GameManager.Instance.UpdateRestaurantGemsServerRpc(item.amount);
 
                 }
             }

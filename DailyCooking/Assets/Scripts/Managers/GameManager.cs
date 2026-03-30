@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Policy;
 using Unity.Netcode;
 using UnityEngine;
 
 [DefaultExecutionOrder(-1)]
-public class GameManager : PersistentSingleton<GameManager>, IGameManager
+public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
 {
     public event EventHandler OnPlayerSpawned;
     public event EventHandler OnStateChanged;
@@ -54,11 +56,11 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
     private void ShowLevelUpPopup(int level)
     {
         UIPopupManager.Instance.ShowPopup(UIPopupType.UILevelUpPopup,
-            new UILevelUpPopup.Param
-            {
-                reward = new RewardData[]
-            { new RewardData(RewardData.RewardType.Coin.ToString(), level * 100) }
-            });
+        new UILevelUpPopup.Param
+        {
+            reward = new RewardData[]
+        { new RewardData(RewardData.RewardType.Coin.ToString(), level * 100) }
+        });
     }
     private void Update()
     {
@@ -104,6 +106,114 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         currentState = newState;
         currentState.Enter();
         OnStateChanged?.Invoke(this,EventArgs.Empty);
+    }
+    [Rpc(SendTo.Server)]
+    public void UpdateRestaurantNameServerRpc(string name)
+    {
+        UpdateRestaurantNameClientRpc(name);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void UpdateRestaurantNameClientRpc(string name)
+    {
+        GameData.RestaurantData.UpdateRestaurantName(name);
+    }
+    [Rpc(SendTo.Server)]
+    public void UpdateRestaurantCoinServerRpc(int addCoins)
+    {
+        UpdateRestaurantCoinClientRpc(addCoins);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void UpdateRestaurantCoinClientRpc(int addCoins)
+    {
+        GameData.RestaurantData.UpdateRestaurantCoins(addCoins);
+    }
+    [Rpc(SendTo.Server)]
+    public void UpdateRestaurantExpServerRpc(int addExp)
+    {
+        UpdateRestaurantExpClientRpc(addExp);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void UpdateRestaurantExpClientRpc(int addExp)
+    {
+        GameData.RestaurantData.UpdateRestaurantExp(addExp);
+    }
+    [Rpc(SendTo.Server)]
+    public void UpdateRestaurantGemsServerRpc(int addGems)
+    {
+        UpdateRestaurantGemsClientRpc(addGems);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void UpdateRestaurantGemsClientRpc(int addGems)
+    {
+        GameData.RestaurantData.UpdateRestaurantGems(addGems);
+    }
+    [Rpc(SendTo.Server)]
+    public void AddInventoryDataServerRpc(string guid)
+    {
+        AddInventoryDataClientRpc(guid);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void AddInventoryDataClientRpc(string guid)
+    {
+        gameData.AddInventoryData(guid);
+    } 
+    [Rpc(SendTo.Server)]
+    public void RemoveInventoryDataServerRpc(string guid)
+    {
+        RemoveInventoryDataClientRpc(guid);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void RemoveInventoryDataClientRpc(string guid)
+    {
+        gameData.RemoveInventoryData(guid);
+    }
+    [Rpc(SendTo.Server)]
+    public void AddDishToMenuServerRpc(int dishIndex)
+    {
+        AddDishToMenuClientRpc(dishIndex);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void AddDishToMenuClientRpc(int dishIndex)
+    {
+        var dish = ConfigManager.Instance.ConfigFood.FoodItems.ElementAt(dishIndex);
+        if(dish == null) 
+        {
+            Debug.LogError($"Dish with index {dishIndex} not found in config.");
+            return;
+        }
+        GameData.AddDishToMenu(dish);
+    }
+    [Rpc(SendTo.Server)]
+    public void RemoveDishFromMenuServerRpc(int dishIndex)
+    {
+        RemoveDishFromMenuClientRpc(dishIndex);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void RemoveDishFromMenuClientRpc(int dishIndex)
+    {
+        var dish = ConfigManager.Instance.ConfigFood.FoodItems.ElementAt(dishIndex);
+        if(dish == null) 
+        {
+            Debug.LogError($"Dish with index {dishIndex} not found in config.");
+            return;
+        }
+        GameData.RemoveDishFromMenu(dish);
+    } 
+    [Rpc(SendTo.Server)]
+    public void PurchaseUpgradeServerRpc(int upgradeIndex)
+    {
+        PurchaseUpgradeClientRpc(upgradeIndex);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void PurchaseUpgradeClientRpc(int upgradeIndex)
+    {
+        var upgrade = ConfigManager.Instance.ConfigUpgrade.Upgrades.ElementAt(upgradeIndex);
+        if(upgrade == null) 
+        {
+            Debug.LogError($"Upgrade with index {upgradeIndex} not found in config.");
+            return;
+        }
+        GameData.PurchaseUpgrade(upgrade);
     }
 
     public void HideJoyStick()
