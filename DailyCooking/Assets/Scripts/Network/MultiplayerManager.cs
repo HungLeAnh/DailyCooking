@@ -19,7 +19,7 @@ public class MultiplayerManager : PersistentSingleton<MultiplayerManager>
         }
     }
 
-    public void StartHostedSession()
+    public void StartHostSession()
     {
         try
         {

@@ -1,5 +1,3 @@
-using Firebase.Auth;
-using Firebase.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -120,26 +118,7 @@ public class AnonymousLogin
     }
     private async Task AnonymousLoginAsync()
     {
-        FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-        await auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(
-            task =>
-            {
-                if (task.IsCanceled)
-                {
-                    Debug.LogError("Anonymous sign-in was canceled.");
-                    return;
-                }
-                if (task.IsFaulted)
-                {
-                    Debug.LogError($"Anonymous sign-in encountered an error: {task.Exception}");
-                    return;
-                }
-                Debug.Log("Anonymous sign-in successful.");
-                AuthResult result = task.Result;
-                Debug.Log($"User signed in anonymously: {result.User.UserId}");
-                Debug.Log($"User signed in anonymously: {result.User.DisplayName}");
-                LoginSuccess(result.User.UserId);
-        });
+
     }
 
     private void LoginSuccess(string userId)

@@ -23,7 +23,7 @@ public class UIMainMenuPopup : UIPopup
         });
         startHostingButton.onClick.AddListener(() =>
         {
-            MultiplayerManager.Instance.StartHostedSession();
+            MultiplayerManager.Instance.StartHostSession();
             Loader.LoadNetwork(Loader.Scene.GameScene);
             GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
