@@ -7,7 +7,8 @@ using Unity.Netcode;
 using UnityEngine;
 
 public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
-{    
+{
+    public Action OnObjectSpawned;
     public class OnSelectedChangedArgs : EventArgs
     {
         public PlacedObjectTypeSO placedObjectTypeSO;
@@ -104,6 +105,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         IUIPopupManager uiPopupManagerInstance = UIPopupManager.Instance;
         buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, uiPopupManagerInstance);
 
+        OnObjectSpawned?.Invoke();
 
         KitchenGameManager.Instance.Init();        
         BakeNavMesh();

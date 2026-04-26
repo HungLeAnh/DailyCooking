@@ -37,19 +37,6 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     }
     private void Start()
     {
-        LoadGame();
-        gameData.MenuData.LoadMenuData();
-
-        gameData.RestaurantData.OnLevelChange += SaveGame;
-        gameData.RestaurantData.OnExpChange += SaveGame;
-        gameData.RestaurantData.OnLevelUp += ShowLevelUpPopup;
-        gameData.RestaurantData.OnResourceChange += SaveGame;
-        gameData.PlayerStats.OnResourceChange += SaveGame;
-        gameData.InventoryData.OnInventoryDataChanged += SaveGame;
-        gameData.GridData.OnGridDataChanged += SaveGame;
-        gameData.TutorialData.OnTutorialDataChanged += SaveGame;
-        gameData.MenuData.OnMenuDataChanged += SaveGame;
-        gameData.ShopData.OnResourceChange += SaveGame;
         SwitchState(new MainMenuState(this));
     }
 
@@ -92,7 +79,20 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     public void LoadGame()
     {
         gameData = dataHandler.Load();
+
         if (gameData == null) NewGame();
+
+        gameData.MenuData.LoadMenuData();
+        gameData.RestaurantData.OnLevelChange += SaveGame;
+        gameData.RestaurantData.OnExpChange += SaveGame;
+        gameData.RestaurantData.OnLevelUp += ShowLevelUpPopup;
+        gameData.RestaurantData.OnResourceChange += SaveGame;
+        gameData.PlayerStats.OnResourceChange += SaveGame;
+        gameData.InventoryData.OnInventoryDataChanged += SaveGame;
+        gameData.GridData.OnGridDataChanged += SaveGame;
+        gameData.TutorialData.OnTutorialDataChanged += SaveGame;
+        gameData.MenuData.OnMenuDataChanged += SaveGame;
+        gameData.ShopData.OnResourceChange += SaveGame;
     }
 
     public void SaveGame()

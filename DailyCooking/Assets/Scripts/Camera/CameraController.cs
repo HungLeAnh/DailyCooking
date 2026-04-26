@@ -30,14 +30,19 @@ public class CameraController : MonoBehaviour
         //GameManager.Instance.OnPlayerSpawned += Instance_OnPlayerSpawned;
         GameInput.Instance.OnScrollPerformed += HandleZoom;
         GameInput.Instance.OnMousePanPerformed += OnPanMovedDesktop;
+        GridBuildingSystem.Instance.OnObjectSpawned += Instance_OnObjectSpawned;
 
-        GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingStart += OnBuildingStart;
-        GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
 
         UIHUDManager.Instance.OnRotateClicked += OnRotateClicked;
         
         ClampCameraPosition();
 
+    }
+
+    private void Instance_OnObjectSpawned()
+    {
+        GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingStart += OnBuildingStart;
+        GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
     }
 
     private void OnRotateClicked()

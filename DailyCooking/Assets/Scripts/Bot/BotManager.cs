@@ -57,9 +57,6 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     private void OnDestroy()
     {
         botPool.Clear();
-        if(GameManager.Instance != null)
-            GameManager.Instance.GameData.TutorialData.OnTutorialDataChanged -= OnTutorialDataChanged;
-
     }
     public void StartSpawnBot()
     {

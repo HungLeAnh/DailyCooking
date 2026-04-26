@@ -19,6 +19,7 @@ public class UIMainMenuPopup : UIPopup
             Loader.Load(Loader.Scene.GameScene);
             GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+            GameManager.Instance.LoadGame();
         });
         startHostingButton.onClick.AddListener(() =>
         {
@@ -26,6 +27,7 @@ public class UIMainMenuPopup : UIPopup
             Loader.LoadNetwork(Loader.Scene.GameScene);
             GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+            GameManager.Instance.LoadGame();
         });
         joinButton.onClick.AddListener(() =>
         {

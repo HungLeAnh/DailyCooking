@@ -223,8 +223,10 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     }
     private void HandleMovement()
     {
-        Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
+        if (GameManager.Instance.GameData == null)
+            return;
 
+        Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
 
         Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
 

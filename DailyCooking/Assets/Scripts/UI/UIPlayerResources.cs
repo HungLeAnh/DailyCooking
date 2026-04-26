@@ -18,6 +18,11 @@ public class UIPlayerResources : MonoBehaviour
 
     private void Start()
     {
+        if(GameManager.Instance.GameData == null)
+        {
+            Debug.LogError("GameData is null in UIPlayerResources");
+            return;
+        }
         GameManager.Instance.GameData.RestaurantData.OnResourceChange += OnResourceChange;
         GameManager.Instance.GameData.RestaurantData.OnLevelChange += OnLevelChange;
         GameManager.Instance.GameData.RestaurantData.OnExpChange += OnExpChange;
