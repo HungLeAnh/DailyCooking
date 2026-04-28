@@ -4,37 +4,168 @@ using System.Net;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
+using Unity.Services.Matchmaker.Models;
 using Unity.Services.Multiplayer;
 using UnityEngine;
+
+#if UNITY_ANDROID
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
+#endif
 
 public class SessionManager : PersistentSingleton<SessionManager>
 {
     ISession activeSession;
     const string playerNamePropertyKey = "PlayerName";
-    public ISession ActiveSession
+    private string googlePlayGameToken;
+    public string Error;
+    protected override async void Awake()
     {
-        get => activeSession;
-        set
-        {
-            if (activeSession != value)
-            {
-                activeSession = value;
-            }
-        }
-    }
-    private async void Start()
-    {
+        base.Awake();
         try
         {
-            await UnityServices.InitializeAsync();
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-            Debug.Log("Initialize Session Manager successfully");
+            PlayGamesPlatform.DebugLogEnabled = true;
+            PlayGamesPlatform.Activate();
+            SetupEvents();
+#if UNITY_EDITOR
+            // Simulate a fake success for testing Editor UI/Logic
+            LoginGooglePlayGames();
+#elif UNITY_ANDROID
+            //Initialize PlayGamesPlatform
+            PlayGamesPlatform.Activate();
+            LoginGooglePlayGames();
+#else
+            await SignInAnonymouslyAsync();
+#endif
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Debug.LogError($"Failed to initialize Session Manager: {e.Message}");
         }
     }
+    private async void Start()
+    {
+
+    }
+    private void SetupEvents()
+    {
+        AuthenticationService.Instance.SignedIn += () => {
+            Debug.Log($"Player ID: {AuthenticationService.Instance.PlayerId}");
+        };
+
+        AuthenticationService.Instance.SignInFailed += (err) => {
+            Debug.LogError($"Sign In Failed: {err}");
+        };
+    }
+    private async Task SignInAnonymouslyAsync()
+    {
+        try
+        {
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            Debug.Log("Sign in anonymously succeeded!");
+        }
+        catch (AuthenticationException ex)
+        {
+            // Compare error code to AuthenticationErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Compare error code to CommonErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+    }
+    public void LoginGooglePlayGames()
+    {
+        PlayGamesPlatform.Instance.Authenticate((success) =>
+        {
+            if (success == SignInStatus.Success)
+            {
+                Debug.Log("Login with Google Play games successful.");
+
+                PlayGamesPlatform.Instance.RequestServerSideAccess(true, code =>
+                {
+                    Debug.Log("Authorization code: " + code);
+                    googlePlayGameToken = code;
+                    // This token serves as an example to be used for SignInWithGooglePlayGames
+                });
+            }
+            else
+            {
+                Error = "Failed to retrieve Google play games authorization code";
+                Debug.Log("Login Unsuccessful");
+            }
+        });
+    }
+    async Task SignInWithGooglePlayGamesAsync(string authCode)
+    {
+        try
+        {
+            await AuthenticationService.Instance.SignInWithGooglePlayGamesAsync(authCode);
+            Debug.Log("SignIn is successful.");
+        }
+        catch (AuthenticationException ex)
+        {
+            // Compare error code to AuthenticationErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Compare error code to CommonErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+    }
+    private async Task LinkWithGooglePlayGamesAsync(string authCode)
+    {
+        try
+        {
+            await AuthenticationService.Instance.LinkWithGooglePlayGamesAsync(authCode);
+            Debug.Log("Link is successful.");
+        }
+        catch (AuthenticationException ex) when (ex.ErrorCode == AuthenticationErrorCodes.AccountAlreadyLinked)
+        {
+            // Prompt the player with an error message.
+            Debug.LogError("This user is already linked with another account. Log in instead.");
+        }
+
+        catch (AuthenticationException ex)
+        {
+            // Compare error code to AuthenticationErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Compare error code to CommonErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+    }
+    private async Task UnlinkGooglePlayGamesAsync()
+    {
+        try
+        {
+            await AuthenticationService.Instance.UnlinkGooglePlayGamesAsync();
+            Debug.Log("Unlink is successful.");
+        }
+        catch (AuthenticationException ex)
+        {
+            // Compare error code to AuthenticationErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Compare error code to CommonErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+    }
+
     private async void StartSessionAsHost()
     {
         try
@@ -66,21 +197,21 @@ public class SessionManager : PersistentSingleton<SessionManager>
     }
     private async Task JoinSessionById(string sessionId)
     {
-        ActiveSession = await MultiplayerService.Instance.JoinSessionByIdAsync(sessionId);
-        Debug.Log($"Session {ActiveSession.Id} joined");
+        activeSession = await MultiplayerService.Instance.JoinSessionByIdAsync(sessionId);
+        Debug.Log($"Session {activeSession.Id} joined");
     }    
     private async Task JoinSessionByCode(string sessionCode)
     {
-        ActiveSession = await MultiplayerService.Instance.JoinSessionByCodeAsync(sessionCode);
-        Debug.Log($"Session {ActiveSession.Id} joined");
+        activeSession = await MultiplayerService.Instance.JoinSessionByCodeAsync(sessionCode);
+        Debug.Log($"Session {activeSession.Id} joined");
     }
     private async Task KickPlayer(string playerId)
     {
-        if (!ActiveSession.IsHost)
+        if (!activeSession.IsHost)
             return;
 
-        await ActiveSession.AsHost().RemovePlayerAsync(playerId);   
-        Debug.Log($"Player {playerId} kicked from session {ActiveSession.Id}");
+        await activeSession.AsHost().RemovePlayerAsync(playerId);   
+        Debug.Log($"Player {playerId} kicked from session {activeSession.Id}");
     }
     private async Task<IList<ISessionInfo>> QuerySessions()
     {
@@ -90,12 +221,12 @@ public class SessionManager : PersistentSingleton<SessionManager>
     }
     private async Task LeaveSession()
     {
-        if (ActiveSession == null)
+        if (activeSession == null)
             return;
         try
         {
-            await ActiveSession.LeaveAsync();
-            Debug.Log($"Left session {ActiveSession.Id}");
+            await activeSession.LeaveAsync();
+            Debug.Log($"Left session {activeSession.Id}");
 
         }
         catch (Exception ex)
@@ -104,25 +235,8 @@ public class SessionManager : PersistentSingleton<SessionManager>
         }
         finally
         {
-            ActiveSession = null;
+            activeSession = null;
 
         }
-    }
-}
-
-public class AnonymousLogin
-{
-    public async void Login()
-    {
-        await AnonymousLoginAsync();
-    }
-    private async Task AnonymousLoginAsync()
-    {
-
-    }
-
-    private void LoginSuccess(string userId)
-    {
-        
     }
 }

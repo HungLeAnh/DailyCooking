@@ -23,16 +23,16 @@ public class PlacedObjectView : NetworkBehaviour
     {
         placedObjectTypeSOGuid.OnValueChanged += (FixedString64Bytes previousValue, FixedString64Bytes newValue) =>
         {
-            Debug.Log("PlacedObjectView: placedObjectTypeSOGuid changed: " + newValue);
+            //Debug.Log("PlacedObjectView: placedObjectTypeSOGuid changed: " + newValue);
             placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(newValue.ToString());
         };
         this.placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(placedObjectTypeSOGuid.Value.ToString());
 
         if(!isPreview.Value)
         {
-            Debug.Log("PlaceObjectType : " + PlacedObjectTypeSO);
-            Debug.Log("PlaceObjectTypeGuid : " + GetPlacedObjectTypeSOGuid());
-            Debug.Log("GridManager : " + GridBuildingSystem.Instance.GridManager);
+            //Debug.Log("PlaceObjectType : " + PlacedObjectTypeSO);
+            //Debug.Log("PlaceObjectTypeGuid : " + GetPlacedObjectTypeSOGuid());
+            //Debug.Log("GridManager : " + GridBuildingSystem.Instance.GridManager);
             List<Vector2Int> gridPositionList = GetGridPositionList();
             foreach (var gridPosition in gridPositionList)
             {
