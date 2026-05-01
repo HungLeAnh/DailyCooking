@@ -1,5 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +10,7 @@ public class UIMainMenuPopup : UIPopup
     [SerializeField] private Button quitButton;
     [SerializeField] private Button startHostingButton;
     [SerializeField] private Button joinButton;
+    [SerializeField] private Button loginButton;
 
     private void Awake()
     {
@@ -42,6 +43,9 @@ public class UIMainMenuPopup : UIPopup
         {
             Application.Quit();
         });
+        loginButton.onClick.AddListener(() => {
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UILoginPopup);
+        });
 
     }
     public override void HidePopup(object param = null)
@@ -51,6 +55,14 @@ public class UIMainMenuPopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
+        if (!AuthenticationService.Instance.IsSignedIn)
+        {
+            
+        }
+        else
+        {
+            
+        }
     }
     public override void SetupPopup()
     {
