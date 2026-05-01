@@ -41,6 +41,7 @@ public class SessionManager : PersistentSingleton<SessionManager>
 #if UNITY_ANDROID
             //Initialize PlayGamesPlatform
             PlayGamesPlatform.Activate();
+            LoginGooglePlayGames();
 #endif
         }
         catch (Exception e)
@@ -112,11 +113,9 @@ public class SessionManager : PersistentSingleton<SessionManager>
     }
     public void StartSignInWithGooglePlayGames()
     {
-        if (!PlayGamesPlatform.Instance.IsAuthenticated())
+        if (!PlayGamesPlatform.Instance.IsAuthenticated()||!HasGooglePlayGamesID())
         {
-            Debug.LogError("Google Play Games token is null or empty. Cannot sign in.");
             LoginGooglePlayGames();
-            return;
         }
         SignInOrLinkWithGooglePlayGames();
     }
@@ -255,6 +254,7 @@ public class SessionManager : PersistentSingleton<SessionManager>
         try
         {
             await AuthenticationService.Instance.SignInWithUnityAsync(PlayerAccountService.Instance.AccessToken);
+            OnUnityLinkOrUnlink?.Invoke();
             Debug.Log("SignIn is successful.");
         }
         catch (AuthenticationException ex)
