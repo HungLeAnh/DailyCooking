@@ -52,19 +52,13 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         state = State.Editing;
         unlockIngredient = new List<KitchenObjectSO>();
 
-        SceneManager.sceneLoaded += SceneManager_sceneLoaded;
     }
-
-    private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
+    public override void OnNetworkSpawn()
     {
-        if (arg0.buildIndex == 0)
-            return;
+        base.OnNetworkSpawn();
         BotManager.Instance.Initialize();
         ChangeState(State.Open);
-        if (GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
-        {
-            BotManager.Instance.StartSpawnBot();
-        }
+        BotManager.Instance.StartSpawnBot();
     }
 
     public void OnDestroy()

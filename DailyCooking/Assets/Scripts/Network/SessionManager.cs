@@ -6,6 +6,12 @@ using Unity.Services.Core;
 using Unity.Services.Multiplayer;
 using UnityEngine;
 using Unity.Services.Authentication.PlayerAccounts;
+using Unity.Services.Relay.Models;
+using Unity.Netcode;
+using Unity.Services.Relay;
+
+using Unity.Netcode.Transports.UTP;
+
 
 #if UNITY_ANDROID
 using GooglePlayGames;
@@ -23,11 +29,11 @@ public class SessionManager : PersistentSingleton<SessionManager>
 {
     public Action OnGoogleLinkOrUnlink;
     public Action OnUnityLinkOrUnlink;
-    ISession activeSession;
     const string playerNamePropertyKey = "PlayerName";
     private string googlePlayGameToken;
 
     public string GooglePlayGameToken => googlePlayGameToken;
+    public string PlayerId => AuthenticationService.Instance.PlayerId;
     protected override async void Awake()
     {
         base.Awake();
@@ -332,79 +338,33 @@ public class SessionManager : PersistentSingleton<SessionManager>
         return AuthenticationService.Instance.PlayerInfo.GetUnityId() != null;
     }
     #endregion
-    private async void StartSessionAsHost()
+    #region Relay
+    public async Task<string> StartHostWithRelay(int maxConnections, string connectionType)
     {
-        try
+        if (!AuthenticationService.Instance.IsSignedIn)
         {
-            var playerProperties = await GetPlayerProperties();
-            var options = new SessionOptions
-            {
-                MaxPlayers = 4,
-                IsLocked = false,
-                IsPrivate = false,
-                PlayerProperties = playerProperties,
-            }.WithRelayNetwork();
-
-            Debug.Log("Session created successfully as host");
+            UIManager.Instance.ShowAlertMessage("You must be signed in to start hosting.");
+            return null;
         }
-        catch (Exception e)
+        
+        var allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
+        var joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+        return NetworkManager.Singleton.StartHost() ? joinCode : null;
+    }
+    public async Task<bool> StartClientWithRelay(string joinCode, string connectionType)
+    {
+        if (!AuthenticationService.Instance.IsSignedIn)
         {
-            Debug.LogError($"Failed to create session as host: {e.Message}");
+            UIManager.Instance.ShowAlertMessage("You must be signed in to start hosting.");
+            return false;
         }
-    }
-    private async Task<Dictionary<string,PlayerProperty>> GetPlayerProperties()
-    {
-        var playerName = await AuthenticationService.Instance.GetPlayerNameAsync();
-        var playerNameProperty = new PlayerProperty(playerName,VisibilityPropertyOptions.Member);
-        return new Dictionary<string, PlayerProperty>
-        {
-            { playerNamePropertyKey, playerNameProperty }
-        };
-    }
-    private async Task JoinSessionById(string sessionId)
-    {
-        activeSession = await MultiplayerService.Instance.JoinSessionByIdAsync(sessionId);
-        Debug.Log($"Session {activeSession.Id} joined");
-    }    
-    private async Task JoinSessionByCode(string sessionCode)
-    {
-        activeSession = await MultiplayerService.Instance.JoinSessionByCodeAsync(sessionCode);
-        Debug.Log($"Session {activeSession.Id} joined");
-    }
-    private async Task KickPlayer(string playerId)
-    {
-        if (!activeSession.IsHost)
-            return;
 
-        await activeSession.AsHost().RemovePlayerAsync(playerId);   
-        Debug.Log($"Player {playerId} kicked from session {activeSession.Id}");
+        var allocation = await RelayService.Instance.JoinAllocationAsync(joinCode: joinCode);
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
+        return !string.IsNullOrEmpty(joinCode) && NetworkManager.Singleton.StartClient();
     }
-    private async Task<IList<ISessionInfo>> QuerySessions()
-    {
-        var sessionsQueryOptions = new QuerySessionsOptions();
-        QuerySessionsResults results = await MultiplayerService.Instance.QuerySessionsAsync(sessionsQueryOptions);
-        return results.Sessions;
-    }
-    private async Task LeaveSession()
-    {
-        if (activeSession == null)
-            return;
-        try
-        {
-            await activeSession.LeaveAsync();
-            Debug.Log($"Left session {activeSession.Id}");
-
-        }
-        catch (Exception ex)
-        {
-
-        }
-        finally
-        {
-            activeSession = null;
-
-        }
-    }
+    #endregion
     public bool HasIDOfType(AuthenticationType type)
     {
         switch (type)
@@ -418,5 +378,9 @@ public class SessionManager : PersistentSingleton<SessionManager>
             default:
                 return false;
         }
+    }
+    public bool IsSignedIn()
+    {
+        return AuthenticationService.Instance.IsSignedIn || PlayerAccountService.Instance.IsSignedIn;
     }
 }

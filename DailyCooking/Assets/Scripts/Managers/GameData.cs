@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class GameData
 {
-    public PlayerStats PlayerStats { get; private set; } = new PlayerStats();
+    public List<PlayerStats> PlayersStats { get; private set; } = new List<PlayerStats>();
     public RestaurantData RestaurantData { get; private set; } = new RestaurantData();
     public InventoryData InventoryData { get; private set; } = new InventoryData();
     public GridData GridData { get; private set; } = new GridData();
@@ -69,6 +69,20 @@ public class GameData
                 return -1;
 
         }
+    }
+    public PlayerStats GetPlayerStatsById(string id)
+    {
+        Debug.Log($"Getting player stats for player {id}");
+        return PlayersStats.Find(player => player.PlayerId == id);
+    }
+    public void TryAddPlayerStats(string playerId)
+    {
+        if (GetPlayerStatsById(playerId) != null) return;
+        Debug.Log($"Adding player stats for player {playerId}");
+        var playerStats = new PlayerStats(playerId);
+        playerStats.OnResourceChange += () => GameManager.Instance.SaveGame();
+        PlayersStats.Add(playerStats);
+        GameManager.Instance.SaveGame();
     }
 }
 

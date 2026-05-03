@@ -18,7 +18,19 @@ public class UIPlayerResources : MonoBehaviour
 
     private void Start()
     {
-        if(GameManager.Instance.GameData == null)
+        if(MultiplayerManager.Instance.IsHost|| MultiplayerManager.Instance.IsServer)
+        {
+                Initialize();
+        }
+        else
+        {
+            MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => Initialize();
+        }
+        
+    }
+    private void Initialize()
+    {
+        if (GameManager.Instance.GameData == null)
         {
             Debug.LogError("GameData is null in UIPlayerResources");
             return;
@@ -27,15 +39,15 @@ public class UIPlayerResources : MonoBehaviour
         GameManager.Instance.GameData.RestaurantData.OnLevelChange += OnLevelChange;
         GameManager.Instance.GameData.RestaurantData.OnExpChange += OnExpChange;
 
-        if(gemText!= null)
+        if (gemText != null)
             gemText.text = GameManager.Instance.GameData.RestaurantData.Gems.ToString();
-        if(coinText != null)
+        if (coinText != null)
             coinText.text = GameManager.Instance.GameData.RestaurantData.Coins.ToString();
-        if(levelText != null)
+        if (levelText != null)
             levelText.text = GameManager.Instance.GameData.RestaurantData.Level.ToString();
-        if(expText != null)
+        if (expText != null)
             expText.text = GameManager.Instance.GameData.RestaurantData.Exp.ToString() + "/" + GameManager.Instance.GameData.RestaurantData.Level * EXP_PER_LEVEL_MULTIPLIER;
-        if(expSlider != null)
+        if (expSlider != null)
             expSlider.value = (float)GameManager.Instance.GameData.RestaurantData.Exp / (GameManager.Instance.GameData.RestaurantData.Level * EXP_PER_LEVEL_MULTIPLIER);
 
     }

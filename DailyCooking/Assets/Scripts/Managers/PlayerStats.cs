@@ -6,15 +6,22 @@ public class PlayerStats
     [System.NonSerialized]
     public Action OnResourceChange;
 
+    private string playerId;
     private float moveSpeed = 5f;
     private float cookingSpeed = 1f;
     private int carryingCapacity = 1;
     private float tipIncrease = 0f;
 
+    public string PlayerId { get => playerId; set => playerId = value; }
     public float MoveSpeed { get => moveSpeed; set => moveSpeed = value; }
     public float CookingSpeed { get => cookingSpeed; set => cookingSpeed = value; }
     public int CarryingCapacity { get => carryingCapacity; set => carryingCapacity = value; }
     public float TipIncrease { get => tipIncrease; set => tipIncrease = value; }
+
+    public PlayerStats(string playerId)
+    {
+        PlayerId = playerId;
+    }
 
     public void UpdatePlayerMoveSpeed(float amount)
     {

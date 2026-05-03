@@ -25,7 +25,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     private GameObject playerGameObject;
     public FileDataHandler DataHandler => dataHandler;
 
-    public GameData GameData => gameData;
+    public GameData GameData { get => gameData; set => gameData = value; }
     public GameManagerBaseState State => currentState;
     protected override void Awake()
     {
@@ -38,6 +38,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     private void Start()
     {
         SwitchState(new MainMenuState(this));
+        MultiplayerManager.Instance.OnPlayerDataNetworkListChanged += Instance_OnPlayerDataNetworkListChanged;
     }
 
     private void ShowLevelUpPopup(int level)
@@ -87,7 +88,13 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         gameData.RestaurantData.OnExpChange += SaveGame;
         gameData.RestaurantData.OnLevelUp += ShowLevelUpPopup;
         gameData.RestaurantData.OnResourceChange += SaveGame;
-        gameData.PlayerStats.OnResourceChange += SaveGame;
+        if(gameData.PlayersStats != null)
+        {
+            foreach(var player in gameData.PlayersStats)            
+            {
+                player.OnResourceChange += SaveGame;
+            }
+        }
         gameData.InventoryData.OnInventoryDataChanged += SaveGame;
         gameData.GridData.OnGridDataChanged += SaveGame;
         gameData.TutorialData.OnTutorialDataChanged += SaveGame;
@@ -215,7 +222,10 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         }
         GameData.PurchaseUpgrade(upgrade);
     }
-
+    private void Instance_OnPlayerDataNetworkListChanged(object sender, EventArgs e)
+    {
+        gameData.TryAddPlayerStats(MultiplayerManager.Instance.GetLatestPlayerData().playerId.ToString());
+    }
     public void HideJoyStick()
     {
        joyStick.gameObject.SetActive(false);

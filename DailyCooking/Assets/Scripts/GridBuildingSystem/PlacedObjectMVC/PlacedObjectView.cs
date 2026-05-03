@@ -21,6 +21,17 @@ public class PlacedObjectView : NetworkBehaviour
     public InventoryTabType InventoryTabType => placedObjectTypeSO.itemType.TabType;
     public override void OnNetworkSpawn()
     {
+        if (MultiplayerManager.Instance.IsHost || MultiplayerManager.Instance.IsServer)
+        {
+            OnSpawned();
+        }
+        else
+        {
+            MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => OnSpawned();
+        }
+    }
+    private void OnSpawned()
+    {
         placedObjectTypeSOGuid.OnValueChanged += (FixedString64Bytes previousValue, FixedString64Bytes newValue) =>
         {
             //Debug.Log("PlacedObjectView: placedObjectTypeSOGuid changed: " + newValue);
@@ -28,7 +39,7 @@ public class PlacedObjectView : NetworkBehaviour
         };
         this.placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(placedObjectTypeSOGuid.Value.ToString());
 
-        if(!isPreview.Value)
+        if (!isPreview.Value)
         {
             //Debug.Log("PlaceObjectType : " + PlacedObjectTypeSO);
             //Debug.Log("PlaceObjectTypeGuid : " + GetPlacedObjectTypeSOGuid());
@@ -36,13 +47,17 @@ public class PlacedObjectView : NetworkBehaviour
             List<Vector2Int> gridPositionList = GetGridPositionList();
             foreach (var gridPosition in gridPositionList)
             {
+                if(GridBuildingSystem.Instance.GridManager == null)
+                {
+                    Debug.LogError("GridManager is null");
+                    return;
+                }
                 GridBuildingSystem.Instance.GridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y,
                     new GridObject(GridBuildingSystem.Instance.GridManager.Grid, this, gridPosition.x, gridPosition.y));
             }
 
             this.GetComponent<IModuleItem>()?.RegisterItem();
         }
-
     }
     public void Intialize(string placedObjectTypeSOGuid, Vector2Int origin, Dir dir,bool isPreview)
     {

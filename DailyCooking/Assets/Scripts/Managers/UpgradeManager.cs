@@ -34,16 +34,16 @@ public class UpgradeManager : PersistentSingleton<UpgradeManager>
         switch (upgradeTarget)
         {
             case UpgradeTarget.MoveSpeed:
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerMoveSpeed(amount);
+                GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).UpdatePlayerMoveSpeed(amount);
                 break;
             case UpgradeTarget.CookingSpeed:
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerCookingSpeed(amount);
+                GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).UpdatePlayerCookingSpeed(amount);
                 break;
             case UpgradeTarget.CarryingCapacity:
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerCarryingCapacity(amount);
+                GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).UpdatePlayerCarryingCapacity(amount);
                 break;
             case UpgradeTarget.TipIncrease:
-                GameManager.Instance.GameData.PlayerStats.UpdatePlayerTipIncrease(amount);
+                GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).UpdatePlayerTipIncrease(amount);
                 break;
             case UpgradeTarget.ExpansionRestaurant:
                 GridBuildingSystem.Instance.ExpandGrid(amount);

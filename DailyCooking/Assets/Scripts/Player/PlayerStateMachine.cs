@@ -230,7 +230,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
 
         Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
 
-        float moveDistance = GameManager.Instance.GameData.PlayerStats.MoveSpeed * Time.deltaTime;
+        float moveDistance = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).MoveSpeed * Time.deltaTime;
         float playerRadius = 0.7f;
         bool canMove = !Physics.BoxCast(transform.position, Vector3.one * playerRadius, moveDir, Quaternion.identity, moveDistance, countersLayerMask);
 

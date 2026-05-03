@@ -37,7 +37,6 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
                 panel.gameObject.SetActive(false);
             }
         }
-        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)

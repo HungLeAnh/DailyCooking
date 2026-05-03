@@ -74,6 +74,17 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         {
             placedObjectTypeSODictionary[placedObject.Guid] = placedObject;
         }
+    }
+    public override void OnNetworkSpawn()
+    {
+        if (IsHost || IsServer)
+            Initialize();
+        else
+            MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => Initialize();
+    }
+
+    private void Initialize()
+    {
         if (GameManager.Instance.GameData.GridData.GridArrayData == null)
         {
             gridManager = new GridManager(0, 0, cellSize, Vector3.zero, (GridXZ<GridObject> grid, int x, int z) => new List<GridObject> { new GridObject(grid, x, z) });
@@ -81,20 +92,14 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         else
         {
             gridManager = new GridManager(GameManager.Instance.GameData.GridData, (GridXZ<GridObject> grid, int x, int z) => new List<GridObject> { new GridObject(grid, x, z) });
-
-        
         }
-    }
-    public override void OnNetworkSpawn()
-    {
-        base.OnNetworkSpawn();
 
         if (IsHost || IsServer)
-                GridObjectSpawner.SpawnObjectsFromData(gridManager.Grid, GameManager.Instance.GameData.GridData.GridArrayData);
+            GridObjectSpawner.SpawnObjectsFromData(gridManager.Grid, GameManager.Instance.GameData.GridData.GridArrayData);
 
 
-        gridInitializer = new GridInitializer(gridManager, this.gameManager, 
-            roadContainer, roadPrefab, roadCornerPrefab, 
+        gridInitializer = new GridInitializer(gridManager, this.gameManager,
+            roadContainer, roadPrefab, roadCornerPrefab,
             floorContainer, floorPrefab);
 
         gridInitializer.InitRoad();
@@ -107,14 +112,14 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
 
         OnObjectSpawned?.Invoke();
 
-        KitchenGameManager.Instance.Init();        
+        KitchenGameManager.Instance.Init();
+        SetBlocker();
         BakeNavMesh();
-
     }
+
     private void Start()
     {
         GameInput.Instance.OnMouseClickPerformed += GameInput_OnMouseClickPerformed;
-        SetBlocker();
     }
     public void BakeNavMesh()
     {
@@ -222,9 +227,9 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         if(networkObjectReference.TryGet(out NetworkObject networkObject))
         {
             PlacedObjectView placedObjectView = networkObject.GetComponent<PlacedObjectView>();
-            Debug.Log("PlaceObjectType : "+placedObjectView.PlacedObjectTypeSO);
-            Debug.Log("PlaceObjectTypeGuid : "+placedObjectView.GetPlacedObjectTypeSOGuid());
-            Debug.Log("GridManager : " + GridManager);
+            //Debug.Log("PlaceObjectType : "+placedObjectView.PlacedObjectTypeSO);
+            //Debug.Log("PlaceObjectTypeGuid : "+placedObjectView.GetPlacedObjectTypeSOGuid());
+            //Debug.Log("GridManager : " + GridManager);
             List<Vector2Int> gridPositionList = placedObjectView.GetGridPositionList();
             foreach (var gridPosition in gridPositionList)
             {

@@ -104,7 +104,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     }
     public void Cut()
     {
-        CutServerRpc(GameManager.Instance.GameData.PlayerStats.CookingSpeed);
+        CutServerRpc(GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).CookingSpeed);
     }
     [Rpc(SendTo.Server)]
     private void CutServerRpc(float coodingSpeed)

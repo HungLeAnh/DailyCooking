@@ -16,19 +16,19 @@ public class UIMainMenuPopup : UIPopup
     {
         playButton.onClick.AddListener(() =>
         {
+            GameManager.Instance.LoadGame();
             MultiplayerManager.Instance.StartSinglePlayer();
             Loader.Load(Loader.Scene.GameScene);
             GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
-            GameManager.Instance.LoadGame();
         });
         startHostingButton.onClick.AddListener(() =>
         {
+            GameManager.Instance.LoadGame();
             MultiplayerManager.Instance.StartHostSession();
             Loader.LoadNetwork(Loader.Scene.GameScene);
             GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
-            GameManager.Instance.LoadGame();
         });
         joinButton.onClick.AddListener(() =>
         {

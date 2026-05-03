@@ -44,7 +44,19 @@ public class FileDataHandler
             return null;
         }
     }
-
+    public GameData LoadFromJson(string jsonData)
+    {
+        try
+        {
+            GameData gameData = JsonConvert.DeserializeObject<GameData>(jsonData, settings);
+            return gameData;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error loading data from JSON: {e}");
+            return null;
+        }
+    }
     public void Save(GameData data)
     {
         string fullPath = Path.Combine(dataDirPath, dataFileName);
@@ -53,6 +65,10 @@ public class FileDataHandler
         string jsonData = JsonConvert.SerializeObject(data, Formatting.Indented, settings);
         
         File.WriteAllText(fullPath, jsonData);
+    }
+    public string ConvertGameDataToJson(GameData data)
+    {
+        return JsonConvert.SerializeObject(data, Formatting.Indented, settings);
     }
 }
 

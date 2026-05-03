@@ -34,7 +34,7 @@ public class UIRestaurantPopup : UIPopup
     private void Start()
     {
         KitchenGameManager.Instance.OnStateChanged += Instance_OnStateChanged;
-        GameManager.Instance.GameData.PlayerStats.OnResourceChange += Initialize;
+        GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).OnResourceChange += Initialize;
         GameManager.Instance.GameData.RestaurantData.OnResourceChange += Initialize;
     }
     private void OnDestroy()
@@ -101,10 +101,10 @@ public class UIRestaurantPopup : UIPopup
     private void Initialize()
     {
         restaurantNameText.text = GameManager.Instance.GameData.RestaurantData.RestaurantName;
-        moveSpeedText.text = GameManager.Instance.GameData.PlayerStats.MoveSpeed.ToString("F2");
-        cookingSpeedText.text = GameManager.Instance.GameData.PlayerStats.CookingSpeed.ToString("F2");
-        carryingCapacityText.text = GameManager.Instance.GameData.PlayerStats.CarryingCapacity.ToString();
-        tipIncreaseText.text = GameManager.Instance.GameData.PlayerStats.TipIncrease.ToString("F2") + "%";
+        moveSpeedText.text = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).MoveSpeed.ToString("F2");
+        cookingSpeedText.text = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).CookingSpeed.ToString("F2");
+        carryingCapacityText.text = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).CarryingCapacity.ToString();
+        tipIncreaseText.text = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).TipIncrease.ToString("F2") + "%";
     }
 
     public override void HidePopup(object param = null)
