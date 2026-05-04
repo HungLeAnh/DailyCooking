@@ -72,13 +72,13 @@ public class GameData
     }
     public PlayerStats GetPlayerStatsById(string id)
     {
-        Debug.Log($"Getting player stats for player {id}");
+        //Debug.Log($"Getting player stats for player {id}");
         return PlayersStats.Find(player => player.PlayerId == id);
     }
     public void TryAddPlayerStats(string playerId)
     {
         if (GetPlayerStatsById(playerId) != null) return;
-        Debug.Log($"Adding player stats for player {playerId}");
+        //Debug.Log($"Adding player stats for player {playerId}");
         var playerStats = new PlayerStats(playerId);
         playerStats.OnResourceChange += () => GameManager.Instance.SaveGame();
         PlayersStats.Add(playerStats);

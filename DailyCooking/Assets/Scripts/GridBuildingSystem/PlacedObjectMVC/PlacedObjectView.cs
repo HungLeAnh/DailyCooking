@@ -27,7 +27,7 @@ public class PlacedObjectView : NetworkBehaviour
         }
         else
         {
-            MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => OnSpawned();
+            GridBuildingSystem.Instance.OnObjectSpawned += () => OnSpawned();
         }
     }
     private void OnSpawned()
@@ -44,14 +44,14 @@ public class PlacedObjectView : NetworkBehaviour
             //Debug.Log("PlaceObjectType : " + PlacedObjectTypeSO);
             //Debug.Log("PlaceObjectTypeGuid : " + GetPlacedObjectTypeSOGuid());
             //Debug.Log("GridManager : " + GridBuildingSystem.Instance.GridManager);
+            if(GridBuildingSystem.Instance.GridManager == null)
+            {
+                Debug.LogError("GridManager is null");
+                return;
+            }
             List<Vector2Int> gridPositionList = GetGridPositionList();
             foreach (var gridPosition in gridPositionList)
             {
-                if(GridBuildingSystem.Instance.GridManager == null)
-                {
-                    Debug.LogError("GridManager is null");
-                    return;
-                }
                 GridBuildingSystem.Instance.GridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y,
                     new GridObject(GridBuildingSystem.Instance.GridManager.Grid, this, gridPosition.x, gridPosition.y));
             }
