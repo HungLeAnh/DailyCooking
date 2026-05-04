@@ -45,7 +45,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     private IBuildingPlacementManager buildingPlacementManager;
     private IGridInitializer gridInitializer;
     private IGridVisualizer gridVisualizer;
-
+    private bool isInitialized = false;
     private bool stopMoving = false;
     private List<GridWall> gridWallList = new List<GridWall>();
 
@@ -61,6 +61,8 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     public IGridInitializer GridInitializer { get => gridInitializer; set => gridInitializer = value; }
     public IGridVisualizer GridVisualizer { get => gridVisualizer; set => gridVisualizer = value; }
     public bool StopMoving { get => stopMoving; set => stopMoving = value; }
+    public bool IsInitialized { get => isInitialized; set => isInitialized = value; }
+
     private void OnDestroy()
     {
 
@@ -111,7 +113,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, uiPopupManagerInstance);
 
         OnObjectSpawned?.Invoke();
-
+        isInitialized = true;
         KitchenGameManager.Instance.Init();
         SetBlocker();
         BakeNavMesh();

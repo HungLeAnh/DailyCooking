@@ -30,7 +30,14 @@ public class CameraController : MonoBehaviour
         //GameManager.Instance.OnPlayerSpawned += Instance_OnPlayerSpawned;
         GameInput.Instance.OnScrollPerformed += HandleZoom;
         GameInput.Instance.OnMousePanPerformed += OnPanMovedDesktop;
-        GridBuildingSystem.Instance.OnObjectSpawned += Instance_OnObjectSpawned;
+        if (GridBuildingSystem.Instance.IsInitialized)
+        {
+            Instance_OnObjectSpawned();
+        }
+        else
+        {
+            GridBuildingSystem.Instance.OnObjectSpawned += Instance_OnObjectSpawned;
+        }
 
 
         UIHUDManager.Instance.OnRotateClicked += OnRotateClicked;
@@ -41,6 +48,7 @@ public class CameraController : MonoBehaviour
 
     private void Instance_OnObjectSpawned()
     {
+        //Debug.Log("CameraController: Object Spawned, subscribing to building placement events");
         GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingStart += OnBuildingStart;
         GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
     }
@@ -85,6 +93,7 @@ public class CameraController : MonoBehaviour
     {
         isRotating = true;
         targetQuaternion = Quaternion.Euler(90, 0, 0);
+        //Debug.Log("Building Start");
     }
     #region Pan
     private void OnPanMovedDesktop(object sender, Vector2 e)

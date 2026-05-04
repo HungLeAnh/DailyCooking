@@ -29,7 +29,15 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
         RefreshVisual(-Vector3.one);
         GameInput.Instance.OnMouseClickPerformed += OnPanStarted;
         GameInput.Instance.OnMouseClickCanceled += OnPanCanceled;
-        GridBuildingSystem.Instance.OnObjectSpawned += Instance_OnObjectSpawned;
+        if(GridBuildingSystem.Instance.IsInitialized)
+        {
+            Instance_OnObjectSpawned();
+        }
+        else
+        {
+            GridBuildingSystem.Instance.OnObjectSpawned += Instance_OnObjectSpawned;
+
+        }
 
     }
 

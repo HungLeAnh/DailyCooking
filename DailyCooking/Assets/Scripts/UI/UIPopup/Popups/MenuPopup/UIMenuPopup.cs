@@ -142,7 +142,7 @@ public class UIMenuPopup : UIPopup
         item.SetMenuFoodItem(dish);
         item.ButtonRemove.onClick.AddListener(() =>
         {
-            bool canRemoved = GameManager.Instance.GameData.MenuData.menuDished.Contains(dish) == false;
+            bool canRemoved = GameManager.Instance.GameData.MenuData.menuDished.Contains(dish);
             if (canRemoved)
             {
                 int index = ConfigManager.Instance.ConfigFood.FoodItems.IndexOf(dish);

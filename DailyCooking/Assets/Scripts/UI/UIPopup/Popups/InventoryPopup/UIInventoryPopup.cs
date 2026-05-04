@@ -73,6 +73,7 @@ public class UIInventoryPopup : UIPopup
     {
         base.ShowPopup(param);
         //Debug.Log(listItem.Count + " Object Subscribe ItemSelected");
+        //Debug.Log("Start building");
 
         _tabsPanel.TabChanged += OnChangeTab;
         for (int i = 0; i < listItem.Count; i++)

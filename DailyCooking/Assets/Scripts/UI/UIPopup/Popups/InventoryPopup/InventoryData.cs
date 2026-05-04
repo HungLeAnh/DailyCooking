@@ -53,7 +53,7 @@ public class InventoryData
             }
         }
 
-        _items.Add(new ItemStack(InventoryItemData.CreateInventoryItem(id,true), count));
+        _items.Add(new ItemStack(InventoryItemData.CreateInventoryItem(id), count));
         OnInventoryDataChanged?.Invoke();
     }
 

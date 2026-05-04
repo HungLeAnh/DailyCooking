@@ -260,7 +260,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         networkObject.Spawn();
         networkObject.ChangeOwnership(targetClientId);
 
-        Debug.Log("Object is created on server " + placeObjectTypeSOGuid +" pass to target "+ targetClientId);
+        //Debug.Log("Object is created on server " + placeObjectTypeSOGuid +" pass to target "+ targetClientId);
         NotifyClientOfSpawnClientRpc(networkObject, RpcTarget.Single(targetClientId,RpcTargetUse.Temp));
 
     }

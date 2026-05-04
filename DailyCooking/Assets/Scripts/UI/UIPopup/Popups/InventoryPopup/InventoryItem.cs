@@ -40,20 +40,10 @@ public class InventoryItemData
         _placedObjectTypeSOGuid = placedObjectTypeSOGuid;
         _tabType = tabType;
     }
-    public static InventoryItemData CreateInventoryItem(string id,bool isGuid = false)
-    {
-        if (isGuid)
-        {
-            var placeObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(id);
-            var inventoryItem = new InventoryItemData(placeObjectTypeSO.Guid, placeObjectTypeSO.itemType.TabType);
-            return inventoryItem;
-        }
-        else
-        {        
-            var placeObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOById(id);
-            var inventoryItem = new InventoryItemData(placeObjectTypeSO.Guid, placeObjectTypeSO.itemType.TabType);
-            return inventoryItem;
-        }
-
+    public static InventoryItemData CreateInventoryItem(string id)
+    {     
+        var placeObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOById(id);
+        var inventoryItem = new InventoryItemData(placeObjectTypeSO.Guid, placeObjectTypeSO.itemType.TabType);
+        return inventoryItem;
     }
 }
