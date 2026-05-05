@@ -1,10 +1,11 @@
 ﻿using System;
+using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 [Serializable]
 public class SerializableScriptableObject : ScriptableObject
 {
-    [SerializeField, HideInInspector] private string _guid;
+    [SerializeField, ReadOnly] private string _guid;
     public string Guid => _guid;
 
 #if UNITY_EDITOR

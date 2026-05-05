@@ -1,25 +1,28 @@
-using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class ContainerCounterController : BaseCounterController, IContainerCounter
 {
-    [SerializeField] private KitchenObjectSO _kitchenObjectSO;
+    private ContainerData containerData;
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
+        if(containerData.FillAmount <= 0f)
+        {
+            return;
+        }
+
         if (!playerStateMachine.HasKitchenObject())
         {
-            KitchenObject.SpawnKitchenObject(_kitchenObjectSO, playerStateMachine);
+            KitchenObject.SpawnKitchenObject(containerData.KitchenObjectSO, playerStateMachine);
         }
         else
         {
             if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject tablewareKitchenObject))
             {
-                if (tablewareKitchenObject.TryAddIngredient(_kitchenObjectSO))
+                if (tablewareKitchenObject.TryAddIngredient(containerData.KitchenObjectSO))
                 {
-                    // Indicate ingredient added to plate
-                    //OnSpawnKitchenObject?.Invoke(this, null); 
+                    containerData.Empty(1f);
+
                 }
             }
         }
@@ -27,6 +30,6 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
 
     public List<KitchenObjectSO> GetContainerKitchenObjectType()
     {
-        return new List<KitchenObjectSO> { _kitchenObjectSO };
+        return new List<KitchenObjectSO> { containerData.KitchenObjectSO };
     }
 }
