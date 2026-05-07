@@ -22,7 +22,7 @@ MonoBehaviour:
     unlockLevel: 2
   - id: 2
     name: Carrot Container
-    type: 0
+    type: 1
     price: 40
     reward: edc8e469bd7837345a2ae859c4eb2be1_1
     category: 0
@@ -138,4 +138,11 @@ MonoBehaviour:
     price: 20
     reward: 6acc2969bc480cd4386b40bd75c9a691_1
     category: 2
+    unlockLevel: 1
+  - id: 19
+    name: Container Counter
+    type: 1
+    price: 10
+    reward: b28a5fed1f54f2948aa1cc6aa79f06d6_1
+    category: 0
     unlockLevel: 1

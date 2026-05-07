@@ -15,7 +15,7 @@ public class GameData
     public ShopData ShopData { get; private set; } = new ShopData();
     public void UpdateGridData(GridXZ<GridObject> grid)
     {
-        GridData.UpdateGridData(grid);
+        //GridData.UpdateGridData(grid);
     }   
     public void AddInventoryData(string guid)
     {

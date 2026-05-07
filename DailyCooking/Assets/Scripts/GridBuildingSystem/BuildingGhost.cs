@@ -50,13 +50,13 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
     {
         Debug.Log("Selected Changed: " + args.placedObjectTypeSO);
         this.placedObjectTypeSO = args.placedObjectTypeSO;        
+        targetPosition = args.position;
         RefreshVisual(args.position);
 
         if (this.placedObjectTypeSO == null)
         {
             return;
         }
-        targetPosition = args.position;
         targetQuaternion = GridBuildingSystem.Instance.BuildingPlacementManager.GetPlacedObjectRotation();
         isRotating = true;
         OffsetRotation();
@@ -132,7 +132,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
         if (placedObjectTypeSO != null)
         {
             KitchenGameManager.Instance.OnSpawnRequestCompleted = (spawnedObject) => {
-                Debug.Log("Spawned Object: " + spawnedObject.name);
+                //Debug.Log("Spawned Object: " + spawnedObject.name);
                 PlacedObjectView placedObjectView = spawnedObject.GetComponent<PlacedObjectView>();
 
                 visual = placedObjectView.transform;
@@ -144,7 +144,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
                 if (targetPosition != -Vector3.one)
                 {
                     visualContainer.position = targetPosition;
-                    visual.position = targetPosition;
+                    visual.position = new Vector3(targetPosition.x, 1f, targetPosition.z);
                 }
                 else
                 {
@@ -154,7 +154,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
                 KitchenGameManager.Instance.OnSpawnRequestCompleted = null;
             };
 
-            PlacedObjectFactory.Create(Vector3.zero, Vector2Int.zero, Dir.Down,
+            PlacedObjectFactory.Create(new Vector3(targetPosition.x, 1f, targetPosition.z), Vector2Int.zero, Dir.Down,
                 placedObjectTypeSO, NetworkManager.Singleton.LocalClientId,true);
             
         }
@@ -203,7 +203,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
     {
         isDragging = false;
         isRotating = false;
-        KitchenGameManager.Instance.DestroyPlacedObject(visual.GetComponent<NetworkObject>());
+//        KitchenGameManager.Instance.DestroyPlacedObject(visual.GetComponent<NetworkObject>());
 
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIInventoryPopup);
         ShowCanvas(false);

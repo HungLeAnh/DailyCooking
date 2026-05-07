@@ -37,6 +37,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     private long earnCount;
     private long serveCount;
     private List<KitchenObjectSO> unlockIngredient;
+    private Dictionary<string,KitchenObjectSO> kitchenObjectSODic;
 
     public long EarnCount => earnCount;
     public long ServeCount => serveCount;
@@ -51,7 +52,11 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         base.Awake();
         state = State.Editing;
         unlockIngredient = new List<KitchenObjectSO>();
-
+        kitchenObjectSODic = new Dictionary<string, KitchenObjectSO>();
+        foreach (var kitchenObjectSO in kitchenObjectSOList)
+        {
+            kitchenObjectSODic[kitchenObjectSO.Guid] = kitchenObjectSO;
+        }
     }
     public override void OnNetworkSpawn()
     {
@@ -71,12 +76,12 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     public void Init()
     {
         unlockIngredient.Clear();
-        foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
-        {
-            if (counterController == null)
-                continue;
-            AddUnlockIngredient(counterController);
-        }
+        //foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
+        //{
+        //    if (counterController == null)
+        //        continue;
+        //    AddUnlockIngredient(counterController);
+        //}
     }
     public void ChangeState(State newState)
     {
@@ -188,23 +193,21 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
             return null;
         return GameManager.Instance.GameData.MenuData.menuDished[index];
     }
-    public int GetKitchenObjectSOIndex(KitchenObjectSO kitchenObjectSO)
+    public KitchenObjectSO GetKitchenObjectSOByGuid(string guid)
     {
-        return kitchenObjectSOList.IndexOf(kitchenObjectSO);
-    }
-    public KitchenObjectSO GetKitchenObjectSOFromIndex(int kitchenObjectSOIndex)
-    {
-        return kitchenObjectSOList[kitchenObjectSOIndex];
-
+        if (kitchenObjectSODic.ContainsKey(guid))
+            return kitchenObjectSODic[guid];
+        else
+            return null;
     }
     public void SpawnKitchenObject(KitchenObjectSO kitchenObjectSO, IKitchenObjectParent kitchenObjectParent, int index = 0)
     {
-        SpawnKitchenObjectServerRpc(GetKitchenObjectSOIndex(kitchenObjectSO), kitchenObjectParent.GetNetworkObject(), index);
+        SpawnKitchenObjectServerRpc(kitchenObjectSO.Guid, kitchenObjectParent.GetNetworkObject(), index);
     }
     [Rpc(SendTo.Server)]
-    private void SpawnKitchenObjectServerRpc(int kitchenObjectSOIndex, NetworkObjectReference networkObjectReference, int index = 0)
+    private void SpawnKitchenObjectServerRpc(string kitchenObjectSOGuid, NetworkObjectReference networkObjectReference, int index = 0)
     {
-        KitchenObjectSO kitchenObjectSO = GetKitchenObjectSOFromIndex(kitchenObjectSOIndex);
+        KitchenObjectSO kitchenObjectSO = kitchenObjectSODic[kitchenObjectSOGuid];
 
         networkObjectReference.TryGet(out NetworkObject kitchenObjectParentNetworkObject);
         IKitchenObjectParent kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponent<IKitchenObjectParent>();
@@ -225,27 +228,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         kitchenObject.SetKitchenObjectParent(kitchenObjectParent, index);
     }
 
-    public void DestroyKitchenObject(KitchenObject kitchenObject)
-    {
-        DestroyKitchenObjectServerRpc(kitchenObject.NetworkObject);
-    }
-
-    [Rpc(SendTo.Server)]
-    private void DestroyKitchenObjectServerRpc(NetworkObjectReference kitchenObjectNetworkObjectReference)
-    {
-        kitchenObjectNetworkObjectReference.TryGet(out NetworkObject kitchenObjectNetworkObject);
-
-        if (kitchenObjectNetworkObject == null)
-        {
-            //This object is already destroyed
-            return;
-        }
-
-        KitchenObject kitchenObject = kitchenObjectNetworkObject.GetComponent<KitchenObject>();
-
-        kitchenObject.ClearKitchenObjectOnParentClientRpc();
-        kitchenObject.DestroySelf();
-    }
     [Rpc(SendTo.Server)]
     public void CreatePlacedObjectViewServerRpc(Vector3 worldPosition, string placeObjectTypeSOGuid, 
         Vector2Int origin, Dir dir, ulong targetClientId, bool isPreview)

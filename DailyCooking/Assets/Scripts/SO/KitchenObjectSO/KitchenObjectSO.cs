@@ -2,10 +2,12 @@
 using UnityEngine;
 
 [CreateAssetMenu()]
-public class KitchenObjectSO : ScriptableObject
+public class KitchenObjectSO : SerializableScriptableObject
 {
     public Transform prefab;
     public Sprite Sprite;
     public string objectName;
     public KitchenObjectOptionalProcessSO processSO;
+    public bool isRefiller;
+    public float refillingAmount;
 }

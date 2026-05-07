@@ -21,7 +21,8 @@ public class FileDataHandler
             Error = (sender, args) =>
             {
                 args.ErrorContext.Handled = true;
-            }
+            },
+            TypeNameHandling = TypeNameHandling.Auto
         };
         settings.Converters.Add(new UniversalUnityConverter());
     }

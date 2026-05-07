@@ -43,7 +43,7 @@ public class InGameState : GameManagerBaseState
             await Task.Yield(); 
         
         interstitialCounter = interstitialInterval;
-        AdsManager.Instance.ShowInterstitialAds();
+        //AdsManager.Instance.ShowInterstitialAds();
         
     }
     public override void Exit()

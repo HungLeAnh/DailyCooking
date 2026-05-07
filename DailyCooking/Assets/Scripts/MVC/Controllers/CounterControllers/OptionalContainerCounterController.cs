@@ -57,4 +57,9 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
     {
         return kitchenObjectSOList;
     }
+
+    public void Refill(float fillAmount, string kitchenObjectGuid)
+    {
+        
+    }
 }

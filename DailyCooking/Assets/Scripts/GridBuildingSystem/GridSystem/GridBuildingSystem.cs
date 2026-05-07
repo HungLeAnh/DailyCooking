@@ -115,6 +115,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         OnObjectSpawned?.Invoke();
         isInitialized = true;
         KitchenGameManager.Instance.Init();
+        gameManager.GameData.GridData.Initialize();
         SetBlocker();
         BakeNavMesh();
     }
@@ -190,10 +191,6 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         {
             return null;
         }
-    }
-    public PlacedObjectTypeSO GetPlacedObjectTypeSOById(string id)
-    {
-        return PlacedObjectDatabase.PlacedObjects.Find(x => x.id == id);
     }
 
     [Rpc(SendTo.Server)]

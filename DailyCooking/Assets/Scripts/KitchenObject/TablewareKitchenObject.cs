@@ -47,21 +47,20 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
         }
         else
         {
-            int index = KitchenGameManager.Instance.GetKitchenObjectSOIndex(kitchenObjectSO);
-            TryAddIngredientServerRpc(index);
+            TryAddIngredientServerRpc(kitchenObjectSO.Guid);
 
             return true;
         }
     }
     [Rpc(SendTo.Server)]
-    private void TryAddIngredientServerRpc(int kitchenObjectSOIndex)
+    private void TryAddIngredientServerRpc(string kitchenObjectSOGuid)
     {
-        TryAddIngredientClientRpc(kitchenObjectSOIndex);
+        TryAddIngredientClientRpc(kitchenObjectSOGuid);
     }
     [Rpc(SendTo.ClientsAndHost)]
-    private void TryAddIngredientClientRpc(int kitchenObjectSOIndex)
+    private void TryAddIngredientClientRpc(string kitchenObjectSOGuid)
     {
-        KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOFromIndex(kitchenObjectSOIndex);
+        KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuid);
         _ingredientSOList.Add(kitchenObjectSO);
         OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
         {

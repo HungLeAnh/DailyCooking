@@ -28,7 +28,7 @@ public class CounterModules : PersistentSingleton<CounterModules>, IModules
     public void AddController(BaseCounterController controller)
     {
         baseCounterControllers.Add(controller);
-        KitchenGameManager.Instance.AddUnlockIngredient(controller);
+        //KitchenGameManager.Instance.AddUnlockIngredient(controller);
         controller.OnDestroySelf += () => DestroyItem(controller);
 
     }

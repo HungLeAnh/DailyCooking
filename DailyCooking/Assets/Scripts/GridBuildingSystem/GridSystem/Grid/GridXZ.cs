@@ -13,6 +13,8 @@ public class GridXZ<TGridObject> {
         public int x;
         public int z;
     }
+    public event Action OnGridSizeChanged;
+
     private int widthMin;
     private int heightMin;
     private int widthMax;
@@ -76,10 +78,10 @@ public class GridXZ<TGridObject> {
             Debug.DrawLine(GetWorldPosition(0, heightMax), GetWorldPosition(widthMax, heightMax), Color.white, 100f);
             Debug.DrawLine(GetWorldPosition(widthMax, 0), GetWorldPosition(widthMax, heightMax), Color.white, 100f);
 
-            OnGridObjectChanged += (object sender, OnGridObjectChangedEventArgs eventArgs) =>
-            {
-                debugTextArray[eventArgs.x, eventArgs.z].text = gridArray[eventArgs.x, eventArgs.z]?.ToString();
-            };
+            //OnGridObjectChanged += (object sender, OnGridObjectChangedEventArgs eventArgs) =>
+            //{
+            //    debugTextArray[eventArgs.x, eventArgs.z].text = gridArray[eventArgs.x, eventArgs.z]?.ToString();
+            //};
         }
     }
     public int GetWidthMin()
@@ -144,7 +146,7 @@ public class GridXZ<TGridObject> {
                 gridArray[x, z] = new List<TGridObject>();
             }
             gridArray[x, z].Add(gridObject);
-            //TriggerGridObjectChanged(x, z);
+            TriggerGridObjectChanged(x, z);
         }
     }
 
@@ -189,6 +191,7 @@ public class GridXZ<TGridObject> {
 
         gridArray = Resize2DArray(gridArray, width, height);
         ShowDebug();
+        OnGridSizeChanged?.Invoke();
     }
     public  List<TGridObject>[,] Resize2DArray(List<TGridObject>[,] original, int newRows, int newCols)
     {
@@ -244,6 +247,6 @@ public class GridXZ<TGridObject> {
             }
         }
         gridArray = Resize2DArray(gridArray, widthMax, heightMax);
-
+         OnGridSizeChanged?.Invoke();
     }
 }
