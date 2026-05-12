@@ -22,6 +22,8 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
 
     private string playerName;
     private NetworkList<PlayerData> playerDataNetworkList;
+    private bool isSinglePlayerMode = false;
+    public bool IsSinglePlayerMode => isSinglePlayerMode;
     public string GetPlayerName()
     {
         return playerName;
@@ -161,6 +163,7 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     {
         // Use the single player transport when starting a single player session.
         networkManager.NetworkConfig.NetworkTransport = singlePlayerTransport;
+        isSinglePlayerMode = true;
         if (!networkManager.StartHost())
         {
             NetworkLog.LogError("Failed to start single player session!");

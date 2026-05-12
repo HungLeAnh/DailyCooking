@@ -18,7 +18,7 @@ public class UIMainMenuPopup : UIPopup
         {
             GameManager.Instance.LoadGame();
             MultiplayerManager.Instance.StartSinglePlayer();
-            Loader.Load(Loader.Scene.GameScene);
+            Loader.LoadNetwork(Loader.Scene.GameScene);
             GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
         });

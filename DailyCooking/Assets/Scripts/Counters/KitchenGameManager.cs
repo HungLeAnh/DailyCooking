@@ -15,7 +15,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
 
     public Action<NetworkObject> OnSpawnRequestCompleted;
     public event EventHandler OnStateChanged;
-
+    public Action OnSpawnKitchenObjectCompleted;
 
     public enum State
     {
@@ -226,6 +226,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         KitchenObject kitchenObject = kitchenObjectTransform.GetComponent<KitchenObject>();
 
         kitchenObject.SetKitchenObjectParent(kitchenObjectParent, index);
+        OnSpawnKitchenObjectCompleted?.Invoke();
     }
 
     [Rpc(SendTo.Server)]

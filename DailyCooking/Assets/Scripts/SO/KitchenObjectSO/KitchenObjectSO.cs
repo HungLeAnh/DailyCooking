@@ -8,6 +8,4 @@ public class KitchenObjectSO : SerializableScriptableObject
     public Sprite Sprite;
     public string objectName;
     public KitchenObjectOptionalProcessSO processSO;
-    public bool isRefiller;
-    public float refillingAmount;
 }

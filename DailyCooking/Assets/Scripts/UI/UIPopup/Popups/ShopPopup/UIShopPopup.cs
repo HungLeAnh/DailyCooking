@@ -12,6 +12,7 @@ public class UIShopPopup : UIPopup
 {
     [SerializeField] private ScrollRect scrollRect;
     [SerializeField] private Transform _shopParent;
+    [SerializeField] private Transform _ingredientParent;
     [SerializeField] private GameObject _shopCategoryPrefab;
     [SerializeField] private Button closeButton;
     [Header("Free Currency")]

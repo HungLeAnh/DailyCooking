@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -79,6 +78,7 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
                 {
                     sender = this,
                     objectSO = kitchenObject.GetKitchenObjectSO(),
+                    Title = "Select way to process ingredient:"
                 }
             );
         }

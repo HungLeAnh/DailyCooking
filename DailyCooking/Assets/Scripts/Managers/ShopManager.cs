@@ -35,6 +35,23 @@ public class ShopManager : PersistentSingleton<ShopManager>
             }
 
         }
+        if (item.Type == ShopItemType.Ingredient)
+        {
+            //Debug.Log(parsedData.Count);
+            foreach (var pair in parsedData)
+            {
+                string recipeId = pair.Key;
+                int amount = pair.Value;
+                //Debug.Log($"Adding {amount} of {recipeId} to the post box.");
+                var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(recipeId);
+                GridBuildingSystem.Instance.PostBox.AddPackage(kitchenObjectSO);
+                //Debug.Log($"Added {amount} of {kitchenObjectSO.objectName} to the post box.");
+                //for (int i = 0; i < amount; i++)
+                //{
+
+                //}
+            }
+        }
     }
 
     public void BuyCurrency(ShopItemType type, int currencyAmount)

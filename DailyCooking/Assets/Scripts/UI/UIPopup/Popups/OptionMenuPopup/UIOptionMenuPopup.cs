@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +15,7 @@ public class UIOptionMenuPopup : UIPopup
         public object sender;
         public List<KitchenObjectSO> optionalList;
         public KitchenObjectSO objectSO;
+        public string Title;
     }
 
     [SerializeField] private Transform _menuContainer;
@@ -56,7 +58,8 @@ public class UIOptionMenuPopup : UIPopup
     private void BaseCounter_OnShowOptionalMenu(object sender, List<KitchenObjectSO> kitchenObjectSOList)
     {
         Show();
-        _title.text = "Select ingredient to make: ";
+        var inputParam = _openParam as Param;
+        _title.text = inputParam.Title;
         _optionalCounter = (IHasOptionalSO)sender;
         if (_optionalCounter == null)
             return;
@@ -77,7 +80,8 @@ public class UIOptionMenuPopup : UIPopup
     private void BaseCounter_OnAnyObjectPlacedHere(object sender, KitchenObjectSO kitchenObjectSO)
     {
         Show();
-        _title.text = "Select way to process ingredient:";
+        var inputParam = _openParam as Param;
+        _title.text = inputParam.Title;
         _optionalCounter = (IHasOptionalSO)sender;
         if (_optionalCounter == null ) 
             return;

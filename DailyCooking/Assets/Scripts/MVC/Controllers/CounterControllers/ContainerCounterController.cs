@@ -1,12 +1,12 @@
 using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
 public class ContainerCounterController : BaseCounterController, IContainerCounter
 {
-    [SerializeField] private KitchenObjectSO kitchenObjectSO;
-    private float fillAmount = 0f;
-    private string kitchenObjectSOGuid;
-
+    private NetworkVariable<float> fillAmount = new NetworkVariable<float>(0f);
+    private NetworkVariable<FixedString64Bytes> kitchenObjectSOGuid = new NetworkVariable<FixedString64Bytes>();
     public override void OnNetworkSpawn()
     {
         GridBuildingSystem.Instance.OnObjectSpawned += GridBuildingSystem_OnObjectSpawned;
@@ -38,8 +38,8 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
                     Debug.Log("ContainerCounterController: Found matching grid object data! ContainerData: " + containerData.KitchenObjectSOGuid);
                     if (containerData != null)
                     {
-                        this.kitchenObjectSOGuid = containerData.KitchenObjectSOGuid;
-                        this.fillAmount = containerData.FillAmount;
+                        this.kitchenObjectSOGuid.Value = containerData.KitchenObjectSOGuid;
+                        this.fillAmount.Value = containerData.FillAmount;
                         break;
                     }
                     else
@@ -58,40 +58,40 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        if (kitchenObjectSO != null)
+        Debug.Log("ContainerCounterController: InteractEvent called! Player has kitchen object: " + playerStateMachine.HasKitchenObject() + ", fill amount: " + fillAmount.Value);
+        if (!playerStateMachine.HasKitchenObject() && fillAmount.Value > 0f )
         {
+            KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuid.Value.ToString());
             KitchenObject.SpawnKitchenObject(kitchenObjectSO, playerStateMachine);
-            return;
-        }
-
-        if (!playerStateMachine.HasKitchenObject() && fillAmount > 0f )
-        {
-            KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuid);
-            KitchenObject.SpawnKitchenObject(kitchenObjectSO, playerStateMachine);
-            fillAmount--;
-            if(fillAmount <= 0f)
+            fillAmount.Value--;
+            if(fillAmount.Value <= 0f)
             {
-                kitchenObjectSOGuid = null;
+                kitchenObjectSOGuid.Value.Clear();
             }
+            UpdateContainerData();
         }
         else
         {
-            if (playerStateMachine.GetKitchenObject().IsRefiller())
+            Debug.Log("Player has kitchen object:" + playerStateMachine.GetKitchenObject());
+            if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
             {
-                playerStateMachine.GetKitchenObject().RefillContainerServerRpc(this);
+                refillerKitchenObject.RefillContainerServerRpc(this);
+
+                playerStateMachine.GetKitchenObject().DestroySelf();
+
             }
         }
     }
 
     public List<KitchenObjectSO> GetContainerKitchenObjectType()
     {
-        return new List<KitchenObjectSO> { KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuid)};
+        return new List<KitchenObjectSO> { KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuid.Value.ToString()) };
     }
 
     public void Refill(float fillAmount, string kitchenObjectSOGuid)
     {
         Debug.Log("Trying to refill container counter with guid: " + kitchenObjectSOGuid);
-        if(kitchenObjectSOGuid == this.kitchenObjectSOGuid || string.IsNullOrEmpty(this.kitchenObjectSOGuid))
+        if(kitchenObjectSOGuid == this.kitchenObjectSOGuid.Value.ToString() || string.IsNullOrEmpty(this.kitchenObjectSOGuid.Value.ToString()))
         {
             PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
             string guid = placedObjectView.GetPlacedObjectTypeSOGuid();
@@ -101,13 +101,35 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
                      new ContainerData(kitchenObjectSOGuid, fillAmount, guid, gridPosition, placedObjectView.Dir, placedObjectView.InventoryTabType),
                      placedObjectView.GetPlacedObjectTypeSOGuid());
             });
+            this.fillAmount.Value = fillAmount;
+            this.kitchenObjectSOGuid.Value = kitchenObjectSOGuid;
 
         }
         else
         {
-            Debug.LogError("Trying to refill container counter with different kitchen object type! Current guid: " + this.kitchenObjectSOGuid + " trying to refill with guid: " + kitchenObjectSOGuid);
+            UIManager.Instance.ShowAlertMessage("Cannot refill container counter with different ingredient type ");
         }
 
     }
-
+    public void UpdateContainerData()
+    {
+        UpdateContainerDataServerRpc();
+    }
+    [Rpc(SendTo.Server)]
+    private void UpdateContainerDataServerRpc()
+    {
+        UpdateContainerDataClientRpc();
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void UpdateContainerDataClientRpc() 
+    {
+        PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
+        string guid = placedObjectView.GetPlacedObjectTypeSOGuid();
+        placedObjectView.GetGridPositionList().ForEach(gridPosition =>
+        {
+            GameManager.Instance.GameData.GridData.ChangeGridObjectData(gridPosition.x, gridPosition.y,
+                new ContainerData(kitchenObjectSOGuid.Value.ToString(), fillAmount.Value, guid, gridPosition, placedObjectView.Dir, placedObjectView.InventoryTabType),
+                placedObjectView.GetPlacedObjectTypeSOGuid());
+        });
+    }
 }

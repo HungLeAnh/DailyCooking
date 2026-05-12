@@ -14,16 +14,4 @@ public class ContainerData : GridObjectData
         FillAmount = fillAmount;
     }
 
-    public void Fill(float amount)
-    {
-        FillAmount += amount;
-    }
-    public void Empty(float amount)
-    {
-        FillAmount -= amount;
-        if (FillAmount < 0f)
-        {
-            FillAmount = 0f;
-        }
-    }
 }

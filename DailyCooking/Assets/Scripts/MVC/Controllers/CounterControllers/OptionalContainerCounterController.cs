@@ -47,7 +47,8 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             new UIOptionMenuPopup.Param
             {
                 sender = this,
-                optionalList = kitchenObjectSOList
+                optionalList = kitchenObjectSOList,
+                Title = "Select ingredient to make: "
             });
 
         }

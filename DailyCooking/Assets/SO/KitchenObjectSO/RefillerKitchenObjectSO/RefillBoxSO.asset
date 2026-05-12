@@ -9,13 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aebea9f5a32204849a819aacd2e76397, type: 3}
-  m_Name: RefillBox
-  m_EditorClassIdentifier: 
-  _guid: c2b0fab10b5a05343be0bab82b421df7
+  m_Script: {fileID: 11500000, guid: b4cb782b1aa8e34409272d315c57ebf0, type: 3}
+  m_Name: RefillBoxSO
+  m_EditorClassIdentifier: Scripts::RefillerKitchenObjectSO
+  _guid: e400035c6d43f6e43b0c964c5a5c6149
   prefab: {fileID: 6154266614422445402, guid: 92d0dd975d02daa4380501696cf03aa2, type: 3}
-  Sprite: {fileID: 21300000, guid: 0a7edeaf507834376b86179b0a989ec1, type: 3}
-  objectName: Refill box
+  Sprite: {fileID: 21300000, guid: 3daae7950d44448a88d051eaaec84d84, type: 3}
+  objectName: Refill Box
   processSO: {fileID: 0}
-  isRefiller: 1
   refillingAmount: 3

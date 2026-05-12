@@ -5,8 +5,7 @@ using Unity.Netcode;
 
 public class KitchenObject : NetworkBehaviour
 {
-    [SerializeField] private KitchenObjectSO kitchenObjectSO;
-    [SerializeField] private KitchenObjectSO refillKitchenObjectSO;
+    [SerializeField] protected KitchenObjectSO kitchenObjectSO;
     private IKitchenObjectParent kitchenObjectParent;
     private FollowTransform kitchenObjectFollowTransform;
     protected virtual void Awake()
@@ -28,26 +27,6 @@ public class KitchenObject : NetworkBehaviour
             return null;
         
     }
-    public bool IsRefiller()
-    {
-        return kitchenObjectSO.isRefiller;
-    }
-    [Rpc(SendTo.Server)]
-    public void RefillContainerServerRpc(NetworkBehaviourReference containerCounter)
-    {
-        RefillClientsAndHostRpc(containerCounter,kitchenObjectSO.refillingAmount,refillKitchenObjectSO.Guid);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    public void RefillClientsAndHostRpc(NetworkBehaviourReference containerCounter, float fillAmount, string kitchenObjectGuid) 
-    {
-        Debug.Log("RefillContainerClientRpc called with containerCounter: " + containerCounter);
-        containerCounter.TryGet(out NetworkBehaviour containerCounterNetworkBehaviour);
-        if (containerCounterNetworkBehaviour is IContainerCounter containerCounterInterface)
-        {
-            containerCounterInterface.Refill(fillAmount, kitchenObjectGuid);
-        }
-    }
-
     public void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent, int index = 0)
     {
         SetKitchenObjectParentClientRpc(kitchenObjectParent.GetNetworkObject(),index);

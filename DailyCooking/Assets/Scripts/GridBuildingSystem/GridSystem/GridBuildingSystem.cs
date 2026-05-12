@@ -36,6 +36,9 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     [SerializeField] private Transform counterContainer;
     [SerializeField] private LayerMask counterLayerMask;
 
+    [Header("PostBox")]
+    [SerializeField] private GameObject postBoxPrefab;
+
     [Header("Blocker")]
     [SerializeField] private Transform blockerX;
     [SerializeField] private Transform blockerZ;
@@ -45,6 +48,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     private IBuildingPlacementManager buildingPlacementManager;
     private IGridInitializer gridInitializer;
     private IGridVisualizer gridVisualizer;
+    private PostBox postBox;
     private bool isInitialized = false;
     private bool stopMoving = false;
     private List<GridWall> gridWallList = new List<GridWall>();
@@ -62,6 +66,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     public IGridVisualizer GridVisualizer { get => gridVisualizer; set => gridVisualizer = value; }
     public bool StopMoving { get => stopMoving; set => stopMoving = value; }
     public bool IsInitialized { get => isInitialized; set => isInitialized = value; }
+    public PostBox PostBox { get => postBox; set => postBox = value; }
 
     private void OnDestroy()
     {
@@ -79,8 +84,11 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     }
     public override void OnNetworkSpawn()
     {
-        if (IsHost || IsServer)
+        base.OnNetworkSpawn();
+        if (IsHost || IsServer || MultiplayerManager.Instance.IsSinglePlayerMode)
+        {
             Initialize();
+        }
         else
             MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => Initialize();
     }
@@ -96,7 +104,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             gridManager = new GridManager(GameManager.Instance.GameData.GridData, (GridXZ<GridObject> grid, int x, int z) => new List<GridObject> { new GridObject(grid, x, z) });
         }
 
-        if (IsHost || IsServer)
+        if (IsHost || IsServer || MultiplayerManager.Instance.IsSinglePlayerMode)
             GridObjectSpawner.SpawnObjectsFromData(gridManager.Grid, GameManager.Instance.GameData.GridData.GridArrayData);
 
 
@@ -111,11 +119,16 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
 
         IUIPopupManager uiPopupManagerInstance = UIPopupManager.Instance;
         buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, uiPopupManagerInstance);
+        
+        GameObject postBoxInstance = Instantiate(postBoxPrefab, Vector3.zero, Quaternion.identity);
+        postBoxInstance.GetComponent<NetworkObject>().Spawn();
+        postBox = postBoxInstance.GetComponent<PostBox>();
 
         OnObjectSpawned?.Invoke();
         isInitialized = true;
         KitchenGameManager.Instance.Init();
         gameManager.GameData.GridData.Initialize();
+        gameManager.InitializePlayer();
         SetBlocker();
         BakeNavMesh();
     }

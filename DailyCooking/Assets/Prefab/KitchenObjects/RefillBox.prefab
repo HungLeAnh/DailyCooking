@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6154266614422445402}
   - component: {fileID: -1341167422320070893}
   - component: {fileID: -6831462771676512599}
-  - component: {fileID: 4793740106873417524}
+  - component: {fileID: 6849631732527373367}
   m_Layer: 0
   m_Name: RefillBox
   m_TagString: Untagged
@@ -73,7 +73,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1c84834a2d13840a33ecdbb5058b2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Scripts::FollowTransform
---- !u!114 &4793740106873417524
+--- !u!114 &6849631732527373367
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -82,12 +82,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 3639094113156401876}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aec14aebab31d7a429e0929eb5138ff7, type: 3}
+  m_Script: {fileID: 11500000, guid: 70d2b3aefbd536141b80fb0bfedf6423, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Scripts::KitchenObject
+  m_EditorClassIdentifier: Scripts::RefillerKitchenObject
   ShowTopMostFoldoutHeaderGroup: 1
-  kitchenObjectSO: {fileID: 11400000, guid: c2b0fab10b5a05343be0bab82b421df7, type: 2}
-  refillKitchenObjectSO: {fileID: 11400000, guid: 1c94b7f0c13c51d4ab047c26f734bbff, type: 2}
+  kitchenObjectSO: {fileID: 11400000, guid: e400035c6d43f6e43b0c964c5a5c6149, type: 2}
 --- !u!1 &8622493025619112790
 GameObject:
   m_ObjectHideFlags: 0
