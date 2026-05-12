@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +12,7 @@ public class GameData
     public MenuData MenuData { get; private set; } = new MenuData();
     public UpgradeData UpgradeData { get; private set; } = new UpgradeData();
     public ShopData ShopData { get; private set; } = new ShopData();
+    public PostBoxData PostBoxData { get; private set; } = new PostBoxData();
     public void UpdateGridData(GridXZ<GridObject> grid)
     {
         //GridData.UpdateGridData(grid);
@@ -85,4 +85,3 @@ public class GameData
         GameManager.Instance.SaveGame();
     }
 }
-

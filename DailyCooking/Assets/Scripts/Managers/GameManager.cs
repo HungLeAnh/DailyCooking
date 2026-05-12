@@ -100,6 +100,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         gameData.TutorialData.OnTutorialDataChanged += SaveGame;
         gameData.MenuData.OnMenuDataChanged += SaveGame;
         gameData.ShopData.OnResourceChange += SaveGame;
+        gameData.PostBoxData.OnResourceChange += SaveGame;
     }
 
     public void SaveGame()
@@ -222,6 +223,27 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         }
         GameData.PurchaseUpgrade(upgrade);
     }
+    [Rpc(SendTo.Server)]
+    public void UpdatePostBoxDataServerRpc(string kitchenObjectSOGuid)
+    {
+        UpdatePostBoxDataClientRpc(kitchenObjectSOGuid);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void UpdatePostBoxDataClientRpc(string kitchenObjectSOGuid)
+    {
+        GameData.PostBoxData.AddPackage(kitchenObjectSOGuid);
+    }
+    [Rpc(SendTo.Server)]
+    public void RemovePostBoxDataServerRpc(string kitchenObjectSOGuid)
+    {
+        RemovePostBoxDataClientRpc(kitchenObjectSOGuid);
+    } 
+    [Rpc(SendTo.ClientsAndHost)]
+    private void RemovePostBoxDataClientRpc(string kitchenObjectSOGuid)
+    {
+        GameData.PostBoxData.RemovePackage(kitchenObjectSOGuid);
+    }
+
     private void Instance_OnPlayerDataNetworkListChanged(object sender, EventArgs e)
     {
         gameData.TryAddPlayerStats(MultiplayerManager.Instance.GetLatestPlayerData().playerId.ToString());

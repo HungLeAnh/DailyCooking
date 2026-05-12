@@ -11,23 +11,17 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
     private List<KitchenObjectSO> kitchenObjectSOList = new List<KitchenObjectSO>();
     private PlayerStateMachine playerStateMachine;
     private int selectedIndex = 0;
-    public void ClearKitchenObjectSO(int index = 0)
-    {
-        kitchenObjectSOList[index] = null;
-    }
 
-    public KitchenObjectSO GetKitchenObjectSO(int index = 0)
+    public override void OnNetworkSpawn()
     {
-        return kitchenObjectSOList[index];
-    }
-    public void SetKitchenObjectSO(KitchenObjectSO kitchenObject, int index = 0)
-    {
-        kitchenObjectSOList[index] = kitchenObject;
-    }
-
-    public NetworkObject GetNetworkObject()
-    {
-        return NetworkObject;
+        GameManager.Instance.GameData.PostBoxData.KitchenObjectSOGuidList.ForEach(guid =>
+        {
+            var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(guid);
+            if (kitchenObjectSO != null)
+            {
+                kitchenObjectSOList.Add(kitchenObjectSO);
+            }
+        });
     }
 
     public bool HasKitchenObjectSO(int index = 0)
@@ -99,6 +93,7 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
         if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
         {
             refillerKitchenObject.SetRefillKitchenObject(kitchenObjectSOList[selectedIndex]);
+            GameManager.Instance.RemovePostBoxDataServerRpc(kitchenObjectSOList[selectedIndex].Guid);
             kitchenObjectSOList.RemoveAt(selectedIndex);
         }
         playerStateMachine = null;
@@ -123,7 +118,7 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
 
     public void AddPackage(KitchenObjectSO kitchenObjectSO)
     {
-
         kitchenObjectSOList.Add(kitchenObjectSO);
+        GameManager.Instance.UpdatePostBoxDataServerRpc(kitchenObjectSO.Guid);
     }
 }
