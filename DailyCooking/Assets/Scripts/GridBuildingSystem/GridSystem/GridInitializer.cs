@@ -29,23 +29,19 @@ public class GridInitializer : IGridInitializer
 
     public void InitRoad()
     {
-        GameObject cornerRoad = GameObject.Instantiate(roadCornerPrefab, gridManager.GetWorldPosition(0, 0), Quaternion.identity);
-        cornerRoad.transform.SetParent(roadContainer);
+        GameObject cornerRoad = GameObject.Instantiate(roadCornerPrefab, gridManager.GetWorldPosition(0, 0), Quaternion.identity, roadContainer);
 
         for (int i = 0; i < 100; i++)
         {
-            GameObject road = GameObject.Instantiate(roadPrefab, gridManager.GetWorldPosition(0, i), Quaternion.identity);
-            road.transform.SetParent(roadContainer);
+            GameObject road = GameObject.Instantiate(roadPrefab, gridManager.GetWorldPosition(0, i), Quaternion.identity, roadContainer);
             road.transform.rotation = Quaternion.Euler(0, 0, 0);
-
         }        
         for (int i = 0; i < 100; i++)
         {
-            GameObject road = GameObject.Instantiate(roadPrefab, gridManager.GetWorldPosition(i, 0), Quaternion.identity);
-            road.transform.SetParent(roadContainer);
+            GameObject road = GameObject.Instantiate(roadPrefab, gridManager.GetWorldPosition(i, 0), Quaternion.identity, roadContainer);
             road.transform.rotation = Quaternion.Euler(0, 270, 0);
-
         }
+        roadContainer.position = new Vector3(-1, -1, -1);
     }    
 
     public void InitFloor()
