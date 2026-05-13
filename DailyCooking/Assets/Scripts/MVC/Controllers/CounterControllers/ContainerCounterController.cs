@@ -66,7 +66,7 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
             fillAmount.Value--;
             if(fillAmount.Value <= 0f)
             {
-                kitchenObjectSOGuid.Value.Clear();
+                kitchenObjectSOGuid.Value = "";
             }
             UpdateContainerData();
         }

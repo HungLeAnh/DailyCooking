@@ -3,6 +3,8 @@ public enum ShopItemCategory
     Counters,
     Tables,
     Walls,
-    Fruits,
+    Vegetables,
+    Bakery,
+    Dairy,
     None
 }

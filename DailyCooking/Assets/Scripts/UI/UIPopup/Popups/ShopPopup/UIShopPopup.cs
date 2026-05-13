@@ -51,14 +51,25 @@ public class UIShopPopup : UIPopup
     }
     public void Initialize()
     {
-        var categoryList = ConfigManager.Instance.ConfigShop.ShopItems.ToLookup(x => x.Category);
-        foreach (var category in categoryList)
+        var listItem = ConfigManager.Instance.ConfigShop.ShopItems.FindAll(x => x.Type == ShopItemType.Item);
+        var itemCategoryList = listItem.ToLookup(x => x.Category);
+        foreach (var category in itemCategoryList)
         {
             GameObject shopCategory = Instantiate(_shopCategoryPrefab, _shopParent);
             shopCategory.gameObject.SetActive(true);
             UIShopCategoryItem shopCategoryItem = shopCategory.GetComponent<UIShopCategoryItem>();
             shopCategoryItem.SetCategory(category);
             _shopCategoryItems.Add(shopCategoryItem);
+        }
+
+        var ingredientList = ConfigManager.Instance.ConfigShop.ShopItems.FindAll(x => x.Type == ShopItemType.Ingredient);
+        var ingredientCategoryList = ingredientList.ToLookup(x => x.Category);
+        foreach (var ingredient in ingredientCategoryList)
+        {
+            GameObject shopCategory = Instantiate(_shopCategoryPrefab, _ingredientParent);
+            shopCategory.gameObject.SetActive(true);
+            UIShopCategoryItem shopCategoryItem = shopCategory.GetComponent<UIShopCategoryItem>();
+            shopCategoryItem.SetCategory(ingredient);
         }
     }
     public void SnapTo(RectTransform target,Action cb = null)
