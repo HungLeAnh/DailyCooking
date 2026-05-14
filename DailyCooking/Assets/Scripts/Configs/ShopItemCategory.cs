@@ -6,5 +6,7 @@ public enum ShopItemCategory
     Vegetables,
     Bakery,
     Dairy,
+    Patties,
+    Meats,
     None
 }
