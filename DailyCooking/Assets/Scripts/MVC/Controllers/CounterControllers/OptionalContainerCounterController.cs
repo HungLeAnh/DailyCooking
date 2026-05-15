@@ -68,11 +68,25 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
     }
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        Debug.Log("Interact optional Counter");
-        this.playerStateMachine = playerStateMachine;
-        // Specify the generic type arguments explicitly to avoid CS0411 type inference failure
-        var kitchenObjectSOList = GetContainerKitchenObjectType();
-        OnShowOptionMenu(kitchenObjectSOList);
+        if (!playerStateMachine.HasKitchenObject())
+        {        
+            Debug.Log("Player does not have kitchen object, showing option menu");
+            this.playerStateMachine = playerStateMachine;
+            var kitchenObjectSOList = GetContainerKitchenObjectType();
+            OnShowOptionMenu(kitchenObjectSOList);
+
+        }
+        else if (playerStateMachine.HasKitchenObject())
+        {
+            Debug.Log("Player has kitchen object:" + playerStateMachine.GetKitchenObject());
+            if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
+            {
+                refillerKitchenObject.RefillContainerServerRpc(this);
+
+                playerStateMachine.GetKitchenObject().DestroySelf();
+
+            }
+        }
     }
 
     public void SetOptionKitchenObjectSO(int index)
@@ -86,6 +100,16 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
             if (kitchenObjectSO != null)
             {
+                if (containerData.FillAmount - 1f <= 0f)
+                {
+                    containerData.FillAmount--;
+                    containerData.KitchenObjectSOGuid = "";
+                }
+                else
+                {
+                    containerData.FillAmount--;
+                }
+                UpdateContainerData();
                 KitchenObject.SpawnKitchenObject(kitchenObjectSO, this.playerStateMachine);
             }
             else
@@ -100,8 +124,10 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
     {
         if(GridBuildingSystem.Instance.BuildingPlacementManager.IsBuilding)
             return;
+        Debug.Log("Showing option menu for container counter with " + kitchenObjectSOList.Count + " options");
         if (IsPlaced.Value)
         {
+            Debug.Log("Container counter is placed, showing option menu popup");
             UIPopupManager.Instance.ShowPopup(
             UIPopupType.UIOptionMenuPopup,
             new UIOptionMenuPopup.Param
@@ -124,27 +150,16 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
     public void Refill(float fillAmount, string kitchenObjectSOGuid)
     {
-        foreach (var containerDataSerializable in kitchenObjectSONetworkList)
+        PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
+        string guid = placedObjectView.GetPlacedObjectTypeSOGuid();
+        kitchenObjectSONetworkList.Add(new ContainerDataSerializable(kitchenObjectSOGuid, fillAmount));
+        placedObjectView.GetGridPositionList().ForEach(gridPosition =>
         {
-            Debug.Log("Trying to refill container counter with guid: " + kitchenObjectSOGuid+ " is empty: " + string.IsNullOrWhiteSpace(containerDataSerializable.KitchenObjectSOGuidString));
-            if (kitchenObjectSOGuid == containerDataSerializable.KitchenObjectSOGuid.ToString() || string.IsNullOrEmpty(containerDataSerializable.KitchenObjectSOGuid.ToString()))
-            {
-                PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
-                string guid = placedObjectView.GetPlacedObjectTypeSOGuid();
-                kitchenObjectSONetworkList.Add(new ContainerDataSerializable(kitchenObjectSOGuid, fillAmount));
-                placedObjectView.GetGridPositionList().ForEach(gridPosition =>
-                {
-                    GameManager.Instance.GameData.GridData.ChangeGridObjectData(gridPosition.x, gridPosition.y,
-                        new ContainerData(kitchenObjectSONetworkList.AsNativeArray().ToList(), guid, gridPosition, placedObjectView.Dir, placedObjectView.InventoryTabType),
-                        placedObjectView.GetPlacedObjectTypeSOGuid());
-                });
-                break;
-            }
-            else
-            {
-                UIManager.Instance.ShowAlertMessage("Cannot refill container counter with different ingredient type ");
-            }
-        }
+            GameManager.Instance.GameData.GridData.ChangeGridObjectData(gridPosition.x, gridPosition.y,
+                new ContainerData(kitchenObjectSONetworkList.AsNativeArray().ToList(), guid, gridPosition, placedObjectView.Dir, placedObjectView.InventoryTabType),
+                placedObjectView.GetPlacedObjectTypeSOGuid());
+        });
+        
     }
     public void UpdateContainerData()
     {
