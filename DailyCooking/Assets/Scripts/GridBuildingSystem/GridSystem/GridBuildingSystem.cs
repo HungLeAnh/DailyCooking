@@ -229,7 +229,6 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     {
         if(networkObjectReference.TryGet(out NetworkObject networkObject))
         {
-            networkObject.GetComponent<IPlaceable>().IsPlaced.Value = true;
             UpdateGridDataClientRpc(networkObject);
 
         }

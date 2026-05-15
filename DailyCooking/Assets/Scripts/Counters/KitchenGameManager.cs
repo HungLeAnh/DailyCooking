@@ -237,7 +237,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition, Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0), GridBuildingSystem.Instance.Container).transform;
         var networkObject = placedObjectTransform.GetComponent<NetworkObject>();
         PlacedObjectView placedObjectView = networkObject.GetComponent<PlacedObjectView>();
-        placedObjectView.GetComponent<IPlaceable>().IsPlaced.Value = false;
         placedObjectView.Intialize(placeObjectTypeSOGuid, origin, dir,isPreview);
 
         networkObject.Spawn();

@@ -102,12 +102,12 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             {
                 if (containerData.FillAmount - 1f <= 0f)
                 {
-                    containerData.FillAmount--;
-                    containerData.KitchenObjectSOGuid = "";
+                    kitchenObjectSONetworkList.RemoveAt(index);
                 }
                 else
                 {
                     containerData.FillAmount--;
+                    kitchenObjectSONetworkList[index] = containerData;
                 }
                 UpdateContainerData();
                 KitchenObject.SpawnKitchenObject(kitchenObjectSO, this.playerStateMachine);
@@ -125,19 +125,14 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
         if(GridBuildingSystem.Instance.BuildingPlacementManager.IsBuilding)
             return;
         Debug.Log("Showing option menu for container counter with " + kitchenObjectSOList.Count + " options");
-        if (IsPlaced.Value)
+        UIPopupManager.Instance.ShowPopup(
+        UIPopupType.UIOptionMenuPopup,
+        new UIOptionMenuPopup.Param
         {
-            Debug.Log("Container counter is placed, showing option menu popup");
-            UIPopupManager.Instance.ShowPopup(
-            UIPopupType.UIOptionMenuPopup,
-            new UIOptionMenuPopup.Param
-            {
-                sender = this,
-                optionalList = kitchenObjectSOList,
-                Title = "Select ingredient to make: "
-            });
-
-        }
+            sender = this,
+            optionalList = kitchenObjectSOList,
+            Title = "Select ingredient to make: "
+        });
     }
 
     public List<KitchenObjectSO> GetContainerKitchenObjectType()
@@ -181,5 +176,6 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
                 new ContainerData( kitchenObjectSONetworkList.AsNativeArray().ToList(), guid, gridPosition, placedObjectView.Dir, placedObjectView.InventoryTabType),
                 placedObjectView.GetPlacedObjectTypeSOGuid());
         });
+        Debug.Log("ContainerCounterController: " + kitchenObjectSONetworkList.AsNativeArray()[0].FillAmount.ToString());
     }
 }

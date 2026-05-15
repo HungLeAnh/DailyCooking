@@ -11,7 +11,6 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
 
     private Action onDestroySelf;
     private KitchenObject _kitchenObject;
-    private NetworkVariable<bool> isPlaced = new NetworkVariable<bool>(false);
     public KitchenObject KitchenObject
     {
         get => _kitchenObject;
@@ -22,7 +21,6 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     }
 
     public Action OnDestroySelf { get =>onDestroySelf; set => onDestroySelf += value; }
-    public NetworkVariable<bool> IsPlaced { get => isPlaced; set => isPlaced = value; }
 
     protected virtual void Start()
     {
