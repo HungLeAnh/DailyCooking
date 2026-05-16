@@ -39,12 +39,12 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
         }
         foreach (var gridObjectData in gridObjectDatas)
         {
-            Debug.Log("ContainerCounterController: Checking grid object data with placed object type SO guid: " + gridObjectData.ToString());
+            //Debug.Log("ContainerCounterController: Checking grid object data with placed object type SO guid: " + gridObjectData.ToString());
             if (gridObjectData.PlacedObjectTypeSOGuid == placedObjectTypeSOGuid)
             {
                 if (gridObjectData is ContainerData containerData)
                 {
-                    Debug.Log("ContainerCounterController: Found matching grid object data! ContainerData: " + containerData.ContainerDataSerializableList[0].KitchenObjectSOGuid);
+                    //Debug.Log("ContainerCounterController: Found matching grid object data! ContainerData: " + containerData.ContainerDataSerializableList[0].KitchenObjectSOGuid);
                     if (containerData != null)
                     {
                         containerData.ContainerDataSerializableList.ForEach(containerDataSerializable =>
@@ -69,8 +69,13 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         if (!playerStateMachine.HasKitchenObject())
-        {        
-            Debug.Log("Player does not have kitchen object, showing option menu");
+        {
+            if (kitchenObjectSONetworkList == null || kitchenObjectSONetworkList.Count == 0)
+            {
+                UIManager.Instance.ShowAlertMessage($"This is empty!");
+                return;
+            }
+            //Debug.Log("Player does not have kitchen object, showing option menu");
             this.playerStateMachine = playerStateMachine;
             var kitchenObjectSOList = GetContainerKitchenObjectType();
             OnShowOptionMenu(kitchenObjectSOList);
@@ -78,7 +83,7 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
         }
         else if (playerStateMachine.HasKitchenObject())
         {
-            Debug.Log("Player has kitchen object:" + playerStateMachine.GetKitchenObject());
+            //Debug.Log("Player has kitchen object:" + playerStateMachine.GetKitchenObject());
             if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
             {
                 refillerKitchenObject.RefillContainerServerRpc(this);
@@ -124,7 +129,7 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
     {
         if(GridBuildingSystem.Instance.BuildingPlacementManager.IsBuilding)
             return;
-        Debug.Log("Showing option menu for container counter with " + kitchenObjectSOList.Count + " options");
+        //Debug.Log("Showing option menu for container counter with " + kitchenObjectSOList.Count + " options");
         UIPopupManager.Instance.ShowPopup(
         UIPopupType.UIOptionMenuPopup,
         new UIOptionMenuPopup.Param
@@ -176,6 +181,5 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
                 new ContainerData( kitchenObjectSONetworkList.AsNativeArray().ToList(), guid, gridPosition, placedObjectView.Dir, placedObjectView.InventoryTabType),
                 placedObjectView.GetPlacedObjectTypeSOGuid());
         });
-        Debug.Log("ContainerCounterController: " + kitchenObjectSONetworkList.AsNativeArray()[0].FillAmount.ToString());
     }
 }

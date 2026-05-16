@@ -4,6 +4,9 @@ using Unity.Netcode;
 public class RefillerKitchenObject : KitchenObject
 {
     private KitchenObjectSO refillKitchenObjectSO;
+
+    public KitchenObjectSO RefillKitchenObjectSO { get => refillKitchenObjectSO; set => refillKitchenObjectSO = value; }
+
     public void SetRefillKitchenObject(KitchenObjectSO value)
     {
         refillKitchenObjectSO = value;

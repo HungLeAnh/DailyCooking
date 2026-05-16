@@ -29,14 +29,14 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
         }
         foreach ( var gridObjectData in gridObjectDatas )
         {
-            Debug.Log("ContainerCounterController: Checking grid object data with placed object type SO guid: " + gridObjectData.ToString());
+            //Debug.Log("ContainerCounterController: Checking grid object data with placed object type SO guid: " + gridObjectData.ToString());
             if (gridObjectData.PlacedObjectTypeSOGuid == placedObjectTypeSOGuid)
             {
                 if (gridObjectData is ContainerData containerData)
                 {
                     if (containerData != null && containerData.ContainerDataSerializableList != null && containerData.ContainerDataSerializableList.Count>0)
                     {
-                        Debug.Log("ContainerCounterController: Found matching grid object data! ContainerData: " + containerData.ContainerDataSerializableList[0].KitchenObjectSOGuid);
+                        //Debug.Log("ContainerCounterController: Found matching grid object data! ContainerData: " + containerData.ContainerDataSerializableList[0].KitchenObjectSOGuid);
                         this.networkContainerData.Value = containerData.ContainerDataSerializableList[0];
                         break;
                     }
@@ -57,34 +57,44 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        Debug.Log("ContainerCounterController: InteractEvent called! Player has kitchen object: " + playerStateMachine.HasKitchenObject() + ", fill amount: " + networkContainerData.Value.FillAmount);
+        //Debug.Log("ContainerCounterController: InteractEvent called! Player has kitchen object: " + playerStateMachine.HasKitchenObject() + ", fill amount: " + networkContainerData.Value.FillAmount);
 
-        if (!playerStateMachine.HasKitchenObject() && networkContainerData.Value.FillAmount > 0f )
+        if (!playerStateMachine.HasKitchenObject())
         {
-            if(string.IsNullOrEmpty(networkContainerData.Value.KitchenObjectSOGuid.ToString()))
+            if(string.IsNullOrEmpty(networkContainerData.Value.KitchenObjectSOGuid.ToString()) || networkContainerData.Value.FillAmount == 0f)
             {
-                Debug.Log("ContainerCounterController: Cannot interact with empty container!");
+                UIManager.Instance.ShowAlertMessage("This is empty!");
                 return;
             }
-            KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(networkContainerData.Value.KitchenObjectSOGuid.ToString());
-            Debug.Log("Spawning kitchen object with SO guid: " + networkContainerData.Value.KitchenObjectSOGuid.ToString() + ", fill amount: " + networkContainerData.Value.FillAmount);
-            KitchenObject.SpawnKitchenObject(kitchenObjectSO, playerStateMachine);
-
-            if(networkContainerData.Value.FillAmount - 1f <= 0f)
+            else if(networkContainerData.Value.FillAmount > 0f)
             {
-                networkContainerData.Value = new ContainerDataSerializable("", networkContainerData.Value.FillAmount - 1f);
+                KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(networkContainerData.Value.KitchenObjectSOGuid.ToString());
+                //Debug.Log("Spawning kitchen object with SO guid: " + networkContainerData.Value.KitchenObjectSOGuid.ToString() + ", fill amount: " + networkContainerData.Value.FillAmount);
+                KitchenObject.SpawnKitchenObject(kitchenObjectSO, playerStateMachine);
+                var data = networkContainerData.Value;
+                if(networkContainerData.Value.FillAmount - 1f <= 0f)
+                {
+                    networkContainerData.Value = new ContainerDataSerializable();
+                }
+                else
+                {
+                    data.FillAmount--;
+                    networkContainerData.Value = data;
+                }
+                UpdateContainerData();
             }
-            else
-            {
-                networkContainerData.Value = new ContainerDataSerializable(networkContainerData.Value.KitchenObjectSOGuid.ToString(), networkContainerData.Value.FillAmount - 1f);
-            }
-            UpdateContainerData();
         }
-        else if(playerStateMachine.HasKitchenObject() && networkContainerData.Value.FillAmount <= 0f)
+        else if(playerStateMachine.HasKitchenObject())
         {
-            Debug.Log("Player has kitchen object:" + playerStateMachine.GetKitchenObject());
+            //Debug.Log("current container data: " + networkContainerData.Value.KitchenObjectSOGuid.ToString() + ", fill amount: " + networkContainerData.Value.FillAmount);
             if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
             {
+                if (refillerKitchenObject.RefillKitchenObjectSO.Guid != this.networkContainerData.Value.KitchenObjectSOGuid.ToString()
+                    && !string.IsNullOrEmpty(this.networkContainerData.Value.KitchenObjectSOGuid.ToString()))
+                {
+                    UIManager.Instance.ShowAlertMessage("Cannot refill container with different ingredient type ");
+                    return;
+                }
                 refillerKitchenObject.RefillContainerServerRpc(this);
 
                 playerStateMachine.GetKitchenObject().DestroySelf();
