@@ -1,14 +1,33 @@
+using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ContainerCounterController : BaseCounterController, IContainerCounter
 {
+    [SerializeField] private Image kitchenObjectImage;
+
     private NetworkVariable<ContainerDataSerializable> networkContainerData = new NetworkVariable<ContainerDataSerializable>(new ContainerDataSerializable());
     public override void OnNetworkSpawn()
     {
         GridBuildingSystem.Instance.OnObjectSpawned += GridBuildingSystem_OnObjectSpawned;
+        networkContainerData.OnValueChanged += NetworkContainerData_OnValueChanged;
+    }
+
+    private void NetworkContainerData_OnValueChanged(ContainerDataSerializable previousValue, ContainerDataSerializable newValue)
+    {
+        if (newValue.FillAmount > 0f && !string.IsNullOrEmpty(newValue.KitchenObjectSOGuid.ToString()))
+        {
+            kitchenObjectImage.gameObject.SetActive(true);
+            kitchenObjectImage.sprite = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(newValue.KitchenObjectSOGuid.ToString()).Sprite;
+        }
+        else
+        {
+            kitchenObjectImage.gameObject.SetActive(false);
+            kitchenObjectImage.sprite = null;
+        }
     }
 
     private void GridBuildingSystem_OnObjectSpawned()
