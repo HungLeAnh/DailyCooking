@@ -11,7 +11,7 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
     [SerializeField] private GameObject[] visualGameObjectArray;
 
     private NetworkList<FixedString64Bytes> kitchenObjectSOGuidList = new NetworkList<FixedString64Bytes>();
-    private PlayerStateMachine playerStateMachine;
+    private IKitchenObjectParent playerStateMachine;
     private int selectedIndex = 0;
     public override void OnNetworkSpawn()
     {
@@ -58,11 +58,27 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
         if (HasKitchenObjectSO() && !playerStateMachine.HasKitchenObject())
         {
             //Debug.Log("Show Option Menu");
-            this.playerStateMachine = playerStateMachine;
+            SetIKitchenObjectParentServerRpc(playerStateMachine.GetNetworkObject());
             OnShowOptionMenu(kitchenObjectSOGuidList.AsNativeArray().ToList().Select(guid => KitchenGameManager.Instance.GetKitchenObjectSOByGuid(guid.ToString())).ToList());
         }
     }
-
+    [Rpc(SendTo.Server)]
+    private void SetIKitchenObjectParentServerRpc(NetworkObjectReference playerReference)
+    {
+        SetIKitchenObjectParentClientRpc(playerReference);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SetIKitchenObjectParentClientRpc(NetworkObjectReference playerReference)
+    {
+        if (playerReference.TryGet(out NetworkObject playerNetworkObject))
+        {
+            var playerStateMachine = playerNetworkObject.GetComponent<PlayerStateMachine>();
+            if (playerStateMachine != null)
+            {
+                this.playerStateMachine = playerStateMachine;
+            }
+        }
+    }
     public void OnSelected()
     {
         Show();
@@ -94,16 +110,21 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
         if (!playerStateMachine.HasKitchenObject())
         {
             selectedIndex = index;
-            KitchenGameManager.Instance.OnSpawnKitchenObjectCompleted += SpawnKitchenObject;
+            SubToOnSpawnKitchenObjectCompletedServerRpc();
             KitchenObject.SpawnKitchenObject(postBoxKitchenSO, playerStateMachine);
         }
     }
-
+    [Rpc(SendTo.Server)]
+    private void SubToOnSpawnKitchenObjectCompletedServerRpc()
+    {
+        KitchenGameManager.Instance.OnSpawnKitchenObjectCompleted += SpawnKitchenObject;
+    }
     private void SpawnKitchenObject()
     {
         KitchenGameManager.Instance.OnSpawnKitchenObjectCompleted -= SpawnKitchenObject;
         if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
         {
+            Debug.Log("Refilling kitchen object with SO guid: " + kitchenObjectSOGuidList[selectedIndex].ToString());
             refillerKitchenObject.SetRefillKitchenObject(KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuidList[selectedIndex].ToString()));
             GameManager.Instance.RemovePostBoxDataServerRpc(kitchenObjectSOGuidList[selectedIndex].ToString());
             kitchenObjectSOGuidList.RemoveAt(selectedIndex);

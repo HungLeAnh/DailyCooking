@@ -23,6 +23,8 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
     private void GridBuildingSystem_OnObjectSpawned()
     {
+        if (!IsHost || !IsServer)
+            return;
         PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
         if (placedObjectView == null)
         {
@@ -105,16 +107,8 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 
             if (kitchenObjectSO != null)
             {
-                if (containerData.FillAmount - 1f <= 0f)
-                {
-                    kitchenObjectSONetworkList.RemoveAt(index);
-                }
-                else
-                {
-                    containerData.FillAmount--;
-                    kitchenObjectSONetworkList[index] = containerData;
-                }
-                UpdateContainerData();
+
+                UpdateContainerData(containerData,index);
                 KitchenObject.SpawnKitchenObject(kitchenObjectSO, this.playerStateMachine);
             }
             else
@@ -161,13 +155,22 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
         });
         
     }
-    public void UpdateContainerData()
+    public void UpdateContainerData(ContainerDataSerializable containerData,int index)
     {
-        UpdateContainerDataServerRpc();
+        UpdateContainerDataServerRpc(containerData,index);
     }
     [Rpc(SendTo.Server)]
-    private void UpdateContainerDataServerRpc()
+    private void UpdateContainerDataServerRpc(ContainerDataSerializable containerData,int index)
     {
+        if (containerData.FillAmount - 1f <= 0f)
+        {
+            kitchenObjectSONetworkList.RemoveAt(index);
+        }
+        else
+        {
+            containerData.FillAmount--;
+            kitchenObjectSONetworkList[index] = containerData;
+        }
         UpdateContainerDataClientRpc();
     }
     [Rpc(SendTo.ClientsAndHost)]

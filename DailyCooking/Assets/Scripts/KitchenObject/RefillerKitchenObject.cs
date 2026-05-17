@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
 using Unity.Netcode;
+using UnityEngine;
 
 public class RefillerKitchenObject : KitchenObject
 {
@@ -16,16 +17,14 @@ public class RefillerKitchenObject : KitchenObject
     public void RefillContainerServerRpc(NetworkBehaviourReference containerCounter)
     {
         var kitchenObjectSO = GetKitchenObjectSO() as RefillerKitchenObjectSO;
-        RefillClientsAndHostRpc(containerCounter, kitchenObjectSO.refillingAmount, refillKitchenObjectSO.Guid);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    public void RefillClientsAndHostRpc(NetworkBehaviourReference containerCounter, float fillAmount, string kitchenObjectGuid)
-    {
-        Debug.Log("RefillContainerClientRpc called with containerCounter: " + containerCounter);
+        //Debug.Log("kitchenObjectSO refillingAmount: " + kitchenObjectSO.refillingAmount);
         containerCounter.TryGet(out NetworkBehaviour containerCounterNetworkBehaviour);
         if (containerCounterNetworkBehaviour is IContainerCounter containerCounterInterface)
         {
-            containerCounterInterface.Refill(fillAmount, kitchenObjectGuid);
+            //Debug.Log("RefillContainerClientRpc called with containerCounter: " + containerCounterInterface);
+            //Debug.Log("RefillContainerClientRpc called with kitchenObjectSO.refillingAmount: " + kitchenObjectSO.refillingAmount);
+            //Debug.Log("RefillContainerClientRpc called with refillKitchenObjectSO.Guid: " + refillKitchenObjectSO.Guid);
+            containerCounterInterface.Refill(kitchenObjectSO.refillingAmount, refillKitchenObjectSO.Guid);
         }
     }
 }
