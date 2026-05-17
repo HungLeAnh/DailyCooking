@@ -38,16 +38,19 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
             }
         }
     }
-
-    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+    private void Start()
     {
-        if(arg0.buildIndex != Loader.Scene.GameScene.GetHashCode())
-            return;
+        GameManager.Instance.OnPlayerSpawned += Instance_OnPlayerSpawned;
+    }
+
+    private void Instance_OnPlayerSpawned(object sender, EventArgs e)
+    {
         if (GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime == false)
         {
             ShowFirstTimeTutorial();
         }
     }
+
     public void ShowFirstTimeTutorial()
     {
         GameManager.Instance.HideJoyStick();
@@ -59,7 +62,7 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
 
     private void TutorialManager_OnTutorialFirstTimePlayingClosed(object sender, EventArgs e)
     {
-        ShowBuildingTutorial();
+        ShowGameMachanicTutorial();
     }
     public void ShowBuildingTutorial()
     {

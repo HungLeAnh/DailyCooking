@@ -29,7 +29,6 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     {
         if(!IsHost||!IsServer) return;
 
-        GameManager.Instance.GameData.TutorialData.OnTutorialDataChanged += OnTutorialDataChanged;
         GameManager.Instance.OnStateChanged += GameManager_OnStateChanged;
     }
 
@@ -47,11 +46,6 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
             }
         }
-    }
-
-    private void OnTutorialDataChanged()
-    {
-        StartSpawnBot();
     }
 
     private void OnDestroy()

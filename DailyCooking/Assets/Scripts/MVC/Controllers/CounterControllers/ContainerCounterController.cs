@@ -12,6 +12,7 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
     private NetworkVariable<ContainerDataSerializable> networkContainerData = new NetworkVariable<ContainerDataSerializable>(new ContainerDataSerializable());
     public override void OnNetworkSpawn()
     {
+        kitchenObjectImage.gameObject.SetActive(false);
         GridBuildingSystem.Instance.OnObjectSpawned += GridBuildingSystem_OnObjectSpawned;
         networkContainerData.OnValueChanged += NetworkContainerData_OnValueChanged;
     }

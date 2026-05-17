@@ -58,7 +58,8 @@ public class GridData
             var placedObjectView = gridObjectItem.GetPlacedObject();
             if (placedObjectView == null)
                 continue;
-
+            if(GridArrayData == null)
+                GridArrayData = new List<GridObjectData>[widthMax, heightMax];
             if (GridArrayData[e.x, e.z] == null)
                 GridArrayData[e.x, e.z] = new List<GridObjectData>();
             if (GridArrayData[e.x, e.z].Any(y => y.Origin == placedObjectView.Origin && y.Dir == placedObjectView.Dir &&
@@ -136,26 +137,41 @@ public class GridData
     public List<GridObjectData>[,] Resize2DArray(List<GridObjectData>[,] original, int newRows, int newCols)
     {
         var newArray = new List<GridObjectData>[widthMax, heightMax];
-        int rowsToCopy = Math.Min(original.GetLength(0), newRows);
-        int colsToCopy = Math.Min(original.GetLength(1), newCols);
-
-        for (int i = 0; i < newRows; i++)
+        int rowsToCopy = 0;
+        int colsToCopy = 0;
+        if (original != null)
         {
-            for (int j = 0; j < newCols; j++)
+            rowsToCopy = Math.Min(original.GetLength(0), newRows);
+            colsToCopy = Math.Min(original.GetLength(1), newCols);
+            for (int i = 0; i < newRows; i++)
             {
-                if (i < rowsToCopy && j < colsToCopy)
+                for (int j = 0; j < newCols; j++)
                 {
-                    newArray[i, j] = original[i, j];
+                    if (i < rowsToCopy && j < colsToCopy)
+                    {
+                        newArray[i, j] = original[i, j];
+
+                    }
+                    else
+                    {
+                        newArray[i, j] = new List<GridObjectData>();
+                    }
 
                 }
-                else
+            }
+        }
+        else
+        {
+            rowsToCopy = newRows;
+            colsToCopy = newCols;
+            for (int i = 0; i < newRows; i++)
+            {
+                for (int j = 0; j < newCols; j++)
                 {
                     newArray[i, j] = new List<GridObjectData>();
                 }
-
             }
         }
-
 
         return newArray;
     }

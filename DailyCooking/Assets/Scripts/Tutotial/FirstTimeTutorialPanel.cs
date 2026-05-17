@@ -34,13 +34,14 @@ public class FirstTimeTutorialPanel : TutorialPanel
     }
     public void OnUnlockGrid()
     {
-        nextButton.onClick.AddListener(OnBuildRestaurant);
+        OnBuildRestaurant();
     }
     public void OnBuildRestaurant()
     {
         GridBuildingSystem.Instance.UnlockGrid();
         UIHUDManager.Instance.ShowAllUIElement();
-        nextButton.onClick.RemoveListener(OnBuildRestaurant);
+        GameManager.Instance.ShowJoyStick();
+        GameManager.Instance.GameData.TutorialData.SetHasPlayedFirstTime(true);
     }
 
     private void OnClickHighlightMenu()
