@@ -57,8 +57,27 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
 
     public void InitializePlayer()
     {
+        // If we are a client, we CANNOT call Spawn(). We must ask the server.
+        if (!IsServer)
+        {
+            RequestSpawnPlayerServerRpc(NetworkManager.Singleton.LocalClientId);
+            return;
+        }
+
+        // If we ARE the server (or Host), we can spawn it directly
+        ExecutePlayerSpawn(NetworkManager.Singleton.LocalClientId);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestSpawnPlayerServerRpc(ulong clientId)
+    {
+        ExecutePlayerSpawn(clientId);
+    }
+
+    private void ExecutePlayerSpawn(ulong clientId)
+    {
         playerGameObject = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
-        playerGameObject.GetComponent<NetworkObject>().Spawn();
+        playerGameObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
         OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
     }
     public void HidePlayer()
@@ -226,12 +245,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void UpdatePostBoxDataServerRpc(string kitchenObjectSOGuid)
     {
-        UpdatePostBoxDataClientRpc(kitchenObjectSOGuid);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdatePostBoxDataClientRpc(string kitchenObjectSOGuid)
-    {
-        GameData.PostBoxData.AddPackage(kitchenObjectSOGuid);
+        GridBuildingSystem.Instance.PostBox.AddPackage(kitchenObjectSOGuid);
     }
     [Rpc(SendTo.Server)]
     public void RemovePostBoxDataServerRpc(string kitchenObjectSOGuid)

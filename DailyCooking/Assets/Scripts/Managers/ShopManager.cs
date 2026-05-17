@@ -44,7 +44,7 @@ public class ShopManager : PersistentSingleton<ShopManager>
                 int amount = pair.Value;
                 //Debug.Log($"Adding {amount} of {recipeId} to the post box.");
                 var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(recipeId);
-                GridBuildingSystem.Instance.PostBox.AddPackage(kitchenObjectSO);
+                GameManager.Instance.UpdatePostBoxDataServerRpc(kitchenObjectSO.Guid);
                 //Debug.Log($"Added {amount} of {kitchenObjectSO.objectName} to the post box.");
                 //for (int i = 0; i < amount; i++)
                 //{

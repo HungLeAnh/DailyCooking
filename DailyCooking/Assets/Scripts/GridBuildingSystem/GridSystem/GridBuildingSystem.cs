@@ -105,8 +105,13 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         }
 
         if (IsHost || IsServer || MultiplayerManager.Instance.IsSinglePlayerMode)
+        {
             GridObjectSpawner.SpawnObjectsFromData(gridManager.Grid, GameManager.Instance.GameData.GridData.GridArrayData);
 
+            GameObject postBoxInstance = Instantiate(postBoxPrefab, new Vector3(1, 0, -1), Quaternion.identity);
+            postBoxInstance.GetComponent<NetworkObject>().Spawn();
+            postBoxInstance.transform.eulerAngles = new Vector3(0, 180, 0);
+        }
 
         gridInitializer = new GridInitializer(gridManager, this.gameManager,
             roadContainer, roadPrefab, roadCornerPrefab,
@@ -119,13 +124,9 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
 
         IUIPopupManager uiPopupManagerInstance = UIPopupManager.Instance;
         buildingPlacementManager = new BuildingPlacementManager(gridManager, gridVisualizer, this.gameManager, uiPopupManagerInstance);
-        
-        GameObject postBoxInstance = Instantiate(postBoxPrefab, new Vector3(1,0,-1), Quaternion.identity);
-        postBoxInstance.GetComponent<NetworkObject>().Spawn();
-        postBoxInstance.transform.eulerAngles = new Vector3(0, 180, 0);
-        postBox = postBoxInstance.GetComponent<PostBox>();
 
         OnObjectSpawned?.Invoke();
+
         isInitialized = true;
         KitchenGameManager.Instance.Init();
         gameManager.GameData.GridData.Initialize();

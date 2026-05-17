@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -8,29 +10,39 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
     [SerializeField] private KitchenObjectSO postBoxKitchenSO;
     [SerializeField] private GameObject[] visualGameObjectArray;
 
-    private List<KitchenObjectSO> kitchenObjectSOList = new List<KitchenObjectSO>();
+    private NetworkList<FixedString64Bytes> kitchenObjectSOGuidList = new NetworkList<FixedString64Bytes>();
     private PlayerStateMachine playerStateMachine;
     private int selectedIndex = 0;
-
     public override void OnNetworkSpawn()
     {
-        GameManager.Instance.GameData.PostBoxData.KitchenObjectSOGuidList.ForEach(guid =>
+        if (IsHost || IsServer || MultiplayerManager.Instance.IsSinglePlayerMode)
         {
-            var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(guid);
-            if (kitchenObjectSO != null)
+            Initialize();            
+            GameManager.Instance.GameData.PostBoxData.KitchenObjectSOGuidList.ForEach(guid =>
             {
-                kitchenObjectSOList.Add(kitchenObjectSO);
-            }
-        });
+                var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(guid);
+                if (kitchenObjectSO != null)
+                {
+                    kitchenObjectSOGuidList.Add(kitchenObjectSO.Guid);
+                }
+            });
+        }
+        else
+            MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => Initialize();
+    }
+
+    private void Initialize()
+    {
+        GridBuildingSystem.Instance.PostBox = this;
     }
 
     public bool HasKitchenObjectSO(int index = 0)
     {
-        if (kitchenObjectSOList.Count <= index)
+        if (kitchenObjectSOGuidList.Count <= index)
         {
             return false;
         }
-        return kitchenObjectSOList[index] != null;
+        return KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuidList[index].ToString()) != null;
     }
 
     public void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
@@ -47,7 +59,7 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
         {
             //Debug.Log("Show Option Menu");
             this.playerStateMachine = playerStateMachine;
-            OnShowOptionMenu(kitchenObjectSOList);
+            OnShowOptionMenu(kitchenObjectSOGuidList.AsNativeArray().ToList().Select(guid => KitchenGameManager.Instance.GetKitchenObjectSOByGuid(guid.ToString())).ToList());
         }
     }
 
@@ -92,9 +104,9 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
         KitchenGameManager.Instance.OnSpawnKitchenObjectCompleted -= SpawnKitchenObject;
         if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
         {
-            refillerKitchenObject.SetRefillKitchenObject(kitchenObjectSOList[selectedIndex]);
-            GameManager.Instance.RemovePostBoxDataServerRpc(kitchenObjectSOList[selectedIndex].Guid);
-            kitchenObjectSOList.RemoveAt(selectedIndex);
+            refillerKitchenObject.SetRefillKitchenObject(KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuidList[selectedIndex].ToString()));
+            GameManager.Instance.RemovePostBoxDataServerRpc(kitchenObjectSOGuidList[selectedIndex].ToString());
+            kitchenObjectSOGuidList.RemoveAt(selectedIndex);
         }
         playerStateMachine = null;
 
@@ -116,9 +128,10 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
 
     }
 
-    public void AddPackage(KitchenObjectSO kitchenObjectSO)
+    public void AddPackage(string kitchenObjectSOGuid)
     {
-        kitchenObjectSOList.Add(kitchenObjectSO);
-        GameManager.Instance.UpdatePostBoxDataServerRpc(kitchenObjectSO.Guid);
+        kitchenObjectSOGuidList.Add(kitchenObjectSOGuid);
+        GameManager.Instance.GameData.PostBoxData.AddPackage(kitchenObjectSOGuid);
     }
+
 }
