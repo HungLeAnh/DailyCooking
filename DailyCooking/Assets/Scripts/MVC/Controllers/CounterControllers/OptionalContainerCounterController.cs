@@ -185,4 +185,11 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
                 placedObjectView.GetPlacedObjectTypeSOGuid());
         });
     }
+    public override bool CanRemove()
+    {
+        var canRemove = base.CanRemove();
+        if(kitchenObjectSONetworkList != null)
+            return canRemove && kitchenObjectSONetworkList.Count == 0;
+        return canRemove;
+    }
 }

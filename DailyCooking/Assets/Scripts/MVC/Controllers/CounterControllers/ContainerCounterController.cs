@@ -177,4 +177,10 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
                 placedObjectView.GetPlacedObjectTypeSOGuid());
         });
     }
+    public override bool CanRemove()
+    {
+        var canRemove = base.CanRemove();
+
+        return canRemove && (string.IsNullOrEmpty(networkContainerData.Value.KitchenObjectSOGuid.ToString()) || networkContainerData.Value.FillAmount == 0f);
+    }
 }

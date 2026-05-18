@@ -121,7 +121,7 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
         Destroy(this);
     }
 
-    public bool CanRemove()
+    public virtual bool CanRemove()
     {
         return !HasKitchenObject();
     }
