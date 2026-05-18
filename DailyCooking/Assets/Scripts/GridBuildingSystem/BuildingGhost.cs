@@ -123,7 +123,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
         OnBUildingDrag?.Invoke(targetPosition);
     }
 
-    private void RefreshVisual(Vector3 targetPosition) {
+    private void RefreshVisual(Vector3 position) {
         if (visual != null) {
             KitchenGameManager.Instance.DestroyPlacedObject(visual.GetComponent<NetworkObject>());
             visual = null;
@@ -141,20 +141,15 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
                 //visual.localEulerAngles = Vector3.zero;
                 SetLayerRecursive(visual.gameObject, LayerMask.NameToLayer("BuildingGhost"));
                 ShowCanvas(true);
-                if (targetPosition != -Vector3.one)
-                {
-                    visualContainer.position = targetPosition;
-                    visual.position = new Vector3(targetPosition.x, 1f, targetPosition.z);
-                }
-                else
-                {
-                    visualContainer.position = Vector3.zero;
-                    visual.position = Vector3.zero;
-                }
+
+                visualContainer.position = position;
+                visual.position = new Vector3(position.x, 4f, position.z);
+  
                 KitchenGameManager.Instance.OnSpawnRequestCompleted = null;
             };
-
-            PlacedObjectFactory.Create(new Vector3(targetPosition.x, 1f, targetPosition.z), Vector2Int.zero, Dir.Down,
+            position.y = 1f;
+            Debug.Log("Creating Placed Object at: " + position);
+            PlacedObjectFactory.Create(position, Vector2Int.zero, Dir.Down,
                 placedObjectTypeSO, NetworkManager.Singleton.LocalClientId,true);
             
         }

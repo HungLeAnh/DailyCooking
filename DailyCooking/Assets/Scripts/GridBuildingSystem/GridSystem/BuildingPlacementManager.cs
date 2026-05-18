@@ -124,7 +124,9 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             if(placeObject!= null)
             {
                 gridObjectList.Remove(placeObject);
-                //gridManager.Grid.TriggerGridObjectChanged(gridPosition.x, gridPosition.y);
+                gameManager.GameData.GridData.RemoveGridObjectData(gridPosition.x, gridPosition.y, placeObject.GetPlacedObject().GetPlacedObjectTypeSOGuid());
+
+                gridManager.Grid.TriggerGridObjectChanged(gridPosition.x, gridPosition.y);
             }
         }
     }
@@ -242,14 +244,18 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     {
         if (this.placedObjectTypeSO != null)
         {
-            GameManager.Instance.AddInventoryDataServerRpc(this.placedObjectTypeSO.Guid);
-            gameManager.GameData.UpdateGridData(gridManager.Grid);
+            if (isPlacingExistingObject)
+            {
+                GameManager.Instance.AddInventoryDataServerRpc(this.placedObjectTypeSO.Guid);
+
+            }
             OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
         }
     }
 
     private void DeselectObjectType()
     {
+        isPlacingExistingObject = false;
         placedObjectTypeSO = null;
         dir = Dir.Down;
         RefreshSelectedObjectType(-Vector3.one);

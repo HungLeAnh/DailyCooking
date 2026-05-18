@@ -11,7 +11,7 @@ public class RefillerKitchenObject : KitchenObject
     public void SetRefillKitchenObject(KitchenObjectSO value)
     {
         refillKitchenObjectSO = value;
-        Debug.Log("RefillKitchenObjectSO set to: " + refillKitchenObjectSO);
+        //Debug.Log("RefillKitchenObjectSO set to: " + refillKitchenObjectSO);
     }
     [Rpc(SendTo.Server)]
     public void RefillContainerServerRpc(NetworkBehaviourReference containerCounter)

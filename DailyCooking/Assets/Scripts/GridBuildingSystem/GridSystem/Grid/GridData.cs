@@ -98,6 +98,23 @@ public class GridData
 
         }
     }
+    public void RemoveGridObjectData(int x, int z, string guid)
+    {
+        if (x < 0 || x >= widthMax || z < 0 || z >= heightMax)
+            return;
+        var gridObjectDatas = GridArrayData[x, z];
+        if (gridObjectDatas == null)
+            return;
+        for (int i = 0; i < gridObjectDatas.Count; i++)
+        {
+            if (gridObjectDatas[i].PlacedObjectTypeSOGuid == guid)
+            {
+                gridObjectDatas.RemoveAt(i);
+                OnGridDataChanged?.Invoke();
+                return;
+            }
+        }
+    }
     public void UpdateGridData(GridXZ<GridObject> grid)
     {
         if (grid == null) return;

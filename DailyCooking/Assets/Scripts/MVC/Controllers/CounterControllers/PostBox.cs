@@ -124,7 +124,7 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
         KitchenGameManager.Instance.OnSpawnKitchenObjectCompleted -= SpawnKitchenObject;
         if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
         {
-            Debug.Log("Refilling kitchen object with SO guid: " + kitchenObjectSOGuidList[selectedIndex].ToString());
+            //Debug.Log("Refilling kitchen object with SO guid: " + kitchenObjectSOGuidList[selectedIndex].ToString());
             refillerKitchenObject.SetRefillKitchenObject(KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuidList[selectedIndex].ToString()));
             GameManager.Instance.RemovePostBoxDataServerRpc(kitchenObjectSOGuidList[selectedIndex].ToString());
             kitchenObjectSOGuidList.RemoveAt(selectedIndex);
