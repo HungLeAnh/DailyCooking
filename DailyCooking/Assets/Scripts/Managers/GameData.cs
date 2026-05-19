@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -33,7 +34,14 @@ public class GameData
     {
         return MenuData.RemoveDishFromMenu(dish);
     }
-
+    public void UnlockDish(string guid)
+    {
+        var dish = ConfigManager.Instance.ConfigFood.FoodItems.Find(x => x.Guid == guid);
+        if (dish != null)
+        {
+            MenuData.AddUnlockedDish(dish);
+        }
+    }
     public bool PurchaseUpgrade(UpgradeSO upgradeData)
     {
         return UpgradeData.PurchaseUpgrade(upgradeData);
@@ -84,4 +92,5 @@ public class GameData
         PlayersStats.Add(playerStats);
         GameManager.Instance.SaveGame();
     }
+
 }

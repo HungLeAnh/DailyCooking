@@ -225,7 +225,17 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
             return;
         }
         GameData.RemoveDishFromMenu(dish);
-    } 
+    }
+    [Rpc(SendTo.Server)]
+    public void UnlockDishServerRpc(string guid)
+    {
+        UnlockDishClientRpc(guid);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void UnlockDishClientRpc(string guid)
+    {
+        GameData.UnlockDish(guid);
+    }
     [Rpc(SendTo.Server)]
     public void PurchaseUpgradeServerRpc(int upgradeIndex)
     {

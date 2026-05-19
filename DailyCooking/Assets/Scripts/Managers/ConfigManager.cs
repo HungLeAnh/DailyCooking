@@ -8,8 +8,8 @@ public class ConfigManager : PersistentSingleton<ConfigManager>
     public ConfigFood ConfigFood => configFood;
     public ConfigUpgrade ConfigUpgrade => configUpgrade;
 
-    public void LoadConfig()
+    protected override void Awake()
     {
-
+        ConfigFood.Initialize();
     }
 }

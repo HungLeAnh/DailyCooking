@@ -63,7 +63,14 @@ public class UIFoodItem :MonoBehaviour
     {
         backgroundImage.color = isLocked ? lockedBackgroundColor : normalBackgroundColor;
         frameImage.color = isLocked ? lockedFrameColor : normalFrameColor;
-        foodStatusText.text = isLocked ? "Locked" : "Add to Menu";
+        if(GameManager.Instance.GameData.RestaurantData.Level < foodSO.unlockLevel)
+        {
+            foodStatusText.text = isLocked ? $"Unlocked at Level {foodSO.unlockLevel}" : "Add to Menu";
+        }
+        else
+        {
+            foodStatusText.text = isLocked ? $"Buy for {foodSO.unlockPrice}" : "Add to Menu";
+        }
         foodButton.interactable = !isLocked;
         lockedOverlayImage.gameObject.SetActive(isLocked);
     }
@@ -74,5 +81,22 @@ public class UIFoodItem :MonoBehaviour
         backgroundImage.color = isSelected ? selectedBackgroundColor : normalBackgroundColor;
         frameImage.color = isSelected ? selectedFrameColor : normalFrameColor;
     }
-
+    public void OnUnlockClick()
+    {
+        if(GameManager.Instance.GameData.RestaurantData.Level < foodSO.unlockLevel)
+        {
+            UIManager.Instance.ShowAlertMessage($"Reach Level {foodSO.unlockLevel} to unlock this dish.");
+            return;
+        }
+        if (GameManager.Instance.GameData.RestaurantData.Coins >= foodSO.unlockPrice)
+        {
+            GameManager.Instance.UpdateRestaurantCoinServerRpc(-foodSO.unlockPrice);
+            GameManager.Instance.UnlockDishServerRpc(foodSO.Guid);
+            SetLockState(false);
+        }
+        else
+        {
+            UIManager.Instance.ShowAlertMessage("Not enough coins to unlock this dish.");
+        }
+    }
 }

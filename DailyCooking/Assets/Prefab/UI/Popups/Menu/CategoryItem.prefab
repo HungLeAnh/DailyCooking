@@ -40,7 +40,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 79.08002, y: -53.600006}
-  m_SizeDelta: {x: 118.16, y: 67.20001}
+  m_SizeDelta: {x: 0, y: 67.20001}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8027793254771542635
 MonoBehaviour:
@@ -128,7 +128,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c163cb9353220594898c69d04b71e946, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Scripts::UIMenuCategoryItem
-  menuPopup: {fileID: 0}
   categoryNameText: {fileID: 6080487876489490563}
   categoryBGImage: {fileID: 8027793254771542635}
   categoryButton: {fileID: 4973294498145533712}
@@ -285,6 +284,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

@@ -10,4 +10,6 @@ public class FoodSO : SerializableScriptableObject
     public long price;
     public int exp;
     public FoodType foodType;
+    public int unlockLevel;
+    public int unlockPrice;
 }

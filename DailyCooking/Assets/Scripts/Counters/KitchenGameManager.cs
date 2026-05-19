@@ -112,68 +112,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         return state == State.Editing;
 
     }
-
-
-    public void AddUnlockIngredient(BaseCounterController counterController)
-    {
-        IContainerCounter containerCounter = counterController as IContainerCounter;
-        if (containerCounter == null) return;
-
-        List<KitchenObjectSO> kitchenObjectSOList = containerCounter.GetContainerKitchenObjectType();
-        if (kitchenObjectSOList != null)
-        {
-            foreach (var item in kitchenObjectSOList)
-            {
-                if (!unlockIngredient.Contains(item))
-                    unlockIngredient.Add(item);
-            }
-        }
-        GetUnlockFood();
-
-    }
-
-    private void GetUnlockFood()
-    {
-        foreach (var foodSO in ConfigManager.Instance.ConfigFood.FoodItems)
-        {
-            bool isUnlocked = true;
-            foreach (var ingredient in foodSO.kitchenObjectSOList)
-            {
-                isUnlocked = isUnlocked && IsIngredientUnlocked(ingredient);
-                if (!isUnlocked)
-                {
-                    break;
-                }
-            }
-            if (isUnlocked)
-            {
-                GameManager.Instance.GameData.MenuData.AddUnlockedDish(foodSO);
-
-            }
-        }
-    }
-
-    private bool IsIngredientUnlocked(KitchenObjectSO ingredient)
-    {
-        foreach (var unlockIngredient in unlockIngredient)
-        {
-            if (unlockIngredient == ingredient)
-            {
-                return true;
-            }
-            else
-            {
-                var cuttingRecipeSO = KitchenGameManager.Instance.CuttingRecipeSOList.Find(x => x.input == unlockIngredient &&
-                                                                       x.output == ingredient);
-                var fryingRecipeSO = KitchenGameManager.Instance.FryingRecipeSOList.Find(x => x.input == unlockIngredient &&
-                                                                       x.output == ingredient);
-                if (cuttingRecipeSO != null || fryingRecipeSO != null)
-                    return true;
-            }
-
-        }
-        return false;
-    }
     public FoodSO GetUnlockedFood()
     {
         if (GameManager.Instance.GameData.MenuData.menuDished.Count == 0)
