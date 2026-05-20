@@ -65,6 +65,7 @@ public class UISettingsPopup : UIPopup
         });
         quitButton.onClick.AddListener(() =>
         {
+            MultiplayerManager.Instance.ShutdownAndReset();
             Loader.Load(Loader.Scene.MainMenuScene);
             GameManager.Instance.SwitchState(new MainMenuState(GameManager.Instance));
             HidePopup();

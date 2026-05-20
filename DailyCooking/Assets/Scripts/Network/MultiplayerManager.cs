@@ -6,7 +6,6 @@ using Unity.Netcode.Transports.UTP;
 using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UnityEngine.LowLevelPhysics2D.PhysicsLayers;
 
 public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
 {
@@ -65,23 +64,8 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     }
     private void NetworkManager_ConnectionApprovalCallback(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
     {
-        if (SceneManager.GetActiveScene().name != Loader.Scene.GameScene.ToString())
-        {
-            connectionApprovalResponse.Approved = false;
-            connectionApprovalResponse.Reason = "Game has already started";
-            Debug.Log("Game has already started");
-            return;
-        }
-
-        if (NetworkManager.Singleton.ConnectedClientsIds.Count >= MAX_PLAYER_AMOUNT)
-        {
-            connectionApprovalResponse.Approved = false;
-            connectionApprovalResponse.Reason = "Game is full";
-            Debug.Log("Game is full");
-            return;
-        }
-
         connectionApprovalResponse.Approved = true;
+        connectionApprovalResponse.CreatePlayerObject = false;
     }
     private void NetworkManager_Client_OnClientDisconnectCallback(ulong clientId)
     {
@@ -180,6 +164,8 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             }
             // Use the network transport when starting a multiplayer session.
             networkManager.NetworkConfig.NetworkTransport = unityTransport;
+            NetworkManager.Singleton.ConnectionApprovalCallback = null;
+
             NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApprovalCallback;
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Server_OnClientConnectedCallback;
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Server_OnClientDisconnectCallback;
@@ -217,6 +203,32 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         {
             Debug.LogError($"Failed to create session: {e.Message}");
         }
+    }
+    public void ShutdownAndReset()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            // 1. Unsubscribe from global network events to prevent duplicates
+            NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Server_OnClientConnectedCallback;
+            NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Client_OnClientConnectCallback;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Server_OnClientDisconnectCallback;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Client_OnClientDisconnectCallback;
+
+            // 2. Clear out the approval delegate entirely
+            NetworkManager.Singleton.ConnectionApprovalCallback = null;
+
+            // 3. Tell the underlying engine to close sockets, ports, and structures
+            NetworkManager.Singleton.Shutdown();
+        }
+
+        // 4. Clear your runtime lists so they don't hold stale player profiles
+        if (playerDataNetworkList != null)
+        {
+            playerDataNetworkList.Clear();
+        }
+
+        isSinglePlayerMode = false;
+        Debug.Log("MultiplayerManager fully reset for next run.");
     }
 }
 public struct PlayerData : IEquatable<PlayerData>, INetworkSerializable
