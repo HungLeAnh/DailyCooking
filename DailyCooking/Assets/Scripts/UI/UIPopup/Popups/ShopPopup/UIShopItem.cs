@@ -76,7 +76,16 @@ public class UIShopItem : MonoBehaviour
 
     private void OnClickButtonBuy()
     {
-        ShopManager.Instance.OnPurchase(configShopItem, parsedData);
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameConfirmPopup, new UIGameConfirmPopup.Param
+        {
+            Title = "Confirm Purchase",
+            Message = $"Are you sure you want to purchase {configShopItem.Name} for {MathUtil.NumberFormat(configShopItem.Price)} coins?",
+            YesAction = () =>
+            {
+                ShopManager.Instance.OnPurchase(configShopItem, parsedData);
+            },
+            NoAction = () => { }
+        });
     }
 
     private void GetReward(Dictionary<string, int> parsedData)

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIFoodItem :MonoBehaviour
+public class UIFoodItem : MonoBehaviour
 {
     [SerializeField] private Button infoButton;
     [SerializeField] private Button foodButton;
@@ -63,7 +63,7 @@ public class UIFoodItem :MonoBehaviour
     {
         backgroundImage.color = isLocked ? lockedBackgroundColor : normalBackgroundColor;
         frameImage.color = isLocked ? lockedFrameColor : normalFrameColor;
-        if(GameManager.Instance.GameData.RestaurantData.Level < foodSO.unlockLevel)
+        if (GameManager.Instance.GameData.RestaurantData.Level < foodSO.unlockLevel)
         {
             foodStatusText.text = isLocked ? $"Unlocked at Level {foodSO.unlockLevel}" : "Add to Menu";
         }
@@ -83,11 +83,28 @@ public class UIFoodItem :MonoBehaviour
     }
     public void OnUnlockClick()
     {
-        if(GameManager.Instance.GameData.RestaurantData.Level < foodSO.unlockLevel)
+        if (GameManager.Instance.GameData.RestaurantData.Level < foodSO.unlockLevel)
         {
             UIManager.Instance.ShowAlertMessage($"Reach Level {foodSO.unlockLevel} to unlock this dish.");
             return;
         }
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameConfirmPopup, new UIGameConfirmPopup.Param
+        {
+            Title = "Unlock Dish",
+            Message = $"Are you sure you want to unlock {foodSO.recipeName} for {foodSO.unlockPrice} coins?",
+            YesAction = () =>
+            {
+                UnlockDish();
+            },
+            NoAction = () =>
+            {
+                // Do nothing on cancel
+            }
+        });
+
+    }
+    private void UnlockDish()
+    {
         if (GameManager.Instance.GameData.RestaurantData.Coins >= foodSO.unlockPrice)
         {
             GameManager.Instance.UpdateRestaurantCoinServerRpc(-foodSO.unlockPrice);
