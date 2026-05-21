@@ -13,7 +13,10 @@ public class WaitForTableState : BotState
     public override void Update()
     {
         Table availableTable = TableManager.Instance.GetAvailableTable();
-        if (availableTable != null && availableTable.IsPlaced.Value)
+        if (availableTable == null)
+            return;
+        PlacedObjectView availablePlacedObject = availableTable.GetComponent<PlacedObjectView>();
+        if (availableTable != null && availablePlacedObject != null && !availablePlacedObject.IsPreview.Value)
         {
             int seatIndex = availableTable.GetAvailableSeat();
             if (seatIndex != -1)

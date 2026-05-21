@@ -11,10 +11,8 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     
     private bool[] isSeatOccupied;
     private KitchenObject[] kitchenObjects;
-    private NetworkVariable<bool> isPlaced = new NetworkVariable<bool>(false);
     private Action onDestroySelf;
     public Action OnDestroySelf { get => onDestroySelf;  set => onDestroySelf += value; }
-    public NetworkVariable<bool> IsPlaced { get => isPlaced; set => isPlaced = value; }
     public override void OnNetworkSpawn()
     {
         

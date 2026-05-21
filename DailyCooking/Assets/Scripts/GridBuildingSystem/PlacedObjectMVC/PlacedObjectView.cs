@@ -19,6 +19,9 @@ public class PlacedObjectView : NetworkBehaviour
     public Dir Dir => dir.Value;
     public PlacedObjectTypeSO PlacedObjectTypeSO => placedObjectTypeSO;
     public InventoryTabType InventoryTabType => placedObjectTypeSO.itemType.TabType;
+
+    public NetworkVariable<bool> IsPreview { get => isPreview; set => isPreview = value; }
+
     public override void OnNetworkSpawn()
     {
         if (MultiplayerManager.Instance.IsHost || MultiplayerManager.Instance.IsServer)
