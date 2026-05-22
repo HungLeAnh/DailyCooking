@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,6 +11,8 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     [SerializeField] private GameObject botPrefab;
     [SerializeField] private int poolSize = 10;
     [SerializeField] private Vector3 spawnPosition;
+    
+    private int MaxBots = 10;
 
     private NetworkList<NetworkObjectReference> botPool = new NetworkList<NetworkObjectReference>();
     private NetworkList<NetworkObjectReference> activeBots = new NetworkList<NetworkObjectReference>();
@@ -82,7 +85,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
         for (int i = 0; i < poolSize; i++)
         {
-            GameObject bot = Instantiate(botPrefab,spawnPosition, Quaternion.identity, transform);
+            GameObject bot = Instantiate(botPrefab,Vector3.zero, Quaternion.identity, transform);
             bot.GetComponent<NetworkObject>().Spawn();
             AddBotToPool(bot);
 
@@ -105,12 +108,15 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     {
         while (GameManager.Instance.State is InGameState)
         {
-            if(KitchenGameManager.Instance.CurrentState == KitchenGameManager.State.Open)
+            if (activeBots.Count < MaxBots)
             {
-                //Debug.Log("Spawning Bot");
-                var bot = GetBot();
-                SpawnBot(bot);
+                if (KitchenGameManager.Instance.CurrentState == KitchenGameManager.State.Open)
+                {
+                    //Debug.Log("Spawning Bot");
+                    var bot = GetBot();
+                    SpawnBot(bot);
 
+                }
             }
             yield return new WaitForSeconds(15f);
         }
@@ -134,7 +140,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
         }
 
         // If no inactive bot is found, create a new one
-        var newBot = Instantiate(botPrefab, spawnPosition, Quaternion.identity, transform);
+        var newBot = Instantiate(botPrefab, Vector3.zero, Quaternion.identity, transform);
         newBot.GetComponent<NetworkObject>().Spawn();
         AddBotToPool(newBot);
         return newBot.gameObject;
@@ -147,23 +153,17 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     [Rpc(SendTo.Server)]
     private void SpawnBotServerRpc(NetworkObjectReference targetRef)
     {
-        SpawnBotClientRpc(targetRef);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void SpawnBotClientRpc(NetworkObjectReference targetRef)
-    {
         if (targetRef.TryGet(out NetworkObject networkObject))
         {
             GameObject bot = networkObject.gameObject;
-            bot.transform.position = spawnPosition;
-
             if (IsHost || IsServer)
             {
+                var posX = new Vector3(-3f, 0f, GridBuildingSystem.Instance.GridManager.GetHeightMax() * GridBuildingSystem.Instance.GridManager.GetCellSize() + 5f);
+                var posZ = new Vector3(GridBuildingSystem.Instance.GridManager.GetWidthMax() * GridBuildingSystem.Instance.GridManager.GetCellSize() + 5f, 0f, -3f);
+                bot.GetComponent<BotCustomerController>().InitBot(posX, posZ);
                 bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = true;
                 activeBots.Add(bot);
-                bot.GetComponent<BotCustomerController>().InitBot();
             }
-
         }
     }
 

@@ -38,6 +38,9 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     private NetworkVariable<int> targetSeatIndex = new NetworkVariable<int>(-1);
     private NetworkVariable<ulong> targetTableNetworkVariable = new NetworkVariable<ulong>(0);
     private NetworkVariable<BotStateType> currentStateType = new NetworkVariable<BotStateType>(BotStateType.Idle);
+    private NetworkVariable<Vector3> roamPosX = new NetworkVariable<Vector3>(Vector3.zero);
+    private NetworkVariable<Vector3> roamPosZ = new NetworkVariable<Vector3>(Vector3.zero);
+
 
     private Table targetTable = null;
     public Table TargetTable { get => targetTable; set => targetTable = value; }
@@ -46,12 +49,18 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     public NavMeshAgent NavMeshAgent { get => navMeshAgent; }
     public NetworkVariable<bool> IsActiveInGame { get => isActiveInGame; set => isActiveInGame = value; }
     public NetworkVariable<BotStateType> CurrentStateType { get => currentStateType; set => currentStateType = value; }
+    public Vector3 RoamPosX { get => roamPosX.Value; set => roamPosX.Value = value; }
+    public Vector3 RoamPosZ { get => roamPosZ.Value; set => roamPosZ.Value = value; }
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();        
 
         IsActiveInGame.OnValueChanged += (oldVal, newVal) => {
             SetVisualActive(newVal);
+            var spawnPos = UnityEngine.Random.Range(0, 2) == 0 ? roamPosX.Value : roamPosZ.Value;
+            transform.position = spawnPos;
+            Debug.Log(" initialized at position: " + spawnPos + " real pos:  " + transform.position);
         };
         isEmotionBubbleActive.OnValueChanged += (oldVal, newVal) => {
             emotionBubble.SetActive(newVal);
@@ -310,8 +319,10 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         waitingFood.Clear();
 
     }
-    public void InitBot()
+    public void InitBot(Vector3 roamPositionX, Vector3 roamPositionZ)
     {
+        roamPosX.Value = roamPositionX;
+        roamPosZ.Value = roamPositionZ;
         isNavMeshStopped.Value = false;
         currentStateType.Value = BotStateType.WaitForTable;
         tipPercentage.Value = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).TipIncrease;
