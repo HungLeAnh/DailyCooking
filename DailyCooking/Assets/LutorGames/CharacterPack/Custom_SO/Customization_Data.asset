@@ -1,0 +1,2066 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3628fd116434e2e479911af5bc02f00b, type: 3}
+  m_Name: Customization_Data
+  m_EditorClassIdentifier: 
+  CosmeticDatas:
+  - Type: Horn
+    UnfittableTypes: Outfit, Hat
+    Cosmetics:
+    - Name: Horn_18
+      Icon: {fileID: 21300000, guid: 424d31892a50ef04296409ec59819977, type: 3}
+      Mesh: {fileID: -4009981058459313963, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_17
+      Icon: {fileID: 21300000, guid: 188f2c32d5f9e0c4fbab7cf1043650ee, type: 3}
+      Mesh: {fileID: -2223350679585351130, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_16
+      Icon: {fileID: 21300000, guid: f4061044a83310049a74e356e4f0093d, type: 3}
+      Mesh: {fileID: -9012583764661773800, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_15
+      Icon: {fileID: 21300000, guid: 2c802d717e3c4e440bef604449702115, type: 3}
+      Mesh: {fileID: -598972359741761346, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_14
+      Icon: {fileID: 21300000, guid: c8c19a7fd46ef5747b8a7f246915bd75, type: 3}
+      Mesh: {fileID: 7056953940812093237, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_13
+      Icon: {fileID: 21300000, guid: d1858b8484922a441a0bda32163a7e7f, type: 3}
+      Mesh: {fileID: -2856663806258024870, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_12
+      Icon: {fileID: 21300000, guid: 115bc8ac6dd535045998f240bd2fc61c, type: 3}
+      Mesh: {fileID: 7293469389552542854, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_11
+      Icon: {fileID: 21300000, guid: 3a02ad647824d774288ba46b86cdbf66, type: 3}
+      Mesh: {fileID: 2635650946381928303, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_10
+      Icon: {fileID: 21300000, guid: 8eddd87f4ded4b540b488d1b982dc1f2, type: 3}
+      Mesh: {fileID: -6002941339265717738, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_9
+      Icon: {fileID: 21300000, guid: 8dfb3fe5cdeaf8843bbd5aadd2771885, type: 3}
+      Mesh: {fileID: 173696077238383165, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Horn_8
+      Icon: {fileID: 21300000, guid: cbc6cdc3234a2574daaf57079914ebcf, type: 3}
+      Mesh: {fileID: -8192937601280325617, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_7
+      Icon: {fileID: 21300000, guid: 19c32ee5dbbdaf14685dd49c75f9079f, type: 3}
+      Mesh: {fileID: -7135050679314393237, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_6
+      Icon: {fileID: 21300000, guid: c906aa8724c590946bede4794bfc16a6, type: 3}
+      Mesh: {fileID: 5855337163207914419, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_5
+      Icon: {fileID: 21300000, guid: 5e9d2dcf16c3aac499a8906a4b15db6d, type: 3}
+      Mesh: {fileID: 7999908492160691688, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_4
+      Icon: {fileID: 21300000, guid: 47557f15548a4ab4c88a4f6d30078639, type: 3}
+      Mesh: {fileID: 1340710739875166826, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_3
+      Icon: {fileID: 21300000, guid: 821b902f627d60a4f959cbceaf1a3cf9, type: 3}
+      Mesh: {fileID: 3527019288465651634, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_2
+      Icon: {fileID: 21300000, guid: ac1f3176bd52d8a41a41e09972fbc8ed, type: 3}
+      Mesh: {fileID: -3284170061846288657, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Horn_1
+      Icon: {fileID: 21300000, guid: dfb7cc1f8ab88164aa880ffccb2fa73f, type: 3}
+      Mesh: {fileID: -5715824051749948977, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Hat
+    UnfittableTypes: Outfit, Horn, Hair
+    Cosmetics:
+    - Name: Hat_66
+      Icon: {fileID: 21300000, guid: 3a3201c634c1c994fa2269d7409397d2, type: 3}
+      Mesh: {fileID: 4677239199860504183, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_65
+      Icon: {fileID: 21300000, guid: 5b06eb8bde74f0041b4848f5d058ad83, type: 3}
+      Mesh: {fileID: -8426144008520578901, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_64
+      Icon: {fileID: 21300000, guid: 2e82b2d83697b094c806920796d007a5, type: 3}
+      Mesh: {fileID: -5206389297048645826, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_63
+      Icon: {fileID: 21300000, guid: b722fa7d26981604990adbb24aa281dd, type: 3}
+      Mesh: {fileID: -8337706936081741587, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_62
+      Icon: {fileID: 21300000, guid: 34834304895693c4eae1096c9fce4c25, type: 3}
+      Mesh: {fileID: -6556057273522334466, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_61
+      Icon: {fileID: 21300000, guid: 748e9d1d0a739264885a49260cb40f3f, type: 3}
+      Mesh: {fileID: 3544004945081843977, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_60
+      Icon: {fileID: 21300000, guid: 34bf365f4f2c95a4e96d12f3d0b607b9, type: 3}
+      Mesh: {fileID: -2931941369805337993, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_59
+      Icon: {fileID: 21300000, guid: 5f7ea40cd96ae5445a4e59282da8d5a2, type: 3}
+      Mesh: {fileID: 8841493994563855036, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_58
+      Icon: {fileID: 21300000, guid: 0165a11fd55db0b47bf44e540b941a07, type: 3}
+      Mesh: {fileID: -5725684117282437636, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_57
+      Icon: {fileID: 21300000, guid: 33c97545be1280244aa747003e476364, type: 3}
+      Mesh: {fileID: 3112575729605435074, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_56
+      Icon: {fileID: 21300000, guid: b0fbb3c54129240489179b3d04047d77, type: 3}
+      Mesh: {fileID: 6181581489180930052, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_55
+      Icon: {fileID: 21300000, guid: 1ab4036252e43de40947ec40c4f4ed69, type: 3}
+      Mesh: {fileID: -2288507286907467232, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_54
+      Icon: {fileID: 21300000, guid: 7cc28395c2737ce4c9c262719721e511, type: 3}
+      Mesh: {fileID: -2226596818615867525, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_53
+      Icon: {fileID: 21300000, guid: 1bf4d0ed8352b7d4d909e09e489d4c6e, type: 3}
+      Mesh: {fileID: 1328395123859608389, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_52
+      Icon: {fileID: 21300000, guid: f32ae89406787724a91bb98f9b1e9bae, type: 3}
+      Mesh: {fileID: 8492580113678647092, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_51
+      Icon: {fileID: 21300000, guid: 109a480db76dc254a93203f162cf09aa, type: 3}
+      Mesh: {fileID: -8915044864590846183, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_50
+      Icon: {fileID: 21300000, guid: 43ccd857cc4b85344a0340f30ad97bd4, type: 3}
+      Mesh: {fileID: -8185920452926097499, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_49
+      Icon: {fileID: 21300000, guid: 486ad6ce23d529742962924305a73602, type: 3}
+      Mesh: {fileID: 5144411363278504780, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_48
+      Icon: {fileID: 21300000, guid: 1b811f6e6d327154db74c5d5e2decaa5, type: 3}
+      Mesh: {fileID: 5749287922953492849, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_47
+      Icon: {fileID: 21300000, guid: e39658ed3dc14d04b87a77a1e8ec2192, type: 3}
+      Mesh: {fileID: 409978106964746145, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Hat_46
+      Icon: {fileID: 21300000, guid: 5a3bf7e73a78c62499b9f7c4c66162c8, type: 3}
+      Mesh: {fileID: 4553023241709818365, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_45
+      Icon: {fileID: 21300000, guid: 88de14ce8273a5b47867cccccac69f95, type: 3}
+      Mesh: {fileID: -1045212532749174248, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_44
+      Icon: {fileID: 21300000, guid: 74a59eda22844ae41a1bb45fb20f2452, type: 3}
+      Mesh: {fileID: -3327899083095926973, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_43
+      Icon: {fileID: 21300000, guid: 4e1940ae6974b2643ac475dd54386871, type: 3}
+      Mesh: {fileID: 2426509594422923264, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_42
+      Icon: {fileID: 21300000, guid: 64b65d529fb8f3244b3f48a3617552ab, type: 3}
+      Mesh: {fileID: -4033012779308271636, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_41
+      Icon: {fileID: 21300000, guid: f55213f7aad8e084cac2c896526a1d01, type: 3}
+      Mesh: {fileID: 4324725956384583524, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_40
+      Icon: {fileID: 21300000, guid: de8e7995dc38fd64abc290f78b2b8839, type: 3}
+      Mesh: {fileID: -2582630324360606144, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_39
+      Icon: {fileID: 21300000, guid: 319a2e8b66f7b61479c97e1f1952776c, type: 3}
+      Mesh: {fileID: 1192719401098325252, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_38
+      Icon: {fileID: 21300000, guid: cd5c6595d3a63eb4188908f0691dc25b, type: 3}
+      Mesh: {fileID: -2733324671677400683, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_37
+      Icon: {fileID: 21300000, guid: 6380a1465d140964b98b3b137c869030, type: 3}
+      Mesh: {fileID: -6625262509472948886, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_36
+      Icon: {fileID: 21300000, guid: eabbea42c18b4454d81b99db06ced113, type: 3}
+      Mesh: {fileID: 8915656358313499504, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_35
+      Icon: {fileID: 21300000, guid: 457651c0b9e781741be392c7429c94e4, type: 3}
+      Mesh: {fileID: 1222083850321373901, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_34
+      Icon: {fileID: 21300000, guid: 8b382df1dabd3c544b974991c02114fd, type: 3}
+      Mesh: {fileID: -403007501721934695, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_33
+      Icon: {fileID: 21300000, guid: 0e2de517c538a9443aa749d80bec0f00, type: 3}
+      Mesh: {fileID: -9050998528355194317, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_32
+      Icon: {fileID: 21300000, guid: 14d5b8451755d8c4a8f1749538362e99, type: 3}
+      Mesh: {fileID: -6113232875877755683, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_31
+      Icon: {fileID: 21300000, guid: 2948eb5f638fd84459245a9a7d77e39e, type: 3}
+      Mesh: {fileID: -4336878629570323307, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_30
+      Icon: {fileID: 21300000, guid: f0ee53684c5197e47a375fbba6787db3, type: 3}
+      Mesh: {fileID: 3371760329551227306, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_29
+      Icon: {fileID: 21300000, guid: 6c5d95f59fb420347828980cfcbd3fff, type: 3}
+      Mesh: {fileID: -8978472777163451318, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_28
+      Icon: {fileID: 21300000, guid: 5245a277332f9934091a1dffe812bb3e, type: 3}
+      Mesh: {fileID: -2473588929971102301, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_27
+      Icon: {fileID: 21300000, guid: dd5cac0b953fa714da820ecf29a017fb, type: 3}
+      Mesh: {fileID: 6123469767089558357, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_26
+      Icon: {fileID: 21300000, guid: 340d48c75dfc9e04bab72f6c803c6bcd, type: 3}
+      Mesh: {fileID: -6846487467213790373, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_25
+      Icon: {fileID: 21300000, guid: 090dabe6c148a1144955063c474393df, type: 3}
+      Mesh: {fileID: 3224723347871804339, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_24
+      Icon: {fileID: 21300000, guid: ef3948f6ec138204db3a93d2fadbf5d3, type: 3}
+      Mesh: {fileID: -944873670881212206, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_23
+      Icon: {fileID: 21300000, guid: f39a0b9e676a7924f815e6ee04bf2281, type: 3}
+      Mesh: {fileID: -3433745960509641807, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_22
+      Icon: {fileID: 21300000, guid: cd97cc370a1ae214eb185d7fab88052c, type: 3}
+      Mesh: {fileID: -6123457707218253605, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_21
+      Icon: {fileID: 21300000, guid: 33f035c9834f34a429c3675f096dc421, type: 3}
+      Mesh: {fileID: -1297108719770905208, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_20
+      Icon: {fileID: 21300000, guid: 97b77b0651874384d99984ccb7ebf898, type: 3}
+      Mesh: {fileID: 4861141166607117748, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_19
+      Icon: {fileID: 21300000, guid: f2f1f44fcff706c4f9c663fa7eab3784, type: 3}
+      Mesh: {fileID: -2344795699758608244, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_18
+      Icon: {fileID: 21300000, guid: 89cc16b283774de4ea88f8fbbd8ec3bc, type: 3}
+      Mesh: {fileID: -6771367002260374918, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_17
+      Icon: {fileID: 21300000, guid: 58cd4beca9dcb60419017eca85443c6d, type: 3}
+      Mesh: {fileID: -668942240984229393, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_16
+      Icon: {fileID: 21300000, guid: 4875c1ffaa5f5fd44955fdbf95105118, type: 3}
+      Mesh: {fileID: -8905634579895914701, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_15
+      Icon: {fileID: 21300000, guid: 83a63dfd22c97cc4e85ac144171f3115, type: 3}
+      Mesh: {fileID: 2098320913111731761, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_14
+      Icon: {fileID: 21300000, guid: 541ae7847693c8b43a19c7da9c00e802, type: 3}
+      Mesh: {fileID: -1210907049786396696, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_13
+      Icon: {fileID: 21300000, guid: 7d6938417ef0ec64f8cd8958f7c335da, type: 3}
+      Mesh: {fileID: -7690195894340951604, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_12
+      Icon: {fileID: 21300000, guid: 4719be91ff00edd42a17ecb1bf4a94d9, type: 3}
+      Mesh: {fileID: -882614835948362321, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_11
+      Icon: {fileID: 21300000, guid: 48120ebeeb1ec8d4299623ade30f89fa, type: 3}
+      Mesh: {fileID: -4470173197721515907, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_10
+      Icon: {fileID: 21300000, guid: 900ba9285791d204bb77d153b1895efc, type: 3}
+      Mesh: {fileID: -2805002311184330566, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_9
+      Icon: {fileID: 21300000, guid: 555f0aae5d2785d4aa4907c3f6179e2d, type: 3}
+      Mesh: {fileID: 1005418452820084863, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_8
+      Icon: {fileID: 21300000, guid: ab7f0113d5e6f414680749c3b1542a48, type: 3}
+      Mesh: {fileID: 6352878717502586848, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_7
+      Icon: {fileID: 21300000, guid: d89c65706ed71e7448021f1ab144176d, type: 3}
+      Mesh: {fileID: 1588857392241448377, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_6
+      Icon: {fileID: 21300000, guid: 0af666fabb8171249bbc182c9933a5b0, type: 3}
+      Mesh: {fileID: -5010605356188698854, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_5
+      Icon: {fileID: 21300000, guid: 0943db949300318489264befc0f05067, type: 3}
+      Mesh: {fileID: -3391289240043063205, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_4
+      Icon: {fileID: 21300000, guid: d49b2b2bcfac301449a4887f20ea0add, type: 3}
+      Mesh: {fileID: 3548761403324268914, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_3
+      Icon: {fileID: 21300000, guid: 3078bb8927187d94eb4db3256135767e, type: 3}
+      Mesh: {fileID: -4102009252773638080, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_2
+      Icon: {fileID: 21300000, guid: 578e9219ae606104bad4582fb510549c, type: 3}
+      Mesh: {fileID: 1143210630144202813, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hat_1
+      Icon: {fileID: 21300000, guid: e6c687f92039b3c4193a436e8c66763f, type: 3}
+      Mesh: {fileID: -2593254747847147328, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Hair
+    UnfittableTypes: Outfit, Hat
+    Cosmetics:
+    - Name: Hair_27
+      Icon: {fileID: 21300000, guid: 3503f509f81dd3447b68435487fc45a1, type: 3}
+      Mesh: {fileID: 1879877456004374015, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_26
+      Icon: {fileID: 21300000, guid: e957e7da709b5f945b822d22527366d2, type: 3}
+      Mesh: {fileID: -2705181927211056311, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_25
+      Icon: {fileID: 21300000, guid: f7f328c0b8f65f942a1802d5b1b33794, type: 3}
+      Mesh: {fileID: 111202884680019303, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Hair_24
+      Icon: {fileID: 21300000, guid: 5283544d62ae9f748ab5777a4efe266a, type: 3}
+      Mesh: {fileID: 5488917101836735238, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_23
+      Icon: {fileID: 21300000, guid: 4749c2faf7cf3884bbb3319e0e970903, type: 3}
+      Mesh: {fileID: -4524233174100670992, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_22
+      Icon: {fileID: 21300000, guid: dff19dacf0e9e5b448f983774ee79891, type: 3}
+      Mesh: {fileID: 1870683984464506856, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_21
+      Icon: {fileID: 21300000, guid: be2d1a07d2d383e4ab2e8b6c2b6ad339, type: 3}
+      Mesh: {fileID: -8012082891095233025, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_20
+      Icon: {fileID: 21300000, guid: 8c1950e4250c14c44909292512fef1a9, type: 3}
+      Mesh: {fileID: 2152149473292717530, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_19
+      Icon: {fileID: 21300000, guid: 5cb2c1c109640a14b82057e05c750f13, type: 3}
+      Mesh: {fileID: -1607186692105549571, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_18
+      Icon: {fileID: 21300000, guid: 24c4be52d865f18459fbefc134d18415, type: 3}
+      Mesh: {fileID: -4052590357162093252, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_17
+      Icon: {fileID: 21300000, guid: 123fab51898a51441b04b349afaeba5b, type: 3}
+      Mesh: {fileID: 3809388921560138974, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_16
+      Icon: {fileID: 21300000, guid: a11cea8353675d143aed1344d6da757f, type: 3}
+      Mesh: {fileID: 1875290867550713997, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_15
+      Icon: {fileID: 21300000, guid: 84c8f0a909d349247bb4a6bba7e23685, type: 3}
+      Mesh: {fileID: -8761994834268791430, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_14
+      Icon: {fileID: 21300000, guid: 1f746899a1ad4f8419232818620725b0, type: 3}
+      Mesh: {fileID: 7471148800224646866, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_13
+      Icon: {fileID: 21300000, guid: e704de41adf2be743923e2364fe8654e, type: 3}
+      Mesh: {fileID: -453648281318872401, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_12
+      Icon: {fileID: 21300000, guid: 02cfc54b936249248b3895e26d769451, type: 3}
+      Mesh: {fileID: 5925935387866058272, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_11
+      Icon: {fileID: 21300000, guid: d2a89c62fc78e8b41b23ca696715508d, type: 3}
+      Mesh: {fileID: -3519743700746051517, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_10
+      Icon: {fileID: 21300000, guid: 187aa07d8c979cc4b91aa01648d16c31, type: 3}
+      Mesh: {fileID: -2964845575804336812, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_9
+      Icon: {fileID: 21300000, guid: 024009d6882c22c4d884fd4117d723d2, type: 3}
+      Mesh: {fileID: -4408314232750632956, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_8
+      Icon: {fileID: 21300000, guid: 61195a102bb42fe4a9b218da268aa7d9, type: 3}
+      Mesh: {fileID: 6629032890700644672, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_7
+      Icon: {fileID: 21300000, guid: 03d4c9dff20ca6c48ad9bfdf7bd369cc, type: 3}
+      Mesh: {fileID: 3675359887384462370, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_6
+      Icon: {fileID: 21300000, guid: 177447f192456174186ab1fe85388133, type: 3}
+      Mesh: {fileID: -6557125094297063439, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_5
+      Icon: {fileID: 21300000, guid: f7d42cd85107f224ab6356eb0f804e35, type: 3}
+      Mesh: {fileID: -263556602727174249, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_4
+      Icon: {fileID: 21300000, guid: 1cac39ef6ef1f464484f9ad952435094, type: 3}
+      Mesh: {fileID: -1743319347576768213, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_3
+      Icon: {fileID: 21300000, guid: ea80014facc409e4e95428eb4e3e422e, type: 3}
+      Mesh: {fileID: 8698662093366416521, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_2
+      Icon: {fileID: 21300000, guid: 4b8dfa1b2bc00684abed4ee95f74957e, type: 3}
+      Mesh: {fileID: -5051638928700572563, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Hair_1
+      Icon: {fileID: 21300000, guid: bf35e8f971f3587458d981c6f0223854, type: 3}
+      Mesh: {fileID: -655281526825552095, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Face
+    UnfittableTypes: 
+    Cosmetics:
+    - Name: Face_27
+      Icon: {fileID: 21300000, guid: bc8fa6145f0e0f449950e9e9a4f74fd9, type: 3}
+      Mesh: {fileID: 99466379753581636, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Face_26
+      Icon: {fileID: 21300000, guid: f0420145db21b2546889cadea17a1e1b, type: 3}
+      Mesh: {fileID: -2629862295844871603, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_25
+      Icon: {fileID: 21300000, guid: 64a3860852540f442a17eca94509eabc, type: 3}
+      Mesh: {fileID: 807735229432611235, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Face_24
+      Icon: {fileID: 21300000, guid: 9430a0e5d7fef11498dc3577f8e5cf7f, type: 3}
+      Mesh: {fileID: 3518967491452654334, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_23
+      Icon: {fileID: 21300000, guid: eef33da96035f76498c61cd9e31b3d26, type: 3}
+      Mesh: {fileID: -53172572115041785, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Face_22
+      Icon: {fileID: 21300000, guid: 51b7f0f461d94f14d9df73ee8e7612e7, type: 3}
+      Mesh: {fileID: -1849691792742370788, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_21
+      Icon: {fileID: 21300000, guid: 782483a2f49dcaa41a6d4252e6a3d0cd, type: 3}
+      Mesh: {fileID: 2918519265446020685, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_20
+      Icon: {fileID: 21300000, guid: dd81ea912da957444a15c85a9ac1da0d, type: 3}
+      Mesh: {fileID: -2008697890271332333, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_19
+      Icon: {fileID: 21300000, guid: 0a144fbfe89b98b488dc86bdcb15f504, type: 3}
+      Mesh: {fileID: -8514156389324840926, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_18
+      Icon: {fileID: 21300000, guid: eb35ae1fe2a36224984bad119e507493, type: 3}
+      Mesh: {fileID: 581116420205811953, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Face_17
+      Icon: {fileID: 21300000, guid: 6a1b5a0a0eb1a244fbc90fd049199793, type: 3}
+      Mesh: {fileID: -4534269796407769734, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_16
+      Icon: {fileID: 21300000, guid: e0bb1e11da5a601498d3bae9ec92aeda, type: 3}
+      Mesh: {fileID: 2414991187812369067, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_15
+      Icon: {fileID: 21300000, guid: 656e493f3c581e744980a75f3890a8a7, type: 3}
+      Mesh: {fileID: 70049112449953833, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Face_14
+      Icon: {fileID: 21300000, guid: cacbc187d3dd4d0488d99dc45e9cd62b, type: 3}
+      Mesh: {fileID: 7353993465174558895, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_13
+      Icon: {fileID: 21300000, guid: 8e21de8378be6a741a209109a43b142b, type: 3}
+      Mesh: {fileID: 3807689759547282244, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_12
+      Icon: {fileID: 21300000, guid: 527872152d933cf439aaef2d91cbc503, type: 3}
+      Mesh: {fileID: 5467585264367557650, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_11
+      Icon: {fileID: 21300000, guid: 5e7b610cb4243284381a184fefdc70c3, type: 3}
+      Mesh: {fileID: -8974982567466328739, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_10
+      Icon: {fileID: 21300000, guid: 74d3a9b58ff376d4fa6af186e08f4f9a, type: 3}
+      Mesh: {fileID: 4106621361097547945, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_9
+      Icon: {fileID: 21300000, guid: e4927beb5993f2949a61d32090a7a1ac, type: 3}
+      Mesh: {fileID: 1404727454098424322, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_8
+      Icon: {fileID: 21300000, guid: a5d7513f24633044ab5d7a3ae4a66952, type: 3}
+      Mesh: {fileID: -7565135848243596594, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_7
+      Icon: {fileID: 21300000, guid: d252733a8bd8fb945b886ba1712b293c, type: 3}
+      Mesh: {fileID: -8491602061449767194, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_6
+      Icon: {fileID: 21300000, guid: 2f6398132a865c54d89c98f6af6a6738, type: 3}
+      Mesh: {fileID: 23972530783484407, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Face_5
+      Icon: {fileID: 21300000, guid: 6011610d63f43104b8e5a1887569e3bc, type: 3}
+      Mesh: {fileID: 8962531585084349523, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_4
+      Icon: {fileID: 21300000, guid: e83d61868ae3adb44bd4b41d047c7a54, type: 3}
+      Mesh: {fileID: 7672075671731307692, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_3
+      Icon: {fileID: 21300000, guid: 294da0abb3ae92f42b868dd54fdaba77, type: 3}
+      Mesh: {fileID: 977877939590932731, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Face_2
+      Icon: {fileID: 21300000, guid: 6b49726245be43e4e954a6bf9ef8f879, type: 3}
+      Mesh: {fileID: -511675342309754899, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Face_1
+      Icon: {fileID: 21300000, guid: 91b6343e5a6604644b198d76e95c8c21, type: 3}
+      Mesh: {fileID: 6701599666442931501, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Eye
+    UnfittableTypes: 
+    Cosmetics:
+    - Name: Eye_eyebrows_56
+      Icon: {fileID: 21300000, guid: 6c0f521a02da3de43af406110baf5aae, type: 3}
+      Mesh: {fileID: 1084298545406571006, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_55
+      Icon: {fileID: 21300000, guid: b2327de285f347a40833a2182b699c5a, type: 3}
+      Mesh: {fileID: -884327832196820485, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_54
+      Icon: {fileID: 21300000, guid: 6a466ceb7b800eb499103152add702e8, type: 3}
+      Mesh: {fileID: 5633377705261288231, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_53
+      Icon: {fileID: 21300000, guid: 8a7140e73623a124794d49aee80ffe98, type: 3}
+      Mesh: {fileID: 1420195074652114008, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_52
+      Icon: {fileID: 21300000, guid: 489fc7ee43b62184a9a59a9b47836085, type: 3}
+      Mesh: {fileID: 8562632518387802752, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_51
+      Icon: {fileID: 21300000, guid: 49643c979addad84ba401325cd161869, type: 3}
+      Mesh: {fileID: -4645266534937417944, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_50
+      Icon: {fileID: 21300000, guid: 90bfc6f61cd74c84a90573f033e91eaf, type: 3}
+      Mesh: {fileID: -8023103140243770077, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_49
+      Icon: {fileID: 21300000, guid: 655fd7f5ccbcd354c8f935b0a448ea35, type: 3}
+      Mesh: {fileID: -4605191524880698152, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_48
+      Icon: {fileID: 21300000, guid: 8f3b24506f04657408a4180ebef4de10, type: 3}
+      Mesh: {fileID: 3257060394344020135, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_47
+      Icon: {fileID: 21300000, guid: beced4e6b99464e439ec24080626ad4b, type: 3}
+      Mesh: {fileID: -2189790275244684507, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_46
+      Icon: {fileID: 21300000, guid: 8ecea52fe385dc94a9d8cb9abc3be793, type: 3}
+      Mesh: {fileID: 8845794232819455102, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_45
+      Icon: {fileID: 21300000, guid: ce169016fc58e6349a584deef20a37e4, type: 3}
+      Mesh: {fileID: 8972023961101533164, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_44
+      Icon: {fileID: 21300000, guid: b54a3f480ef8c244ca2c01374581e152, type: 3}
+      Mesh: {fileID: -4832708097290446, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Eye_eyebrows_43
+      Icon: {fileID: 21300000, guid: 09eca032494e19442a55945e713d9290, type: 3}
+      Mesh: {fileID: 7345035079442140362, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_42
+      Icon: {fileID: 21300000, guid: 0953bd883a45ff34281f8fd73cc474ee, type: 3}
+      Mesh: {fileID: -6587668123598832242, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_41
+      Icon: {fileID: 21300000, guid: 0b8099feb7a57d148986fb2e44608348, type: 3}
+      Mesh: {fileID: 7206103947342301624, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_40
+      Icon: {fileID: 21300000, guid: c40fd2c74dfff854496e332afae9b565, type: 3}
+      Mesh: {fileID: 8433473620563170128, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_39
+      Icon: {fileID: 21300000, guid: 76a5c5c9728e6bd45a8159a8c15a58a3, type: 3}
+      Mesh: {fileID: -6357522476288518425, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_38
+      Icon: {fileID: 21300000, guid: f960acf789921494bb6733b7e3f39af0, type: 3}
+      Mesh: {fileID: 2420710881174339637, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_37
+      Icon: {fileID: 21300000, guid: ca1c58b864bf111428238ffc8afede0d, type: 3}
+      Mesh: {fileID: -8294216580950064872, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_36
+      Icon: {fileID: 21300000, guid: 64c19006d0d88ac42b0c43a4aeff324f, type: 3}
+      Mesh: {fileID: 8574337934284799852, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_35
+      Icon: {fileID: 21300000, guid: 985487221611cfd429081f690c0c7432, type: 3}
+      Mesh: {fileID: -1830384923868328107, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_34
+      Icon: {fileID: 21300000, guid: f466005309ff9e947979266e380d3f8c, type: 3}
+      Mesh: {fileID: 4732532609196435637, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_33
+      Icon: {fileID: 21300000, guid: 4a75ff2acdc521641ba2cba2db154a9d, type: 3}
+      Mesh: {fileID: -7936922427841999797, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_32
+      Icon: {fileID: 21300000, guid: a68ffc54c825deb4a90024ba754a4044, type: 3}
+      Mesh: {fileID: -3598001629540932825, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_31
+      Icon: {fileID: 21300000, guid: 6120ddb6923b2ca41b752b32e0280c39, type: 3}
+      Mesh: {fileID: 2103982192949907706, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_30
+      Icon: {fileID: 21300000, guid: d43d95e6ba6aaca44bb396bdc774d510, type: 3}
+      Mesh: {fileID: 5960157910655391580, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_29
+      Icon: {fileID: 21300000, guid: c5194da51e288c642a61f51153ebb5fd, type: 3}
+      Mesh: {fileID: 172973878703727659, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Eye_eyebrows_28
+      Icon: {fileID: 21300000, guid: 7e851abada12c7349b4f2e3dcd37ed26, type: 3}
+      Mesh: {fileID: -5969279162855190105, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_27
+      Icon: {fileID: 21300000, guid: 197684ca4a9075f4e9552b453417cfd3, type: 3}
+      Mesh: {fileID: 2090011232916414371, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_26
+      Icon: {fileID: 21300000, guid: 30cd3ca22df5b704d9af959513c5cda1, type: 3}
+      Mesh: {fileID: 4159259187017302586, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_25
+      Icon: {fileID: 21300000, guid: 93a0a0c61b5a5544e8b03116f190a472, type: 3}
+      Mesh: {fileID: -1036186622660060807, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_24
+      Icon: {fileID: 21300000, guid: a3907d1474425334c9018ba964147639, type: 3}
+      Mesh: {fileID: -55109284465573040, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Eye_eyebrows_23
+      Icon: {fileID: 21300000, guid: 6e402548d4fcc7248afc82b6d6367711, type: 3}
+      Mesh: {fileID: -2739577397392171867, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_22
+      Icon: {fileID: 21300000, guid: e3d675e691dc1984a8712f53da345e53, type: 3}
+      Mesh: {fileID: -4147330598366839773, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_21
+      Icon: {fileID: 21300000, guid: fba9409bff7529843a053d142544279c, type: 3}
+      Mesh: {fileID: -6454999760677193505, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_20
+      Icon: {fileID: 21300000, guid: d5abf323d698760418056a5b73aba717, type: 3}
+      Mesh: {fileID: -7806677211438055454, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_19
+      Icon: {fileID: 21300000, guid: 90decef99b6cb364880530d55aa11e47, type: 3}
+      Mesh: {fileID: -6227121766267138967, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_18
+      Icon: {fileID: 21300000, guid: 8b1d2feea2443d049b66948db5363863, type: 3}
+      Mesh: {fileID: -5725589308709461750, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_17
+      Icon: {fileID: 21300000, guid: 241ac10e71d17cc479fa42867f802eee, type: 3}
+      Mesh: {fileID: -4342932891776206892, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_16
+      Icon: {fileID: 21300000, guid: cc0a2da14365b4845a6ea6eeda028eff, type: 3}
+      Mesh: {fileID: -1197049719606697867, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_15
+      Icon: {fileID: 21300000, guid: edacc278a20aeda40ab4584fae29cefb, type: 3}
+      Mesh: {fileID: 7201886830554715316, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_14
+      Icon: {fileID: 21300000, guid: 619943dd7b2022e4594761780871896a, type: 3}
+      Mesh: {fileID: 3644201216987253127, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_13
+      Icon: {fileID: 21300000, guid: fc6d996d9c7c8324faf390f6a2c2b7b1, type: 3}
+      Mesh: {fileID: -6527632321683348677, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_12
+      Icon: {fileID: 21300000, guid: fb15bc591b699f749b7d8126faef0677, type: 3}
+      Mesh: {fileID: -6407838623941641400, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_11
+      Icon: {fileID: 21300000, guid: 2f90bd7a08cb2844d9f84f866fea8a03, type: 3}
+      Mesh: {fileID: 6939289268747169793, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_10
+      Icon: {fileID: 21300000, guid: b9053ffe5d284b543aeec17c5f396b84, type: 3}
+      Mesh: {fileID: 7250481760445034601, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_9
+      Icon: {fileID: 21300000, guid: 92d781752ca76b54595c8fda1caeb645, type: 3}
+      Mesh: {fileID: 564665890300443925, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Eye_eyebrows_8
+      Icon: {fileID: 21300000, guid: 176b2d3a918c4b745864ad114c40fd7a, type: 3}
+      Mesh: {fileID: -4483655483171011044, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_7
+      Icon: {fileID: 21300000, guid: 04389a6da962c9640b1dfd5c8c508ea9, type: 3}
+      Mesh: {fileID: -5528169700004331679, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_6
+      Icon: {fileID: 21300000, guid: edbb95b8793111241a3ff58342e89862, type: 3}
+      Mesh: {fileID: 757769004997206457, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Eye_eyebrows_5
+      Icon: {fileID: 21300000, guid: 84ec12184f650b44db9313821823d93b, type: 3}
+      Mesh: {fileID: 3219979175669204696, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_4
+      Icon: {fileID: 21300000, guid: 89122579f2c769340ad6b3c5e928d3ce, type: 3}
+      Mesh: {fileID: 3912635677225310339, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_3
+      Icon: {fileID: 21300000, guid: 975c4f1750db4e649b867854981389a1, type: 3}
+      Mesh: {fileID: 2789344241145962366, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_2
+      Icon: {fileID: 21300000, guid: 3f0d0805463282743ae36b1def1af723, type: 3}
+      Mesh: {fileID: -7749199363288285112, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Eye_eyebrows_1
+      Icon: {fileID: 21300000, guid: 19e8f74d84209e340950d0cb1949debe, type: 3}
+      Mesh: {fileID: -1010909535675321664, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Back
+    UnfittableTypes: Outfit
+    Cosmetics:
+    - Name: Back_27
+      Icon: {fileID: 21300000, guid: e0af1a5489273fd428ed8a0ec2c28077, type: 3}
+      Mesh: {fileID: 5282906776544335465, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_26
+      Icon: {fileID: 21300000, guid: addf886cecc3a0a48abf9975317cb8b6, type: 3}
+      Mesh: {fileID: 2457337109692246538, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_25
+      Icon: {fileID: 21300000, guid: 46ce4c2a40a523c44a2489c8d1d92147, type: 3}
+      Mesh: {fileID: 8742509353248437711, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_24
+      Icon: {fileID: 21300000, guid: 2eaf2a6fd163cca49b21ec4392c83713, type: 3}
+      Mesh: {fileID: -4720482778647459435, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_23
+      Icon: {fileID: 21300000, guid: f3b76e63ce026f34c8e1de31c1331df1, type: 3}
+      Mesh: {fileID: 5724030951475967312, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_22
+      Icon: {fileID: 21300000, guid: 68c0c9ff8de846746866c472d7ebfa5c, type: 3}
+      Mesh: {fileID: -1662785393186140404, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_21
+      Icon: {fileID: 21300000, guid: 34f9a9fd77d6aad4da0d4e73edf64b98, type: 3}
+      Mesh: {fileID: 6641086507932912738, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_20
+      Icon: {fileID: 21300000, guid: bfb5fe101a4dc534bb0299365e92a1af, type: 3}
+      Mesh: {fileID: -4207532438828640903, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_19
+      Icon: {fileID: 21300000, guid: 849151c09a7105f478399a8868a83389, type: 3}
+      Mesh: {fileID: 1095502295697805103, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_18
+      Icon: {fileID: 21300000, guid: 365c721bed4499f4aac78c0bb783025b, type: 3}
+      Mesh: {fileID: 6608734730272939082, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_17
+      Icon: {fileID: 21300000, guid: 333ce63b9f9546e47bbb3d1da772243f, type: 3}
+      Mesh: {fileID: -2846853777387763799, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_16
+      Icon: {fileID: 21300000, guid: 87f442621d48902418b9943c403e9dc9, type: 3}
+      Mesh: {fileID: 8093866176897195431, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_15
+      Icon: {fileID: 21300000, guid: 0a5ba88b9eeca4b4db469211226cbe68, type: 3}
+      Mesh: {fileID: -5432911839359508371, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_14
+      Icon: {fileID: 21300000, guid: 56b3abdacfe08c94c9569c0f14ae3a08, type: 3}
+      Mesh: {fileID: -1582368544813240979, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_13
+      Icon: {fileID: 21300000, guid: 55e1d15cf39b5dc4d926e97cfc4feaf3, type: 3}
+      Mesh: {fileID: 5328131824455493603, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_12
+      Icon: {fileID: 21300000, guid: 2bae8f1cbc17807439a19ae53bf0e0c9, type: 3}
+      Mesh: {fileID: -8473442026591030388, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_11
+      Icon: {fileID: 21300000, guid: e8fa03cf77930714e8d53013f401cb8a, type: 3}
+      Mesh: {fileID: -8717393231336552529, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_10
+      Icon: {fileID: 21300000, guid: 940c7b4bc1be1d94092b3b0326c4e485, type: 3}
+      Mesh: {fileID: 428316970717308454, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Back_9
+      Icon: {fileID: 21300000, guid: c960607cc90530b4fa6d9f1240bc284c, type: 3}
+      Mesh: {fileID: 449926707968671282, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Back_8
+      Icon: {fileID: 21300000, guid: 0a1441e2f2ca15a45804afb7e7f57505, type: 3}
+      Mesh: {fileID: -6719350280146425080, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_7
+      Icon: {fileID: 21300000, guid: 06d36b0d9d3445b449502c1bee055ce5, type: 3}
+      Mesh: {fileID: 2245153065084588123, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_6
+      Icon: {fileID: 21300000, guid: 1a89e7bc2266c974ebd79869897d8d57, type: 3}
+      Mesh: {fileID: 3497925832132108053, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_5
+      Icon: {fileID: 21300000, guid: bac07a8e512529746a64394d7e9041ae, type: 3}
+      Mesh: {fileID: 3318374464397269086, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_4
+      Icon: {fileID: 21300000, guid: 1b4360a86a53a164b8260def51e8dde5, type: 3}
+      Mesh: {fileID: 445748747014627234, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Back_3
+      Icon: {fileID: 21300000, guid: 9a86170d06a648e44a946b33509d2cee, type: 3}
+      Mesh: {fileID: -3923680215882474177, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_2
+      Icon: {fileID: 21300000, guid: 493b55167998b9748abb6e649c2ebd79, type: 3}
+      Mesh: {fileID: -5795968714504774104, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Back_1
+      Icon: {fileID: 21300000, guid: aaace6f6f2e9e324798eb6ee4fb16cad, type: 3}
+      Mesh: {fileID: -2117245858073638806, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Gloves
+    UnfittableTypes: Outfit
+    Cosmetics:
+    - Name: Gloves_52
+      Icon: {fileID: 21300000, guid: 0622f222e7c8f62469c2380b9ec78670, type: 3}
+      Mesh: {fileID: -6871521622535763620, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_51
+      Icon: {fileID: 21300000, guid: e42901dbbcffe1042b2451028c43ff7a, type: 3}
+      Mesh: {fileID: -787829737752622212, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_50
+      Icon: {fileID: 21300000, guid: 03a13a403bf30d14eb998691c1b64382, type: 3}
+      Mesh: {fileID: -5756722599673664471, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_49
+      Icon: {fileID: 21300000, guid: aab904a7ad566be4d94bd8247490c5bf, type: 3}
+      Mesh: {fileID: 4512428097578517354, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_48
+      Icon: {fileID: 21300000, guid: 558db14a9537d0644b4224063c7e4254, type: 3}
+      Mesh: {fileID: 1708784651775199907, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_47
+      Icon: {fileID: 21300000, guid: 518c8d00a5dc16b41bd9dc1d8ec8df12, type: 3}
+      Mesh: {fileID: -1018800946310116077, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_46
+      Icon: {fileID: 21300000, guid: ef7323c6a3caeab4c9b0dac010f4cabb, type: 3}
+      Mesh: {fileID: 773775876516589069, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Gloves_45
+      Icon: {fileID: 21300000, guid: eb754fd1b99e1d84884d8ec89ff73539, type: 3}
+      Mesh: {fileID: -9184882880671764539, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_44
+      Icon: {fileID: 21300000, guid: 15735c1b6d159834ea20d54c9ac9e82b, type: 3}
+      Mesh: {fileID: 2293800419807144634, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_43
+      Icon: {fileID: 21300000, guid: ed1f688e8543dbd45a05592e29c06c9f, type: 3}
+      Mesh: {fileID: -7423000494925704761, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_42
+      Icon: {fileID: 21300000, guid: d6d1e669acbee644f8305c3b9f33ca9d, type: 3}
+      Mesh: {fileID: -9026903566004802650, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_41
+      Icon: {fileID: 21300000, guid: 7db975f8ee521f74e832b3c264f4ba8b, type: 3}
+      Mesh: {fileID: 8564909388997945207, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_40
+      Icon: {fileID: 21300000, guid: 0133d4781667798479a2f975f56c8d4f, type: 3}
+      Mesh: {fileID: -5665779652031525172, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_39
+      Icon: {fileID: 21300000, guid: 53eedb5546307db4482b559998379327, type: 3}
+      Mesh: {fileID: -4538531065024496646, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_38
+      Icon: {fileID: 21300000, guid: 0aa55aa4266f2b044ba5e50526aa9329, type: 3}
+      Mesh: {fileID: 4443239400508672851, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_37
+      Icon: {fileID: 21300000, guid: 48a461c7caa07d4498573f56c0f9533b, type: 3}
+      Mesh: {fileID: 873198959154077543, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Gloves_36
+      Icon: {fileID: 21300000, guid: 70bddb0a35121614d9f652bd128c0580, type: 3}
+      Mesh: {fileID: 6019980169273228747, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_35
+      Icon: {fileID: 21300000, guid: 8ab1ae63a6500e94d94f1ef5d4d17062, type: 3}
+      Mesh: {fileID: 6532711016107600266, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_34
+      Icon: {fileID: 21300000, guid: 1e03559a03c078d42b8bfc92c7ac83ed, type: 3}
+      Mesh: {fileID: -859848505407589105, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_33
+      Icon: {fileID: 21300000, guid: b5d991e9e9c819748a0ea4b99b4343d9, type: 3}
+      Mesh: {fileID: -4870728775060870527, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_32
+      Icon: {fileID: 21300000, guid: ff899d83f7430564e8e9c50502322d1b, type: 3}
+      Mesh: {fileID: 4512690456178088412, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_31
+      Icon: {fileID: 21300000, guid: 847593c0e2493c247900a7b1b12fd1a5, type: 3}
+      Mesh: {fileID: -5813587759712831658, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_30
+      Icon: {fileID: 21300000, guid: 01620e0593027934bba57db41bbb5c62, type: 3}
+      Mesh: {fileID: 8558669796156898715, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_29
+      Icon: {fileID: 21300000, guid: bfefeef5c258476468a9cd2ede6484bb, type: 3}
+      Mesh: {fileID: -792411896937882515, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_28
+      Icon: {fileID: 21300000, guid: fe498837b3e0cee438ec36b083732c54, type: 3}
+      Mesh: {fileID: -9077893623807270370, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_27
+      Icon: {fileID: 21300000, guid: 7aef13a78782f534098826b1e3cbf579, type: 3}
+      Mesh: {fileID: 2923723664885408200, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_26
+      Icon: {fileID: 21300000, guid: 1fe601fdb0e665341a92c5d57ff5472b, type: 3}
+      Mesh: {fileID: -9060966832391396018, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_25
+      Icon: {fileID: 21300000, guid: 672c2921909208e448871b699039f25b, type: 3}
+      Mesh: {fileID: -8068501938206284722, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_24
+      Icon: {fileID: 21300000, guid: 2e0123aff38b4374fa4c7e4c5d82822e, type: 3}
+      Mesh: {fileID: 5044688799585955468, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_23
+      Icon: {fileID: 21300000, guid: 7b7095cad15b4274ba230ae35d7accf0, type: 3}
+      Mesh: {fileID: -5987005074499217359, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_22
+      Icon: {fileID: 21300000, guid: d74f26a36dca4b54f901028ebdb5b9ba, type: 3}
+      Mesh: {fileID: 1864486839306003694, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_21
+      Icon: {fileID: 21300000, guid: 4288e0f9d50afcd458e29e3011308d76, type: 3}
+      Mesh: {fileID: -4336942306295307426, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_20
+      Icon: {fileID: 21300000, guid: 27eced426be965047b2e4d432d90d6b9, type: 3}
+      Mesh: {fileID: 4878473717943942834, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_19
+      Icon: {fileID: 21300000, guid: ebf4e99cb50d60d499e49bf8eb85ae88, type: 3}
+      Mesh: {fileID: 5386863877478514247, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_18
+      Icon: {fileID: 21300000, guid: 36548ff8d5f7cb743890d0cd01444247, type: 3}
+      Mesh: {fileID: -4935551214531168281, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_17
+      Icon: {fileID: 21300000, guid: 1df65dac3a7f84d44b2920a14e79b9b7, type: 3}
+      Mesh: {fileID: 3739230341124580612, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_16
+      Icon: {fileID: 21300000, guid: 2997ff0a1ac28f74c805b37d2de08a38, type: 3}
+      Mesh: {fileID: -7363072752629616490, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_15
+      Icon: {fileID: 21300000, guid: bb377df9b7a5b1241b06bfefc695e715, type: 3}
+      Mesh: {fileID: 7162534511672588250, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_14
+      Icon: {fileID: 21300000, guid: a43e6c01a87d6bd48ba82816db3fdaf6, type: 3}
+      Mesh: {fileID: 3686615793169364347, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_13
+      Icon: {fileID: 21300000, guid: a3b045f5a9d76d84790b70ec862655a3, type: 3}
+      Mesh: {fileID: -7661943348425524365, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_12
+      Icon: {fileID: 21300000, guid: 72ee9c38e77c4c64ebbd95e42a332ef7, type: 3}
+      Mesh: {fileID: 4475671670049435229, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_11
+      Icon: {fileID: 21300000, guid: d4ccd7245fc8c78438ecde38cdbd6fcb, type: 3}
+      Mesh: {fileID: 6841251067624967781, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_10
+      Icon: {fileID: 21300000, guid: 51a03ca6393a83b4fb02859761cc8cd2, type: 3}
+      Mesh: {fileID: 8172913183357672665, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_9
+      Icon: {fileID: 21300000, guid: 7f649d37b443cc94ba98a9d27eb1c1ec, type: 3}
+      Mesh: {fileID: 942717847875728383, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Gloves_8
+      Icon: {fileID: 21300000, guid: 7e16471600423d24c84c17acd640f316, type: 3}
+      Mesh: {fileID: 3731237786725440023, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_7
+      Icon: {fileID: 21300000, guid: 15e48bc454772d540916e2bb68e82833, type: 3}
+      Mesh: {fileID: 596921149045462629, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Gloves_6
+      Icon: {fileID: 21300000, guid: 2529a81cff5e40d49b58e07eeda43fa0, type: 3}
+      Mesh: {fileID: -1614882773550508280, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_5
+      Icon: {fileID: 21300000, guid: b1714903007afe04792ae6c9149e9bf9, type: 3}
+      Mesh: {fileID: -1402803867670833428, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_4
+      Icon: {fileID: 21300000, guid: 16fdea3c04eb2754b80a91879451cf0b, type: 3}
+      Mesh: {fileID: 5618298330904429749, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_3
+      Icon: {fileID: 21300000, guid: ff2f3a7c8035c6340b495dad93682c24, type: 3}
+      Mesh: {fileID: 8819593306263335343, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_2
+      Icon: {fileID: 21300000, guid: 37ac1b1b4306c38489dd08146dc22f00, type: 3}
+      Mesh: {fileID: 4281050542533640016, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Gloves_1
+      Icon: {fileID: 21300000, guid: d6e01868ee46b7146b66ee31e89381ec, type: 3}
+      Mesh: {fileID: -3276217534909260252, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Shoe
+    UnfittableTypes: Outfit
+    Cosmetics:
+    - Name: Shoe_42
+      Icon: {fileID: 21300000, guid: 0926d2165da9c13409aca804477fd5b1, type: 3}
+      Mesh: {fileID: -9132576320195493463, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_41
+      Icon: {fileID: 21300000, guid: 3ac0f7db615e31d40a927440dfbadf76, type: 3}
+      Mesh: {fileID: -5303601210912692641, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_40
+      Icon: {fileID: 21300000, guid: cc5fbe8117d789a47a62a0d0a5e77fae, type: 3}
+      Mesh: {fileID: -8885833872168397817, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_39
+      Icon: {fileID: 21300000, guid: 2603ea4cca3365448954e75aff43db95, type: 3}
+      Mesh: {fileID: -7982181793550071699, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_38
+      Icon: {fileID: 21300000, guid: f0f45ab49a61f5a4da51f96fd4eef378, type: 3}
+      Mesh: {fileID: 6777739957791097345, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_37
+      Icon: {fileID: 21300000, guid: 1575b8ae131b21f429b2c44641342fe8, type: 3}
+      Mesh: {fileID: -3983525829180074646, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_36
+      Icon: {fileID: 21300000, guid: ec445200091c59e409a266890444375b, type: 3}
+      Mesh: {fileID: -8559343853930887853, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_35
+      Icon: {fileID: 21300000, guid: 4578d1f67bbd3374fb083a58784825a0, type: 3}
+      Mesh: {fileID: 7631473162883911075, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_34
+      Icon: {fileID: 21300000, guid: 6fce8df0488899e40ba47cbc2071daf8, type: 3}
+      Mesh: {fileID: -1325403916001966283, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_33
+      Icon: {fileID: 21300000, guid: 50b8dc77a83868b43915819467c776b1, type: 3}
+      Mesh: {fileID: 3497098697511416883, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_32
+      Icon: {fileID: 21300000, guid: c7029a86db8898740bdc8eef9fe75df5, type: 3}
+      Mesh: {fileID: 1721250946139216839, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_31
+      Icon: {fileID: 21300000, guid: 38337917d893cba40a125131515794cb, type: 3}
+      Mesh: {fileID: -4622845641114080391, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_30
+      Icon: {fileID: 21300000, guid: 7a84432b54b4d194eaff137d5549fd04, type: 3}
+      Mesh: {fileID: -3168221662714503754, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_29
+      Icon: {fileID: 21300000, guid: b2e5862d408f4a94791111c14cf18593, type: 3}
+      Mesh: {fileID: 3192702472959058223, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_28
+      Icon: {fileID: 21300000, guid: abf8ace159e2da042b002170ec41909b, type: 3}
+      Mesh: {fileID: -1797545357464901832, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_27
+      Icon: {fileID: 21300000, guid: 4b10931a7356f7942a44421d5c7e98da, type: 3}
+      Mesh: {fileID: 2859646050544597759, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_26
+      Icon: {fileID: 21300000, guid: 83f5cc2fab365124ea53fd483d8f4a75, type: 3}
+      Mesh: {fileID: -7207298093851642867, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_25
+      Icon: {fileID: 21300000, guid: 75edffe65f232704aa2d0da34548cccd, type: 3}
+      Mesh: {fileID: -5176209718793178185, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_24
+      Icon: {fileID: 21300000, guid: 544a8aae18b0a5141819dfd3149de495, type: 3}
+      Mesh: {fileID: 2592968488119513525, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_23
+      Icon: {fileID: 21300000, guid: 44d44d4b059da6748ba8bed32abe1039, type: 3}
+      Mesh: {fileID: 1024793830266542976, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_22
+      Icon: {fileID: 21300000, guid: f1ebe6e7b7d998e44b29b71458362a4e, type: 3}
+      Mesh: {fileID: -8821262096945802118, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_21
+      Icon: {fileID: 21300000, guid: 7fc7108bfa91d47469332b32155e1f11, type: 3}
+      Mesh: {fileID: 6269742885881190930, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_20
+      Icon: {fileID: 21300000, guid: 91cd5476e2ff1004e89a61d07e1af815, type: 3}
+      Mesh: {fileID: 5658427303340846828, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_19
+      Icon: {fileID: 21300000, guid: 57db6232dd5487447ac37aea6d5821e7, type: 3}
+      Mesh: {fileID: 7713374478634908976, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_18
+      Icon: {fileID: 21300000, guid: 69fb401fbdfd79c49b868f5d6add7f7a, type: 3}
+      Mesh: {fileID: -5604658157386470466, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_17
+      Icon: {fileID: 21300000, guid: e346a8f95afc36d4b87cbda546952108, type: 3}
+      Mesh: {fileID: -2885417976013628103, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_16
+      Icon: {fileID: 21300000, guid: df02c45e529f19d4899d98406fc5da73, type: 3}
+      Mesh: {fileID: -5261583256732022785, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_15
+      Icon: {fileID: 21300000, guid: e305eefbdd7506e4a843f2a3ce7a39b5, type: 3}
+      Mesh: {fileID: -5062161177244525756, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_14
+      Icon: {fileID: 21300000, guid: c8bdfd84b34d53c47bc9ce6e21eefc58, type: 3}
+      Mesh: {fileID: -5987314119376746953, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_13
+      Icon: {fileID: 21300000, guid: ec6b72d413820a640be4f162d2e76727, type: 3}
+      Mesh: {fileID: 7114151181584375327, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_12
+      Icon: {fileID: 21300000, guid: 4d59bd49608a3c64eaf56d25f0c895ce, type: 3}
+      Mesh: {fileID: -3096392019659473304, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_11
+      Icon: {fileID: 21300000, guid: 69f0c95414d06124bb802a5e3154153d, type: 3}
+      Mesh: {fileID: -4013453831940687516, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_10
+      Icon: {fileID: 21300000, guid: 2ed10e7bea288d44faf1f961fcaef744, type: 3}
+      Mesh: {fileID: 1765217350582301329, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_9
+      Icon: {fileID: 21300000, guid: 1ef0e1d17ed697e48bc06355b433a709, type: 3}
+      Mesh: {fileID: 7058494566230222443, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_8
+      Icon: {fileID: 21300000, guid: 799669cce995ce9468d5409e7522522c, type: 3}
+      Mesh: {fileID: 3871159811978888560, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_7
+      Icon: {fileID: 21300000, guid: 4dc57cf22388359448009b17f39cb635, type: 3}
+      Mesh: {fileID: -5534848561459666527, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_6
+      Icon: {fileID: 21300000, guid: d20ecaef8920bc845af8c602362f12a5, type: 3}
+      Mesh: {fileID: -5368723682836860941, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_5
+      Icon: {fileID: 21300000, guid: fea223225f5d0874bbfa209ae361182e, type: 3}
+      Mesh: {fileID: 6135987202715192553, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_4
+      Icon: {fileID: 21300000, guid: 39fe51129e63b98489c938c53677ea6e, type: 3}
+      Mesh: {fileID: 8061817779763245466, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_3
+      Icon: {fileID: 21300000, guid: a9606e10fbd8a154784bea5d86bd168b, type: 3}
+      Mesh: {fileID: 7479245227453418981, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_2
+      Icon: {fileID: 21300000, guid: ebc62fd264a96214fa117e85f1f2e9d8, type: 3}
+      Mesh: {fileID: -7777154187171388669, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shoe_1
+      Icon: {fileID: 21300000, guid: 32430dab7699bd6448b45df95afe20ad, type: 3}
+      Mesh: {fileID: -5199033204611577963, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Pants
+    UnfittableTypes: Outfit
+    Cosmetics:
+    - Name: Pants_64
+      Icon: {fileID: 21300000, guid: 809e19a09c54b9d4eaad2bdc2d2ebb86, type: 3}
+      Mesh: {fileID: 2211570637581739444, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_63
+      Icon: {fileID: 21300000, guid: 8ee20f144f0138e4fb400b7c9042cf6d, type: 3}
+      Mesh: {fileID: -494742897286712713, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_62
+      Icon: {fileID: 21300000, guid: 34bf0f2a826beda42a0bf82a9e7b7e21, type: 3}
+      Mesh: {fileID: 2944466963096382409, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_61
+      Icon: {fileID: 21300000, guid: c5d86cf8cad101c47970c261d78e93b4, type: 3}
+      Mesh: {fileID: -8130765458794598157, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_60
+      Icon: {fileID: 21300000, guid: 75e0d450141c32b4d80f1698741a7c4c, type: 3}
+      Mesh: {fileID: 6133308653243171657, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_59
+      Icon: {fileID: 21300000, guid: b965ed938541975449549c20877a84a7, type: 3}
+      Mesh: {fileID: 6907531410900951863, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_58
+      Icon: {fileID: 21300000, guid: 7ffad4b15c63b8b49b496b0c040fb447, type: 3}
+      Mesh: {fileID: 6187742987262702762, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_57
+      Icon: {fileID: 21300000, guid: aa915e0e317a4164abdf23bbd83efb75, type: 3}
+      Mesh: {fileID: -8533796674108767030, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_56
+      Icon: {fileID: 21300000, guid: 2395c5657a48639418d477608004970d, type: 3}
+      Mesh: {fileID: 2764526431946374805, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_55
+      Icon: {fileID: 21300000, guid: 7b92adeda4263eb4eb562a18650ca28f, type: 3}
+      Mesh: {fileID: 1882558483120522700, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_54
+      Icon: {fileID: 21300000, guid: 16f3ff13dcc23a24d8b81f350fe25dcb, type: 3}
+      Mesh: {fileID: 8413374127974948213, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_53
+      Icon: {fileID: 21300000, guid: 620b5bdf134d82b468e940c9c3f82b2a, type: 3}
+      Mesh: {fileID: 3299316816605406184, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_52
+      Icon: {fileID: 21300000, guid: 2c47359c4f7c4d14689529302719396d, type: 3}
+      Mesh: {fileID: -6014786082555339309, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_51
+      Icon: {fileID: 21300000, guid: 7755b2b232a56af43bdee13048a3eacb, type: 3}
+      Mesh: {fileID: 2990248660184681198, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_50
+      Icon: {fileID: 21300000, guid: ad46934e5860dc84193a0461a10d57a1, type: 3}
+      Mesh: {fileID: 185864789434313192, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Pants_49
+      Icon: {fileID: 21300000, guid: 66dce5a0b8445d347a8033287c0e83f1, type: 3}
+      Mesh: {fileID: 6349505096071485416, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_48
+      Icon: {fileID: 21300000, guid: 5821c9f1028ca9d4a808ffed6b4627cf, type: 3}
+      Mesh: {fileID: 4499396540493974658, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_47
+      Icon: {fileID: 21300000, guid: dc8ddc357aef6d94abbe6a8a0b6aaccf, type: 3}
+      Mesh: {fileID: -4974796530001398375, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_46
+      Icon: {fileID: 21300000, guid: 6fc45003bd041954a9d8ad0f71937a3c, type: 3}
+      Mesh: {fileID: 3596591044773143653, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_45
+      Icon: {fileID: 21300000, guid: 64272153c63574e4e92e1dc06c21e943, type: 3}
+      Mesh: {fileID: -4174942989393238153, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_44
+      Icon: {fileID: 21300000, guid: 26deaf46bc3b7fe4dab973d54a384ac9, type: 3}
+      Mesh: {fileID: 6635009681812154188, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_43
+      Icon: {fileID: 21300000, guid: 53fdeb44432dedd4c85723edf84122da, type: 3}
+      Mesh: {fileID: 6431088672594379771, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_42
+      Icon: {fileID: 21300000, guid: 84d9bfe7a4027f04999c563ef657e1ca, type: 3}
+      Mesh: {fileID: 9003516425372950469, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_41
+      Icon: {fileID: 21300000, guid: 8ccf6ffdbb7c91843a37b31fbc0c0e28, type: 3}
+      Mesh: {fileID: 1390634649298668668, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_40
+      Icon: {fileID: 21300000, guid: d3663f291fb363c4d806466a203f14e6, type: 3}
+      Mesh: {fileID: -1653321546203045673, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_39
+      Icon: {fileID: 21300000, guid: ae7a48e191b53484e857e1917c415d4a, type: 3}
+      Mesh: {fileID: -8520856706115050996, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_38
+      Icon: {fileID: 21300000, guid: 3bc7aa02c2919e741aa3f4fa8ff700a4, type: 3}
+      Mesh: {fileID: 1810530862344209947, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_37
+      Icon: {fileID: 21300000, guid: accaf10010596e542bba305000115cc5, type: 3}
+      Mesh: {fileID: -6036075811635404288, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_36
+      Icon: {fileID: 21300000, guid: 9eb5472b404f49d45819c343ae3f25b4, type: 3}
+      Mesh: {fileID: -3787595045356582971, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_35
+      Icon: {fileID: 21300000, guid: da5f31ee3cad68f4680e90ed75c1b122, type: 3}
+      Mesh: {fileID: 4724619237422974562, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_34
+      Icon: {fileID: 21300000, guid: ff1c7ca59b14f364c89d4eedd69a0ec2, type: 3}
+      Mesh: {fileID: 5534196846920859254, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_33
+      Icon: {fileID: 21300000, guid: 4b728bac60a2c044aaa322dc6d925ffb, type: 3}
+      Mesh: {fileID: 3966994267441352683, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_32
+      Icon: {fileID: 21300000, guid: cc9ee6a3a9fdd9047aa0ecb0c1d709ed, type: 3}
+      Mesh: {fileID: -4589458473525011115, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_31
+      Icon: {fileID: 21300000, guid: 20e2a5f8e6a9a3e4098b2825889c6535, type: 3}
+      Mesh: {fileID: 2600393385425132284, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_30
+      Icon: {fileID: 21300000, guid: 06e9379bef075e44bb02912ae65b75f1, type: 3}
+      Mesh: {fileID: -3201188558359338683, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_29
+      Icon: {fileID: 21300000, guid: 1345d99c6f5a9894387c77604543cc0e, type: 3}
+      Mesh: {fileID: 2780868574803699681, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_28
+      Icon: {fileID: 21300000, guid: 081092c7efd1ec545b6bd8e6da03af8f, type: 3}
+      Mesh: {fileID: -3201989417782279986, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_27
+      Icon: {fileID: 21300000, guid: 2dd90dd2eba7e2c4c96729f25802925c, type: 3}
+      Mesh: {fileID: -3782296624120028652, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_26
+      Icon: {fileID: 21300000, guid: 5673fa7ee61c560408d7b1303181021f, type: 3}
+      Mesh: {fileID: -2398328474039617179, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_25
+      Icon: {fileID: 21300000, guid: 70edc7b138a71ec4aa3e7b42361745b6, type: 3}
+      Mesh: {fileID: -6933173741787018423, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_24
+      Icon: {fileID: 21300000, guid: 0d66d6e759f49fb4ab686dc8228a40ac, type: 3}
+      Mesh: {fileID: -8855629597564890909, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_23
+      Icon: {fileID: 21300000, guid: ea1ca7f744bbaf042a48ddbe05251fe9, type: 3}
+      Mesh: {fileID: -8737411020039011191, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_22
+      Icon: {fileID: 21300000, guid: e855d5fcb6ce41249ad23c7354bdd2bf, type: 3}
+      Mesh: {fileID: -1971007185918143785, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_21
+      Icon: {fileID: 21300000, guid: 409429bd2a5dbbd43acbee81856dfd9f, type: 3}
+      Mesh: {fileID: 2994676325138191299, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_20
+      Icon: {fileID: 21300000, guid: b50295c510a12c14a989da0d5dd0aaa6, type: 3}
+      Mesh: {fileID: 1306970066478568570, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_19
+      Icon: {fileID: 21300000, guid: 8c0b902cdcad51644adcbc1e4c77abc8, type: 3}
+      Mesh: {fileID: -5294888389101184107, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_18
+      Icon: {fileID: 21300000, guid: bfe835f67a0a8e140b111840934ed151, type: 3}
+      Mesh: {fileID: 7661611022843400655, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_17
+      Icon: {fileID: 21300000, guid: 2fe16a798a7b3af4b8fe0fdcbc188bec, type: 3}
+      Mesh: {fileID: -4460886243852642197, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_16
+      Icon: {fileID: 21300000, guid: 1a8b64813e9ec624e9e88beeeec3073f, type: 3}
+      Mesh: {fileID: 4277794754904588720, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_15
+      Icon: {fileID: 21300000, guid: a99213f9fcce2ab48a29deb179c05ce2, type: 3}
+      Mesh: {fileID: 4122927898749119769, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_14
+      Icon: {fileID: 21300000, guid: b5aab7438b5a0c94ab0dd0c3463984f4, type: 3}
+      Mesh: {fileID: 8365846181006807011, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_13
+      Icon: {fileID: 21300000, guid: 4c6eed012f8ac1f4ba0b97e72982c65e, type: 3}
+      Mesh: {fileID: -7174682663038085362, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_12
+      Icon: {fileID: 21300000, guid: b0e0f4cb704d04e4db19f2bf57db6257, type: 3}
+      Mesh: {fileID: -1602216458834000358, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_11
+      Icon: {fileID: 21300000, guid: 027cbbfaa4e3d0e45a48992f00a06e6f, type: 3}
+      Mesh: {fileID: -6833425477436108569, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_10
+      Icon: {fileID: 21300000, guid: bc7fafca25966de479197233f9dbb40c, type: 3}
+      Mesh: {fileID: 8634359377457026240, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_9
+      Icon: {fileID: 21300000, guid: 44e99382d1948be48afab0c552a8e000, type: 3}
+      Mesh: {fileID: 6798003379652974314, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_8
+      Icon: {fileID: 21300000, guid: ab3096b899400c548b6bd89c5f3dc450, type: 3}
+      Mesh: {fileID: -6314453992403671029, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_7
+      Icon: {fileID: 21300000, guid: 12694462ffa65ba42b196456d452a468, type: 3}
+      Mesh: {fileID: -4233637768077107511, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_6
+      Icon: {fileID: 21300000, guid: 827d908ddeea964468fc3ef50ae571ed, type: 3}
+      Mesh: {fileID: -4020974339211124210, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_5
+      Icon: {fileID: 21300000, guid: 951eab3ebebf2244bb26367e9685fee5, type: 3}
+      Mesh: {fileID: -695156420278356008, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_4
+      Icon: {fileID: 21300000, guid: b50879d97e7622144b1a4ed90ac4e57b, type: 3}
+      Mesh: {fileID: 5451460245492165187, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_3
+      Icon: {fileID: 21300000, guid: 237ece25738874749a9e102f7698baf0, type: 3}
+      Mesh: {fileID: 5451724442572275917, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_2
+      Icon: {fileID: 21300000, guid: 5148a69004f0de84ea03769c12cbb7ae, type: 3}
+      Mesh: {fileID: -4352258593214999454, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Pants_1
+      Icon: {fileID: 21300000, guid: 17e9d4bf9a3d9ad479c759cf42c69b57, type: 3}
+      Mesh: {fileID: -4856331242625222461, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Shirts
+    UnfittableTypes: Outfit
+    Cosmetics:
+    - Name: Shirts_56
+      Icon: {fileID: 21300000, guid: f2f34a91ead80494b9b49d523623d42a, type: 3}
+      Mesh: {fileID: -3247567011481059954, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_55
+      Icon: {fileID: 21300000, guid: c4f558d7ed50292498494583f4d25de1, type: 3}
+      Mesh: {fileID: 2532974958486095677, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_54
+      Icon: {fileID: 21300000, guid: 06112e368aa4b86408086e5f72a137ab, type: 3}
+      Mesh: {fileID: -1071816311687065398, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_53
+      Icon: {fileID: 21300000, guid: d63889fa665bbd3469c65c05480f24d9, type: 3}
+      Mesh: {fileID: 3106743166649742556, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_52
+      Icon: {fileID: 21300000, guid: 1b87aa34609ddb74fb18f63870db8e12, type: 3}
+      Mesh: {fileID: -4828583786838866074, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_51
+      Icon: {fileID: 21300000, guid: 7bb73ef483773a54e9f6d413ca60a020, type: 3}
+      Mesh: {fileID: -3223881775358594643, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_50
+      Icon: {fileID: 21300000, guid: e06579063b8464440976033a724d6b6c, type: 3}
+      Mesh: {fileID: 441484043553703034, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Shirts_49
+      Icon: {fileID: 21300000, guid: 92a5dcc0c81cea242b8026c558cc1f5b, type: 3}
+      Mesh: {fileID: 5212027355520940052, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_48
+      Icon: {fileID: 21300000, guid: d7065dacddb30df41b01abd9714a3f81, type: 3}
+      Mesh: {fileID: 745825139727922464, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Shirts_47
+      Icon: {fileID: 21300000, guid: e383099bf7c2c5c4b95a556d91d81378, type: 3}
+      Mesh: {fileID: 5446693860999241062, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_46
+      Icon: {fileID: 21300000, guid: f831e5f035379794b93ba04330d8b58c, type: 3}
+      Mesh: {fileID: 653561923623251387, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Shirts_45
+      Icon: {fileID: 21300000, guid: 001eb20f6d242a448ab832abdf8af983, type: 3}
+      Mesh: {fileID: -3046059843318868823, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_44
+      Icon: {fileID: 21300000, guid: d3c285c13fe9dcc4a9918489a607d3f6, type: 3}
+      Mesh: {fileID: -101540469299128096, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_43
+      Icon: {fileID: 21300000, guid: e4cabc7ca5fd74b4d80990ad9498a5fe, type: 3}
+      Mesh: {fileID: 1598155646875838398, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_42
+      Icon: {fileID: 21300000, guid: a6749168e8e02cc48a2df072729765d2, type: 3}
+      Mesh: {fileID: 3816846735708998098, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_41
+      Icon: {fileID: 21300000, guid: 0ba80b3c564fe1142ad6a0fc76a4bc6f, type: 3}
+      Mesh: {fileID: -4842161564160158659, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_40
+      Icon: {fileID: 21300000, guid: 4a8bf2704a04c7843b5df409113643b5, type: 3}
+      Mesh: {fileID: -4914821983544846182, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_39
+      Icon: {fileID: 21300000, guid: d3da1445f1fd48a4497aece86ac175a4, type: 3}
+      Mesh: {fileID: -2936763576417939513, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_38
+      Icon: {fileID: 21300000, guid: 41a510250b4d3bb4fbf772be93f6f3fc, type: 3}
+      Mesh: {fileID: -5802765512585452862, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_37
+      Icon: {fileID: 21300000, guid: eeabb70ff3fb6504b93b21dde8e8fded, type: 3}
+      Mesh: {fileID: -5738958057462001520, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_36
+      Icon: {fileID: 21300000, guid: 176758fc1227d5b42a995dc0fb702c56, type: 3}
+      Mesh: {fileID: -8811996213979316080, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_35
+      Icon: {fileID: 21300000, guid: 737ce73aa15c9994397218b4712b5c99, type: 3}
+      Mesh: {fileID: 7733772059631835238, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_34
+      Icon: {fileID: 21300000, guid: 2c7792bfbc363c646a6c8e11d549f486, type: 3}
+      Mesh: {fileID: 5174528463887289286, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_33
+      Icon: {fileID: 21300000, guid: 65979015e26c8ea44a607c8af15ca343, type: 3}
+      Mesh: {fileID: -267129654199129992, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_32
+      Icon: {fileID: 21300000, guid: 2faaf233c0fdb93458fa662e81947826, type: 3}
+      Mesh: {fileID: 7961287548545018466, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_31
+      Icon: {fileID: 21300000, guid: 677ed1538917cd245813c28ff3f492a5, type: 3}
+      Mesh: {fileID: -862240953149043880, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_30
+      Icon: {fileID: 21300000, guid: 6c1925955c9a67744b552229e6d6f322, type: 3}
+      Mesh: {fileID: -2387316102447323058, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_29
+      Icon: {fileID: 21300000, guid: f4fad99818c0c644a93ca696b8d34302, type: 3}
+      Mesh: {fileID: 6802804284882985646, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_28
+      Icon: {fileID: 21300000, guid: 0e61e5925fbf58b4086a268eb3b234f3, type: 3}
+      Mesh: {fileID: 6555465428275093587, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_27
+      Icon: {fileID: 21300000, guid: 95cdc0ce3bb1509428b0e5da1b7bef06, type: 3}
+      Mesh: {fileID: 5486934801229063084, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_26
+      Icon: {fileID: 21300000, guid: 2f521794540c2fa4d88da13ddf9c67e0, type: 3}
+      Mesh: {fileID: -6387576496805113554, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_25
+      Icon: {fileID: 21300000, guid: 28117a648c0f1614bb81d4c673637e53, type: 3}
+      Mesh: {fileID: -480327752450551482, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_24
+      Icon: {fileID: 21300000, guid: ccb0ab52194cea24490ebe6a9449b28b, type: 3}
+      Mesh: {fileID: -3829251624533953408, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_23
+      Icon: {fileID: 21300000, guid: 13a0b0163e075ae4b8624851cc2aa2a3, type: 3}
+      Mesh: {fileID: 5678474218606439249, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_22
+      Icon: {fileID: 21300000, guid: ab85052a1d6fc5141aba4d7629b4d385, type: 3}
+      Mesh: {fileID: -1621416321340103796, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_21
+      Icon: {fileID: 21300000, guid: 0634905ed5a62a14baff5a5d5fecf6b8, type: 3}
+      Mesh: {fileID: 6697587039118675864, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_20
+      Icon: {fileID: 21300000, guid: 0a478b266134af54a8116c68b17f8d7b, type: 3}
+      Mesh: {fileID: 996934704058925390, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Shirts_19
+      Icon: {fileID: 21300000, guid: 46e3c4b2a94bf0c428aa4ac9c053934d, type: 3}
+      Mesh: {fileID: 7027825220111986675, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_18
+      Icon: {fileID: 21300000, guid: c4972f586fab3d14db946ccfb1b171b7, type: 3}
+      Mesh: {fileID: -2986913245917700098, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_17
+      Icon: {fileID: 21300000, guid: d7bade234cd077545a7cea884e1149dd, type: 3}
+      Mesh: {fileID: -8199465149013999684, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_16
+      Icon: {fileID: 21300000, guid: b28ee9973487f7947abb8eb420cf8f52, type: 3}
+      Mesh: {fileID: -8463314072498245727, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_15
+      Icon: {fileID: 21300000, guid: dffe861de3d83714d9ee4c1db1287e6c, type: 3}
+      Mesh: {fileID: 4043931799012691041, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_14
+      Icon: {fileID: 21300000, guid: 6cb0fc656a80e934893b2dd6143d66cf, type: 3}
+      Mesh: {fileID: 318866929582204256, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Shirts_13
+      Icon: {fileID: 21300000, guid: f10aa354aae94414fac5a02054c78d9e, type: 3}
+      Mesh: {fileID: 750837155884080544, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Shirts_12
+      Icon: {fileID: 21300000, guid: cc66c9aacd88ebc41ba86dabc719b32f, type: 3}
+      Mesh: {fileID: 8923598682947647998, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_11
+      Icon: {fileID: 21300000, guid: 521f3080096be654ea5b0e7f2648931b, type: 3}
+      Mesh: {fileID: 7423033312029871491, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_10
+      Icon: {fileID: 21300000, guid: 1ea32cbf266ab124987288232b1e83a4, type: 3}
+      Mesh: {fileID: 1473244919128244272, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_9
+      Icon: {fileID: 21300000, guid: f77aef970caee044ca687c83bcf1b29a, type: 3}
+      Mesh: {fileID: 7097533684147488897, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_8
+      Icon: {fileID: 21300000, guid: 0f5bdbc5327526c438af2f7dc8216d04, type: 3}
+      Mesh: {fileID: 5323732207742759469, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_7
+      Icon: {fileID: 21300000, guid: 8796bc84d0069d04ead1947f78fe8a21, type: 3}
+      Mesh: {fileID: -2642883571546261051, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_6
+      Icon: {fileID: 21300000, guid: 51eb25c07174ed74c85ce0a538551475, type: 3}
+      Mesh: {fileID: 4593448058184777349, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_5
+      Icon: {fileID: 21300000, guid: 04fa4ffaed18ba94a9a955c07d59a143, type: 3}
+      Mesh: {fileID: 1073968179571370637, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_4
+      Icon: {fileID: 21300000, guid: 6a59096e5bf07294bb92d279a5dd0729, type: 3}
+      Mesh: {fileID: 6102768072783913837, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_3
+      Icon: {fileID: 21300000, guid: ede8f51ace2b89c4b97097c77e61ba66, type: 3}
+      Mesh: {fileID: -7729790747993524144, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_2
+      Icon: {fileID: 21300000, guid: b43debcf36cca9e49bcb66916362511d, type: 3}
+      Mesh: {fileID: -1441720183944983882, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Shirts_1
+      Icon: {fileID: 21300000, guid: ced0abdf1f4ae5247805676d936fe8f6, type: 3}
+      Mesh: {fileID: -3820197601266463616, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Base body
+    UnfittableTypes: 
+    Cosmetics:
+    - Name: Base body_60
+      Icon: {fileID: 21300000, guid: 3b7e8cd5447741944a3d64fb240f66c7, type: 3}
+      Mesh: {fileID: -1018774522419003970, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_59
+      Icon: {fileID: 21300000, guid: 2eb47826056daeb41ba5b4f87769d7b4, type: 3}
+      Mesh: {fileID: 689849800192911612, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Base body_58
+      Icon: {fileID: 21300000, guid: 123e614b7521e4e48b9920e7722e09d3, type: 3}
+      Mesh: {fileID: -8366985979461668644, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_57
+      Icon: {fileID: 21300000, guid: 6e3ee32fba4e2564595a3ca8e748f24d, type: 3}
+      Mesh: {fileID: 488363107383792759, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Base body_56
+      Icon: {fileID: 21300000, guid: d42f5bccf79998c4aabc2277ffa75aab, type: 3}
+      Mesh: {fileID: 205689816696443408, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Base body_55
+      Icon: {fileID: 21300000, guid: 371580270e0a72645a119e95168b08ea, type: 3}
+      Mesh: {fileID: -5147035593748436655, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_54
+      Icon: {fileID: 21300000, guid: d55c58a8dc442c745af26e555efce4f4, type: 3}
+      Mesh: {fileID: 3107479917425070291, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_53
+      Icon: {fileID: 21300000, guid: efd27fd33fb9af74fb098e8b781ffa52, type: 3}
+      Mesh: {fileID: 3873820208907426313, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_52
+      Icon: {fileID: 21300000, guid: 9ed1b8c09eb452c469f6529e4b9915f6, type: 3}
+      Mesh: {fileID: 8038248040241688967, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_51
+      Icon: {fileID: 21300000, guid: 70dedd40835cacb4b9c35e13586f0d3e, type: 3}
+      Mesh: {fileID: -920373017717633026, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_50
+      Icon: {fileID: 21300000, guid: cd426cae59db7464b9ff9f02fca9e26f, type: 3}
+      Mesh: {fileID: 6684943391989320475, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_49
+      Icon: {fileID: 21300000, guid: d42394e956967084c9779240397b1d45, type: 3}
+      Mesh: {fileID: -9178028303727208542, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_48
+      Icon: {fileID: 21300000, guid: 5349f0191a0f7df48802cb08b079644d, type: 3}
+      Mesh: {fileID: -6016818578886004046, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_47
+      Icon: {fileID: 21300000, guid: 4d19acbd4e1c6af438bbd25525727c9b, type: 3}
+      Mesh: {fileID: 1234654111172838897, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_46
+      Icon: {fileID: 21300000, guid: 631806bfeaac2d44eb8b3144d6b65169, type: 3}
+      Mesh: {fileID: 4805397170832062675, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_45
+      Icon: {fileID: 21300000, guid: f0ceec8a693f3b44b8dbe1a1779ad530, type: 3}
+      Mesh: {fileID: 1257380648609990969, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_44
+      Icon: {fileID: 21300000, guid: c92df5b548fd21040bbff70184c7b1c7, type: 3}
+      Mesh: {fileID: 413828206830642078, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Base body_43
+      Icon: {fileID: 21300000, guid: 473e790f1ad29ce4899d870bb60e44dc, type: 3}
+      Mesh: {fileID: 8752848312123848846, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_42
+      Icon: {fileID: 21300000, guid: 6bfb049fd38f19344b17630c551220a3, type: 3}
+      Mesh: {fileID: 8158665339478421451, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_41
+      Icon: {fileID: 21300000, guid: edb224575b88cfb4e92133c7b9b98dfa, type: 3}
+      Mesh: {fileID: 5491388982368090271, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_40
+      Icon: {fileID: 21300000, guid: 00912486933c5134cbd74546d1a5437e, type: 3}
+      Mesh: {fileID: -4086576481420222285, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_39
+      Icon: {fileID: 21300000, guid: c3d060f9052a89a4982c95395034934c, type: 3}
+      Mesh: {fileID: 830730772081162252, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Base body_38
+      Icon: {fileID: 21300000, guid: 4c69d7ad7e4d1834caa97d5fc37c1fd5, type: 3}
+      Mesh: {fileID: 9090800352189724331, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_37
+      Icon: {fileID: 21300000, guid: 8256c49f2ddc9d24088e2a0c16db5a63, type: 3}
+      Mesh: {fileID: -1427111433212335840, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_36
+      Icon: {fileID: 21300000, guid: 45fa5fb22be54fb4a8b0d460fbe0fb2b, type: 3}
+      Mesh: {fileID: 8303324175855150718, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_35
+      Icon: {fileID: 21300000, guid: 07b5f42dc6055964d8f2b98139838b3a, type: 3}
+      Mesh: {fileID: 5512670536924863930, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_34
+      Icon: {fileID: 21300000, guid: d642d1b75336c854dad1698656345d94, type: 3}
+      Mesh: {fileID: -677850740346431160, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_33
+      Icon: {fileID: 21300000, guid: 2d65c55a9de671346a2b2ebdcc756c69, type: 3}
+      Mesh: {fileID: 5938680295806842060, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_32
+      Icon: {fileID: 21300000, guid: b5b1ac99e51428a4689eb352ef665207, type: 3}
+      Mesh: {fileID: 289111472775198928, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Base body_31
+      Icon: {fileID: 21300000, guid: 60d719420871835498c98eca470748ef, type: 3}
+      Mesh: {fileID: -2591210847648043181, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_30
+      Icon: {fileID: 21300000, guid: 315418727a0d56945a9444bb7b242feb, type: 3}
+      Mesh: {fileID: -2361933979968713180, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_29
+      Icon: {fileID: 21300000, guid: 75d422ee171f65e4786824471222797e, type: 3}
+      Mesh: {fileID: -404560576745385828, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_28
+      Icon: {fileID: 21300000, guid: 32d9707c1076e584cb8c3c1ec90a5969, type: 3}
+      Mesh: {fileID: -7264625205333102488, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_27
+      Icon: {fileID: 21300000, guid: c766b2763d52c7840b3ac15f6df7c258, type: 3}
+      Mesh: {fileID: -3820384674802965068, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_26
+      Icon: {fileID: 21300000, guid: 44c1492439e9b7a45820198a459ef30e, type: 3}
+      Mesh: {fileID: 3988837348037512461, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_25
+      Icon: {fileID: 21300000, guid: 62870c027806b0840ba2fb41f6c93461, type: 3}
+      Mesh: {fileID: -411541695445386877, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_24
+      Icon: {fileID: 21300000, guid: 030e01ada03b47743abc1840d12ba300, type: 3}
+      Mesh: {fileID: -2533424440110139772, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_23
+      Icon: {fileID: 21300000, guid: f9b30eaf2bfe0b946a8aea3a60c93039, type: 3}
+      Mesh: {fileID: 4075844904892255099, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_22
+      Icon: {fileID: 21300000, guid: 87bb21265f824904ba1d7a1345e9fb73, type: 3}
+      Mesh: {fileID: 2683378354040563260, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_21
+      Icon: {fileID: 21300000, guid: eca4a71f0de510b44a5a9da97bffe61f, type: 3}
+      Mesh: {fileID: 3007130938239106953, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_20
+      Icon: {fileID: 21300000, guid: ccc176f7e5aede04296b5a91f57ab2cc, type: 3}
+      Mesh: {fileID: -803659552158400539, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_19
+      Icon: {fileID: 21300000, guid: 18e17791614faec4590cc1c1fb02dfac, type: 3}
+      Mesh: {fileID: 1032661844499591687, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_18
+      Icon: {fileID: 21300000, guid: 2ac6fca71e774dd40bbfc680a31a06d8, type: 3}
+      Mesh: {fileID: 1867227534284431316, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_17
+      Icon: {fileID: 21300000, guid: 79dc69cd776a2e6449accbd79bc40f23, type: 3}
+      Mesh: {fileID: -879267202654261086, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_16
+      Icon: {fileID: 21300000, guid: 86309bdeaa7633f43bd414b1d044c86f, type: 3}
+      Mesh: {fileID: -1626172005248442590, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_15
+      Icon: {fileID: 21300000, guid: 06cb71652a722ed43b17a589aa8f93e5, type: 3}
+      Mesh: {fileID: 6537620490822779525, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_14
+      Icon: {fileID: 21300000, guid: ce548b01c63b89e41897e621ccf90e1f, type: 3}
+      Mesh: {fileID: 5820683290279446195, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_13
+      Icon: {fileID: 21300000, guid: 47f84a810f9f72041a9121f18f09ae5f, type: 3}
+      Mesh: {fileID: 3480644196102442325, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_12
+      Icon: {fileID: 21300000, guid: 13e8a3fa84f1449429204910aa7e009a, type: 3}
+      Mesh: {fileID: -5418492494697032418, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_11
+      Icon: {fileID: 21300000, guid: 0387f8f7ec799fe49bb099a83d663c65, type: 3}
+      Mesh: {fileID: -8516791723811271917, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_10
+      Icon: {fileID: 21300000, guid: 2330d412d4244b445abac9be214dc429, type: 3}
+      Mesh: {fileID: 3909622926169612774, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_9
+      Icon: {fileID: 21300000, guid: 4860fa0a6e6a51746aa5c7f860e638d7, type: 3}
+      Mesh: {fileID: 4173950548399082468, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_8
+      Icon: {fileID: 21300000, guid: dc8ba262f9be7b74c9ef94ea33b32738, type: 3}
+      Mesh: {fileID: -8926490117214084326, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_7
+      Icon: {fileID: 21300000, guid: 9b5d4aa9d847141488897c88ad9a3f9a, type: 3}
+      Mesh: {fileID: 7914562562479920476, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_6
+      Icon: {fileID: 21300000, guid: 443d5767ec0681b4b9942e6040e834ac, type: 3}
+      Mesh: {fileID: 2982121500329395093, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_5
+      Icon: {fileID: 21300000, guid: 35ac17585c88694409aa7081f553ecb0, type: 3}
+      Mesh: {fileID: -1628096833247545135, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_4
+      Icon: {fileID: 21300000, guid: dad97b667a7dcda4197cf82f09919f04, type: 3}
+      Mesh: {fileID: -8424968537224298619, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_3
+      Icon: {fileID: 21300000, guid: 5c83191e689b33c458af9b0516e17049, type: 3}
+      Mesh: {fileID: 958184646805106649, guid: ed4213104c2cb174d9bda386431ff013, type: 3}
+    - Name: Base body_2
+      Icon: {fileID: 21300000, guid: 6afad2e2c83900342a817e89cd94ce02, type: 3}
+      Mesh: {fileID: -6901989072139958010, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Base body_1
+      Icon: {fileID: 21300000, guid: 4cfcd20536cbe4e4c83480dfe801bdbb, type: 3}
+      Mesh: {fileID: -1677942006385061629, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Outfit
+    UnfittableTypes: Back, Hair, Hat, Horn, Gloves, Shoe,Pants, Shirts
+    Cosmetics:
+    - Name: Outfit_6
+      Icon: {fileID: 21300000, guid: eed17df0089324344b1ab5a4717c7141, type: 3}
+      Mesh: {fileID: -3351875515346063932, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Outfit_5
+      Icon: {fileID: 21300000, guid: a5a41dc52cf69244eb37ef161d9ee9ce, type: 3}
+      Mesh: {fileID: 9099185335878285417, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Outfit_4
+      Icon: {fileID: 21300000, guid: 556577e2f5f0b6547940d62c1bc85fb8, type: 3}
+      Mesh: {fileID: -4223372648338744113, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Outfit_3
+      Icon: {fileID: 21300000, guid: 4bf9347e44b05ca44befbdc3f557485b, type: 3}
+      Mesh: {fileID: -1259988323992888106, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Outfit_2
+      Icon: {fileID: 21300000, guid: 39092e72733d28747ae7c53ddf5d6b09, type: 3}
+      Mesh: {fileID: -3496400604918243344, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Outfit_1
+      Icon: {fileID: 21300000, guid: dd2e58364efb092498f5e1bf6846b7cc, type: 3}
+      Mesh: {fileID: -5635100050943733016, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+  - Type: Mustache
+    UnfittableTypes: 
+    Cosmetics:
+    - Name: Mustache_11
+      Icon: {fileID: 21300000, guid: a1413d77a25cfe5488273eb195412ee5, type: 3}
+      Mesh: {fileID: 7008612071592249925, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_10
+      Icon: {fileID: 21300000, guid: 444e20771fc738340b398d25bdde8db3, type: 3}
+      Mesh: {fileID: 7016731244102417404, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_9
+      Icon: {fileID: 21300000, guid: c3bd6523b479d6a488c2e473bfb97571, type: 3}
+      Mesh: {fileID: -1806472971815364723, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_8
+      Icon: {fileID: 21300000, guid: 2686cd5c4a6bc9146826c534d6e6d550, type: 3}
+      Mesh: {fileID: 6001281056633238146, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_7
+      Icon: {fileID: 21300000, guid: 775c7b9108d352d4d8f5862bbd3145fa, type: 3}
+      Mesh: {fileID: 3844414527188196857, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_6
+      Icon: {fileID: 21300000, guid: a5412012403c0574598c2a92d68d38d6, type: 3}
+      Mesh: {fileID: 5878757396232542814, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_5
+      Icon: {fileID: 21300000, guid: bcf9720f632fa55459b525427e20681f, type: 3}
+      Mesh: {fileID: 1971836545927629223, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_4
+      Icon: {fileID: 21300000, guid: c27b31a5ecbbba4459b0404cad509051, type: 3}
+      Mesh: {fileID: -4283253450531190462, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_3
+      Icon: {fileID: 21300000, guid: 119ea8797ca995b47b125abeebf25844, type: 3}
+      Mesh: {fileID: -6524495543680281234, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_2
+      Icon: {fileID: 21300000, guid: c31f7880d03bba247bd58c1b12aa6dd8, type: 3}
+      Mesh: {fileID: -2137187580627192559, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
+    - Name: Mustache_1
+      Icon: {fileID: 21300000, guid: 4ec74098cd4a83842b86e9a5e98ae709, type: 3}
+      Mesh: {fileID: -6594044724720275294, guid: ed4213104c2cb174d9bda386431ff013,
+        type: 3}
