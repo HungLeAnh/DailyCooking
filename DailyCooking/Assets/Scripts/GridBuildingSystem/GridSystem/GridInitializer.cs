@@ -33,15 +33,15 @@ public class GridInitializer : IGridInitializer
 
         for (int i = 0; i < 100; i++)
         {
-            GameObject road = GameObject.Instantiate(roadPrefab, gridManager.GetWorldPosition(0, i), Quaternion.identity, roadContainer);
+            GameObject road = GameObject.Instantiate(roadPrefab, (gridManager.GetWorldPosition(0, i) + new Vector3(0, 0, 1)) * 4, Quaternion.identity, roadContainer);
             road.transform.rotation = Quaternion.Euler(0, 0, 0);
         }        
         for (int i = 0; i < 100; i++)
         {
-            GameObject road = GameObject.Instantiate(roadPrefab, gridManager.GetWorldPosition(i, 0), Quaternion.identity, roadContainer);
-            road.transform.rotation = Quaternion.Euler(0, 270, 0);
+            GameObject road = GameObject.Instantiate(roadPrefab, (gridManager.GetWorldPosition(i, 0) + new Vector3(1, 0, 0)) * 4, Quaternion.identity, roadContainer);
+            road.transform.rotation = Quaternion.Euler(0, -90, 0);
         }
-        roadContainer.position = new Vector3(-1, -1, -1);
+        roadContainer.position = new Vector3(-3, -1, -3);
     }    
 
     public void InitFloor()
