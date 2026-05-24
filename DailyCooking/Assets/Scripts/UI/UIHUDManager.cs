@@ -14,7 +14,7 @@ public enum UIHUDElements
     Shop,
     Rotate,
     Restaurant,
-
+    Character,
 }
 [Serializable]
 struct SerializableKeyValuePair<T1, T2>
@@ -93,6 +93,10 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
     public void OnRestaurantClick()
     {
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIRestaurantPopup);
+    }
+    public void OnCharacterClick()
+    {
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UICharacterPopup);
     }
     public void HideAllUIElement()
     {
