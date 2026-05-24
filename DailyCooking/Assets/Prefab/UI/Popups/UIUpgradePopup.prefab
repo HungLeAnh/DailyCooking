@@ -251,14 +251,8 @@ MonoBehaviour:
   activeTabColor: {r: 0.19215687, g: 0.5058824, b: 1, a: 1}
   inactiveTabColor: {r: 0.21176471, g: 0.21176471, b: 0.30588236, a: 1}
   tabs:
-  - name: Restaurant
-    tabButton: {fileID: 8522476361797728573}
-    contentPanel: {fileID: 4947175736940907154}
-    tabLabel: {fileID: 1011782497901140671}
-  - name: Skill
-    tabButton: {fileID: 1022369518823324342}
-    contentPanel: {fileID: 6129147835966158220}
-    tabLabel: {fileID: 937092738812066568}
+  - {fileID: 3592073692402933260}
+  - {fileID: 5287531810202908790}
   onTabChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -486,6 +480,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: -3
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -804,6 +799,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: -6
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1125,6 +1121,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: -5
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1328,6 +1325,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: -5
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1725,6 +1723,7 @@ GameObject:
   - component: {fileID: 1592733983301810763}
   - component: {fileID: 681699602050113761}
   - component: {fileID: 8522476361797728573}
+  - component: {fileID: 3592073692402933260}
   m_Layer: 0
   m_Name: TabButton
   m_TagString: Untagged
@@ -1835,6 +1834,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3592073692402933260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4534499962458719952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7641e22fe6e8c38449217413c338e1a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::TabPair
+  name: Skills
+  tabButton: {fileID: 8522476361797728573}
+  contentPanel: {fileID: 6129147835966158220}
+  tabLabel: {fileID: 1011782497901140671}
+  tabIcon: {fileID: 0}
 --- !u!1 &4881541767967681560
 GameObject:
   m_ObjectHideFlags: 0
@@ -2467,6 +2483,7 @@ GameObject:
   - component: {fileID: 5767764987646023912}
   - component: {fileID: 5544952646818967562}
   - component: {fileID: 1022369518823324342}
+  - component: {fileID: 5287531810202908790}
   m_Layer: 0
   m_Name: TabButton
   m_TagString: Untagged
@@ -2577,6 +2594,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5287531810202908790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7229835057173723570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7641e22fe6e8c38449217413c338e1a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::TabPair
+  name: Restaurant
+  tabButton: {fileID: 1022369518823324342}
+  contentPanel: {fileID: 4947175736940907154}
+  tabLabel: {fileID: 937092738812066568}
+  tabIcon: {fileID: 0}
 --- !u!1 &7449279188799629734
 GameObject:
   m_ObjectHideFlags: 0
@@ -2920,6 +2954,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: -3
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

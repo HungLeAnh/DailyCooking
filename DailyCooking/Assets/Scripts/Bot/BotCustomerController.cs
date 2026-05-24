@@ -60,7 +60,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
             SetVisualActive(newVal);
             var spawnPos = UnityEngine.Random.Range(0, 2) == 0 ? roamPosX.Value : roamPosZ.Value;
             transform.position = spawnPos;
-            Debug.Log(" initialized at position: " + spawnPos + " real pos:  " + transform.position);
+            //Debug.Log(" initialized at position: " + spawnPos + " real pos:  " + transform.position);
         };
         isEmotionBubbleActive.OnValueChanged += (oldVal, newVal) => {
             emotionBubble.SetActive(newVal);

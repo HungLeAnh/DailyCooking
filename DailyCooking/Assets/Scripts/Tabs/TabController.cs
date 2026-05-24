@@ -1,40 +1,7 @@
-using UnityEngine;
-using UnityEngine.UI;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Events;
-using TMPro;
-
-[System.Serializable]
-public class TabPair
-{
-    public string name; 
-    public Button tabButton;
-    public GameObject contentPanel;
-    public TextMeshProUGUI tabLabel;
-
-    public void SetUpTab(bool isActive, Color activeColor,Color inactiveColor)
-    {
-        if(tabLabel != null)
-        {
-            tabLabel.text = name;
-        }
-        if (contentPanel != null)
-        {
-            contentPanel.SetActive(isActive);
-        }
-
-        if (tabButton != null)
-        {
-            var image = tabButton.GetComponent<Image>();
-            if (image != null)
-            {
-                image.color = isActive ? activeColor : inactiveColor;
-            }
-
-            tabButton.interactable = !isActive;
-        }
-    }
-}
 
 public class TabController : MonoBehaviour
 {
@@ -54,6 +21,8 @@ public class TabController : MonoBehaviour
 
     private void Start()
     {
+        if (tabs.Count == 0||tabs == null)
+            return;
         for (int i = 0; i < tabs.Count; i++)
         {
             int index = i; 
@@ -74,5 +43,15 @@ public class TabController : MonoBehaviour
             tabs[i].SetUpTab(isActive, activeTabColor, inactiveTabColor);
         }
         onTabChanged?.Invoke(index);
+    }
+    public void InitializeTabs(List<string> tabNames, List<Sprite> tabIcons)
+    {
+        for (int i = 0; i < tabs.Count && i < tabNames.Count && i < tabIcons.Count; i++)
+        {
+            tabs[i].name = tabNames[i];
+            tabs[i].InitTab(tabIcons[i]);
+            tabs[i].tabButton.onClick.AddListener(() => SelectTab(i));
+        }
+        SelectTab(defaultTabIndex);
     }
 }

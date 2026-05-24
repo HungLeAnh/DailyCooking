@@ -229,7 +229,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &37620134273222529
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1773,18 +1773,9 @@ MonoBehaviour:
   activeTabColor: {r: 1, g: 1, b: 1, a: 1}
   inactiveTabColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   tabs:
-  - name: Resources
-    tabButton: {fileID: 7595490537416749053}
-    contentPanel: {fileID: 4127911701210093880}
-    tabLabel: {fileID: 2882041322424705815}
-  - name: Restaurant
-    tabButton: {fileID: 2233701385808104561}
-    contentPanel: {fileID: 4189726369625286857}
-    tabLabel: {fileID: 3843447199293840676}
-  - name: Ingredients
-    tabButton: {fileID: 8744504267785483466}
-    contentPanel: {fileID: 3789002934647937677}
-    tabLabel: {fileID: 8449302132874802893}
+  - {fileID: 4377243186926221484}
+  - {fileID: 8879545702294555785}
+  - {fileID: 3526599086496491950}
   onTabChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -7543,7 +7534,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5612374389482914912
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7886,7 +7877,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8744289533535072632
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11274,6 +11265,7 @@ GameObject:
   - component: {fileID: 2064260679760569753}
   - component: {fileID: 3923494924913889742}
   - component: {fileID: 7595490537416749053}
+  - component: {fileID: 4377243186926221484}
   m_Layer: 0
   m_Name: Resources
   m_TagString: Untagged
@@ -11386,6 +11378,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4377243186926221484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5614577634397314589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7641e22fe6e8c38449217413c338e1a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::TabPair
+  name: Resource
+  tabButton: {fileID: 7595490537416749053}
+  contentPanel: {fileID: 4127911701210093880}
+  tabLabel: {fileID: 2882041322424705815}
+  tabIcon: {fileID: 5346268306568003589}
 --- !u!1 &5699330171393329741
 GameObject:
   m_ObjectHideFlags: 0
@@ -16719,6 +16728,7 @@ GameObject:
   - component: {fileID: 3721424612006333744}
   - component: {fileID: 2000705801466914420}
   - component: {fileID: 2233701385808104561}
+  - component: {fileID: 8879545702294555785}
   m_Layer: 0
   m_Name: Restaurant
   m_TagString: Untagged
@@ -16831,6 +16841,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8879545702294555785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8215975974856969016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7641e22fe6e8c38449217413c338e1a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::TabPair
+  name: Restaurant
+  tabButton: {fileID: 2233701385808104561}
+  contentPanel: {fileID: 4189726369625286857}
+  tabLabel: {fileID: 3843447199293840676}
+  tabIcon: {fileID: 7460330328913803362}
 --- !u!1 &8283461367405749948
 GameObject:
   m_ObjectHideFlags: 0
@@ -17453,6 +17480,7 @@ GameObject:
   - component: {fileID: 7441350373169516347}
   - component: {fileID: 5669121461038291667}
   - component: {fileID: 8744504267785483466}
+  - component: {fileID: 3526599086496491950}
   m_Layer: 0
   m_Name: Ingredients
   m_TagString: Untagged
@@ -17565,6 +17593,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3526599086496491950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8433643381356713990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7641e22fe6e8c38449217413c338e1a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::TabPair
+  name: Ingredients
+  tabButton: {fileID: 8744504267785483466}
+  contentPanel: {fileID: 3789002934647937677}
+  tabLabel: {fileID: 8449302132874802893}
+  tabIcon: {fileID: 1684768425238384836}
 --- !u!1 &8528207852682753947
 GameObject:
   m_ObjectHideFlags: 0
