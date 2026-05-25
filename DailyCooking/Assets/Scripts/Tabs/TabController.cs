@@ -5,6 +5,8 @@ using UnityEngine.Events;
 
 public class TabController : MonoBehaviour
 {
+    public Action onTabChanged;
+
     [Header("Configuration")]
     [Tooltip("The index of the tab to open on Start")]
     public int defaultTabIndex = 0;
@@ -16,8 +18,9 @@ public class TabController : MonoBehaviour
     [Header("Tabs Data")]
     public List<TabPair> tabs = new List<TabPair>();
 
-    [Header("Events")]
-    public UnityEvent<int> onTabChanged;
+
+    private TabPair currentTab;
+    public TabPair CurrentTab => currentTab;
 
     private void Start()
     {
@@ -32,7 +35,7 @@ public class TabController : MonoBehaviour
         SelectTab(defaultTabIndex);
     }
 
-    public void SelectTab(int index)
+    private void SelectTab(int index)
     {
         if (index < 0 || index >= tabs.Count) return;
 
@@ -42,7 +45,8 @@ public class TabController : MonoBehaviour
 
             tabs[i].SetUpTab(isActive, activeTabColor, inactiveTabColor);
         }
-        onTabChanged?.Invoke(index);
+        currentTab = tabs[index];
+        onTabChanged?.Invoke();
     }
     public void InitializeTabs(List<string> tabNames, List<Sprite> tabIcons)
     {
