@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class UICharacterItem : MonoBehaviour
 {
-    public Action ItemSelected;
+    public Action<int> ItemSelected;
 
     [SerializeField] private Image _itemPreviewImage = default;
     [SerializeField] private Image _bgImage = default;
@@ -13,9 +13,11 @@ public class UICharacterItem : MonoBehaviour
 
     bool _isSelected = false;
     private Cosmetic cosmetic;
-    public void SetItem(Cosmetic cosmetic, bool isSelected)
+    private int currentIndex;
+    public void SetItem(int index, Cosmetic cosmetic, bool isSelected)
     {
         this.cosmetic = cosmetic;
+        this.currentIndex = index;
         _isSelected = isSelected;
 
         gameObject.SetActive(true);
@@ -54,7 +56,7 @@ public class UICharacterItem : MonoBehaviour
 
         if (ItemSelected != null)
         {
-            ItemSelected.Invoke();
+            ItemSelected.Invoke(currentIndex);
         }
         else
         {
