@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using Unity.Netcode;
 using UnityEngine;
@@ -34,6 +35,9 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     private Transform kitchenObjectHoldPoint;
     [SerializeField] 
     private Animator characterAnimator;
+    [SerializeField] 
+    private List<CustomizationPart> customizationParts;
+
 
     [SerializeField] private float radius = 2f;
     private float height = 2.0f;
@@ -51,6 +55,28 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         var states = _stateFactory.CreateStates(this);
         _stateManager.SetStates(states, EPlayerState.Idle);
         _stateManager.Start();
+
+        SetCharacterMesh();
+    }
+
+    private void SetCharacterMesh()
+    {
+        foreach (var part in customizationParts)
+        {
+            part.Initialise(ConfigManager.Instance.CustomizationData);
+        }
+        var playerData = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        foreach (var item in playerData.CharacterCustomizationIds)
+        {
+            var part = customizationParts.FirstOrDefault(x => x.Type == item.Key);
+            if (part != null)
+            {
+                if (item.Value >= 0)
+                    part.SetMesh(item.Value);
+                else
+                    part.Clear();
+            }
+        }
     }
 
     protected void Awake()
@@ -63,6 +89,12 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     private void Start()
     {
         GameInput.Instance.OnMouseClickPerformed += PlayerStateMachine_OnMouseClickPerformed;
+        GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).OnResourceChange += OnResourceChanged;
+    }
+
+    private void OnResourceChanged()
+    {
+        SetCharacterMesh();
     }
 
     private void OnDestroy()

@@ -22,7 +22,8 @@ public class FileDataHandler
             {
                 args.ErrorContext.Handled = true;
             },
-            TypeNameHandling = TypeNameHandling.Auto
+            TypeNameHandling = TypeNameHandling.Auto,
+            Formatting = Formatting.Indented
         };
         settings.Converters.Add(new UniversalUnityConverter());
     }

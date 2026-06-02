@@ -11,7 +11,8 @@ public class GameDefine : MonoBehaviour
 
     #endregion
 
-    #region Player State Machine
+    #region Player
+    public const string PlayerCharacter = "{\"Back\": -1,\"Base body\": 0,\"Eye\": 13,\"Face\": -1,\"Gloves\": -1,\"Hair\": -1,\"Hat\": -1,\"Mustache\": -1,\"Outfit\": -1,\"Pants\": -1,\"Shirts\": -1,\"Shoe\": -1,\"Horn\": -1}";
     #endregion
 
     #region Emotion

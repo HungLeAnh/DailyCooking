@@ -13,11 +13,11 @@ public class UICharacterPopup : UIPopup
     [SerializeField] private Button backButton;
     [SerializeField] private TabController tabController;
     [SerializeField] private TextMeshProUGUI currentTypeText;
-    [SerializeField] private Button ClearCurrentTypeCustom;
+    [SerializeField] private Button ClearCurrentTypeCustomButton;
+    [SerializeField] private Button SaveCustomButtom;
     [SerializeField] private Transform UnfitParentTransform;
     [SerializeField] private GameObject UnfitPrefab;
 
-    [SerializeField] private Customization_Data customizationData;
     [SerializeField] private GameObject characterObject;
     [SerializeField] private List<CustomizationPart> customizationParts;
     [SerializeField] private GameObject tabPrefab;
@@ -28,7 +28,6 @@ public class UICharacterPopup : UIPopup
 
     private int selectedItemId = -1;
     private List<UICharacterItem> listItem = new List<UICharacterItem>();
-    private bool isPlacingObject = false;
     private bool isShowItems = false;
 
     private Cosmetic currentCosmetic;
@@ -50,10 +49,10 @@ public class UICharacterPopup : UIPopup
         
         foreach (var part in customizationParts)
         {
-            part.Initialise(customizationData);
+            part.Initialise(ConfigManager.Instance.CustomizationData);
         }
 
-        foreach ( var tabData in customizationData.CosmeticDatas)
+        foreach ( var tabData in ConfigManager.Instance.CustomizationData.CosmeticDatas)
         {
             var instantiatedTab = Instantiate(tabPrefab, tabContent);
             instantiatedTab.SetActive(true);
@@ -63,11 +62,24 @@ public class UICharacterPopup : UIPopup
 
             UnfitSpriteDictionary[tabData.Type] = tabData.Icon;
         }
-        var listTabNames = customizationData.CosmeticDatas.Select(x => x.Type).ToList();
-        var listTabIcons = customizationData.CosmeticDatas.Select(x => (x.Icon)).ToList();
+        var listTabNames = ConfigManager.Instance.CustomizationData.CosmeticDatas.Select(x => x.Type).ToList();
+        var listTabIcons = ConfigManager.Instance.CustomizationData.CosmeticDatas.Select(x => (x.Icon)).ToList();
 
         tabController.onTabChanged += () => OnChangeTab(tabController.CurrentTab.name);
         tabController.InitializeTabs(listTabNames, listTabIcons);
+
+        var playerData = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        foreach(var item in playerData.CharacterCustomizationIds)
+        {
+            var part = customizationParts.FirstOrDefault(x => x.Type == item.Key);
+            if (part != null)
+            {
+                if(item.Value >= 0)
+                    part.SetMesh(item.Value);
+                else
+                    part.Clear();
+            }
+        }
 
         backButton.onClick.AddListener(() =>
         {
@@ -81,12 +93,16 @@ public class UICharacterPopup : UIPopup
                 isShowItems = false;                
             }
         });
-        ClearCurrentTypeCustom.onClick.AddListener(() =>
+        ClearCurrentTypeCustomButton.onClick.AddListener(() =>
         {
             if (currentCosmeticsData != null)
             {
                 currentCosmeticsData.OnClear?.Invoke();
             }
+        });
+        SaveCustomButtom.onClick.AddListener(() =>
+        {
+            SaveCustom();
         });
     }
 
@@ -120,7 +136,7 @@ public class UICharacterPopup : UIPopup
     {
         if (tabController.CurrentTab != null)
         {
-            var cosmeticsData = customizationData.CosmeticDatas.Find(x => x.Type == type);
+            var cosmeticsData = ConfigManager.Instance.CustomizationData.CosmeticDatas.Find(x => x.Type == type);
             SetCosmeticType(cosmeticsData);
             currentTypeText.text = type;
             foreach (Transform child in UnfitParentTransform)
@@ -131,12 +147,12 @@ public class UICharacterPopup : UIPopup
             }
             if(unfittables != null|| unfittables.Count > 0)
             {
-                Debug.Log("unfit count: " + unfittables.Count);
+                //Debug.Log("unfit count: " + unfittables.Count);
                 foreach(var unfit in unfittables)
                 {
                     if (string.IsNullOrEmpty(unfit)) break;
 
-                    Debug.Log("unfit: " + unfit);
+                    //Debug.Log("unfit: " + unfit);
                     var instance = Instantiate(UnfitPrefab, UnfitParentTransform);
                     instance.GetComponent<Image>().sprite = UnfitSpriteDictionary[unfit];
                     instance.gameObject.SetActive(true);
@@ -162,7 +178,7 @@ public class UICharacterPopup : UIPopup
             return;
         }
 
-        Debug.Log("Fill Inventory with " + listItemsToShow.Count + " items");
+        //Debug.Log("Fill Inventory with " + listItemsToShow.Count + " items");
         int maxCount = Mathf.Max(listItemsToShow.Count, listItem.Count);
         int diffCount = Mathf.Abs(listItemsToShow.Count - listItem.Count);
         selectedItemId = -1;
@@ -173,7 +189,7 @@ public class UICharacterPopup : UIPopup
                 CreateInventoryItem();
             }
         }
-        Debug.Log("List Item Count: " + listItem.Count);
+        //Debug.Log("List Item Count: " + listItem.Count);
         for (int i = 0; i < maxCount; i++)
         {
             if (i < listItemsToShow.Count)
@@ -239,6 +255,16 @@ public class UICharacterPopup : UIPopup
 
         parts.Remove(currentCustomizationPart);
     }
+    private void SaveCustom()
+    {
+        var playerData = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        foreach (var part in customizationParts)
+        {
+            Debug.Log($"Saving {part.Type} with index {part.Index}");
+            playerData.UpdatePlayerCustomization(part.Type, part.Index);
+        }
+
+    }
     private void OnChangeTab(string type)
     {
         //Debug.Log("Type: " + type);
@@ -247,7 +273,6 @@ public class UICharacterPopup : UIPopup
     }
     public void ClosePopup()
     {
-        isPlacingObject = false;
         isShowItems = false;
         HidePopup();
     }
