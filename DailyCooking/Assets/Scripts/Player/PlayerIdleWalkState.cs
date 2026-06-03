@@ -10,7 +10,7 @@ public class PlayerIdleWalkState : PlayerBaseState
 
     public override void EnterState()
     {
-        ChangeAnimationState("IdleWalk");
+        ChangeAnimationState("Walking");
     }
 
     public override void ExitState()

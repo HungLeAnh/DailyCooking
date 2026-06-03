@@ -80,7 +80,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2290866766
+  GlobalObjectIdHash: 1752586117
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -190,11 +190,7 @@ MonoBehaviour:
   m_Animator: {fileID: 3502598980215133441}
   TransitionStateInfoList: []
   AnimatorParameterEntries:
-    ParameterEntries:
-    - name: Blend
-      NameHash: 1784438316
-      Synchronize: 1
-      ParameterType: 1
+    ParameterEntries: []
   AnimatorParametersExpanded: 0
 --- !u!1 &2260947745876742963
 GameObject:
@@ -299,7 +295,7 @@ PrefabInstance:
     - target: {fileID: 8335503986344408926, guid: bdf0475ffd29bbf4a82116e789996e80, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 301fe09abe207db4884705ac725ac934, type: 2}
+      objectReference: {fileID: 9100000, guid: 7a1c397e027d5094b8eff58b13b693ef, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
