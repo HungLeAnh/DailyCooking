@@ -196,7 +196,8 @@ public class UICharacterPopup : UIPopup
             {
                 if (listItemsToShow[i] != null && listItem[i] != null)
                 {
-                    listItem[i].SetItem(i,listItemsToShow[i], false);
+                    bool isLocked = !GameManager.Instance.GameData.CosmeticData.IsCosmeticUnlocked(currentCosmeticsData.Type, i);
+                    listItem[i].SetItem(i, listItemsToShow[i], false, isLocked);
                 }
                 else
                 {
@@ -218,8 +219,25 @@ public class UICharacterPopup : UIPopup
         instantiatedItem.SetActive(true);
         var item = instantiatedItem.GetComponent<UICharacterItem>();
         item.ItemSelected += OnSelectItem;
+        item.ItemUnlocked += OnUnlockItem;
 
         listItem.Add(item);
+    }
+
+    private void OnUnlockItem(int index)
+    {
+        string itemName = currentCosmeticsData.Cosmetics[index].Name;
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameConfirmPopup, new UIGameConfirmPopup.Param
+        {
+            Title = "Unlock Cosmetic",
+            Message = $"Are you sure you want to unlock {itemName}?",
+            YesAction = () =>
+            {
+                GameManager.Instance.GameData.CosmeticData.UnlockCosmetic(currentCosmeticsData.Type, index);
+                GameManager.Instance.SaveGame();
+                FillInvetoryItems(currentCosmeticsData.Cosmetics);
+            }
+        });
     }
 
     private void OnSelectItem(int index)

@@ -6,41 +6,65 @@ using UnityEngine.UI;
 public class UICharacterItem : MonoBehaviour
 {
     public Action<int> ItemSelected;
+    public Action<int> ItemUnlocked;
 
-    [SerializeField] private Image _itemPreviewImage = default;
-    [SerializeField] private Image _bgImage = default;
-    [SerializeField] public Button _itemButton = default;
-
-    bool _isSelected = false;
+    [SerializeField] private Image itemPreviewImage = default;
+    [SerializeField] private Image bgImage = default;
+    [SerializeField] private Button itemButton = default;
+    [SerializeField] private GameObject LockItem;
+    [SerializeField] private Button UnlockItemButton;
+    bool isSelected = false;
     private Cosmetic cosmetic;
     private int currentIndex;
-    public void SetItem(int index, Cosmetic cosmetic, bool isSelected)
+    private bool isLocked = false;
+
+    private void Awake()
+    {
+        if (UnlockItemButton != null)
+        {
+            UnlockItemButton.onClick.AddListener(() =>
+            {
+                ItemUnlocked?.Invoke(currentIndex);
+            });
+        }
+    }
+
+    public void SetItem(int index, Cosmetic cosmetic, bool isSelected, bool isLocked)
     {
         this.cosmetic = cosmetic;
         this.currentIndex = index;
-        _isSelected = isSelected;
+        this.isSelected = isSelected;
+        this.isLocked = isLocked;
 
         gameObject.SetActive(true);
-        _itemPreviewImage.gameObject.SetActive(true);
-        _itemButton.gameObject.SetActive(true);
-        _itemPreviewImage.sprite = cosmetic.Icon;
+        itemPreviewImage.gameObject.SetActive(true);
+        itemButton.gameObject.SetActive(true);
+        itemPreviewImage.sprite = cosmetic.Icon;
+
+        LockItem.SetActive(isLocked);
+        itemButton.interactable = !isLocked;
+        
+        if (UnlockItemButton != null)
+        {
+            UnlockItemButton.gameObject.SetActive(isLocked);
+        }
     }
 
     public void SetInactiveItem()
     {
         gameObject.SetActive(false);
-        _isSelected = false;
+        isSelected = false;
     }
 
     private void OnEnable()
     {
-        if (_isSelected)
+        if (isSelected)
         { SelectItem(); }
     }
     public void OnItemClick()
     {
-        _isSelected = !_isSelected;
-        if (_isSelected)
+        isSelected = !isSelected;
+        if (isSelected)
         {
             SelectItem();
         }
@@ -52,7 +76,7 @@ public class UICharacterItem : MonoBehaviour
 
     public void SelectItem()
     {
-        _isSelected = true;
+        isSelected = true;
 
         if (ItemSelected != null)
         {
@@ -65,6 +89,6 @@ public class UICharacterItem : MonoBehaviour
 
     public void UnselectItem()
     {
-        _isSelected = false;
+        isSelected = false;
     }
 }
