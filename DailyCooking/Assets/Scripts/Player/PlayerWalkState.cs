@@ -3,9 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlayerIdleState : PlayerBaseState
+public class PlayerWalkState : PlayerBaseState
 {
-    public PlayerIdleState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
+    public PlayerWalkState(PlayerStateMachine.EPlayerState stateKey) : base(stateKey)
     {
     }
 
@@ -20,10 +20,10 @@ public class PlayerIdleState : PlayerBaseState
 
     public override PlayerStateMachine.EPlayerState GetNextState()
     {
-        if (Context.IsWalking)
-            return PlayerStateMachine.EPlayerState.Walking;
+        if (!Context.IsWalking)
+            return PlayerStateMachine.EPlayerState.Idle;
         
-        return PlayerStateMachine.EPlayerState.Idle;
+        return PlayerStateMachine.EPlayerState.Walking;
     }
 
     public override void UpdateState()
@@ -33,7 +33,7 @@ public class PlayerIdleState : PlayerBaseState
 
     private void UpdateAnimation()
     {
-        ChangeAnimationState("Idle");
+        ChangeAnimationState("Walking");
         if (Context.PlayerIKHandler != null)
         {
             float targetWeight = Context.KitchenObject != null ? 1f : 0f;

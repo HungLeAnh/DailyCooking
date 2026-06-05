@@ -14,9 +14,11 @@ public class PlayerStateContext
     private IInteractable selectedInteractableObject;
     private Vector3 lastInteractDir;
     private List<IHighlightable> highlightable;
+    private string currentAnimation;
+    private PlayerIKHandler playerIKHandler;
     public PlayerStateContext(Animator animator, 
         Transform playerTransform, LayerMask counterLayerMask, 
-        Transform kitchenObjectHoldPoint)
+        Transform kitchenObjectHoldPoint, PlayerIKHandler ikHandler)
     {
         characterAnimator = animator;
         gameInput = GameInput.Instance;
@@ -26,6 +28,7 @@ public class PlayerStateContext
         idDisableInput = false;
         isWalking = false;
         highlightable = new List<IHighlightable>();
+        playerIKHandler = ikHandler;
     }
 
     //Read only
@@ -33,7 +36,9 @@ public class PlayerStateContext
     public GameInput PlayerGameInput => gameInput; 
     public Transform PlayerTransform => playerTransform;
     public LayerMask CounterLayerMask => counterLayermask;
+    public PlayerIKHandler PlayerIKHandler => playerIKHandler;
     //Read and Write
+    public string CurrentAnimation { get => currentAnimation; set => currentAnimation = value; }
     public bool IsDisableInput { get => idDisableInput; set => idDisableInput = value; }
     public bool IsWalking { get => isWalking; set => isWalking = value; }
     public KitchenObject KitchenObject { get => kitchenObject; set => kitchenObject = value; }

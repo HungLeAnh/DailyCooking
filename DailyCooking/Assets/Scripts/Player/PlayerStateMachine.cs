@@ -15,17 +15,8 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     public event EventHandler<Transform> OnSelectInteractable;
     public enum EPlayerState
     {
-        // Top-level states
         Idle, 
-        Holding,
-
-        // Sub-states for Idle
-        Idle_Idle, 
-        Idle_Walking,
-
-        // Sub-states for Holding
-        Holding_Idle,
-        Holding_Walking,
+        Walking,
     }
 
 
@@ -37,6 +28,8 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     private Animator characterAnimator;
     [SerializeField] 
     private List<CustomizationPart> customizationParts;
+    [SerializeField]
+    private PlayerIKHandler playerIKHandler;
 
 
     [SerializeField] private float radius = 2f;
@@ -50,7 +43,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     private void IntializeStates()
     {
         Context = new PlayerStateContext(characterAnimator,
-            this.transform, countersLayerMask, this.kitchenObjectHoldPoint);
+            this.transform, countersLayerMask, this.kitchenObjectHoldPoint, playerIKHandler);
 
         var states = _stateFactory.CreateStates(this);
         _stateManager.SetStates(states, EPlayerState.Idle);

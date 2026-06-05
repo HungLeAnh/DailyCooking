@@ -24,8 +24,10 @@ public abstract class PlayerBaseState : BaseState<PlayerStateMachine.EPlayerStat
     {
         if(Context != null)
         {
-            Context.CharacterAnimator.CrossFade(animationName,0.1f,0,0.1f,0.1f);
+            if (Context.CurrentAnimation == animationName) return;
 
+            Context.CharacterAnimator.CrossFade(animationName,0.1f,0,0.1f,0.1f);
+            Context.CurrentAnimation = animationName;
         }
     }
     public override void UpdateState()
