@@ -9,6 +9,7 @@ public class Cosmetic
     public string Name;
     public Sprite Icon;
     public Mesh Mesh;
+    public int Price;
 }
 
 [Serializable]

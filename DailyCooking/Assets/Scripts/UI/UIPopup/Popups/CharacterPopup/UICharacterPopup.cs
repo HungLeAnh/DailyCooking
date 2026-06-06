@@ -226,16 +226,26 @@ public class UICharacterPopup : UIPopup
 
     private void OnUnlockItem(int index)
     {
-        string itemName = currentCosmeticsData.Cosmetics[index].Name;
+        var cosmetic = currentCosmeticsData.Cosmetics[index];
+        string itemName = cosmetic.Name;
+        int price = cosmetic.Price;
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameConfirmPopup, new UIGameConfirmPopup.Param
         {
             Title = "Unlock Cosmetic",
-            Message = $"Are you sure you want to unlock {itemName}?",
+            Message = $"Are you sure you want to unlock {itemName} for {price} coins?",
             YesAction = () =>
             {
-                GameManager.Instance.GameData.CosmeticData.UnlockCosmetic(currentCosmeticsData.Type, index);
-                GameManager.Instance.SaveGame();
-                FillInvetoryItems(currentCosmeticsData.Cosmetics);
+                if (GameManager.Instance.GameData.RestaurantData.Coins >= price)
+                {
+                    GameManager.Instance.UpdateRestaurantCoinServerRpc(-price);
+                    GameManager.Instance.GameData.CosmeticData.UnlockCosmetic(currentCosmeticsData.Type, index);
+                    GameManager.Instance.SaveGame();
+                    FillInvetoryItems(currentCosmeticsData.Cosmetics);
+                }
+                else
+                {
+                    UIManager.Instance.ShowAlertMessage("Not enough coins to unlock this cosmetic.");
+                }
             }
         });
     }

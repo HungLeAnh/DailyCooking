@@ -11,6 +11,7 @@ public class UICharacterItem : MonoBehaviour
     [SerializeField] private Image itemPreviewImage = default;
     [SerializeField] private Image bgImage = default;
     [SerializeField] private Button itemButton = default;
+    [SerializeField] private TextMeshProUGUI priceText = default;
     [SerializeField] private GameObject LockItem;
     [SerializeField] private Button UnlockItemButton;
     bool isSelected = false;
@@ -47,6 +48,12 @@ public class UICharacterItem : MonoBehaviour
         if (UnlockItemButton != null)
         {
             UnlockItemButton.gameObject.SetActive(isLocked);
+        }
+
+        if (priceText != null)
+        {
+            priceText.text = cosmetic.Price.ToString();
+            priceText.gameObject.SetActive(isLocked);
         }
     }
 

@@ -16,6 +16,44 @@ namespace PrivateLT.CharacterCustomization
         private static readonly string _iconFolderPath = "Assets/LutorGames/CharacterPack/Art/Icons";
         private static readonly string _scriptableObjectPath = "Assets/LutorGames/CharacterPack/Custom_SO/Customization_Data.asset";
 
+        [MenuItem("Assets/LutorGames/Randomize All 0-Price Cosmetics", false, -9)]
+        public static void RandomizeEmptyPrices()
+        {
+            customizationData = AssetDatabase.LoadAssetAtPath<Customization_Data>(_scriptableObjectPath);
+
+            if (customizationData == null)
+            {
+                Debug.LogError($"Customization_Data ScriptableObject not found at path: {_scriptableObjectPath}");
+                return;
+            }
+
+            int count = 0;
+            foreach (var category in customizationData.CosmeticDatas)
+            {
+                foreach (var cosmetic in category.Cosmetics)
+                {
+                    if (cosmetic.Price == 0)
+                    {
+                        cosmetic.Price = GetRandomPrice();
+                        count++;
+                    }
+                }
+            }
+
+            EditorUtility.SetDirty(customizationData);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log($"Randomized {count} cosmetic prices.");
+            EditorUtility.DisplayDialog("Completed", $"Randomized {count} cosmetic prices.", "OK");
+        }
+
+        private static int GetRandomPrice()
+        {
+            int[] prices = { 50, 100, 150, 200, 250, 300, 400, 500 };
+            return prices[Random.Range(0, prices.Length)];
+        }
+
         [MenuItem("Assets/LutorGames/Analyze Character Customization", false, -10)]
         public static void AnalyzeCharacter()
         {
@@ -99,7 +137,8 @@ namespace PrivateLT.CharacterCustomization
                     {
                         Name = meshName,
                         Icon = image,
-                        Mesh = mesh
+                        Mesh = mesh,
+                        Price = GetRandomPrice()
                     };
 
                     if (customizationData.Contains(newCosmetic, out var isSame) && (isSame || !ShowOverrideDialog(meshName))) continue;
