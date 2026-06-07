@@ -101,7 +101,7 @@ public class WaitForTableState : BotState
         }
 
         stateMachine.GetBotController().StartNavMesh();
-        stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walk);
+        stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walking);
         stateMachine.GetBotController().NavMeshAgent.SetDestination(targetPos);
         isWalking = true;
     }

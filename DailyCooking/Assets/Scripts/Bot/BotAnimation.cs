@@ -3,7 +3,7 @@ public class BotAnimation
     public enum State
     {
         Idle,
-        Walk,
+        Walking,
         Talk,
         Eat
     }

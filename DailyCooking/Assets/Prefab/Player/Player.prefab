@@ -144,7 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2290866766
+  GlobalObjectIdHash: 1752586117
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -436,18 +436,6 @@ PrefabInstance:
       value: MainCharacter
       objectReference: {fileID: 0}
     - target: {fileID: 4978951749737478836, guid: bdf0475ffd29bbf4a82116e789996e80, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978951749737478836, guid: bdf0475ffd29bbf4a82116e789996e80, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978951749737478836, guid: bdf0475ffd29bbf4a82116e789996e80, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978951749737478836, guid: bdf0475ffd29bbf4a82116e789996e80, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -487,9 +475,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4978951749737478836, guid: bdf0475ffd29bbf4a82116e789996e80, type: 3}
-      propertyPath: m_ConstrainProportionsScale
-      value: 1
+    - target: {fileID: 8335503986344408926, guid: bdf0475ffd29bbf4a82116e789996e80, type: 3}
+      propertyPath: m_WarningMessage
+      value: "\nBinding warning: Some generic clip(s) animate transforms that are
+        already bound by a Humanoid avatar. These transforms can only be changed
+        by Humanoid clips.\n\tTransform 'rig:LeftForeArm'\n\tTransform 'rig:LeftArm'\n\tTransform
+        'rig:LeftHand'\n\tTransform 'rig:LeftForeArm'\n\tTransform 'rig:LeftArm'\n\tTransform
+        'rig:LeftHand'\n\tTransform 'rig:LeftForeArm'\n\tTransform 'rig:LeftArm'\n\tTransform
+        'rig:LeftHand'"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

@@ -7,7 +7,7 @@ public class LeavingState : BotState
     public override void Enter()
     {
         //Debug.Log("Bot is leaving.");
-        stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walk);
+        stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walking);
 
         
         Vector3 exitPoint = new Vector3(3, 0, -5);

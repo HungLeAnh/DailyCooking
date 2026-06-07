@@ -23,7 +23,7 @@ public class WalkToTableState : BotState
         if (path.status == NavMeshPathStatus.PathComplete)
         {        
             stateMachine.GetBotController().StartNavMesh();
-            stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walk);
+            stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walking);
             stateMachine.GetBotController().NavMeshAgent.SetDestination(destination);
         }
         else
@@ -58,7 +58,7 @@ public class WalkToTableState : BotState
                 if (path.status == NavMeshPathStatus.PathComplete)
                 {
                     stateMachine.GetBotController().StartNavMesh();
-                    stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walk);
+                    stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Walking);
                     stateMachine.GetBotController().NavMeshAgent.SetDestination(destination);
                 }
                 else
