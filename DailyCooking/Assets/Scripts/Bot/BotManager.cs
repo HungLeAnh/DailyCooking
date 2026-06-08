@@ -1,31 +1,74 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.Pool;
 
 public class BotManager : NetworkPersistentSingleton<BotManager>
 {
-    [SerializeField] private GameObject botPrefab;
+    [SerializeField] private GameObject[] botPrefabs;
     [SerializeField] private int poolSize = 10;
-    [SerializeField] private Vector3 spawnPosition;
+    [SerializeField] private Transform spawnPosition;
     
     private int MaxBots = 10;
 
-    private NetworkList<NetworkObjectReference> botPool = new NetworkList<NetworkObjectReference>();
-    private NetworkList<NetworkObjectReference> activeBots = new NetworkList<NetworkObjectReference>();
+    private List<IObjectPool<GameObject>> pools = new List<IObjectPool<GameObject>>();
+    private List<GameObject> activeBots = new List<GameObject>();
 
     protected override void Awake()
     {
         base.Awake();
-        botPool = new NetworkList<NetworkObjectReference>();
-        activeBots = new NetworkList<NetworkObjectReference>();
     }
+
+    private GameObject CreateBot(GameObject prefab)
+    {
+        GameObject bot = Instantiate(prefab, Vector3.zero, Quaternion.identity, transform);
+        bot.GetComponent<NetworkObject>().Spawn();
+        return bot;
+    }
+
+    private void OnGetBot(GameObject bot)
+    {
+        bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = true;
+        activeBots.Add(bot);
+    }
+
+    private void OnReleaseBot(GameObject bot)
+    {
+        bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
+        activeBots.Remove(bot);
+    }
+
+    private void OnDestroyBot(GameObject bot)
+    {
+        if (bot.GetComponent<NetworkObject>().IsSpawned)
+        {
+            bot.GetComponent<NetworkObject>().Despawn();
+        }
+        Destroy(bot);
+    }
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+        if (IsHost || IsServer)
+        {
+            //Debug.Log("Initializing BotManager pools...");
+            foreach (var prefab in botPrefabs)
+            {
+                var pool = new ObjectPool<GameObject>(
+                    createFunc: () => CreateBot(prefab),
+                    actionOnGet: OnGetBot,
+                    actionOnRelease: OnReleaseBot,
+                    actionOnDestroy: OnDestroyBot,
+                    defaultCapacity: poolSize / botPrefabs.Length,
+                    maxSize: MaxBots
+                );
+                pools.Add(pool);
+            }
+        }
     }
 
     private void Start()
@@ -37,24 +80,16 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     private void GameManager_OnStateChanged(object sender, EventArgs e)
     {
-        foreach (var bot in activeBots)
+        foreach (var bot in activeBots.ToList())
         {
-            if(bot.TryGet(out NetworkObject networkObject))
+            if (bot != null)
             {
-                if (networkObject.gameObject != null)
-                {
-                    networkObject.GetComponent<BotCustomerController>().ResetBot();
-                    ReturnBotToPool(bot);
-                }
-
+                bot.GetComponent<BotCustomerController>().ResetBot();
+                ReturnBotToPool(bot);
             }
         }
     }
 
-    private void OnDestroy()
-    {
-        botPool.Clear();
-    }
     public void StartSpawnBot()
     {
         if (!IsHost || !IsServer) return;
@@ -63,40 +98,32 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
             StartCoroutine(SpawnBotRoutine());
         }));
     }
+
     public void StopSpawnBot()
     {
         if (!IsHost || !IsServer) return;
 
         StopCoroutine(SpawnBotRoutine());
-        foreach (var bot in botPool)
+        var botsToReturn = new List<GameObject>(activeBots);
+        foreach (var bot in botsToReturn)
         {
-            if(bot.TryGet(out NetworkObject networkObject))
-            {
-                GameObject botGameObject = networkObject.gameObject;
-                ReturnBotToPool(botGameObject);
-            }
+            ReturnBotToPool(bot);
         }
-
     }
 
     public void Initialize()
     {
-        if (!IsHost || !IsServer) return;
+        if (!IsHost || !IsServer || pools.Count == 0) return;
 
-        for (int i = 0; i < poolSize; i++)
+        int botsPerPool = poolSize / pools.Count;
+        foreach (var pool in pools)
         {
-            GameObject bot = Instantiate(botPrefab,Vector3.zero, Quaternion.identity, transform);
-            bot.GetComponent<NetworkObject>().Spawn();
-            AddBotToPool(bot);
-
+            for (int i = 0; i < botsPerPool; i++)
+            {
+                var bot = pool.Get();
+                pool.Release(bot);
+            }
         }
-    }
-
-    public void AddBotToPool(GameObject bot)
-    {
-        bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
-        botPool.Add(bot);
-        
     }
 
     private IEnumerator WaitForSecond(int seconds, Action action)
@@ -104,6 +131,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
         yield return new WaitForSeconds(seconds);
         action?.Invoke();
     }
+
     private IEnumerator SpawnBotRoutine()
     {
         while (GameManager.Instance.State is InGameState)
@@ -112,10 +140,11 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
             {
                 if (KitchenGameManager.Instance.CurrentState == KitchenGameManager.State.Open)
                 {
-                    //Debug.Log("Spawning Bot");
                     var bot = GetBot();
-                    SpawnBot(bot);
-
+                    if (bot != null)
+                    {
+                        SpawnBot(bot);
+                    }
                 }
             }
             yield return new WaitForSeconds(15f);
@@ -124,76 +153,51 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public GameObject GetBot()
     {
-        if (!IsHost || !IsServer) return null;
+        //Debug.Log("GetBot called. pool bots: " + pools.Count);
+        if (!IsHost || !IsServer || pools.Count == 0) return null;
 
-        foreach (var bot in botPool)
-        {
-            if(bot.TryGet(out NetworkObject networkObject))
-            {
-                var botController = networkObject.GetComponent<BotCustomerController>();
-                if (!botController.IsActiveInGame.Value)
-                {
-                    return networkObject.gameObject;
-                }
-
-            }
-        }
-
-        // If no inactive bot is found, create a new one
-        var newBot = Instantiate(botPrefab, Vector3.zero, Quaternion.identity, transform);
-        newBot.GetComponent<NetworkObject>().Spawn();
-        AddBotToPool(newBot);
-        return newBot.gameObject;
+        int randomIndex = UnityEngine.Random.Range(0, pools.Count);
+        return pools[randomIndex].Get();
     }
+
     public void SpawnBot(GameObject bot)
     {
-        SpawnBotServerRpc(bot);
-    }
+        if (!IsHost || !IsServer) return;
 
-    [Rpc(SendTo.Server)]
-    private void SpawnBotServerRpc(NetworkObjectReference targetRef)
-    {
-        if (targetRef.TryGet(out NetworkObject networkObject))
-        {
-            GameObject bot = networkObject.gameObject;
-            if (IsHost || IsServer)
-            {
-                var posX = new Vector3(-3f, 0f, GridBuildingSystem.Instance.GridManager.GetHeightMax() * GridBuildingSystem.Instance.GridManager.GetCellSize() + 5f);
-                var posZ = new Vector3(GridBuildingSystem.Instance.GridManager.GetWidthMax() * GridBuildingSystem.Instance.GridManager.GetCellSize() + 5f, 0f, -3f);
-                bot.GetComponent<BotCustomerController>().InitBot(posX, posZ);
-                bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = true;
-                activeBots.Add(bot);
-            }
-        }
+        var posX = new Vector3(-3f, 0f, GridBuildingSystem.Instance.GridManager.GetHeightMax() * GridBuildingSystem.Instance.GridManager.GetCellSize() + 5f);
+        var posZ = new Vector3(GridBuildingSystem.Instance.GridManager.GetWidthMax() * GridBuildingSystem.Instance.GridManager.GetCellSize() + 5f, 0f, -3f);
+        bot.GetComponent<BotCustomerController>().InitBot(posX, posZ);
     }
 
     public void ReturnBotToPool(GameObject bot)
     {
-        ReturnBotToPoolServerRpc(bot);
+        if (!IsHost || !IsServer) return;
+
+        string originalName = bot.name.Replace("(Clone)", "").Trim();
+        foreach (var prefab in botPrefabs)
+        {
+            if (prefab.name == originalName)
+            {
+                int index = Array.IndexOf(botPrefabs, prefab);
+                pools[index].Release(bot);
+                return;
+            }
+        }
+        
+        Destroy(bot);
     }
 
-    [Rpc(SendTo.Server)]
-    private void ReturnBotToPoolServerRpc(NetworkObjectReference targetRef)
-    {
-        if (targetRef.TryGet(out NetworkObject networkObject))
-        {
-            GameObject bot = networkObject.gameObject;
-            bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
-            activeBots.Remove(bot);            
-        }
-    }
     public void KickAllBots()
     {
-        foreach(var bot in activeBots)
-        {
-            if(bot.TryGet(out NetworkObject networkObject))
-            {
-                var botController = networkObject.GetComponent<BotCustomerController>();
-                botController.ResetSeat();
-                networkObject.GetComponent<BotCustomerController>().ResetBot();
-                networkObject.GetComponent<BotCustomerController>().IsActiveInGame.Value = false;
+        if (!IsHost || !IsServer) return;
 
-            }
+        var botsToReturn = new List<GameObject>(activeBots);
+        foreach(var bot in botsToReturn)
+        {
+            var botController = bot.GetComponent<BotCustomerController>();
+            botController.ResetSeat();
+            botController.ResetBot();
+            ReturnBotToPool(bot);
         }
     }
 }
