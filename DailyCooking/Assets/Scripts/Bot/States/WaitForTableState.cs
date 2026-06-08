@@ -4,7 +4,7 @@ using UnityEngine.AI;
 public class WaitForTableState : BotState
 {
     private float roamTimer;
-    private float roamInterval = 2f;
+    private float roamInterval = 1f;
     private float checkTableRange = 10f;
     private bool isWalking;
 
@@ -62,7 +62,10 @@ public class WaitForTableState : BotState
 
                 stateMachine.GetBotController().StopNavMesh();
                 stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Idle);
-                roamTimer = roamInterval;
+                if(destination == zeroPos)
+                    roamTimer = 0;
+                else
+                    roamTimer = roamInterval;
             }
         }
         else

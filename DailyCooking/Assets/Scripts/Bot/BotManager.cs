@@ -31,7 +31,6 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     private void OnGetBot(GameObject bot)
     {
-        bot.GetComponent<BotCustomerController>().IsActiveInGame.Value = true;
         activeBots.Add(bot);
     }
 

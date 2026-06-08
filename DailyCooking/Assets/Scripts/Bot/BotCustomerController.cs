@@ -58,9 +58,6 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
         IsActiveInGame.OnValueChanged += (oldVal, newVal) => {
             SetVisualActive(newVal);
-            var spawnPos = UnityEngine.Random.Range(0, 2) == 0 ? roamPosX.Value : roamPosZ.Value;
-            transform.position = spawnPos;
-            //Debug.Log(" initialized at position: " + spawnPos + " real pos:  " + transform.position);
         };
         isEmotionBubbleActive.OnValueChanged += (oldVal, newVal) => {
             emotionBubble.SetActive(newVal);
@@ -326,6 +323,9 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         isNavMeshStopped.Value = false;
         currentStateType.Value = BotStateType.WaitForTable;
         tipPercentage.Value = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).TipIncrease;
+        var spawnPos = UnityEngine.Random.Range(0, 2) == 0 ? roamPositionX : roamPositionZ;
+        transform.position = spawnPos;
+        IsActiveInGame.Value = true;
     }
     [Rpc(SendTo.Server)]
     public void StopBubbleServerRpc()
