@@ -21,7 +21,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     [SerializeField] private BubbleFoodUI bubbleFoodUI;
 
     [SerializeField] private GameObject visual;
-    [SerializeField] private GameObject[] highlightGameObjectArray;
+    [SerializeField] private SkinnedMeshRenderer[] highlightGameObjectArray;
 
     private BotStateMachine stateMachine;
     private List<FoodSO> waitingFood;
@@ -349,7 +349,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         foreach (var visualGameObject in highlightGameObjectArray)
         {
-            visualGameObject.SetActive(true);
+            visualGameObject.materials[1].SetFloat("_IsActive", 1f);
         }
 
     }
@@ -357,7 +357,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         foreach (var visualGameObject in highlightGameObjectArray)
         {
-            visualGameObject.SetActive(false);
+            visualGameObject.materials[1].SetFloat("_IsActive", 0f);
         }
     }
     public void SetVisualActive(bool active)

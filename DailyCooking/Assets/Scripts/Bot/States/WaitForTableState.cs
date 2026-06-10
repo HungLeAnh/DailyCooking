@@ -62,7 +62,7 @@ public class WaitForTableState : BotState
 
                 stateMachine.GetBotController().StopNavMesh();
                 stateMachine.GetBotController().PlayAnimation(BotAnimation.State.Idle);
-                if(destination == zeroPos)
+                if(Vector3.Distance(destination, zeroPos) < 0.5f)
                     roamTimer = 0;
                 else
                     roamTimer = roamInterval;
