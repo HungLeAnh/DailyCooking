@@ -109,6 +109,19 @@ public class UIShopItem : MonoBehaviour
                 SetIcon(placedObject.icon);
 
                 break;
+            case ShopItemCategory.Vegetables:
+            case ShopItemCategory.Bakery:
+            case ShopItemCategory.Dairy:
+            case ShopItemCategory.Patties:
+            case ShopItemCategory.Meats:
+                var item = KitchenGameManager.Instance.KitchenObjectSODic.GetValueOrDefault(parsedDataList[0].Key);
+                if (item == null)
+                {
+                    gameObject.SetActive(false);
+                    break;
+                }
+                SetIcon(item.Sprite);
+                break;
             default:
                 break;
         }

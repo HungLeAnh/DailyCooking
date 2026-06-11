@@ -47,6 +47,9 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     public List<CuttingRecipeSO> CuttingRecipeSOList { get => cuttingRecipeSOList; set => cuttingRecipeSOList = value; }
     public List<FryingRecipeSO> FryingRecipeSOList { get => fryingRecipeSOList; set => fryingRecipeSOList = value; }
     public State CurrentState => state;
+
+    public Dictionary<string, KitchenObjectSO> KitchenObjectSODic { get => kitchenObjectSODic; set => kitchenObjectSODic = value; }
+
     protected override void Awake()
     {
         base.Awake();
