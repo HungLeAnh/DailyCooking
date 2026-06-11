@@ -8,7 +8,7 @@ using UnityEngine;
 public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptionalSO
 {
     [SerializeField] private KitchenObjectSO postBoxKitchenSO;
-    [SerializeField] private GameObject[] visualGameObjectArray;
+    [SerializeField] private MeshRenderer[] visualGameObjectArray;
 
     private NetworkList<FixedString64Bytes> kitchenObjectSOGuidList = new NetworkList<FixedString64Bytes>();
     private IKitchenObjectParent playerStateMachine;
@@ -93,7 +93,8 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
     {
         foreach (var visualGameObject in visualGameObjectArray)
         {
-            visualGameObject.SetActive(true);
+            int index =visualGameObject.materials.Length - 1;
+            visualGameObject.materials[index].SetFloat("_IsActive", 1f);
         }
     }
 
@@ -101,7 +102,8 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
     {
         foreach (var visualGameObject in visualGameObjectArray)
         {
-            visualGameObject.SetActive(false);
+            int index =visualGameObject.materials.Length - 1;
+            visualGameObject.materials[index].SetFloat("_IsActive", 0f);
         }
     }
 

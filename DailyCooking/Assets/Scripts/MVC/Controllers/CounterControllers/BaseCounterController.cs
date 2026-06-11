@@ -7,7 +7,7 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
 {
 
     [SerializeField] private Transform counterTopPoint;
-    [SerializeField] private GameObject[] visualGameObjectArray;
+    [SerializeField] private MeshRenderer[] visualGameObjectArray;
 
     private Action onDestroySelf;
     private KitchenObject _kitchenObject;
@@ -102,7 +102,8 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     {
         foreach (var visualGameObject in visualGameObjectArray)
         {
-            visualGameObject.SetActive(true);
+            int index = visualGameObject.materials.Length - 1;
+            visualGameObject.materials[index].SetFloat("_IsActive", 1f);
         }
     }
 
@@ -110,7 +111,8 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     {
         foreach (var visualGameObject in visualGameObjectArray)
         {
-            visualGameObject.SetActive(false);
+            int index = visualGameObject.materials.Length - 1;
+            visualGameObject.materials[index].SetFloat("_IsActive", 0f);
         }
     }
 

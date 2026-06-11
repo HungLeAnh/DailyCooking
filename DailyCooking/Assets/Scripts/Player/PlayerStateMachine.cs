@@ -230,6 +230,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
                 }
             }
             Context.Highlightable.Clear();
+            Context.Highlightable = null;
             Context.Highlightable = newHighlightables;
 
         }

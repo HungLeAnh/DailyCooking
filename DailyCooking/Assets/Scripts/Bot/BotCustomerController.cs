@@ -349,7 +349,8 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         foreach (var visualGameObject in highlightGameObjectArray)
         {
-            visualGameObject.materials[1].SetFloat("_IsActive", 1f);
+            int index = visualGameObject.materials.Length - 1;
+            visualGameObject.materials[index].SetFloat("_IsActive", 1f);
         }
 
     }
@@ -357,7 +358,8 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         foreach (var visualGameObject in highlightGameObjectArray)
         {
-            visualGameObject.materials[1].SetFloat("_IsActive", 0f);
+            int index = visualGameObject.materials.Length - 1;
+            visualGameObject.materials[index].SetFloat("_IsActive", 0f);
         }
     }
     public void SetVisualActive(bool active)
