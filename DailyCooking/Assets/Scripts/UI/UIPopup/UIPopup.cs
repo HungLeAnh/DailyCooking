@@ -7,6 +7,8 @@ public class UIPopup : MonoBehaviour
     public virtual void SetupPopup()
     {
         //Debug.Log("SetPopup");
+        var rectTransform = this.gameObject.transform as RectTransform;
+        rectTransform.SetAsLastSibling();
     }
 
     public virtual void HidePopup(object param = null)
