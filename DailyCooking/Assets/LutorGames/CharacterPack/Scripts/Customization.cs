@@ -65,7 +65,18 @@ public class CustomizationPart
         CosmeticsData.CurrentMeshIndex = index;
     }
 
+    public void SetMesh(int index, bool clearUnfittables)
+    {
+        SetMesh(Cosmetics[index], clearUnfittables);
+        CosmeticsData.CurrentMeshIndex = index;
+    }
+
     public void SetMesh(Cosmetic cosmetic)
+    {
+        SetMesh(cosmetic, true);
+    }
+
+    public void SetMesh(Cosmetic cosmetic, bool clearUnfittables)
     {
         if (cosmetic == null)
         {
@@ -79,7 +90,8 @@ public class CustomizationPart
 
         _index = Cosmetics.IndexOf(cosmetic);
 
-        ClearFromUnfittables();
+        if (clearUnfittables)
+            ClearFromUnfittables();
     }
 
     private void ClearFromUnfittables()

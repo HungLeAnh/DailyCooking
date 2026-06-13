@@ -62,4 +62,20 @@ public class PlayerStats
         }
         OnResourceChange?.Invoke();
     }
+
+    public void UpdatePlayerCustomization(Dictionary<string, int> customizations)
+    {
+        foreach (var item in customizations)
+        {
+            if (CharacterCustomizationIds.ContainsKey(item.Key))
+            {
+                CharacterCustomizationIds[item.Key] = item.Value;
+            }
+            else
+            {
+                CharacterCustomizationIds.Add(item.Key, item.Value);
+            }
+        }
+        OnResourceChange?.Invoke();
+    }
 }

@@ -54,6 +54,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
 
     private void SetCharacterMesh()
     {
+        Debug.Log("Setting character mesh");
         foreach (var part in customizationParts)
         {
             part.Initialise(ConfigManager.Instance.CustomizationData);
@@ -65,10 +66,15 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
             if (part != null)
             {
                 if (item.Value >= 0)
-                    part.SetMesh(item.Value);
+                    part.SetMesh(item.Value, false);
                 else
                     part.Clear();
             }
+        }
+
+        foreach (var part in customizationParts)
+        {
+            part.Close();
         }
     }
 
@@ -87,6 +93,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
 
     private void OnResourceChanged()
     {
+        Debug.Log("Resource changed");
         SetCharacterMesh();
     }
 

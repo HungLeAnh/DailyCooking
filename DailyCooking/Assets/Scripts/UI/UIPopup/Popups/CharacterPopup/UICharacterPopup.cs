@@ -68,19 +68,6 @@ public class UICharacterPopup : UIPopup
         tabController.onTabChanged += () => OnChangeTab(tabController.CurrentTab.name);
         tabController.InitializeTabs(listTabNames, listTabIcons);
 
-        var playerData = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
-        foreach(var item in playerData.CharacterCustomizationIds)
-        {
-            var part = customizationParts.FirstOrDefault(x => x.Type == item.Key);
-            if (part != null)
-            {
-                if(item.Value >= 0)
-                    part.SetMesh(item.Value);
-                else
-                    part.Clear();
-            }
-        }
-
         backButton.onClick.AddListener(() =>
         {
             if (!isShowItems)
@@ -115,9 +102,24 @@ public class UICharacterPopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
-        //Debug.Log(listItem.Count + " Object Subscribe ItemSelected");
-        //Debug.Log("Start building");
+        
+        foreach (var part in customizationParts)
+        {
+            part.Initialise(ConfigManager.Instance.CustomizationData);
+        }
 
+        var playerData = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        foreach (var item in playerData.CharacterCustomizationIds)
+        {
+            var part = customizationParts.FirstOrDefault(x => x.Type == item.Key);
+            if (part != null)
+            {
+                if (item.Value >= 0)
+                    part.SetMesh(item.Value);
+                else
+                    part.Clear();
+            }
+        }
     }
 
     public override void HidePopup(object param = null)
@@ -286,11 +288,13 @@ public class UICharacterPopup : UIPopup
     private void SaveCustom()
     {
         var playerData = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        Dictionary<string, int> customizations = new Dictionary<string, int>();
         foreach (var part in customizationParts)
         {
             Debug.Log($"Saving {part.Type} with index {part.Index}");
-            playerData.UpdatePlayerCustomization(part.Type, part.Index);
+            customizations.Add(part.Type, part.Index);
         }
+        playerData.UpdatePlayerCustomization(customizations);
 
     }
     private void OnChangeTab(string type)
@@ -305,5 +309,14 @@ public class UICharacterPopup : UIPopup
         HidePopup();
     }
 
-
+    private void OnDestroy()
+    {
+        if (customizationParts != null)
+        {
+            foreach (var part in customizationParts)
+            {
+                part.Close();
+            }
+        }
+    }
 }
