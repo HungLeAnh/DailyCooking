@@ -61,7 +61,7 @@ public class SavedDataHandler
             return null;
         }
     }
-    public void Save(SavedData data)
+    public void Save(List<SavedData> data)
     {
         string fullPath = Path.Combine(dataDirPath, dataFileName);
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath));

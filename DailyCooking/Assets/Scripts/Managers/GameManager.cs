@@ -38,6 +38,10 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
             SavedDataFileName
         );
         savedDataList = savedDataHandler.Load();
+        if (savedDataList == null)
+        {
+            savedDataList = new List<SavedData>();
+        }
     }
     private void Start()
     {
@@ -98,7 +102,12 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     public void NewGame(string gameDataName, string password)
     {
         gameData = new GameData();
+        dataHandler = new FileDataHandler(
+            Application.persistentDataPath,
+            fileName + "_" + gameDataName
+        );
         savedDataList.Add(new SavedData(gameDataName, password));
+        savedDataHandler.Save(savedDataList);
     }
 
     public void LoadGame(string gameDataName, string password)

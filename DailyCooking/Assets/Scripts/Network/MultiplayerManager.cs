@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Netcode;
 using Unity.Netcode.Transports.SinglePlayer;
@@ -154,13 +155,13 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         }
     }
 
-    public void StartHostSession()
+    public async Task StartHostSessionAsync()
     {
         try
         {
             if (!SessionManager.Instance.IsSignedIn())
             {
-                UIManager.Instance.ShowAlertMessage("You must be signed in to start a multiplayer session."); return;
+                await SessionManager.Instance.SignInAnonymouslyAsync(); 
             }
             // Use the network transport when starting a multiplayer session.
             networkManager.NetworkConfig.NetworkTransport = unityTransport;

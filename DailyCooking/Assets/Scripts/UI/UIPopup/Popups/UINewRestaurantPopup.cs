@@ -7,14 +7,13 @@ public class UINewRestaurantPopup : UIPopup
 {
     public class Param
     {
-        public string Title;
-        public Action callback;
+        public Action<string, string> OnSubmit;
     }
 
-    [SerializeField] private TextMeshProUGUI titleText;
-    [SerializeField] private TMP_InputField inputField;
+    [SerializeField] private TMP_InputField nameInputField;
+    [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private Button okButton;
-    private Action callback;
+    private Action<string, string> callback;
     public Button OkButton { get => okButton; }
     public override void SetupPopup()
     {
@@ -29,7 +28,15 @@ public class UINewRestaurantPopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
-        Show();
+        if(param != null) 
+        { 
+            var p = param as Param;
+            if(p.OnSubmit != null)
+            {
+                callback = p.OnSubmit;
+            }
+        }
+
         okButton.onClick.RemoveAllListeners();
         okButton.onClick.AddListener(OnSubmit);
     }
@@ -39,31 +46,28 @@ public class UINewRestaurantPopup : UIPopup
         base.HidePopup(param);
     }
 
-    private void Show()
-    {
-        if(_openParam != null)
-        {
-            Param notificationParam = _openParam as Param;
-            titleText.text = notificationParam.Title;
-            callback = notificationParam.callback;
-        }
-        else
-        {
-            titleText.text = "Input your restaurant name";
-        }
-    }
     private void OnSubmit()
     {
-        if (StringExtensions.ValidateInput(inputField.text))
+        if (StringExtensions.ValidateInput(nameInputField.text))
         {
-            GameManager.Instance.UpdateRestaurantNameServerRpc(inputField.text);
-            callback?.Invoke();
-            HidePopup();
+            if (StringExtensions.ValidateInput(passwordInputField.text))
+            {
+                callback?.Invoke(nameInputField.text, passwordInputField.text);
+                HidePopup();
+            }
+            else
+            {
+                UIManager.Instance.ShowAlertMessage("Invalid Password! Please use only letters and numbers, max length 20 characters.");
+            }
         }
         else
         {
-            UIManager.Instance.ShowAlertMessage("Invalid Input! Please use only letters and numbers, max length 20 characters.");
+            UIManager.Instance.ShowAlertMessage("Invalid Restaurant Name! Please use only letters and numbers, max length 20 characters.");
         }
+    }
+    public void Hide()
+    {
+        HidePopup();
     }
 
 }

@@ -19,30 +19,21 @@ public class UIMainMenuPopup : UIPopup
     {
         NewRestaurant.onClick.AddListener(() =>
         {
-            //UIPopupManager.Instance.ShowPopup(UIPopupType.UIInputNamePopup, new UIInputNamePopup.InputNamePopupData()
-            //{
-            //    Title = "New Restaurant",
-            //    Description = "Enter the name of your restaurant",
-            //    Placeholder = "Restaurant Name",
-            //    OnSubmit = (input) =>
-            //    {
-            //        GameManager.Instance.NewGame(input, "password");
-            //        MultiplayerManager.Instance.StartHostSession();
-            //        Loader.LoadNetwork(Loader.Scene.GameScene);
-            //        GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
-            //        UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
-            //    }
-            //});
-            GameManager.Instance.NewGame("New Restaurant", "password");
-            MultiplayerManager.Instance.StartHostSession();
-            Loader.LoadNetwork(Loader.Scene.GameScene);
-            GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
-            UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UINewRestaurantPopup, new UINewRestaurantPopup.Param { 
+            OnSubmit = async (name, password) =>
+                {
+                    GameManager.Instance.NewGame(name, password);
+                    await MultiplayerManager.Instance.StartHostSessionAsync();
+                    Loader.LoadNetwork(Loader.Scene.GameScene);
+                    GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+                    UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+                } 
+            });
         });
-        LoadRestaurant.onClick.AddListener(() =>
+        LoadRestaurant.onClick.AddListener(async () =>
         {
             GameManager.Instance.LoadGame("New Restaurant", "password");
-            MultiplayerManager.Instance.StartHostSession();
+            await MultiplayerManager.Instance.StartHostSessionAsync();
             Loader.LoadNetwork(Loader.Scene.GameScene);
             GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
             UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
