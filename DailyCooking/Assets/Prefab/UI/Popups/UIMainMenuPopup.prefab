@@ -396,7 +396,7 @@ GameObject:
   - component: {fileID: 6533543859396050683}
   - component: {fileID: 3556231949567487027}
   m_Layer: 5
-  m_Name: PlayButton
+  m_Name: NewRestaurantButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -595,6 +595,8 @@ MonoBehaviour:
   startHostingButton: {fileID: 5770311447502416369}
   joinButton: {fileID: 455009984400700631}
   loginButton: {fileID: 3200551243587925350}
+  NewRestaurant: {fileID: 1285746781577596499}
+  LoadRestaurant: {fileID: 5770311447502416369}
 --- !u!1 &3235218832793914367
 GameObject:
   m_ObjectHideFlags: 0
@@ -610,7 +612,7 @@ GameObject:
   - component: {fileID: 1124430111162314176}
   - component: {fileID: 8389915152098891772}
   m_Layer: 5
-  m_Name: StartHostingButton
+  m_Name: LoadButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1103,7 +1105,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: START
+  m_text: New Restaurant
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1b5c9a7370e424d53a1b8a999cf54a02, type: 2}
   m_sharedMaterial: {fileID: 7512481295523713106, guid: 1b5c9a7370e424d53a1b8a999cf54a02, type: 2}
@@ -1240,7 +1242,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: START HOSTING
+  m_text: Load Restaurant
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1b5c9a7370e424d53a1b8a999cf54a02, type: 2}
   m_sharedMaterial: {fileID: 7512481295523713106, guid: 1b5c9a7370e424d53a1b8a999cf54a02, type: 2}

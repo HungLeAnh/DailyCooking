@@ -8,6 +8,7 @@ using UnityEngine;
 [DefaultExecutionOrder(-1)]
 public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
 {
+    private const string SavedDataFileName = "SavedData";
     public event EventHandler OnPlayerSpawned;
     public event EventHandler OnStateChanged;
 
@@ -15,8 +16,10 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [SerializeField] private Vector3 playerSpawnPosition;
     [SerializeField] private UIJoyStick joyStick;
 
+    private List<SavedData> savedDataList = new List<SavedData>();
     private GameData gameData;
     private FileDataHandler dataHandler;
+    private SavedDataHandler savedDataHandler;
     private GameManagerBaseState currentState;
 
     [Header("Settings")]
@@ -30,10 +33,11 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     protected override void Awake()
     {
         base.Awake();
-        dataHandler = new FileDataHandler(
+        savedDataHandler = new SavedDataHandler(
             Application.persistentDataPath,
-            fileName
+            SavedDataFileName
         );
+        savedDataList = savedDataHandler.Load();
     }
     private void Start()
     {
@@ -91,17 +95,22 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     {
         Destroy(playerGameObject);
     }
-    public void NewGame()
+    public void NewGame(string gameDataName, string password)
     {
         gameData = new GameData();
+        savedDataList.Add(new SavedData(gameDataName, password));
     }
 
-    public void LoadGame()
+    public void LoadGame(string gameDataName, string password)
     {
+        var savedData = savedDataList.FirstOrDefault(s => s.GameDataName == gameDataName && s.Password == password);
+        if (savedData == null)
+        {
+            Debug.LogError("Invalid game data name or password.");
+            return;
+        }
+
         gameData = dataHandler.Load();
-
-        if (gameData == null) NewGame();
-
         gameData.MenuData.LoadMenuData();
         gameData.RestaurantData.OnLevelChange += SaveGame;
         gameData.RestaurantData.OnExpChange += SaveGame;

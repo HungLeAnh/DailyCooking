@@ -11,6 +11,7 @@ public enum UIPopupType
     UILoadingPopup,
     UILoginPopup,
     UIMainMenuPopup,
+    UINewRestaurantPopup,
     UIOptionMenuPopup,
     UIRestaurantPopup,
     UIRewardPopup,
