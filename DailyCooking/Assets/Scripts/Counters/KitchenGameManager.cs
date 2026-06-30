@@ -79,12 +79,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     public void Init()
     {
         unlockIngredient.Clear();
-        //foreach (var counterController in CounterModules.Instance.BaseCounterControllers)
-        //{
-        //    if (counterController == null)
-        //        continue;
-        //    AddUnlockIngredient(counterController);
-        //}
     }
     public void ChangeState(State newState)
     {

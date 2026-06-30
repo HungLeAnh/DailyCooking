@@ -47,7 +47,7 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
     {
         if (GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime == false)
         {
-            ShowFirstTimeTutorial();
+            ShowGameMachanicTutorial();
         }
     }
 

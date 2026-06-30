@@ -32,11 +32,17 @@ public class UIMainMenuPopup : UIPopup
         });
         LoadRestaurant.onClick.AddListener(async () =>
         {
-            GameManager.Instance.LoadGame("New Restaurant", "password");
-            await MultiplayerManager.Instance.StartHostSessionAsync();
-            Loader.LoadNetwork(Loader.Scene.GameScene);
-            GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
-            UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UILoadRestaurantPopup, new UILoadRestaurantPopup.Param
+            {
+                OnSubmit = async (name, password) =>
+                {
+                    GameManager.Instance.LoadGame(name, password);
+                    await MultiplayerManager.Instance.StartHostSessionAsync();
+                    Loader.LoadNetwork(Loader.Scene.GameScene);
+                    GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+                    UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+                }
+            });            
         });
         joinButton.onClick.AddListener(() =>
         {

@@ -30,6 +30,9 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
 
     public GameData GameData { get => gameData; set => gameData = value; }
     public GameManagerBaseState State => currentState;
+
+    public List<SavedData> SavedDataList { get => savedDataList; set => savedDataList = value; }
+
     protected override void Awake()
     {
         base.Awake();
@@ -37,10 +40,10 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
             Application.persistentDataPath,
             SavedDataFileName
         );
-        savedDataList = savedDataHandler.Load();
-        if (savedDataList == null)
+        SavedDataList = savedDataHandler.Load();
+        if (SavedDataList == null)
         {
-            savedDataList = new List<SavedData>();
+            SavedDataList = new List<SavedData>();
         }
     }
     private void Start()
@@ -106,13 +109,13 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
             Application.persistentDataPath,
             fileName + "_" + gameDataName
         );
-        savedDataList.Add(new SavedData(gameDataName, password));
-        savedDataHandler.Save(savedDataList);
+        SavedDataList.Add(new SavedData(gameDataName, password));
+        savedDataHandler.Save(SavedDataList);
     }
 
     public void LoadGame(string gameDataName, string password)
     {
-        var savedData = savedDataList.FirstOrDefault(s => s.GameDataName == gameDataName && s.Password == password);
+        var savedData = SavedDataList.FirstOrDefault(s => s.GameDataName == gameDataName && s.Password == password);
         if (savedData == null)
         {
             Debug.LogError("Invalid game data name or password.");
