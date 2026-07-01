@@ -32,7 +32,14 @@ public class UILoadRestaurantPopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
-        foreach(Transform child in SavedItemParent)
+        var inputParam = _openParam as Param;
+        if (inputParam != null)
+        {
+            if(inputParam.OnSubmit != null)
+                callback = inputParam.OnSubmit;
+        }
+        SavedItemPrefab.gameObject.SetActive(false);
+        foreach (Transform child in SavedItemParent)
         {
             if (child == SavedItemPrefab.transform) continue;
             Destroy(child.gameObject);
@@ -40,7 +47,12 @@ public class UILoadRestaurantPopup : UIPopup
         foreach(var item in GameManager.Instance.SavedDataList)
         {
             var instance = Instantiate(SavedItemPrefab, SavedItemParent);
-            instance.GetComponent<UISavedItem>().Init(item);
+            instance.GetComponent<UISavedItem>().Init(item,()=>
+            {
+                callback?.Invoke(item.GameDataName, item.Password);
+                Hide();
+            });
+            instance.gameObject.SetActive(true);
             items.Add(instance.GetComponent<UISavedItem>());
         }
 
