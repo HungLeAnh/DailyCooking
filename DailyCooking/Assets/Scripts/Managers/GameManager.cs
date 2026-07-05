@@ -121,7 +121,10 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
             Debug.LogError("Invalid game data name or password.");
             return;
         }
-
+        dataHandler = new FileDataHandler(
+            Application.persistentDataPath,
+            fileName + "_" + gameDataName
+        );
         gameData = dataHandler.Load();
         gameData.MenuData.LoadMenuData();
         gameData.RestaurantData.OnLevelChange += SaveGame;
@@ -141,6 +144,11 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         gameData.MenuData.OnMenuDataChanged += SaveGame;
         gameData.ShopData.OnResourceChange += SaveGame;
         gameData.PostBoxData.OnResourceChange += SaveGame;
+    }
+    public void DeleteSavedData(SavedData savedData)
+    {
+        SavedDataList.Remove(savedData);
+        savedDataHandler.Save(SavedDataList);
     }
 
     public void SaveGame()
