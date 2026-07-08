@@ -1,6 +1,7 @@
 public enum UIPopupType
 {
     UICharacterPopup,
+    UIJoinRestaurantPopup,
     UILoadRestaurantPopup,
     UIMenuPopup,
     UIFoodDetailPopup,

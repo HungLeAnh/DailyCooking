@@ -46,9 +46,16 @@ public class UIMainMenuPopup : UIPopup
         });
         joinButton.onClick.AddListener(() =>
         {
-            MultiplayerManager.Instance.StartClientSession();
-            GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
-            UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIJoinRestaurantPopup, new UIJoinRestaurantPopup.Param
+            {
+                OnSubmit = async (name, password) =>
+                {
+                    MultiplayerManager.Instance.StartClientSession();
+                    Loader.LoadNetwork(Loader.Scene.GameScene);
+                    GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+                    UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+                }
+            });
         });
         optionsButton.onClick.AddListener(() => {
             UIPopupManager.Instance.ShowPopup(UIPopupType.UISettingPopup);
