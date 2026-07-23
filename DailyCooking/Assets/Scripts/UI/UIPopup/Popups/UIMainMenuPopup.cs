@@ -48,7 +48,7 @@ public class UIMainMenuPopup : UIPopup
         {
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIJoinRestaurantPopup, new UIJoinRestaurantPopup.Param
             {
-                OnSubmit = async (name, password) =>
+                OnSubmit = async (joinCode) =>
                 {
                     MultiplayerManager.Instance.StartClientSession();
                     Loader.LoadNetwork(Loader.Scene.GameScene);
