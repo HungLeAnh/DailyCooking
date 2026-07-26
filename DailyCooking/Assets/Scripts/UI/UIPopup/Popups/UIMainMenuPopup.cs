@@ -19,30 +19,41 @@ public class UIMainMenuPopup : UIPopup
     {
         NewRestaurant.onClick.AddListener(() =>
         {
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UINewRestaurantPopup, new UINewRestaurantPopup.Param { 
-            OnSubmit = async (name, password) =>
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UINewRestaurantPopup, new UINewRestaurantPopup.Param
+            {
+                OnSubmit = async (name, password) =>
                 {
                     GameManager.Instance.NewGame(name, password);
-                    await MultiplayerManager.Instance.StartHostSessionAsync();
-                    Loader.LoadNetwork(Loader.Scene.GameScene);
-                    GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
-                    UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
-                } 
+                    string joinCode = await MultiplayerManager.Instance.StartHostSessionAsync();
+                    if (!string.IsNullOrEmpty(joinCode))
+                    {
+                        GUIUtility.systemCopyBuffer = joinCode;
+                        UIManager.Instance.ShowAlertMessage($"Join Code: {joinCode} (copied)");
+                        Loader.LoadNetwork(Loader.Scene.GameScene);
+                        GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+                        UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+                    }
+                }
             });
         });
-        LoadRestaurant.onClick.AddListener(async () =>
+        LoadRestaurant.onClick.AddListener(() =>
         {
             UIPopupManager.Instance.ShowPopup(UIPopupType.UILoadRestaurantPopup, new UILoadRestaurantPopup.Param
             {
                 OnSubmit = async (name, password) =>
                 {
                     GameManager.Instance.LoadGame(name, password);
-                    await MultiplayerManager.Instance.StartHostSessionAsync();
-                    Loader.LoadNetwork(Loader.Scene.GameScene);
-                    GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
-                    UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+                    string joinCode = await MultiplayerManager.Instance.StartHostSessionAsync();
+                    if (!string.IsNullOrEmpty(joinCode))
+                    {
+                        GUIUtility.systemCopyBuffer = joinCode;
+                        UIManager.Instance.ShowAlertMessage($"Join Code: {joinCode} (copied)");
+                        Loader.LoadNetwork(Loader.Scene.GameScene);
+                        GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+                        UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+                    }
                 }
-            });            
+            });
         });
         joinButton.onClick.AddListener(() =>
         {
@@ -50,10 +61,13 @@ public class UIMainMenuPopup : UIPopup
             {
                 OnSubmit = async (joinCode) =>
                 {
-                    MultiplayerManager.Instance.StartClientSession();
-                    Loader.LoadNetwork(Loader.Scene.GameScene);
-                    GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
-                    UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+                    bool success = await MultiplayerManager.Instance.StartClientSession(joinCode);
+                    if (success)
+                    {
+                        Loader.LoadNetwork(Loader.Scene.GameScene);
+                        GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+                        UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+                    }
                 }
             });
         });

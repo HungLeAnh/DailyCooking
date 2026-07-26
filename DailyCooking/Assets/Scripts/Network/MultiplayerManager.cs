@@ -155,54 +155,55 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         }
     }
 
-    public async Task StartHostSessionAsync()
+    public async Task<string> StartHostSessionAsync()
     {
         try
         {
             if (!SessionManager.Instance.IsSignedIn())
             {
-                await SessionManager.Instance.SignInAnonymouslyAsync(); 
+                await SessionManager.Instance.SignInAnonymouslyAsync();
             }
-            // Use the network transport when starting a multiplayer session.
-            networkManager.NetworkConfig.NetworkTransport = unityTransport;
-            NetworkManager.Singleton.ConnectionApprovalCallback = null;
 
-            NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApprovalCallback;
+            NetworkManager.Singleton.ConnectionApprovalCallback = NetworkManager_ConnectionApprovalCallback;
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Server_OnClientConnectedCallback;
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Server_OnClientDisconnectCallback;
-            if (!networkManager.StartHost())
+
+            string joinCode = await SessionManager.Instance.StartHostWithRelay(MAX_PLAYER_AMOUNT, "dtls");
+
+            if (string.IsNullOrEmpty(joinCode))
             {
-                NetworkLog.LogError("Failed to start hosted session!");
+                NetworkLog.LogError("Failed to start host with Relay");
             }
-            Debug.Log("NetworkManager started as Host.");
+
+            return joinCode;
         }
         catch (Exception e)
         {
             Debug.LogError($"Failed to create session: {e.Message}");
+            return null;
         }
     }
-    public void StartClientSession()
+    public async Task<bool> StartClientSession(string joinCode)
     {
         try
         {
             if (!SessionManager.Instance.IsSignedIn())
             {
-                UIManager.Instance.ShowAlertMessage("You must be signed in to start a multiplayer session."); return;
+                UIManager.Instance.ShowAlertMessage("You must be signed in to join.");
+                return false;
             }
-            // Use the network transport when starting a multiplayer session.
+
             OnTryingToJoinGame?.Invoke(this, EventArgs.Empty);
-            networkManager.NetworkConfig.NetworkTransport = unityTransport;
+
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Client_OnClientConnectCallback;
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Client_OnClientDisconnectCallback;
-            if (!networkManager.StartClient())
-            {
-                NetworkLog.LogError("Failed to start client session!");
-            }
-            Debug.Log("NetworkManager started as Client.");
+
+            return await SessionManager.Instance.StartClientWithRelay(joinCode, "dtls");
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to create session: {e.Message}");
+            Debug.LogError($"Failed to join session: {e.Message}");
+            return false;
         }
     }
     public void ShutdownAndReset()
