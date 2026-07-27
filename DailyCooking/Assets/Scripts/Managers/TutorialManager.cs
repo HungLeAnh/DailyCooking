@@ -96,6 +96,8 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
 
     private void TutorialManager_OnTutorialGameMechanicClosed(object sender, EventArgs e)
     {
+        GameManager.Instance.GameData.TutorialData.SetHasPlayedFirstTime(true);
+        GridBuildingSystem.Instance.UnlockGrid();
         UIHUDManager.Instance.ShowAllUIElement();
     }
 }
