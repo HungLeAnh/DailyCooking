@@ -348,7 +348,9 @@ public class SessionManager : PersistentSingleton<SessionManager>
         }
         
         var allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
+        var unityTransport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        NetworkManager.Singleton.NetworkConfig.NetworkTransport = unityTransport;
+        unityTransport.SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
         var joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
         return NetworkManager.Singleton.StartHost() ? joinCode : null;
     }
@@ -361,7 +363,9 @@ public class SessionManager : PersistentSingleton<SessionManager>
         }
 
         var allocation = await RelayService.Instance.JoinAllocationAsync(joinCode: joinCode);
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
+        var unityTransport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        NetworkManager.Singleton.NetworkConfig.NetworkTransport = unityTransport;
+        unityTransport.SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
         return !string.IsNullOrEmpty(joinCode) && NetworkManager.Singleton.StartClient();
     }
     #endregion
