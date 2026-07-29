@@ -90,11 +90,17 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             Initialize();
         }
         else
-            MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => Initialize();
+        {
+            if (GameManager.Instance?.GameData != null)
+                Initialize();
+            else
+                MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => Initialize();
+        }
     }
 
     private void Initialize()
     {
+        if (GameManager.Instance?.GameData == null) return;
         if (GameManager.Instance.GameData.GridData.GridArrayData == null)
         {
             gridManager = new GridManager(0, 0, cellSize, Vector3.zero, (GridXZ<GridObject> grid, int x, int z) => new List<GridObject> { new GridObject(grid, x, z) });

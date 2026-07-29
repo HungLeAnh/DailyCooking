@@ -299,6 +299,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
 
     private void Instance_OnPlayerDataNetworkListChanged(object sender, EventArgs e)
     {
+        if (gameData == null) return;
         gameData.TryAddPlayerStats(MultiplayerManager.Instance.GetLatestPlayerData().playerId.ToString());
     }
     public void HideJoyStick()

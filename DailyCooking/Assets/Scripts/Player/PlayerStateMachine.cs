@@ -59,7 +59,11 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         {
             part.Initialise(ConfigManager.Instance.CustomizationData);
         }
+
+        if (GameManager.Instance?.GameData == null || SessionManager.Instance == null) return;
+
         var playerData = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        if (playerData == null) return;
         foreach (var item in playerData.CharacterCustomizationIds)
         {
             var part = customizationParts.FirstOrDefault(x => x.Type == item.Key);
@@ -88,7 +92,11 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     private void Start()
     {
         GameInput.Instance.OnMouseClickPerformed += PlayerStateMachine_OnMouseClickPerformed;
-        GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).OnResourceChange += OnResourceChanged;
+
+        if (GameManager.Instance?.GameData == null || SessionManager.Instance == null) return;
+        var stats = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        if (stats != null)
+            stats.OnResourceChange += OnResourceChanged;
     }
 
     private void OnResourceChanged()
@@ -256,14 +264,17 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     }
     private void HandleMovement()
     {
-        if (GameManager.Instance.GameData == null)
+        if (GameManager.Instance?.GameData == null || SessionManager.Instance == null)
             return;
+
+        var stats = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        if (stats == null) return;
 
         Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
 
         Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
 
-        float moveDistance = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).MoveSpeed * Time.deltaTime;
+        float moveDistance = stats.MoveSpeed * Time.deltaTime;
         float playerRadius = 0.7f;
         bool canMove = !Physics.BoxCast(transform.position, Vector3.one * playerRadius, moveDir, Quaternion.identity, moveDistance, countersLayerMask);
 

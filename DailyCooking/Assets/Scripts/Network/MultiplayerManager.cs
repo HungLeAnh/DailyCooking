@@ -88,8 +88,16 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     [Rpc(SendTo.SpecifiedInParams)]
     private void LoadGameDataClientRpc(string jsonData, RpcParams rpcParams = default)
     {
-        // The code inside remains the same
-        GameManager.Instance.GameData = GameManager.Instance.DataHandler.LoadFromJson(jsonData);
+        if (GameManager.Instance == null) return;
+        if (GameManager.Instance.DataHandler == null)
+        {
+            var tempHandler = new FileDataHandler(Application.persistentDataPath, "GameData_temp");
+            GameManager.Instance.GameData = tempHandler.LoadFromJson(jsonData);
+        }
+        else
+        {
+            GameManager.Instance.GameData = GameManager.Instance.DataHandler.LoadFromJson(jsonData);
+        }
         OnDataSyncToNewClient?.Invoke(this, EventArgs.Empty);
     }
     [Rpc(SendTo.Server)]

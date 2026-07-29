@@ -11,17 +11,23 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     
     private bool[] isSeatOccupied;
     private KitchenObject[] kitchenObjects;
+    private bool isInitialized;
     private Action onDestroySelf;
     public Action OnDestroySelf { get => onDestroySelf;  set => onDestroySelf += value; }
     public override void OnNetworkSpawn()
     {
-        
+        InitializeArrays();
     }
     private void Start()
     {
+        InitializeArrays();
+    }
+    private void InitializeArrays()
+    {
+        if (isInitialized) return;
         isSeatOccupied = new bool[seats.Count];
         kitchenObjects = new KitchenObject[seats.Count];
-        //KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+        isInitialized = true;
     }
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
@@ -53,7 +59,7 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
 
     public bool OccupySeat(int seatIndex)
     {
-        if (seatIndex < 0 || seatIndex >= seats.Count || isSeatOccupied[seatIndex])
+        if (!isInitialized || seatIndex < 0 || seatIndex >= seats.Count || isSeatOccupied[seatIndex])
         {
             return false; // Invalid seat index or seat is already occupied
         }
