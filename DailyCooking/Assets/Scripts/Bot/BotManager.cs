@@ -170,7 +170,8 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public void ReturnBotToPool(GameObject bot)
     {
-        if (!IsHost || !IsServer) return;
+        if (!IsHost || !IsServer || bot == null) return;
+        if (!activeBots.Contains(bot)) return;
 
         string originalName = bot.name.Replace("(Clone)", "").Trim();
         foreach (var prefab in botPrefabs)

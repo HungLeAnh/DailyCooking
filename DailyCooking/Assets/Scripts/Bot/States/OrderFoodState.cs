@@ -15,11 +15,8 @@ public class OrderFoodState : BotState
 
     private void OnOrderComplete(PlayerStateMachine playerStateMachine)
     {
-        if(stateMachine.GetBotController().OrderFood())
-        {
-            stateMachine.GetBotController().SetCurrentStateServerRpc(BotStateType.WaitingForFood);
-            Debug.Log("Bot has ordered food and is now waiting.");
-        }
+        stateMachine.GetBotController().OrderFoodServerRpc();
+        Debug.Log("Bot has ordered food and is now waiting.");
     }
 
     public override void Update()

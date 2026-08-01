@@ -111,15 +111,15 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
     {
         if (!playerStateMachine.HasKitchenObject())
         {
-            selectedIndex = index;
-            SubToOnSpawnKitchenObjectCompletedServerRpc();
-            KitchenObject.SpawnKitchenObject(postBoxKitchenSO, playerStateMachine);
+            SetOptionKitchenObjectServerRpc(index);
         }
     }
     [Rpc(SendTo.Server)]
-    private void SubToOnSpawnKitchenObjectCompletedServerRpc()
+    private void SetOptionKitchenObjectServerRpc(int index)
     {
+        selectedIndex = index;
         KitchenGameManager.Instance.OnSpawnKitchenObjectCompleted += SpawnKitchenObject;
+        KitchenObject.SpawnKitchenObject(postBoxKitchenSO, playerStateMachine);
     }
     private void SpawnKitchenObject()
     {

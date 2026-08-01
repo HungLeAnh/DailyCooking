@@ -248,6 +248,15 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
                 break;
         }
     }
+    [Rpc(SendTo.Server)]
+    public void OrderFoodServerRpc(RpcParams rpcParams = default)
+    {
+        if (OrderFood())
+        {
+            SetCurrentStateServerRpc(BotStateType.WaitingForFood);
+        }
+    }
+
     public bool OrderFood()
     {
         var food = KitchenGameManager.Instance.GetUnlockedFood();
@@ -324,7 +333,8 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         currentStateType.Value = BotStateType.WaitForTable;
         tipPercentage.Value = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).TipIncrease;
         var spawnPos = UnityEngine.Random.Range(0, 2) == 0 ? roamPositionX : roamPositionZ;
-        transform.position = spawnPos;
+        navMeshAgent.Warp(spawnPos);
+        GetComponent<Unity.Netcode.Components.NetworkTransform>().Teleport(spawnPos, transform.rotation, transform.localScale);
         IsActiveInGame.Value = true;
     }
     [Rpc(SendTo.Server)]
