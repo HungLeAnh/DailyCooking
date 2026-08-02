@@ -730,6 +730,77 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7111196169613406837, guid: e93d8374bc26e0c4f91f25c5b4cf85ea, type: 3}
   m_PrefabInstance: {fileID: 6249500353981299332}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &578921563
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 578921565}
+  - component: {fileID: 578921564}
+  - component: {fileID: 578921566}
+  m_Layer: 0
+  m_Name: PrefabSpawnService
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &578921564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 578921563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 2192518993
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!4 &578921565
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 578921563}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &578921566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 578921563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ef6913027719014d841909985ad7dcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::PrefabSpawnService
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &665436565
 GameObject:
   m_ObjectHideFlags: 0
@@ -2037,6 +2108,77 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1727586439}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1654667009
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1654667011}
+  - component: {fileID: 1654667010}
+  - component: {fileID: 1654667012}
+  m_Layer: 0
+  m_Name: KitchenObjectPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1654667010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654667009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 2722774085
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!4 &1654667011
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654667009}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1654667012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654667009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ace6597b25204e46a9acf2205935ba4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::KitchenObjectPool
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &1689198186
 GameObject:
   m_ObjectHideFlags: 0
@@ -2270,17 +2412,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 20168b59800919e44a5e0ae2e13985a1, type: 2}
   - {fileID: 11400000, guid: 8615f37fccba7a649baec0d3c7c7c568, type: 2}
   - {fileID: 11400000, guid: e400035c6d43f6e43b0c964c5a5c6149, type: 2}
-  cuttingRecipeSOList:
-  - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
-  - {fileID: 11400000, guid: 03df2848847bcdc4fafa39a849b83e11, type: 2}
-  - {fileID: 11400000, guid: 8fb39336a1ea95c41a1b18b41daf020e, type: 2}
-  - {fileID: 11400000, guid: 82b52adef9815c6428fb367a3965fe0a, type: 2}
-  - {fileID: 11400000, guid: d92c3ca9c36cd9f4db431a6e4e3cdc8b, type: 2}
-  - {fileID: 11400000, guid: a38c3a45a63565442a408863dfe6a113, type: 2}
-  - {fileID: 11400000, guid: 1d02dc73db885f346a64d250880b7dd4, type: 2}
-  fryingRecipeSOList:
-  - {fileID: 11400000, guid: 03a4633e975251e4bbcc10c49aa23b19, type: 2}
-  - {fileID: 11400000, guid: 561cb208a595885409b71715b3d7984f, type: 2}
+  recipeDatabase: {fileID: 11400000, guid: e96e88c9db82a604da584b2a9f6bfce5, type: 2}
+  popupDatabase: {fileID: 0}
 --- !u!4 &1982984534
 Transform:
   m_ObjectHideFlags: 0
@@ -3140,3 +3273,5 @@ SceneRoots:
   - {fileID: 893634708}
   - {fileID: 2124465213}
   - {fileID: 92473575}
+  - {fileID: 1654667011}
+  - {fileID: 578921565}

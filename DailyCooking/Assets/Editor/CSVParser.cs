@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -6,6 +7,10 @@ using UnityEngine;
 
 public class CSVParser<T> where T : class, new()
 {
+    private static readonly Dictionary<Type, Func<string, object>> s_customParsers = new()
+    {
+        { typeof(ShopReward), s => { var sep = s.Split('_'); return new ShopReward(sep[0], int.Parse(sep[1])); } }
+    };
     public static List<T> ParseCSV(string filePath, string delimiter = ",")
     {
         List<T> data = new List<T>();
@@ -41,10 +46,34 @@ public class CSVParser<T> where T : class, new()
                     {
                         if (propertyInfo.PropertyType.IsEnum)
                         {
-                            // Handle enum type
                             var enumType = propertyInfo.PropertyType;
                             var enumValue = Enum.Parse(enumType, value);
                             propertyInfo.SetValue(obj, enumValue);
+                        }
+                        else if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+                        {
+                            var elementType = propertyInfo.PropertyType.GetGenericArguments()[0];
+                            var list = (IList)Activator.CreateInstance(propertyInfo.PropertyType);
+                            if (!string.IsNullOrEmpty(value))
+                            {
+                                var parts = value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var p in parts)
+                                {
+                                    if (s_customParsers.TryGetValue(elementType, out var parser))
+                                    {
+                                        list.Add(parser(p));
+                                    }
+                                    else if (elementType.IsEnum)
+                                    {
+                                        list.Add(Enum.Parse(elementType, p));
+                                    }
+                                    else
+                                    {
+                                        list.Add(Convert.ChangeType(p, elementType));
+                                    }
+                                }
+                            }
+                            propertyInfo.SetValue(obj, list);
                         }
                         else
                         {
@@ -105,6 +134,31 @@ public class CSVParser<T> where T : class, new()
                         {
                             propertyInfo.SetValue(obj, ParseColorFromString(value));
                             //Debug.Log($"Parsed Color: {obj} from value: {value}");
+                        }
+                        else if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+                        {
+                            var elementType = propertyInfo.PropertyType.GetGenericArguments()[0];
+                            var list = (IList)Activator.CreateInstance(propertyInfo.PropertyType);
+                            if (!string.IsNullOrEmpty(value))
+                            {
+                                var parts = value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var p in parts)
+                                {
+                                    if (s_customParsers.TryGetValue(elementType, out var parser))
+                                    {
+                                        list.Add(parser(p));
+                                    }
+                                    else if (elementType.IsEnum)
+                                    {
+                                        list.Add(Enum.Parse(elementType, p));
+                                    }
+                                    else
+                                    {
+                                        list.Add(Convert.ChangeType(p, elementType));
+                                    }
+                                }
+                            }
+                            propertyInfo.SetValue(obj, list);
                         }
                         else
                         {

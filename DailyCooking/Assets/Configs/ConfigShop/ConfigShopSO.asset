@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -17,146 +17,188 @@ MonoBehaviour:
     name: Clear Counter
     type: 1
     price: 30
-    reward: bc571c2f81ae71245b19e8a3748b8b72_1
+    rewards:
+    - Guid: bc571c2f81ae71245b19e8a3748b8b72
+      Amount: 1
     category: 0
     unlockLevel: 1
   - id: 2
     name: Cutting Counter
     type: 1
     price: 40
-    reward: 74268350f66e75a42929093c253fe95f_1
+    rewards:
+    - Guid: 74268350f66e75a42929093c253fe95f
+      Amount: 1
     category: 0
     unlockLevel: 1
   - id: 3
     name: Fridge
     type: 1
     price: 50
-    reward: e796b6381a3503c48aeb31e64942efa8_1
+    rewards:
+    - Guid: e796b6381a3503c48aeb31e64942efa8
+      Amount: 1
     category: 0
     unlockLevel: 2
   - id: 4
     name: Plate Counter
     type: 1
     price: 40
-    reward: 667d87b3a7db4ed4ab2f0a0eb500f026_1
+    rewards:
+    - Guid: 667d87b3a7db4ed4ab2f0a0eb500f026
+      Amount: 1
     category: 0
     unlockLevel: 1
   - id: 5
     name: Stove Pan Counter
     type: 1
     price: 50
-    reward: efd77c74ec8bdb74e811b458c89e5e1a_1
+    rewards:
+    - Guid: efd77c74ec8bdb74e811b458c89e5e1a
+      Amount: 1
     category: 0
     unlockLevel: 2
   - id: 6
     name: Stove Pot Counter
     type: 1
     price: 80
-    reward: d4488b64edbf4dd41859e16c58897c03_1
+    rewards:
+    - Guid: d4488b64edbf4dd41859e16c58897c03
+      Amount: 1
     category: 0
     unlockLevel: 3
   - id: 7
     name: Trash Bin
     type: 1
     price: 10
-    reward: 127792b0de500fd4a972be0796d3f7d0_1
+    rewards:
+    - Guid: 127792b0de500fd4a972be0796d3f7d0
+      Amount: 1
     category: 0
     unlockLevel: 1
   - id: 8
     name: Single Table
     type: 1
     price: 100
-    reward: 384226191b7471b4b82fd751d66b5757_1
+    rewards:
+    - Guid: 384226191b7471b4b82fd751d66b5757
+      Amount: 1
     category: 1
     unlockLevel: 1
   - id: 9
     name: Double Table
     type: 1
     price: 200
-    reward: cbff455ef1d5e89428e90c9ed2eb8e36_1
+    rewards:
+    - Guid: cbff455ef1d5e89428e90c9ed2eb8e36
+      Amount: 1
     category: 1
     unlockLevel: 2
   - id: 10
     name: Wall
     type: 1
     price: 10
-    reward: e735350232f8f564a9bf514f8e3b0d55_1
+    rewards:
+    - Guid: e735350232f8f564a9bf514f8e3b0d55
+      Amount: 1
     category: 2
     unlockLevel: 1
   - id: 11
     name: Door
     type: 1
     price: 20
-    reward: 6acc2969bc480cd4386b40bd75c9a691_1
+    rewards:
+    - Guid: 6acc2969bc480cd4386b40bd75c9a691
+      Amount: 1
     category: 2
     unlockLevel: 1
   - id: 12
     name: Container Counter
     type: 1
     price: 10
-    reward: b28a5fed1f54f2948aa1cc6aa79f06d6_1
+    rewards:
+    - Guid: b28a5fed1f54f2948aa1cc6aa79f06d6
+      Amount: 1
     category: 0
     unlockLevel: 1
   - id: 13
     name: Tomatoes
     type: 2
     price: 15
-    reward: 8fea54ee7aaa8544e8fe6a99d41d6689_1
+    rewards:
+    - Guid: 8fea54ee7aaa8544e8fe6a99d41d6689
+      Amount: 1
     category: 3
     unlockLevel: 1
   - id: 14
     name: Buns
     type: 2
     price: 15
-    reward: 1c94b7f0c13c51d4ab047c26f734bbff_1
+    rewards:
+    - Guid: 1c94b7f0c13c51d4ab047c26f734bbff
+      Amount: 1
     category: 4
     unlockLevel: 1
   - id: 15
     name: Carrots
     type: 2
     price: 15
-    reward: 0747001d6513483489782ac8424172a3_1
+    rewards:
+    - Guid: 0747001d6513483489782ac8424172a3
+      Amount: 1
     category: 3
     unlockLevel: 1
   - id: 16
     name: Cheese
     type: 2
     price: 15
-    reward: d20cbb9f2e2c062468b72931fb100a49_1
+    rewards:
+    - Guid: d20cbb9f2e2c062468b72931fb100a49
+      Amount: 1
     category: 5
     unlockLevel: 1
   - id: 17
     name: Lettuces
     type: 2
     price: 15
-    reward: 218499c936f06474baddf67496bfef11_1
+    rewards:
+    - Guid: 218499c936f06474baddf67496bfef11
+      Amount: 1
     category: 3
     unlockLevel: 1
   - id: 18
     name: Onions
     type: 2
     price: 15
-    reward: c0e555111a5be2640a2cef3171b2b2e9_1
+    rewards:
+    - Guid: c0e555111a5be2640a2cef3171b2b2e9
+      Amount: 1
     category: 3
     unlockLevel: 1
   - id: 19
     name: Potatoes
     type: 2
     price: 15
-    reward: dd9b1be3a963350418676757e8b4edd8_1
+    rewards:
+    - Guid: dd9b1be3a963350418676757e8b4edd8
+      Amount: 1
     category: 3
     unlockLevel: 1
   - id: 20
     name: Burger
     type: 2
     price: 15
-    reward: 173872a3feebe344980d20f67d470122_1
+    rewards:
+    - Guid: 173872a3feebe344980d20f67d470122
+      Amount: 1
     category: 6
     unlockLevel: 1
   - id: 21
     name: Vegetable Burger
     type: 2
     price: 15
-    reward: 8615f37fccba7a649baec0d3c7c7c568_1
+    rewards:
+    - Guid: 8615f37fccba7a649baec0d3c7c7c568
+      Amount: 1
     category: 6
     unlockLevel: 1

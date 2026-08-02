@@ -6,11 +6,11 @@ using UnityEngine;
 
 public class CuttingCounterController : BaseCounterController, IHasProgress, IHasOptionalSO
 {
-    [SerializeField] private CuttingRecipeSO[] _cuttingRecipeSOArray;
-    [SerializeField] private ProgressBarUI progressBarUI;
-
     private NetworkVariable<float> cuttingProgress = new NetworkVariable<float>(-1);
     private CuttingRecipeSO cuttingRecipeSO;
+
+    private CuttingRecipeSO[] CuttingRecipes => KitchenGameManager.Instance.RecipeDatabase?.GetCuttingRecipes() ?? System.Array.Empty<CuttingRecipeSO>();
+    [SerializeField] private ProgressBarUI progressBarUI;
 
     public NetworkVariable<float> CuttingProgress { get => cuttingProgress; set => cuttingProgress = value; }
     public CuttingRecipeSO CuttingRecipeSO { get => cuttingRecipeSO; set => cuttingRecipeSO = value; }
@@ -47,7 +47,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
                 if (HasRecipeWithInput(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
                 {
                     playerStateMachine.GetKitchenObject().SetKitchenObjectParent(this);
-                    int index = _cuttingRecipeSOArray.ToList()
+                    int index = CuttingRecipes.ToList()
                         .IndexOf(GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO()));
                     SetCuttingRecipeSOServerRpc(index);
                     SetCuttingProgressServerRpc(0f);
@@ -92,13 +92,13 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
     [Rpc(SendTo.ClientsAndHost)]
     private void SetCuttingRecipeSOClientRpc(int index)
     {
-        if(index < 0 || index >= _cuttingRecipeSOArray.Length)
+        if(index < 0 || index >= CuttingRecipes.Length)
         {
             CuttingRecipeSO = null;
         }
         else
         {
-            CuttingRecipeSO = _cuttingRecipeSOArray[index];
+            CuttingRecipeSO = CuttingRecipes[index];
 
         }
     }
@@ -115,7 +115,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
 
             if (CuttingRecipeSO == null)
             {
-                int index = _cuttingRecipeSOArray.ToList().IndexOf(GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO()));
+                int index = CuttingRecipes.ToList().IndexOf(GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO()));
                 SetCuttingRecipeSOServerRpc(index);
             }
 
@@ -136,7 +136,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
 
     private CuttingRecipeSO GetCuttingRecipeSOWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
-        foreach (CuttingRecipeSO cuttingRecipeSO in _cuttingRecipeSOArray)
+        foreach (CuttingRecipeSO cuttingRecipeSO in CuttingRecipes)
         {
             if (cuttingRecipeSO.input == inputKitchenObjectSO)
             {

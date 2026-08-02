@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class PotCookingTool : CookingTool,IHasOptionalSO
 {
-    [SerializeField] private CombineRecipeSO[] combineRecipeSOArray;
-    [SerializeField] private BurningRecipeSO[] burningRecipeSOArray;
+    private CombineRecipeSO[] CombineRecipes => KitchenGameManager.Instance.RecipeDatabase?.GetCombineRecipes() ?? System.Array.Empty<CombineRecipeSO>();
+    private BurningRecipeSO[] BurningRecipes => KitchenGameManager.Instance.RecipeDatabase?.GetBurningRecipes() ?? System.Array.Empty<BurningRecipeSO>();
     [SerializeField] private CombineDetailUI _combineDetailUI;
 
     private CombineRecipeSO _combineRecipeSO;
@@ -16,12 +16,11 @@ public class PotCookingTool : CookingTool,IHasOptionalSO
     {
         CombineRecipeSO combineRecipeSO = GetCombineRecipesSOWithInput(inputKitchenObjectSO);
         return combineRecipeSO != null;
-
     }
 
     private BurningRecipeSO GetBurningRecipeSOWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
-        foreach (BurningRecipeSO burningRecipeSO in burningRecipeSOArray)
+        foreach (BurningRecipeSO burningRecipeSO in BurningRecipes)
         {
             if (burningRecipeSO.input == inputKitchenObjectSO)
             {
@@ -32,16 +31,16 @@ public class PotCookingTool : CookingTool,IHasOptionalSO
     }
     private CombineRecipeSO GetCombineRecipesSOWithInput(KitchenObjectSO kitchenObjectSO)
     {
-        foreach (var combineRecipe in combineRecipeSOArray)
+        foreach (var combineRecipe in CombineRecipes)
         {
             if(combineRecipe.input.Contains(kitchenObjectSO))
                 return combineRecipe;
         }
         return null;
-    }    
+    }
     private CombineRecipeSO GetCombineRecipeSOFromOutput(KitchenObjectSO kitchenObjectSO)
     {
-        foreach (var combineRecipe in combineRecipeSOArray)
+        foreach (var combineRecipe in CombineRecipes)
         {
             if(combineRecipe.output == kitchenObjectSO)
                 return combineRecipe;
@@ -51,14 +50,13 @@ public class PotCookingTool : CookingTool,IHasOptionalSO
 
     public override void SetCookingRecipeSO()
     {
-        
+
     }
 
     public override void SetBurningRecipeSO(KitchenObjectSO kitchenObjectSO)
     {
         _burningRecipeSO = GetBurningRecipeSOWithInput(kitchenObjectSO);
         BurningTimeMax = _burningRecipeSO.burningTimerMax;
-
     }
 
     public override KitchenObjectSO GetCookingOutput()
@@ -73,7 +71,7 @@ public class PotCookingTool : CookingTool,IHasOptionalSO
 
     public void SetOptionKitchenObjectSO(int index)
     {
-        _combineRecipeSO = combineRecipeSOArray[index];
+        _combineRecipeSO = CombineRecipes[index];
         CookingTimeMax = _combineRecipeSO.combineTimerMax;
 
         _combineDetailUI.InitUI(_combineRecipeSO);
@@ -82,7 +80,7 @@ public class PotCookingTool : CookingTool,IHasOptionalSO
     public List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)
     {
         List<KitchenObjectSO> kitchenObjectSOs = new List<KitchenObjectSO>();
-        foreach (var combineRecipe in combineRecipeSOArray)
+        foreach (var combineRecipe in CombineRecipes)
         {
             if (combineRecipe.input.Contains(kitchenObjectSO))
                 kitchenObjectSOs.Add(combineRecipe.output);

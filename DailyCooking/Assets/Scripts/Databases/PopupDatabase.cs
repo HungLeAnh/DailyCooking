@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "PopupSystem/PopupDatabase", fileName = "PopupDatabase")]
@@ -8,16 +9,25 @@ public class PopupDatabase : ScriptableObject
 
     public List<PopupData> Popups { get => popups; set => popups = value; }
 
-    public PopupData GetPopup(string popupName)
+    private Dictionary<UIPopupType, PopupData> _popupDict;
+
+    public void Initialize()
     {
-        foreach (var popup in Popups)
+        _popupDict = new Dictionary<UIPopupType, PopupData>();
+        foreach (var popup in popups)
         {
-            if (popup.popupName == popupName)
+            if (Enum.TryParse<UIPopupType>(popup.popupName, out var type))
             {
-                return popup;
+                _popupDict[type] = popup;
             }
         }
-        return null;
+    }
+
+    public PopupData GetPopup(UIPopupType popupType)
+    {
+        if (_popupDict == null) Initialize();
+        _popupDict.TryGetValue(popupType, out var popup);
+        return popup;
     }
 
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class PanCookingTool : CookingTool
 {
-    [SerializeField] private FryingRecipeSO[] fryingRecipeSOArray;
-    [SerializeField] private BurningRecipeSO[] burningRecipeSOArray;
+    private FryingRecipeSO[] FryingRecipes => KitchenGameManager.Instance.RecipeDatabase?.GetFryingRecipes() ?? System.Array.Empty<FryingRecipeSO>();
+    private BurningRecipeSO[] BurningRecipes => KitchenGameManager.Instance.RecipeDatabase?.GetBurningRecipes() ?? System.Array.Empty<BurningRecipeSO>();
 
     private FryingRecipeSO _fryingRecipeSO;
     private BurningRecipeSO _burningRecipeSO;
@@ -14,12 +14,11 @@ public class PanCookingTool : CookingTool
     {
         FryingRecipeSO fryingRecipeSO = GetFryingRecipeSOWithInput(inputKitchenObjectSO);
         return fryingRecipeSO != null;
-
     }
 
     private FryingRecipeSO GetFryingRecipeSOWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
-        foreach (FryingRecipeSO fryingRecipeSO in fryingRecipeSOArray)
+        foreach (FryingRecipeSO fryingRecipeSO in FryingRecipes)
         {
             if (fryingRecipeSO.input == inputKitchenObjectSO)
             {
@@ -30,7 +29,7 @@ public class PanCookingTool : CookingTool
     }
     private BurningRecipeSO GetBurningRecipeSOWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
-        foreach (BurningRecipeSO burningRecipeSO in burningRecipeSOArray)
+        foreach (BurningRecipeSO burningRecipeSO in BurningRecipes)
         {
             if (burningRecipeSO.input == inputKitchenObjectSO)
             {
@@ -50,7 +49,6 @@ public class PanCookingTool : CookingTool
     {
         _burningRecipeSO = GetBurningRecipeSOWithInput(kitchenObjectSO);
         BurningTimeMax = _burningRecipeSO.burningTimerMax;
-
     }
 
     public override KitchenObjectSO GetCookingOutput()

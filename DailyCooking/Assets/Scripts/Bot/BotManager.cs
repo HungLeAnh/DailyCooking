@@ -29,8 +29,13 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
         return bot;
     }
 
-    private void OnGetBot(GameObject bot)
+    private void OnGetBot(GameObject bot, int poolIndex)
     {
+        var botController = bot.GetComponent<BotCustomerController>();
+        if (botController != null)
+        {
+            botController.PoolIndex = poolIndex;
+        }
         activeBots.Add(bot);
     }
 
@@ -57,9 +62,10 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
             //Debug.Log("Initializing BotManager pools...");
             foreach (var prefab in botPrefabs)
             {
+                int poolIndex = pools.Count;
                 var pool = new ObjectPool<GameObject>(
                     createFunc: () => CreateBot(prefab),
-                    actionOnGet: OnGetBot,
+                    actionOnGet: (bot) => OnGetBot(bot, poolIndex),
                     actionOnRelease: OnReleaseBot,
                     actionOnDestroy: OnDestroyBot,
                     defaultCapacity: poolSize / botPrefabs.Length,
@@ -115,12 +121,13 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
         if (!IsHost || !IsServer || pools.Count == 0) return;
 
         int botsPerPool = poolSize / pools.Count;
-        foreach (var pool in pools)
+        for (int i = 0; i < pools.Count; i++)
         {
-            for (int i = 0; i < botsPerPool; i++)
+            for (int j = 0; j < botsPerPool; j++)
             {
-                var bot = pool.Get();
-                pool.Release(bot);
+                var bot = pools[i].Get();
+                bot.GetComponent<BotCustomerController>().PoolIndex = i;
+                pools[i].Release(bot);
             }
         }
     }
@@ -152,11 +159,15 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public GameObject GetBot()
     {
-        //Debug.Log("GetBot called. pool bots: " + pools.Count);
         if (!IsHost || !IsServer || pools.Count == 0) return null;
 
         int randomIndex = UnityEngine.Random.Range(0, pools.Count);
-        return pools[randomIndex].Get();
+        var bot = pools[randomIndex].Get();
+        if (bot != null)
+        {
+            bot.GetComponent<BotCustomerController>().PoolIndex = randomIndex;
+        }
+        return bot;
     }
 
     public void SpawnBot(GameObject bot)
@@ -173,18 +184,17 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
         if (!IsHost || !IsServer || bot == null) return;
         if (!activeBots.Contains(bot)) return;
 
-        string originalName = bot.name.Replace("(Clone)", "").Trim();
-        foreach (var prefab in botPrefabs)
+        var botController = bot.GetComponent<BotCustomerController>();
+        int poolIndex = botController.PoolIndex;
+
+        if (poolIndex >= 0 && poolIndex < pools.Count)
         {
-            if (prefab.name == originalName)
-            {
-                int index = Array.IndexOf(botPrefabs, prefab);
-                pools[index].Release(bot);
-                return;
-            }
+            pools[poolIndex].Release(bot);
         }
-        
-        Destroy(bot);
+        else
+        {
+            Destroy(bot);
+        }
     }
 
     public void KickAllBots()

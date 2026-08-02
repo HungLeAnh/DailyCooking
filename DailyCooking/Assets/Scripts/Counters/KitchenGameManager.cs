@@ -27,8 +27,8 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     [SerializeField] private long serveGoalMultiply = 10;
     [SerializeField] private long gamePlayingTimeMultiply = 60;
     [SerializeField] private List<KitchenObjectSO> kitchenObjectSOList;
-    [SerializeField] private List<CuttingRecipeSO> cuttingRecipeSOList;
-    [SerializeField] private List<FryingRecipeSO> fryingRecipeSOList;
+    [SerializeField] private RecipeDatabaseSO recipeDatabase;
+    [SerializeField] private PopupDatabase popupDatabase;
 
     private State state;
 
@@ -44,11 +44,11 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     public long EarnGoal { get => earnGoal; set => earnGoal = value; }
     public long ServeGoal { get => serveGoal; set => serveGoal = value; }
 
-    public List<CuttingRecipeSO> CuttingRecipeSOList { get => cuttingRecipeSOList; set => cuttingRecipeSOList = value; }
-    public List<FryingRecipeSO> FryingRecipeSOList { get => fryingRecipeSOList; set => fryingRecipeSOList = value; }
     public State CurrentState => state;
 
     public Dictionary<string, KitchenObjectSO> KitchenObjectSODic { get => kitchenObjectSODic; set => kitchenObjectSODic = value; }
+    public RecipeDatabaseSO RecipeDatabase { get => recipeDatabase; }
+    public PopupDatabase PopupDatabase { get => popupDatabase; }
 
     protected override void Awake()
     {
@@ -59,6 +59,13 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         foreach (var kitchenObjectSO in kitchenObjectSOList)
         {
             kitchenObjectSODic[kitchenObjectSO.Guid] = kitchenObjectSO;
+        }
+        recipeDatabase?.Initialize();
+        popupDatabase?.Initialize();
+
+        if (IsServer && KitchenObjectPool.Instance != null)
+        {
+            KitchenObjectPool.Instance.PrewarmPools(kitchenObjectSOList);
         }
     }
     public override void OnNetworkSpawn()
@@ -153,10 +160,22 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
             return;
         }
 
-        Transform kitchenObjectTransform = Instantiate(kitchenObjectSO.prefab);
+        GameObject kitchenObjectGO;
+        if (KitchenObjectPool.Instance != null && KitchenObjectPool.Instance.HasPool(kitchenObjectSOGuid))
+        {
+            kitchenObjectGO = KitchenObjectPool.Instance.GetKitchenObject(kitchenObjectSOGuid);
+        }
+        else
+        {
+            kitchenObjectGO = Instantiate(kitchenObjectSO.prefab).gameObject;
+        }
 
+        Transform kitchenObjectTransform = kitchenObjectGO.transform;
         NetworkObject kitchenObjectNetworkObject = kitchenObjectTransform.GetComponent<NetworkObject>();
-        kitchenObjectNetworkObject.Spawn(true);
+        if (!kitchenObjectNetworkObject.IsSpawned)
+        {
+            kitchenObjectNetworkObject.Spawn(true);
+        }
 
         KitchenObject kitchenObject = kitchenObjectTransform.GetComponent<KitchenObject>();
 
@@ -168,26 +187,47 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     public void CreatePlacedObjectViewServerRpc(Vector3 worldPosition, string placeObjectTypeSOGuid, 
         Vector2Int origin, Dir dir, ulong targetClientId, bool isPreview)
     {
+        if (PrefabSpawnService.Instance != null)
+        {
+            PrefabSpawnService.Instance.SpawnPlacedObjectDirect(worldPosition, placeObjectTypeSOGuid, origin, dir, targetClientId, isPreview);
+            PrefabSpawnService.Instance.OnSpawnRequestCompleted += HandleSpawnRequestCompleted;
+        }
+        else
+        {
+            SpawnPlacedObjectFallback(worldPosition, placeObjectTypeSOGuid, origin, dir, targetClientId, isPreview);
+        }
+    }
+
+    private void SpawnPlacedObjectFallback(Vector3 worldPosition, string placeObjectTypeSOGuid,
+        Vector2Int origin, Dir dir, ulong targetClientId, bool isPreview)
+    {
         PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(placeObjectTypeSOGuid);
+        if (placedObjectTypeSO == null) return;
         Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition, Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0), GridBuildingSystem.Instance.Container).transform;
         var networkObject = placedObjectTransform.GetComponent<NetworkObject>();
         PlacedObjectView placedObjectView = networkObject.GetComponent<PlacedObjectView>();
-        placedObjectView.Intialize(placeObjectTypeSOGuid, origin, dir,isPreview);
+        placedObjectView.Intialize(placeObjectTypeSOGuid, origin, dir, isPreview);
 
         networkObject.Spawn();
         networkObject.ChangeOwnership(targetClientId);
 
-        //Debug.Log("Object is created on server " + placeObjectTypeSOGuid +" pass to target "+ targetClientId);
-        NotifyClientOfSpawnClientRpc(networkObject, RpcTarget.Single(targetClientId,RpcTargetUse.Temp));
-
+        NotifyClientOfSpawnClientRpc(networkObject, RpcTarget.Single(targetClientId, RpcTargetUse.Temp));
     }
+
+    private void HandleSpawnRequestCompleted(NetworkObject spawnedObject)
+    {
+        if (PrefabSpawnService.Instance != null)
+        {
+            PrefabSpawnService.Instance.OnSpawnRequestCompleted -= HandleSpawnRequestCompleted;
+        }
+        OnSpawnRequestCompleted?.Invoke(spawnedObject);
+    }
+
     [Rpc(SendTo.SpecifiedInParams)]
-    private void NotifyClientOfSpawnClientRpc(NetworkObjectReference spawnedObjectRef, 
-        RpcParams rpcParams)
+    private void NotifyClientOfSpawnClientRpc(NetworkObjectReference spawnedObjectRef, RpcParams rpcParams)
     {
         if (spawnedObjectRef.TryGet(out NetworkObject netObj))
         {
-            //Debug.Log($"Client received my new object: {netObj.name}");
             OnSpawnRequestCompleted?.Invoke(netObj);
         }
     }

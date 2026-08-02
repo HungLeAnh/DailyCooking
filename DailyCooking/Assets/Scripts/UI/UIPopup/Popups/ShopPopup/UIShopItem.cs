@@ -14,7 +14,6 @@ public class UIShopItem : MonoBehaviour
     [SerializeField] private Button buttonBuy;
     private ConfigShopItem configShopItem;
     private ShopItemCategory itemCategory;
-    private Dictionary<string, int> parsedData = new Dictionary<string, int>();
 
     public Button ButtonBuy => buttonBuy;
     public ConfigShopItem ConfigShopItem => configShopItem;
@@ -45,20 +44,7 @@ public class UIShopItem : MonoBehaviour
             lockTransform.gameObject.SetActive(false);
         }
 
-        string[] pairs = item.Reward.Split(';');
-
-        foreach (var pair in pairs)
-        {
-            // Split each pair by '_' to get id and amount
-            string[] parts = pair.Split('_');
-            if (parts.Length == 2)
-            {
-                string id = parts[0];
-                int amount = int.Parse(parts[1]); 
-                parsedData[id] = amount;
-            }
-        }
-        GetReward(parsedData);
+        GetReward(item.Rewards);
 
     }
 
@@ -82,16 +68,16 @@ public class UIShopItem : MonoBehaviour
             Message = $"Are you sure you want to purchase {configShopItem.Name} for {MathUtil.NumberFormat(configShopItem.Price)} coins?",
             YesAction = () =>
             {
-                ShopManager.Instance.OnPurchase(configShopItem, parsedData);
+                ShopManager.Instance.OnPurchase(configShopItem, configShopItem.Rewards);
             },
             NoAction = () => { }
         });
     }
 
-    private void GetReward(Dictionary<string, int> parsedData)
+    private void GetReward(List<ShopReward> rewards)
     {
-        var parsedDataList = parsedData.ToList();
-        if (parsedDataList.Count == 0) return;
+        if (rewards == null || rewards.Count == 0) return;
+        var reward = rewards[0];
         switch (itemCategory)
         {
             case ShopItemCategory.Counters :
@@ -99,7 +85,7 @@ public class UIShopItem : MonoBehaviour
             case ShopItemCategory.Walls:
 
                 var placedObject = GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects
-                    .Find(x => x.Guid == parsedDataList[0].Key);
+                    .Find(x => x.Guid == reward.Guid);
                 if (placedObject == null)
                 {
                     gameObject.SetActive(false);
@@ -114,7 +100,7 @@ public class UIShopItem : MonoBehaviour
             case ShopItemCategory.Dairy:
             case ShopItemCategory.Patties:
             case ShopItemCategory.Meats:
-                var item = KitchenGameManager.Instance.KitchenObjectSODic.GetValueOrDefault(parsedDataList[0].Key);
+                var item = KitchenGameManager.Instance.KitchenObjectSODic.GetValueOrDefault(reward.Guid);
                 if (item == null)
                 {
                     gameObject.SetActive(false);

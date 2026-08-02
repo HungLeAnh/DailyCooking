@@ -60,6 +60,11 @@ public class KitchenObject : NetworkBehaviour
     {
         return kitchenObjectParent;
     }
+
+    public void ResetState()
+    {
+        kitchenObjectParent = null;
+    }
     public void DestroySelf(int index = 0)
     {
         DestroySelfServerRpc(index);
@@ -68,8 +73,16 @@ public class KitchenObject : NetworkBehaviour
     private void DestroySelfServerRpc(int index = 0)
     {
         ClearKitchenObjectOnParentClientRpc(index);
-        gameObject.GetComponent<NetworkObject>().Despawn();
-        Destroy(gameObject);
+        var netObj = gameObject.GetComponent<NetworkObject>();
+        netObj.Despawn();
+        if (KitchenObjectPool.Instance != null && kitchenObjectSO != null)
+        {
+            KitchenObjectPool.Instance.ReturnKitchenObject(gameObject, kitchenObjectSO.Guid);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
     [Rpc(SendTo.ClientsAndHost)]
     public void ClearKitchenObjectOnParentClientRpc(int index = 0)

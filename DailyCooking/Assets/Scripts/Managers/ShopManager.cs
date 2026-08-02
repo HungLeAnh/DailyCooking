@@ -10,7 +10,7 @@ public class ShopManager : PersistentSingleton<ShopManager>
 
     public List<DailyFreeCurrency> DailyFreeCurrency { get => dailyFreeCurrency; set => dailyFreeCurrency = value; }
 
-    public void OnPurchase(ConfigShopItem item, Dictionary<string, int> parsedData)
+    public void OnPurchase(ConfigShopItem item, List<ShopReward> rewards)
     {
         if(item.Price > GameManager.Instance.GameData.RestaurantData.Coins)
         {
@@ -24,32 +24,21 @@ public class ShopManager : PersistentSingleton<ShopManager>
         GameManager.Instance.UpdateRestaurantCoinServerRpc(-item.Price);
         if(item.Type == ShopItemType.Item)
         {
-            foreach (var pair in parsedData)
+            foreach (var reward in rewards)
             {
-                string itemId = pair.Key;
-                int amount = pair.Value;
-                for (int i = 0; i < amount; i++)
+                for (int i = 0; i < reward.Amount; i++)
                 {
-                    GameManager.Instance.AddInventoryDataServerRpc(itemId);
+                    GameManager.Instance.AddInventoryDataServerRpc(reward.Guid);
                 }
             }
 
         }
         if (item.Type == ShopItemType.Ingredient)
         {
-            //Debug.Log(parsedData.Count);
-            foreach (var pair in parsedData)
+            foreach (var reward in rewards)
             {
-                string recipeId = pair.Key;
-                int amount = pair.Value;
-                //Debug.Log($"Adding {amount} of {recipeId} to the post box.");
-                var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(recipeId);
+                var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(reward.Guid);
                 GameManager.Instance.UpdatePostBoxDataServerRpc(kitchenObjectSO.Guid);
-                //Debug.Log($"Added {amount} of {kitchenObjectSO.objectName} to the post box.");
-                //for (int i = 0; i < amount; i++)
-                //{
-
-                //}
             }
         }
     }

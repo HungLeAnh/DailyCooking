@@ -43,6 +43,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
 
     private Table targetTable = null;
+    private int _poolIndex = -1;
     public Table TargetTable { get => targetTable; set => targetTable = value; }
     public NetworkVariable<ulong> TargetTableNetworkVariable { get => targetTableNetworkVariable; set => targetTableNetworkVariable.Value = value.Value;}
     public NetworkVariable<int> TargetSeatIndex { get => targetSeatIndex; set => targetSeatIndex = value;}
@@ -51,6 +52,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     public NetworkVariable<BotStateType> CurrentStateType { get => currentStateType; set => currentStateType = value; }
     public Vector3 RoamPosX { get => roamPosX.Value; set => roamPosX.Value = value; }
     public Vector3 RoamPosZ { get => roamPosZ.Value; set => roamPosZ.Value = value; }
+    public int PoolIndex { get => _poolIndex; set => _poolIndex = value; }
 
     public override void OnNetworkSpawn()
     {

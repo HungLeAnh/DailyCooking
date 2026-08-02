@@ -64,7 +64,7 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>, IUIPopupManag
 
     public void CreatePopup(UIPopupType popupType)
     {
-        var popupData = popupDatabase.GetPopup(popupType.ToString());
+        var popupData = popupDatabase.GetPopup(popupType);
         if(popupData == null)
         {
             Debug.LogWarning($"Popup '{popupType}' not found in the database.");

@@ -126,8 +126,7 @@ public class UIMenuPopup : UIPopup
                 bool canAdded = GameManager.Instance.GameData.MenuData.menuDished.Contains(item) == false;
                 if (canAdded)
                 {
-                    int index = ConfigManager.Instance.ConfigFood.FoodItems.IndexOf(item);
-                    GameManager.Instance.AddDishToMenuServerRpc(index);
+                GameManager.Instance.AddDishToMenuServerRpc(item.Guid);
                     CreateMenuItem(item);
                     totalDish.text = $"{GameManager.Instance.GameData.MenuData.menuDished.Count}";
                     uifooditem.SetSelectedState(true);
@@ -145,8 +144,7 @@ public class UIMenuPopup : UIPopup
             bool canRemoved = GameManager.Instance.GameData.MenuData.menuDished.Contains(dish);
             if (canRemoved)
             {
-                int index = ConfigManager.Instance.ConfigFood.FoodItems.IndexOf(dish);
-                GameManager.Instance.RemoveDishFromMenuServerRpc(index);
+                GameManager.Instance.RemoveDishFromMenuServerRpc(dish.Guid);
                 foodItemList.Find(x => x.FoodSO == dish ).SetSelectedState(false);
                 Destroy(menuCategory);
                 totalDish.text = $"{GameManager.Instance.GameData.MenuData.menuDished.Count}";

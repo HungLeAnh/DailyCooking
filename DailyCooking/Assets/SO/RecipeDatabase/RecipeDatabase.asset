@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7257980c7ef9d447a3b1a231df0c501, type: 3}
+  m_Name: RecipeDatabase
+  m_EditorClassIdentifier: Scripts::RecipeDatabaseSO
+  cuttingRecipes:
+  - {fileID: 11400000, guid: fe9d3497f5d5eb344a7046e837c3da14, type: 2}
+  - {fileID: 11400000, guid: 03df2848847bcdc4fafa39a849b83e11, type: 2}
+  - {fileID: 11400000, guid: 8fb39336a1ea95c41a1b18b41daf020e, type: 2}
+  - {fileID: 11400000, guid: 82b52adef9815c6428fb367a3965fe0a, type: 2}
+  - {fileID: 11400000, guid: d92c3ca9c36cd9f4db431a6e4e3cdc8b, type: 2}
+  - {fileID: 11400000, guid: a38c3a45a63565442a408863dfe6a113, type: 2}
+  - {fileID: 11400000, guid: 1d02dc73db885f346a64d250880b7dd4, type: 2}
+  fryingRecipes:
+  - {fileID: 11400000, guid: 03a4633e975251e4bbcc10c49aa23b19, type: 2}
+  - {fileID: 11400000, guid: 561cb208a595885409b71715b3d7984f, type: 2}
+  burningRecipes:
+  - {fileID: 11400000, guid: 76eee288774439d45ab2141f8a55fb0f, type: 2}
+  - {fileID: 11400000, guid: ab47a9ec26f9e0f429f012d487d4347c, type: 2}
+  - {fileID: 11400000, guid: 8d59480adedce68459ef8fc4d0c3ca12, type: 2}
+  combineRecipes:
+  - {fileID: 11400000, guid: 0aefb950d4687af4cb75cdcbb9ed0b74, type: 2}

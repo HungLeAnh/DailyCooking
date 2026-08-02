@@ -224,33 +224,33 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         gameData.RemoveInventoryData(guid);
     }
     [Rpc(SendTo.Server)]
-    public void AddDishToMenuServerRpc(int dishIndex)
+    public void AddDishToMenuServerRpc(string foodGuid)
     {
-        AddDishToMenuClientRpc(dishIndex);
+        AddDishToMenuClientRpc(foodGuid);
     }
     [Rpc(SendTo.ClientsAndHost)]
-    private void AddDishToMenuClientRpc(int dishIndex)
+    private void AddDishToMenuClientRpc(string foodGuid)
     {
-        var dish = ConfigManager.Instance.ConfigFood.FoodItems.ElementAt(dishIndex);
+        var dish = ConfigManager.Instance.ConfigFood.FoodItems.Find(x => x.Guid == foodGuid);
         if(dish == null) 
         {
-            Debug.LogError($"Dish with index {dishIndex} not found in config.");
+            Debug.LogError($"Dish with guid {foodGuid} not found in config.");
             return;
         }
         GameData.AddDishToMenu(dish);
     }
     [Rpc(SendTo.Server)]
-    public void RemoveDishFromMenuServerRpc(int dishIndex)
+    public void RemoveDishFromMenuServerRpc(string foodGuid)
     {
-        RemoveDishFromMenuClientRpc(dishIndex);
+        RemoveDishFromMenuClientRpc(foodGuid);
     }
     [Rpc(SendTo.ClientsAndHost)]
-    private void RemoveDishFromMenuClientRpc(int dishIndex)
+    private void RemoveDishFromMenuClientRpc(string foodGuid)
     {
-        var dish = ConfigManager.Instance.ConfigFood.FoodItems.ElementAt(dishIndex);
+        var dish = ConfigManager.Instance.ConfigFood.FoodItems.Find(x => x.Guid == foodGuid);
         if(dish == null) 
         {
-            Debug.LogError($"Dish with index {dishIndex} not found in config.");
+            Debug.LogError($"Dish with guid {foodGuid} not found in config.");
             return;
         }
         GameData.RemoveDishFromMenu(dish);
@@ -266,17 +266,17 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         GameData.UnlockDish(guid);
     }
     [Rpc(SendTo.Server)]
-    public void PurchaseUpgradeServerRpc(int upgradeIndex)
+    public void PurchaseUpgradeServerRpc(string upgradeGuid)
     {
-        PurchaseUpgradeClientRpc(upgradeIndex);
+        PurchaseUpgradeClientRpc(upgradeGuid);
     }
     [Rpc(SendTo.ClientsAndHost)]
-    private void PurchaseUpgradeClientRpc(int upgradeIndex)
+    private void PurchaseUpgradeClientRpc(string upgradeGuid)
     {
-        var upgrade = ConfigManager.Instance.ConfigUpgrade.Upgrades.ElementAt(upgradeIndex);
+        var upgrade = ConfigManager.Instance.ConfigUpgrade.Upgrades.Find(x => x.Guid == upgradeGuid);
         if(upgrade == null) 
         {
-            Debug.LogError($"Upgrade with index {upgradeIndex} not found in config.");
+            Debug.LogError($"Upgrade with guid {upgradeGuid} not found in config.");
             return;
         }
         GameData.PurchaseUpgrade(upgrade);
