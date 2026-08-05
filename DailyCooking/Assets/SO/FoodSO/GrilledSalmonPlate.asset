@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40ab37e8500c2e54c9efa9096bbadac0, type: 3}
+  m_Name: GrilledSalmonPlate
+  m_EditorClassIdentifier: Scripts::FoodSO
+  _guid: bf02f37cd6ee7a342bef6020d0753d64
+  kitchenObjectSOList:
+  - {fileID: 11400000, guid: 4ab6c2c8c272305458d6f2f931267c52, type: 2}
+  - {fileID: 11400000, guid: 134f27a69dee68e40a38a521e11e5a29, type: 2}
+  Sprite: {fileID: 21300000, guid: 889ab891cd469ab4789acd1ed971833d, type: 3}
+  recipeName: Grilled Salmon Plate
+  price: 260
+  exp: 30
+  foodType: 3
+  unlockLevel: 5
+  unlockPrice: 90

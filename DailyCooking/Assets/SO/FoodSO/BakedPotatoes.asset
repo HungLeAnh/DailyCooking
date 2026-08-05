@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40ab37e8500c2e54c9efa9096bbadac0, type: 3}
+  m_Name: BakedPotatoes
+  m_EditorClassIdentifier: Scripts::FoodSO
+  _guid: 8b53ecf012a6d4d4d99b55dfb8bbd6f0
+  kitchenObjectSOList:
+  - {fileID: 11400000, guid: 134f27a69dee68e40a38a521e11e5a29, type: 2}
+  Sprite: {fileID: 21300000, guid: 889ab891cd469ab4789acd1ed971833d, type: 3}
+  recipeName: Baked Potatoes
+  price: 130
+  exp: 16
+  foodType: 3
+  unlockLevel: 2
+  unlockPrice: 35

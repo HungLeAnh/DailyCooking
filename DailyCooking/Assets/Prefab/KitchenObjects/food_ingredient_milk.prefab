@@ -1,0 +1,128 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &6032012229932659550
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1677312792478464117, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_Name
+      value: food_ingredient_milk
+      objectReference: {fileID: 0}
+    - target: {fileID: 1677312792478464117, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021223109513044687, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1677312792478464117, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6048627165611881252}
+    - targetCorrespondingSourceObject: {fileID: 1677312792478464117, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8778571884751218746}
+    - targetCorrespondingSourceObject: {fileID: 1677312792478464117, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1345354414218994196}
+  m_SourcePrefab: {fileID: 100100000, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+--- !u!1 &4967752083296422699 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1677312792478464117, guid: 12e3ff3ee2e4e8547bce58901974deea, type: 3}
+  m_PrefabInstance: {fileID: 6032012229932659550}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6048627165611881252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4967752083296422699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 2251053125
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &8778571884751218746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4967752083296422699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec14aebab31d7a429e0929eb5138ff7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::KitchenObject
+  ShowTopMostFoldoutHeaderGroup: 1
+  kitchenObjectSO: {fileID: 11400000, guid: d73c2bd56342c8f4c92bdbfc0597b268, type: 2}
+--- !u!114 &1345354414218994196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4967752083296422699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c1c84834a2d13840a33ecdbb5058b2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::FollowTransform

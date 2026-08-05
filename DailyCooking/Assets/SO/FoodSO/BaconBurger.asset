@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40ab37e8500c2e54c9efa9096bbadac0, type: 3}
+  m_Name: BaconBurger
+  m_EditorClassIdentifier: Scripts::FoodSO
+  _guid: b174b6c97cb34564297cfab1f4df6c98
+  kitchenObjectSOList:
+  - {fileID: 11400000, guid: 1c94b7f0c13c51d4ab047c26f734bbff, type: 2}
+  - {fileID: 11400000, guid: 45a0756a18761704b9e36a6a7d3f2d5f, type: 2}
+  - {fileID: 11400000, guid: 3b67d61f9eaad4c4fa5a1b61b1ba3cb3, type: 2}
+  - {fileID: 11400000, guid: 3749fc0a854478f4f9547855651188ea, type: 2}
+  - {fileID: 11400000, guid: 7c50a37b03b268d49af100bd6bfd4e0c, type: 2}
+  - {fileID: 11400000, guid: 8c2f67e06d0c9ed40b55258cfa2918ed, type: 2}
+  Sprite: {fileID: 21300000, guid: 889ab891cd469ab4789acd1ed971833d, type: 3}
+  recipeName: Bacon Burger
+  price: 300
+  exp: 34
+  foodType: 3
+  unlockLevel: 5
+  unlockPrice: 110

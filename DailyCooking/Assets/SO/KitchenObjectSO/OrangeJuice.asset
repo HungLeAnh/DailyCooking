@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aebea9f5a32204849a819aacd2e76397, type: 3}
+  m_Name: OrangeJuice
+  m_EditorClassIdentifier: Scripts::KitchenObjectSO
+  _guid: 4de7fa4a068bea24cb74ef1e4cf3ecbe
+  prefab: {fileID: 4633467319828268511, guid: cb2c70ec0d92fb247980c9f00fda1ed1, type: 3}
+  Sprite: {fileID: 21300000, guid: 889ab891cd469ab4789acd1ed971833d, type: 3}
+  objectName: Orange Juice
+  processSO: {fileID: 0}
