@@ -46,6 +46,28 @@ public class CameraController : MonoBehaviour
 
     }
 
+    private void OnDestroy()
+    {
+        if (GameInput.Instance != null)
+        {
+            GameInput.Instance.OnScrollPerformed -= HandleZoom;
+            GameInput.Instance.OnMousePanPerformed -= OnPanMovedDesktop;
+        }
+        if (GridBuildingSystem.Instance != null)
+        {
+            GridBuildingSystem.Instance.OnObjectSpawned -= Instance_OnObjectSpawned;
+            if (GridBuildingSystem.Instance.BuildingPlacementManager != null)
+            {
+                GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingStart -= OnBuildingStart;
+                GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingEnd -= OnBuildingEnd;
+            }
+        }
+        if (UIHUDManager.Instance != null)
+        {
+            UIHUDManager.Instance.OnRotateClicked -= OnRotateClicked;
+        }
+    }
+
     private void Instance_OnObjectSpawned()
     {
         //Debug.Log("CameraController: Object Spawned, subscribing to building placement events");

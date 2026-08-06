@@ -173,30 +173,18 @@ public class FlexibleGridLayout : LayoutGroup
         }
         else
         {
-            //if (rectChildren.Count == 0)
-            //{
-            //    SetLayoutInputForAxis(0, 0, 0, 1);
-            //    return;
-            //}
-            
-            //float totalPreferredHeight = 0;
-            //for (int r = 0; r < actualRows; r++)
-            //{
-            //    float maxCellHeightInRow = 0;
-            //    for (int c = 0; c < actualColumns; c++)
-            //    {
-            //        int index = r * actualColumns + c;
-            //        if (index < rectChildren.Count)
-            //        {
-            //            maxCellHeightInRow = Mathf.Max(maxCellHeightInRow, LayoutUtility.GetPreferredSize(rectChildren[index], 1));
-            //        }
-            //    }
-            //    totalPreferredHeight += maxCellHeightInRow;
-            //}
+            if (rectChildren.Count == 0)
+            {
+                SetLayoutInputForAxis(padding.top + padding.bottom, padding.top + padding.bottom, -1, 1);
+                return;
+            }
 
-            //totalPreferredHeight += spacing.y * (actualRows - 1);
-            //totalPreferredHeight += padding.top + padding.bottom;
-            //SetLayoutInputForAxis(totalPreferredHeight, totalPreferredHeight, -1, 1);
+            int totalRows = rows > 0 ? rows : 1;
+            float totalPreferredHeight = (cellSize.y * totalRows)
+                + (spacing.y * (totalRows - 1))
+                + padding.top + padding.bottom;
+
+            SetLayoutInputForAxis(totalPreferredHeight, totalPreferredHeight, -1, 1);
         }
     }
 

@@ -16,6 +16,15 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
         kitchenObjectSONetworkList.OnListChanged += KitchenObjectSONetworkList_OnListChanged;
     }
 
+    public override void OnNetworkDespawn()
+    {
+        if (GridBuildingSystem.Instance != null)
+        {
+            GridBuildingSystem.Instance.OnObjectSpawned -= GridBuildingSystem_OnObjectSpawned;
+        }
+        kitchenObjectSONetworkList.OnListChanged -= KitchenObjectSONetworkList_OnListChanged;
+    }
+
     private void KitchenObjectSONetworkList_OnListChanged(NetworkListEvent<ContainerDataSerializable> changeEvent)
     {
 

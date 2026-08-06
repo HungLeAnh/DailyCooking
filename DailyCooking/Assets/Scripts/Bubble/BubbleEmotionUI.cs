@@ -14,6 +14,13 @@ public class BubbleEmotionUI: MonoBehaviour
         botCustomerController.OnClockTimerChanged += BotCustomerController_OnClockTimerChanged;
     }
 
+    private void OnDestroy()
+    {
+        if (botCustomerController == null)
+            return;
+        botCustomerController.OnEmotionChanged -= BotCustomerController_OnEmotionChanged;
+        botCustomerController.OnClockTimerChanged -= BotCustomerController_OnClockTimerChanged;
+    }
     private void BotCustomerController_OnClockTimerChanged(float fillAmount)
     {
         imageEmotionClock.fillAmount = fillAmount;

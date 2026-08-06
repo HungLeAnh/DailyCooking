@@ -30,16 +30,36 @@ public class PlacedObjectView : NetworkBehaviour
         }
         else
         {
-            GridBuildingSystem.Instance.OnObjectSpawned += () => OnSpawned();
+            GridBuildingSystem.Instance.OnObjectSpawned += GridBuildingSystem_OnObjectSpawned;
         }
     }
+
+    public override void OnNetworkDespawn()
+    {
+        if (GridBuildingSystem.Instance != null)
+        {
+            GridBuildingSystem.Instance.OnObjectSpawned -= GridBuildingSystem_OnObjectSpawned;
+        }
+        if (placedObjectTypeSOGuid != null)
+        {
+            placedObjectTypeSOGuid.OnValueChanged -= PlacedObjectTypeSOGuid_OnValueChanged;
+        }
+    }
+
+    private void GridBuildingSystem_OnObjectSpawned()
+    {
+        OnSpawned();
+    }
+
+    private void PlacedObjectTypeSOGuid_OnValueChanged(FixedString64Bytes previousValue, FixedString64Bytes newValue)
+    {
+        //Debug.Log("PlacedObjectView: placedObjectTypeSOGuid changed: " + newValue);
+        placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(newValue.ToString());
+    }
+
     private void OnSpawned()
     {
-        placedObjectTypeSOGuid.OnValueChanged += (FixedString64Bytes previousValue, FixedString64Bytes newValue) =>
-        {
-            //Debug.Log("PlacedObjectView: placedObjectTypeSOGuid changed: " + newValue);
-            placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(newValue.ToString());
-        };
+        placedObjectTypeSOGuid.OnValueChanged += PlacedObjectTypeSOGuid_OnValueChanged;
         this.placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(placedObjectTypeSOGuid.Value.ToString());
 
         if (!isPreview.Value)

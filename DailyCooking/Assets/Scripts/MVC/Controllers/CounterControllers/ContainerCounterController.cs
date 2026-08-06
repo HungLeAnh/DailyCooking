@@ -18,6 +18,15 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
         NetworkContainerData_OnValueChanged(default(ContainerDataSerializable), networkContainerData.Value);
     }
 
+    public override void OnNetworkDespawn()
+    {
+        if (GridBuildingSystem.Instance != null)
+        {
+            GridBuildingSystem.Instance.OnObjectSpawned -= GridBuildingSystem_OnObjectSpawned;
+        }
+        networkContainerData.OnValueChanged -= NetworkContainerData_OnValueChanged;
+    }
+
     private void NetworkContainerData_OnValueChanged(ContainerDataSerializable previousValue, ContainerDataSerializable newValue)
     {
         if (newValue.FillAmount > 0f && !string.IsNullOrEmpty(newValue.KitchenObjectSOGuid.ToString()))

@@ -20,6 +20,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
     private bool stopMoving = false;
     private Quaternion targetQuaternion;
     private Vector3 targetPosition;
+    private Vector3 pendingSpawnPosition;
 
     public bool IsDragging { get => isDragging; set => isDragging = value; }
     public bool StopMoving { get => stopMoving; set => stopMoving = value; }
@@ -39,6 +40,27 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
 
         }
 
+    }
+
+    private void OnDestroy()
+    {
+        if (GameInput.Instance != null)
+        {
+            GameInput.Instance.OnMouseClickPerformed -= OnPanStarted;
+            GameInput.Instance.OnMouseClickCanceled -= OnPanCanceled;
+        }
+        if (GridBuildingSystem.Instance != null)
+        {
+            GridBuildingSystem.Instance.OnObjectSpawned -= Instance_OnObjectSpawned;
+            if (GridBuildingSystem.Instance.BuildingPlacementManager != null)
+            {
+                GridBuildingSystem.Instance.BuildingPlacementManager.OnSelectedChanged -= Instance_OnSelectedChanged;
+            }
+        }
+        if (KitchenGameManager.Instance != null)
+        {
+            KitchenGameManager.Instance.OnSpawnRequestCompleted -= OnSpawnRequestCompletedHandler;
+        }
     }
 
     private void Instance_OnObjectSpawned()
@@ -131,22 +153,10 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
 
         if (placedObjectTypeSO != null)
         {
-            KitchenGameManager.Instance.OnSpawnRequestCompleted = (spawnedObject) => {
-                //Debug.Log("Spawned Object: " + spawnedObject.name);
-                PlacedObjectView placedObjectView = spawnedObject.GetComponent<PlacedObjectView>();
+            pendingSpawnPosition = position;
+            KitchenGameManager.Instance.OnSpawnRequestCompleted -= OnSpawnRequestCompletedHandler;
+            KitchenGameManager.Instance.OnSpawnRequestCompleted += OnSpawnRequestCompletedHandler;
 
-                visual = placedObjectView.transform;
-                //visual.parent = visualContainer;
-                //visual.localPosition = Vector3.zero;
-                //visual.localEulerAngles = Vector3.zero;
-                SetLayerRecursive(visual.gameObject, LayerMask.NameToLayer("BuildingGhost"));
-                ShowCanvas(true);
-
-                visualContainer.position = position;
-                visual.position = new Vector3(position.x, 4f, position.z);
-  
-                KitchenGameManager.Instance.OnSpawnRequestCompleted = null;
-            };
             position.y = 1f;
             Debug.Log("Creating Placed Object at: " + position);
             PlacedObjectFactory.Create(position, Vector2Int.zero, Dir.Down,
@@ -157,6 +167,20 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
         {
             ShowCanvas(false);
         }
+    }
+
+    private void OnSpawnRequestCompletedHandler(NetworkObject spawnedObject)
+    {
+        KitchenGameManager.Instance.OnSpawnRequestCompleted -= OnSpawnRequestCompletedHandler;
+        //Debug.Log("Spawned Object: " + spawnedObject.name);
+        PlacedObjectView placedObjectView = spawnedObject.GetComponent<PlacedObjectView>();
+
+        visual = placedObjectView.transform;
+        SetLayerRecursive(visual.gameObject, LayerMask.NameToLayer("BuildingGhost"));
+        ShowCanvas(true);
+
+        visualContainer.position = pendingSpawnPosition;
+        visual.position = new Vector3(pendingSpawnPosition.x, 4f, pendingSpawnPosition.z);
     }
 
 

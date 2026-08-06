@@ -24,9 +24,13 @@ public class UIPlayerResources : MonoBehaviour
         }
         else
         {
-            MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => Initialize();
+            MultiplayerManager.Instance.OnDataSyncToNewClient += MultiplayerManager_OnDataSyncToNewClient;
         }
         
+    }
+    private void MultiplayerManager_OnDataSyncToNewClient(object sender, EventArgs e)
+    {
+        Initialize();
     }
     private void Initialize()
     {
@@ -35,6 +39,9 @@ public class UIPlayerResources : MonoBehaviour
             Debug.LogError("GameData is null in UIPlayerResources");
             return;
         }
+        GameManager.Instance.GameData.RestaurantData.OnResourceChange -= OnResourceChange;
+        GameManager.Instance.GameData.RestaurantData.OnLevelChange -= OnLevelChange;
+        GameManager.Instance.GameData.RestaurantData.OnExpChange -= OnExpChange;
         GameManager.Instance.GameData.RestaurantData.OnResourceChange += OnResourceChange;
         GameManager.Instance.GameData.RestaurantData.OnLevelChange += OnLevelChange;
         GameManager.Instance.GameData.RestaurantData.OnExpChange += OnExpChange;
@@ -53,6 +60,10 @@ public class UIPlayerResources : MonoBehaviour
     }
     private void OnDestroy()
     {
+        if (MultiplayerManager.Instance != null)
+        {
+            MultiplayerManager.Instance.OnDataSyncToNewClient -= MultiplayerManager_OnDataSyncToNewClient;
+        }
         if(GameManager.Instance == null || GameManager.Instance.GameData == null)
             return;
         GameManager.Instance.GameData.RestaurantData.OnResourceChange -= OnResourceChange;
