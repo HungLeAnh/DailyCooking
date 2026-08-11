@@ -152,7 +152,11 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         KitchenObjectSO kitchenObjectSO = kitchenObjectSODic[kitchenObjectSOGuid];
 
         networkObjectReference.TryGet(out NetworkObject kitchenObjectParentNetworkObject);
-        IKitchenObjectParent kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponent<IKitchenObjectParent>();
+        IKitchenObjectParent kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponentInChildren<CookingTool>();
+        if (kitchenObjectParent == null)
+        {
+            kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponent<IKitchenObjectParent>();
+        }
 
         if (kitchenObjectParent.HasKitchenObject())
         {
