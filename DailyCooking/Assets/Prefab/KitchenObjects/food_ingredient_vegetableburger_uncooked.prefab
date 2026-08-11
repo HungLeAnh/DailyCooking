@@ -48,6 +48,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: a2cc3805f85a9694f8d88ad39ed1573a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: c3f129db3897b1444a2284b61ee6b4d6, type: 2}
     - target: {fileID: 919132149155446097, guid: a2cc3805f85a9694f8d88ad39ed1573a, type: 3}
       propertyPath: m_Name
       value: food_ingredient_vegetableburger_uncooked
@@ -65,6 +69,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a2cc3805f85a9694f8d88ad39ed1573a, type: 3}
       insertIndex: -1
       addedObject: {fileID: -7051320413718408724}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a2cc3805f85a9694f8d88ad39ed1573a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7155527361350150739}
   m_SourcePrefab: {fileID: 100100000, guid: a2cc3805f85a9694f8d88ad39ed1573a, type: 3}
 --- !u!1 &3279956123706476271 stripped
 GameObject:
@@ -122,3 +129,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1c84834a2d13840a33ecdbb5058b2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Scripts::FollowTransform
+--- !u!114 &7155527361350150739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3279956123706476271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28038cab2089dbd419262cf6c170edf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::CookedFoodController
+  cook: 0
+  gameplayDriven: 1
+  autoAnimate: 0
+  animateSpeed: 0.4

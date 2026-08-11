@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3164777339794659301, guid: 6178ee784fb91a3448aceefef5516414, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: f864b3641ff687441a838e2a106c9468, type: 2}
     - target: {fileID: 3525034593206220336, guid: 6178ee784fb91a3448aceefef5516414, type: 3}
       propertyPath: m_Name
       value: food_ingredient_baconraw
@@ -69,6 +73,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3525034593206220336, guid: 6178ee784fb91a3448aceefef5516414, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4077209916459483381}
+    - targetCorrespondingSourceObject: {fileID: 3525034593206220336, guid: 6178ee784fb91a3448aceefef5516414, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1781337889050895428}
   m_SourcePrefab: {fileID: 100100000, guid: 6178ee784fb91a3448aceefef5516414, type: 3}
 --- !u!1 &1547571913051882246 stripped
 GameObject:
@@ -126,3 +133,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1c84834a2d13840a33ecdbb5058b2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Scripts::FollowTransform
+--- !u!114 &1781337889050895428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1547571913051882246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28038cab2089dbd419262cf6c170edf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::CookedFoodController
+  cook: 1
+  gameplayDriven: 1
+  autoAnimate: 0
+  animateSpeed: 0.4
