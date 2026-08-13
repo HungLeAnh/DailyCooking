@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.AI;
 using Unity.Netcode;
 using Object = UnityEngine.Object;
 
@@ -111,6 +112,12 @@ public static class DailyCookingContentBuilder
         var so = new SerializedObject(obj);
         var list = so.FindProperty("List");
         if (list == null) { Log("  could not find 'List' property on network prefabs asset"); return; }
+        for (int i = list.arraySize - 1; i >= 0; i--)
+        {
+            var elem = list.GetArrayElementAtIndex(i);
+            var p = elem.FindPropertyRelative("Prefab");
+            if (p == null || p.objectReferenceValue == null) list.DeleteArrayElementAtIndex(i);
+        }
         bool present = false;
         for (int i = 0; i < list.arraySize; i++)
         {
@@ -364,76 +371,164 @@ public static class DailyCookingContentBuilder
         else so.Dispose();
     }
 
-    private static void CreateCookingToolCounter(System.Type toolType, string toolChildName, string counterPrefabName, string placedSoName, string displayName)
+    private static void CreateCookingToolCounter(CookingToolConfigSO config, string toolChildName, string counterPrefabName, string placedSoName, string displayName, string visualModelPath, float visualScale = 1f, string toolTemplatePath = "Assets/Prefab/CookingTool/PanCookingTool.prefab")
     {
         string counterPath = Path.Combine("Assets/Prefab/Counters", counterPrefabName + ".prefab").Replace('\\', '/');
         EnsureDir(counterPath);
+        string soPath = Path.Combine("Assets/SO/BuildingSO/Counters", placedSoName + ".asset").Replace('\\', '/');
+        PlacedObjectTypeSO placedSO = AssetDatabase.LoadAssetAtPath<PlacedObjectTypeSO>(soPath);
         GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(counterPath);
-        if (existing != null) { Log("  tool prefab exists, re-wiring: " + counterPrefabName); return; }
-        GameObject template = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/Counters/StovePanCounter.prefab");
-        if (template == null) { Log("  ERROR: StovePanCounter template null"); return; }
-        GameObject clone = (GameObject)Object.Instantiate(template);
+        if (existing != null)
+        {
+            bool upToDate = false;
+            if (placedSO != null && placedSO.cookingToolConfigSO == config)
+            {
+                GameObject probe = (GameObject)PrefabUtility.InstantiatePrefab(existing);
+                if (probe != null)
+                {
+                    var tool = probe.GetComponentInChildren<CookingTool>(true);
+                    if (tool != null)
+                    {
+                        var tso = new SerializedObject(tool);
+                        var p = tso.FindProperty("cookingToolConfig");
+                        upToDate = p != null && p.objectReferenceValue == config;
+                        tso.Dispose();
+                    }
+                    Object.DestroyImmediate(probe);
+                }
+            }
+            if (upToDate)
+            {
+                Log("  tool prefab up to date, skipping: " + counterPrefabName);
+                return;
+            }
+            Log("  rebuilding (stale tool script or config): " + counterPrefabName);
+            AssetDatabase.DeleteAsset(counterPath);
+        }
+        GameObject baseCounter = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/Counters/_BaseCounter.prefab");
+        if (baseCounter == null) { Log("  ERROR: _BaseCounter template null"); return; }
+        GameObject clone = (GameObject)PrefabUtility.InstantiatePrefab(baseCounter);
         clone.name = counterPrefabName;
 
-        Transform toolChild = FindChildByName(clone, "PanCookingTool");
-        if (toolChild == null) { Log("  ERROR: PanCookingTool child not found in template"); Object.DestroyImmediate(clone); return; }
-        toolChild.name = toolChildName;
+        // Base tweaks (mirror StovePanCounter's overrides on _BaseCounter)
+        var boxCollider = clone.GetComponent<BoxCollider>();
+        if (boxCollider != null) { boxCollider.size = new Vector3(2f, 1f, 2f); boxCollider.center = new Vector3(1f, 0.5f, 1f); }
+        var navObstacle = clone.GetComponent<NavMeshObstacle>();
+        if (navObstacle != null) navObstacle.center = new Vector3(1f, 0.5f, 1f);
+        Transform counterTopPos = FindChildByName(clone, "CounterTopPos");
+        if (counterTopPos != null) counterTopPos.localPosition = new Vector3(1f, 1.3f, 1f);
+        Transform selected = FindChildByName(clone, "Selected");
+        if (selected != null) Object.DestroyImmediate(selected.gameObject);
 
-        var oldTool = toolChild.GetComponent<PanCookingTool>();
-        Transform savedPlacePoint = null;
-        Component savedProgressBar = null, savedBurnWarning = null;
-        float savedBurnShow = 0.5f;
-        if (oldTool != null)
+        Transform counterVisual = FindChildByName(clone, "CounterVisual");
+        if (counterVisual == null) { Log("  ERROR: CounterVisual child not found"); Object.DestroyImmediate(clone); return; }
+
+        GameObject visualPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(visualModelPath);
+        if (visualPrefab == null) { Log("  ERROR: visual model null: " + visualModelPath); Object.DestroyImmediate(clone); return; }
+        GameObject visualInstance = (GameObject)PrefabUtility.InstantiatePrefab(visualPrefab, counterVisual);
+        visualInstance.name = visualPrefab.name;
+        if (visualScale != 1f)
+            visualInstance.transform.localScale = Vector3.one * visualScale;
+        MeshRenderer visualRenderer = visualInstance.GetComponentInChildren<MeshRenderer>();
+        float visualTop = 1.0f;
+        if (visualRenderer != null) visualTop = visualRenderer.bounds.center.y + visualRenderer.bounds.size.y * 0.5f;
+
+        GameObject toolPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(toolTemplatePath);
+        if (toolPrefab == null) { Log("  ERROR: tool template prefab null: " + toolTemplatePath); Object.DestroyImmediate(clone); return; }
+        GameObject toolInstance = (GameObject)PrefabUtility.InstantiatePrefab(toolPrefab, counterVisual);
+        toolInstance.name = toolChildName;
+        GameObjectUtility.RemoveMonoBehavioursWithMissingScript(toolInstance);
+        Transform placePointChild = toolInstance.transform.Find("PlacePoint");
+        Transform panVisualChild = FindChildByName(toolInstance, "PanCookingTool") ?? FindChildByName(toolInstance, "PotCookingTool2") ?? FindChildByName(toolInstance, "PotCookingTool");
+        Transform progressBarChild = toolInstance.transform.Find("ProgressBarUI");
+        Transform burnWarnChild = toolInstance.transform.Find("BurningWarnUI");
+        Transform combineHudChild = FindChildByName(toolInstance, "CombineHUD");
+        float panCenterY = visualTop - 0.04f;
+        if (placePointChild != null) placePointChild.localPosition = new Vector3(0f, panCenterY + 0.03f, 0f);
+        if (panVisualChild != null) panVisualChild.localPosition = new Vector3(0f, panCenterY, 0f);
+        if (progressBarChild != null) progressBarChild.localPosition = new Vector3(0f, panCenterY + 1.03f, 0f);
+        if (burnWarnChild != null) burnWarnChild.localPosition = new Vector3(0f, panCenterY + 1.52f, 0f);
+        if (counterTopPos != null)
+            counterTopPos.localPosition = new Vector3(counterTopPos.localPosition.x, visualTop + 0.13f, counterTopPos.localPosition.z);
+        foreach (var anim in toolInstance.GetComponentsInChildren<Animator>(true))
+            anim.runtimeAnimatorController = null;
+
+        var comps = toolInstance.GetComponentsInChildren<Component>(true);
+        foreach (var c in comps)
         {
-            var oso = new SerializedObject(oldTool);
-            var p = oso.FindProperty("placePoint"); if (p != null) savedPlacePoint = p.objectReferenceValue as Transform;
-            var pb = oso.FindProperty("progressBarUI"); if (pb != null) savedProgressBar = pb.objectReferenceValue as Component;
-            var bw = oso.FindProperty("burnWarningUI"); if (bw != null) savedBurnWarning = bw.objectReferenceValue as Component;
-            var bsp = oso.FindProperty("burnShowProgressAmount"); if (bsp != null) savedBurnShow = bsp.floatValue;
-            oso.Dispose();
-            Object.DestroyImmediate(oldTool);
+            if (c == null) continue;
+            if (c is CookingTool oldTool) Object.DestroyImmediate(oldTool);
         }
 
-        var newTool = (CookingTool)toolChild.gameObject.AddComponent(toolType);
+        Transform savedPlacePoint = placePointChild;
+        Component savedProgressBar = progressBarChild != null ? progressBarChild.GetComponent<ProgressBarUI>() as Component : null;
+        Component savedBurnWarning = burnWarnChild != null ? burnWarnChild.GetComponent<BurnWarningUI>() as Component : null;
+        Component savedCombineDetail = combineHudChild != null ? combineHudChild.GetComponent<CombineDetailUI>() as Component : null;
+        float savedBurnShow = 0.5f;
+
+        var newTool = toolInstance.AddComponent<CookingTool>();
         var nso = new SerializedObject(newTool);
         var pp = nso.FindProperty("placePoint"); if (pp != null) pp.objectReferenceValue = savedPlacePoint;
         var npb = nso.FindProperty("progressBarUI"); if (npb != null) npb.objectReferenceValue = savedProgressBar;
         var nbw = nso.FindProperty("burnWarningUI"); if (nbw != null) nbw.objectReferenceValue = savedBurnWarning;
         var nbsp = nso.FindProperty("burnShowProgressAmount"); if (nbsp != null) nbsp.floatValue = savedBurnShow;
+        var ncd = nso.FindProperty("combineDetailUI"); if (ncd != null) ncd.objectReferenceValue = savedCombineDetail;
+        var ncfg = nso.FindProperty("cookingToolConfig"); if (ncfg != null) ncfg.objectReferenceValue = config;
         nso.ApplyModifiedProperties();
         nso.Dispose();
 
-        var ctrl = clone.GetComponent<StoveCounterController>();
-        if (ctrl != null)
+        Material outline = AssetDatabase.LoadAssetAtPath<Material>("Assets/Shaders/OutLineMaterial.mat");
+        var panRenderer = toolInstance.GetComponentInChildren<MeshRenderer>();
+        if (outline != null)
         {
-            var cso = new SerializedObject(ctrl);
-            var ct = cso.FindProperty("_cookingTool");
-            if (ct != null) ct.objectReferenceValue = newTool;
-            cso.ApplyModifiedProperties();
-            cso.Dispose();
+            if (panRenderer != null) panRenderer.sharedMaterials = new[] { panRenderer.sharedMaterial, outline };
+            if (visualRenderer != null) visualRenderer.sharedMaterials = new[] { visualRenderer.sharedMaterial, outline };
         }
 
-        GameObject prefabAsset = PrefabUtility.SaveAsPrefabAsset(clone, counterPath);
+        var ctrl = clone.GetComponent<CookingToolCounterController>();
+        if (ctrl == null) ctrl = clone.AddComponent<CookingToolCounterController>();
+        var cso = new SerializedObject(ctrl);
+        var ct = cso.FindProperty("counterTopPoint"); if (ct != null) ct.objectReferenceValue = counterTopPos;
+        var cva = cso.FindProperty("visualGameObjectArray");
+        if (cva != null)
+        {
+            cva.arraySize = 2;
+            if (panRenderer != null) cva.GetArrayElementAtIndex(0).objectReferenceValue = panRenderer;
+            if (visualRenderer != null) cva.GetArrayElementAtIndex(1).objectReferenceValue = visualRenderer;
+        }
+        var ctool = cso.FindProperty("_cookingTool"); if (ctool != null) ctool.objectReferenceValue = newTool;
+        cso.ApplyModifiedProperties();
+        cso.Dispose();
+
+        GameObject prefabAsset = PrefabUtility.SaveAsPrefabAssetAndConnect(clone, counterPath, InteractionMode.AutomatedAction);
         Object.DestroyImmediate(clone);
         RegisterNetworkPrefab(prefabAsset);
 
         var tplSo = AssetDatabase.LoadAssetAtPath<PlacedObjectTypeSO>("Assets/SO/BuildingSO/Counters/StovePanCounter.asset");
         if (tplSo == null) { Log("  ERROR: StovePanCounter SO template null"); return; }
-        var copy = ScriptableObject.CreateInstance<PlacedObjectTypeSO>();
-        EditorUtility.CopySerialized(tplSo, copy);
-        string soPath = Path.Combine("Assets/SO/BuildingSO/Counters", placedSoName + ".asset").Replace('\\', '/');
         EnsureDir(soPath);
-        AssetDatabase.CreateAsset(copy, soPath);
+        PlacedObjectTypeSO copy = AssetDatabase.LoadAssetAtPath<PlacedObjectTypeSO>(soPath);
+        bool isNew = copy == null;
+        if (isNew)
+        {
+            copy = ScriptableObject.CreateInstance<PlacedObjectTypeSO>();
+            EditorUtility.CopySerialized(tplSo, copy);
+            AssetDatabase.CreateAsset(copy, soPath);
+        }
         var soso = new SerializedObject(copy);
         soso.FindProperty("nameString").stringValue = displayName;
         soso.FindProperty("prefab").objectReferenceValue = prefabAsset;
+        var ctso = soso.FindProperty("cookingToolConfigSO"); if (ctso != null) ctso.objectReferenceValue = config;
         var icon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Assets/Icons/Counters/StovePanCounter.png");
         soso.FindProperty("icon").objectReferenceValue = icon;
-        // unique id
-        var pdbObj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>("Assets/SO/PlacedObjectDatabase/PlacedObjectDatabase.asset");
-        var ids = GetExistingPlacedIds(new SerializedObject(pdbObj));
-        int max = 0; foreach (var id in ids) if (int.TryParse(id, out int v) && v > max) max = v;
-        soso.FindProperty("id").stringValue = (max + 1).ToString();
+        if (isNew)
+        {
+            // unique id
+            var pdbObj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>("Assets/SO/PlacedObjectDatabase/PlacedObjectDatabase.asset");
+            var ids = GetExistingPlacedIds(new SerializedObject(pdbObj));
+            int max = 0; foreach (var id in ids) if (int.TryParse(id, out int v) && v > max) max = v;
+            soso.FindProperty("id").stringValue = (max + 1).ToString();
+        }
         soso.ApplyModifiedProperties();
         EditorUtility.SetDirty(copy);
         AssetDatabase.ImportAsset(soPath, ImportAssetOptions.ForceUpdate);
@@ -447,15 +542,78 @@ public static class DailyCookingContentBuilder
         Phase4_CreateCookingTools();
     }
 
+    private static void CleanToolTemplates()
+    {
+        string[] templates =
+        {
+            "Assets/Prefab/CookingTool/PanCookingTool.prefab",
+            "Assets/Prefab/CookingTool/PotCookingTool.prefab",
+            "Assets/Prefab/CookingTool/_BaseCookingTool.prefab",
+        };
+        foreach (string path in templates)
+        {
+            GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (asset == null) { Log("  WARN template missing: " + path); continue; }
+            GameObject root = PrefabUtility.LoadPrefabContents(path);
+            int removed = GameObjectUtility.RemoveMonoBehavioursWithMissingScript(root);
+            if (removed > 0)
+            {
+                PrefabUtility.SaveAsPrefabAsset(root, path);
+                Log("  cleaned template (" + removed + " scripts): " + path);
+            }
+            else
+            {
+                Log("  template already clean: " + path);
+            }
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+        AssetDatabase.SaveAssets();
+    }
+
     public static void Phase4_CreateCookingTools()
     {
         Log("=== Phase 4: Creating Cooking Tools ===");
-        CreateCookingToolCounter(typeof(OvenCookingTool), "OvenCookingTool", "OvenCookingToolCounter", "OvenCounter", "Oven");
-        CreateCookingToolCounter(typeof(DeepFryCookingTool), "DeepFryCookingTool", "DeepFryerCounter", "DeepFryerCounter", "Deep Fryer");
-        CreateCookingToolCounter(typeof(BeverageCookingTool), "BeverageCookingTool", "BeverageMachineCounter", "BeverageCounter", "Beverage Machine");
+        CleanToolTemplates();
+        var ovenConfig = LoadOrCreateCookingToolConfig("Oven", CookingToolConfigSO.CookingToolType.Baking, "Assets/_Packages/KayKit_Restaurant/Mesh/oven.fbx");
+        CreateCookingToolCounter(ovenConfig, "OvenCookingTool", "OvenCookingToolCounter", "OvenCounter", "Oven", "Assets/_Packages/KayKit_Restaurant/Mesh/oven.fbx");
+        var deepFryConfig = LoadOrCreateCookingToolConfig("DeepFryer", CookingToolConfigSO.CookingToolType.DeepFry, "Assets/_Packages/KayKit_Restaurant/Mesh/pot_large.fbx");
+        CreateCookingToolCounter(deepFryConfig, "DeepFryCookingTool", "DeepFryerCounter", "DeepFryerCounter", "Deep Fryer", "Assets/_Packages/KayKit_Restaurant/Mesh/pot_large.fbx");
+        var beverageConfig = LoadOrCreateCookingToolConfig("Beverage", CookingToolConfigSO.CookingToolType.Beverage, "Assets/ithappy/Furniture_Cute/Meshes/Kitchen/Coffee_Machine_01.fbx", 4f);
+        CreateCookingToolCounter(beverageConfig, "BeverageCookingTool", "BeverageMachineCounter", "BeverageCounter", "Beverage Machine", "Assets/ithappy/Furniture_Cute/Meshes/Kitchen/Coffee_Machine_01.fbx", 4f);
+
+        var panConfig = LoadOrCreateCookingToolConfig("Pan", CookingToolConfigSO.CookingToolType.Frying, "Assets/_Packages/KayKit_Restaurant/Mesh/pan_A.fbx");
+        CreateCookingToolCounter(panConfig, "PanCookingTool", "StovePanCounter", "StovePanCounter", "Stove Pan Counter", "Assets/_Packages/KayKit_Restaurant/Mesh/stove_single.fbx", 1f, "Assets/Prefab/CookingTool/PanCookingTool.prefab");
+        var potConfig = LoadOrCreateCookingToolConfig("Pot", CookingToolConfigSO.CookingToolType.Combine, "Assets/_Packages/KayKit_Restaurant/Mesh/pot_large.fbx", 1f, true);
+        CreateCookingToolCounter(potConfig, "PotCookingTool", "StovePotCounter", "StovePotCounter", "Stove Pot Counter", "Assets/_Packages/KayKit_Restaurant/Mesh/stove_single.fbx", 1f, "Assets/Prefab/CookingTool/PotCookingTool.prefab");
+
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Log("=== Phase 4 complete ===");
+    }
+
+    private static CookingToolConfigSO LoadOrCreateCookingToolConfig(string name, CookingToolConfigSO.CookingToolType toolType, string visualModelPath, float visualScale = 1f, bool supportsOptionMenu = false)
+    {
+        string dir = "Assets/SO/CookingToolConfigSO";
+        EnsureDir(Path.Combine(dir, name + ".asset"));
+        string path = Path.Combine(dir, name + ".asset").Replace('\\', '/');
+        CookingToolConfigSO config = AssetDatabase.LoadAssetAtPath<CookingToolConfigSO>(path);
+        if (config == null)
+        {
+            config = ScriptableObject.CreateInstance<CookingToolConfigSO>();
+            config.name = name;
+            AssetDatabase.CreateAsset(config, path);
+        }
+        var so = new SerializedObject(config);
+        so.FindProperty("toolType").enumValueIndex = (int)toolType;
+        var op = so.FindProperty("supportsOptionMenu"); if (op != null) op.boolValue = supportsOptionMenu;
+        GameObject visual = AssetDatabase.LoadAssetAtPath<GameObject>(visualModelPath);
+        var vp = so.FindProperty("visualModel"); if (vp != null) vp.objectReferenceValue = visual;
+        var vs = so.FindProperty("visualScale"); if (vs != null) vs.floatValue = visualScale;
+        so.ApplyModifiedProperties();
+        so.Dispose();
+        EditorUtility.SetDirty(config);
+        Log("  cooking tool config ready: " + path);
+        return config;
     }
 
     private const string BAKING_DIR = "Assets/SO/BakingRecipeSO";

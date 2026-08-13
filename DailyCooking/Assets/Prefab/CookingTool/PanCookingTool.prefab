@@ -156,37 +156,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3835830830082720915, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3867961959400068751}
-    - targetCorrespondingSourceObject: {fileID: 3835830830082720915, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6983875412975341295}
   m_SourcePrefab: {fileID: 100100000, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
---- !u!114 &927980690929840512 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8408743451753940217, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
-  m_PrefabInstance: {fileID: 8669713075343259001}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e2e509b684f116b4e89120c61caa3c80, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1449230221004652872 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7804088542725583921, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
-  m_PrefabInstance: {fileID: 8669713075343259001}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 899c967393c23df489e435d06acb510f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &2272796693335353773 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7483745177535470804, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
-  m_PrefabInstance: {fileID: 8669713075343259001}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2327461308816248343 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6349459341066746734, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
@@ -222,26 +192,3 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &6983875412975341295
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5578440184501268970}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30b1028be114bde439f8f15bd3d9d09e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  placePoint: {fileID: 2272796693335353773}
-  progressBarUI: {fileID: 927980690929840512}
-  burnWarningUI: {fileID: 1449230221004652872}
-  burnShowProgressAmount: 0.5
-  fryingRecipeSOArray:
-  - {fileID: 11400000, guid: 03a4633e975251e4bbcc10c49aa23b19, type: 2}
-  - {fileID: 11400000, guid: 561cb208a595885409b71715b3d7984f, type: 2}
-  burningRecipeSOArray:
-  - {fileID: 11400000, guid: 76eee288774439d45ab2141f8a55fb0f, type: 2}
-  - {fileID: 11400000, guid: 8d59480adedce68459ef8fc4d0c3ca12, type: 2}

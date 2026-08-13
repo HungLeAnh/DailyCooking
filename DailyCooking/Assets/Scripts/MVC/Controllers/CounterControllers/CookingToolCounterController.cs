@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class StoveCounterController : BaseCounterController
+public class CookingToolCounterController : BaseCounterController, IHasOptionalSO
 {
     [SerializeField] private CookingTool _cookingTool;
 
@@ -58,5 +59,22 @@ public class StoveCounterController : BaseCounterController
     public bool IsDone()
     {
         return _cookingTool.IsDone();
+    }
+
+    public void SetOptionKitchenObjectSO(int index)
+    {
+        _cookingTool.SetOptionKitchenObjectSO(index);
+        if (_cookingTool.CookingTimeMax > 0f)
+            _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
+    }
+
+    public List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)
+    {
+        return _cookingTool.GetListKitchenObjectList(kitchenObjectSO);
+    }
+
+    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
+    {
+        throw new NotImplementedException();
     }
 }
