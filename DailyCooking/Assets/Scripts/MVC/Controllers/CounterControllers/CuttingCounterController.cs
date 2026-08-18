@@ -136,14 +136,7 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
 
     private CuttingRecipeSO GetCuttingRecipeSOWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
-        foreach (CuttingRecipeSO cuttingRecipeSO in CuttingRecipes)
-        {
-            if (cuttingRecipeSO.input == inputKitchenObjectSO)
-            {
-                return cuttingRecipeSO;
-            }
-        }
-        return null;
+        return KitchenGameManager.Instance?.RecipeDatabase?.GetCuttingRecipe(inputKitchenObjectSO);
     }
 
     public override void InteractAlternateEvent(PlayerStateMachine playerStateMachine)

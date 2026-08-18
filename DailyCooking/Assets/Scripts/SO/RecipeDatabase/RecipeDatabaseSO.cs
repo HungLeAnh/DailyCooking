@@ -16,9 +16,10 @@ public class RecipeDatabaseSO : ScriptableObject
     private Dictionary<KitchenObjectSO, CuttingRecipeSO> _cuttingCache;
     private Dictionary<KitchenObjectSO, FryingRecipeSO> _fryingCache;
     private Dictionary<KitchenObjectSO, BurningRecipeSO> _burningCache;
-    private Dictionary<KitchenObjectSO, CombineRecipeSO> _combineCache;
+    private Dictionary<KitchenObjectSO, List<CombineRecipeSO>> _combineCache;
     private Dictionary<KitchenObjectSO, BakingRecipeSO> _bakingCache;
     private Dictionary<KitchenObjectSO, DeepFryRecipeSO> _deepFryCache;
+    private Dictionary<KitchenObjectSO, List<DrinkRecipeSO>> _drinkIngredientCache;
     private List<DrinkRecipeSO> _drinkCache;
 
     public void Initialize()
@@ -41,12 +42,17 @@ public class RecipeDatabaseSO : ScriptableObject
             _burningCache[recipe.input] = recipe;
         }
 
-        _combineCache = new Dictionary<KitchenObjectSO, CombineRecipeSO>();
+        _combineCache = new Dictionary<KitchenObjectSO, List<CombineRecipeSO>>();
         foreach (var recipe in combineRecipes)
         {
             foreach (var input in recipe.input)
             {
-                _combineCache[input] = recipe;
+                if (!_combineCache.TryGetValue(input, out var list))
+                {
+                    list = new List<CombineRecipeSO>();
+                    _combineCache[input] = list;
+                }
+                list.Add(recipe);
             }
         }
 
@@ -62,7 +68,20 @@ public class RecipeDatabaseSO : ScriptableObject
             _deepFryCache[recipe.input] = recipe;
         }
 
+        _drinkIngredientCache = new Dictionary<KitchenObjectSO, List<DrinkRecipeSO>>();
         _drinkCache = new List<DrinkRecipeSO>(drinkRecipes);
+        foreach (var recipe in drinkRecipes)
+        {
+            foreach (var input in recipe.input)
+            {
+                if (!_drinkIngredientCache.TryGetValue(input, out var list))
+                {
+                    list = new List<DrinkRecipeSO>();
+                    _drinkIngredientCache[input] = list;
+                }
+                list.Add(recipe);
+            }
+        }
     }
 
     public CuttingRecipeSO[] GetCuttingRecipes() => cuttingRecipes?.ToArray();
@@ -97,8 +116,17 @@ public class RecipeDatabaseSO : ScriptableObject
     public CombineRecipeSO GetCombineRecipe(KitchenObjectSO input)
     {
         if (_combineCache == null) Initialize();
-        _combineCache.TryGetValue(input, out var recipe);
-        return recipe;
+        if (_combineCache.TryGetValue(input, out var list) && list.Count > 0)
+            return list[0];
+        return null;
+    }
+
+    public List<CombineRecipeSO> GetCombineRecipesForInput(KitchenObjectSO input)
+    {
+        if (_combineCache == null) Initialize();
+        if (input == null || !_combineCache.TryGetValue(input, out var list))
+            return null;
+        return list;
     }
 
     public BakingRecipeSO GetBakingRecipe(KitchenObjectSO input)
@@ -113,6 +141,14 @@ public class RecipeDatabaseSO : ScriptableObject
         if (_deepFryCache == null) Initialize();
         _deepFryCache.TryGetValue(input, out var recipe);
         return recipe;
+    }
+
+    public DrinkRecipeSO GetDrinkRecipeByIngredient(KitchenObjectSO input)
+    {
+        if (_drinkIngredientCache == null) Initialize();
+        if (_drinkIngredientCache.TryGetValue(input, out var list) && list.Count > 0)
+            return list[0];
+        return null;
     }
 
     public DrinkRecipeSO GetDrinkRecipe(List<KitchenObjectSO> inputs)

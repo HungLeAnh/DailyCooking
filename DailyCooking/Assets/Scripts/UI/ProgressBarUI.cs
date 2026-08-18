@@ -5,22 +5,29 @@ public class ProgressBarUI : MonoBehaviour
 {
     [SerializeField] private Image _barImage;
 
+    private float _lastFillAmount;
+    private bool _isVisible;
+
     private void Start()
-    { 
+    {
         _barImage.fillAmount = 0f;
         Hide();
     }
 
     public void OnProgressChanged(float progressNormalized)
     {
-        _barImage.fillAmount = progressNormalized;
-        if (progressNormalized <= 0f || progressNormalized >= 1f)
+        if (!Mathf.Approximately(_lastFillAmount, progressNormalized))
         {
-            Hide();
+            _lastFillAmount = progressNormalized;
+            _barImage.fillAmount = progressNormalized;
         }
-        else
+
+        bool show = progressNormalized > 0f && progressNormalized < 1f;
+        if (show != _isVisible)
         {
-            Show();
+            _isVisible = show;
+            if (show) Show();
+            else Hide();
         }
     }
     private void Show()
@@ -29,6 +36,7 @@ public class ProgressBarUI : MonoBehaviour
     }
     public void Hide()
     {
+        _isVisible = false;
         gameObject.SetActive(false);
     }
 }

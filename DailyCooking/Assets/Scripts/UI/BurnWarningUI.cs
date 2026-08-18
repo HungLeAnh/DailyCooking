@@ -2,6 +2,8 @@
 
 public class BurnWarningUI : MonoBehaviour
 {
+    private bool _isVisible;
+
     private void Start()
     {
         Hide();
@@ -13,23 +15,21 @@ public class BurnWarningUI : MonoBehaviour
 
         bool show = sender.IsDone() && progressNormalized >= burnShowProgressAmount;
 
-        if (show)
+        if (show != _isVisible)
         {
-            Show();
+            _isVisible = show;
+            if (show) Show();
+            else Hide();
         }
-        else
-        {
-            Hide();
-        }
-
     }
     public void Show()
     {
+        _isVisible = true;
         gameObject.SetActive(true);
     }
     public void Hide()
     {
+        _isVisible = false;
         gameObject.SetActive(false);
     }
-
 }
