@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e7747bdf78fa6141a2f81d16ff91e5f, type: 3}
-  m_Name: OvenCounter
+  m_Name: StorageBox
   m_EditorClassIdentifier: Scripts::PlacedObjectTypeSO
-  _guid: 12325ece4f3077e4bae3bf63c977afe9
-  id: 21
-  nameString: Oven
-  prefab: {fileID: 2745458957846179637, guid: 6e3cfef6d01a2a04ea7f654089a05474, type: 3}
+  _guid: 99291f922b933c84cb29532511336925
+  id: 900
+  nameString: Storage Box
+  prefab: {fileID: 5920327736269686943, guid: e600802fd222f5147858376e70ea743f, type: 3}
   visual: {fileID: 0}
-  icon: {fileID: 21300000, guid: f3fb5acb322e39b4bbcf266e25806467, type: 3}
+  icon: {fileID: 0}
   width: 1
   height: 1
   itemType:
     _typeColor: {r: 0, g: 0, b: 0, a: 0}
     _tabType: 0
-  cookingToolConfigSO: {fileID: 11400000, guid: b1b4be3f3737e6c409cdcbc3ca03d606, type: 2}
+  cookingToolConfigSO: {fileID: 0}
   isTool: 0

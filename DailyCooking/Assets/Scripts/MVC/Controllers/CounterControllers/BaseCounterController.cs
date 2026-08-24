@@ -22,6 +22,12 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
 
     public Action OnDestroySelf { get =>onDestroySelf; set => onDestroySelf += value; }
 
+    protected virtual void Awake()
+    {
+        if (visualGameObjectArray == null || visualGameObjectArray.Length == 0)
+            visualGameObjectArray = GetComponentsInChildren<MeshRenderer>(true);
+    }
+
     protected virtual void Start()
     {
         //KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
@@ -100,19 +106,35 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
 
     public void Show()
     {
+        if (visualGameObjectArray == null)
+            return;
+
         foreach (var visualGameObject in visualGameObjectArray)
         {
-            int index = visualGameObject.materials.Length - 1;
-            visualGameObject.materials[index].SetFloat("_IsActive", 1f);
+            if (visualGameObject == null || visualGameObject.sharedMaterials == null || visualGameObject.sharedMaterials.Length == 0)
+                continue;
+
+            Material[] mats = visualGameObject.materials;
+            int index = mats.Length - 1;
+            if (mats[index] != null)
+                mats[index].SetFloat("_IsActive", 1f);
         }
     }
 
     public void Hide()
     {
+        if (visualGameObjectArray == null)
+            return;
+
         foreach (var visualGameObject in visualGameObjectArray)
         {
-            int index = visualGameObject.materials.Length - 1;
-            visualGameObject.materials[index].SetFloat("_IsActive", 0f);
+            if (visualGameObject == null || visualGameObject.sharedMaterials == null || visualGameObject.sharedMaterials.Length == 0)
+                continue;
+
+            Material[] mats = visualGameObject.materials;
+            int index = mats.Length - 1;
+            if (mats[index] != null)
+                mats[index].SetFloat("_IsActive", 0f);
         }
     }
 

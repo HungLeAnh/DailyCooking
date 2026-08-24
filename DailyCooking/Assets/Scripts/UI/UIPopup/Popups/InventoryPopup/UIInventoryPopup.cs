@@ -10,7 +10,8 @@ public enum InventoryTabType
 {
     Counter,
     Table,
-    Wall
+    Wall,
+    Tool
 }
 
 public class UIInventoryPopup : UIPopup
@@ -182,6 +183,13 @@ public class UIInventoryPopup : UIPopup
 
     public void PlacingItem(PlacedObjectTypeSO itemToInspect)
     {
+        if (itemToInspect != null && itemToInspect.isTool)
+        {
+            KitchenGameManager.Instance.RequestSpawnToolItem(itemToInspect);
+            HidePopup();
+            return;
+        }
+
         if (listItem.Exists(o => o.PlacedObjectTypeSO == itemToInspect))
         {
             int itemIndex = listItem.FindIndex(o => o.PlacedObjectTypeSO == itemToInspect);

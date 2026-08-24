@@ -10,15 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dfbc97da426fa5b438fc0bd8cf7b5fdd, type: 3}
-  m_Name: Pot
+  m_Name: Juice
   m_EditorClassIdentifier: Scripts::CookingToolConfigSO
-  toolType: 4
-  toolTypes:
-  - 2
-  - 4
-  visualPrefab: {fileID: 5957239416477429506, guid: 8ecc7c84b59518448814e2dff12cb8da, type: 3}
-  supportsOptionMenu: 1
-  visualModel: {fileID: 919132149155446097, guid: 69f62e99177466f42934d4823d0320bf, type: 3}
+  toolType: 3
+  visualPrefab: {fileID: 1116373453933933089, guid: f8455ed745506544f8ebaba9d1f4e49b, type: 3}
   visualScale: 1
-  panTopOffsetY: -0.04
-  counterTopOffsetY: 0.13
+  supportsOptionMenu: 0

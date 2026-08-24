@@ -70,11 +70,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
   m_PrefabInstance: {fileID: 822780222897013527}
   m_PrefabAsset: {fileID: 0}
---- !u!23 &2065621576494931859 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: cb611b964c5c3b74d855b5131c03fad2, type: 3}
-  m_PrefabInstance: {fileID: 822780222897013527}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3864696244795748536
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -192,7 +187,7 @@ PrefabInstance:
       addedObject: {fileID: -259965126951428719}
     - targetCorrespondingSourceObject: {fileID: 1422007882026835853, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3214397304085762483}
+      addedObject: {fileID: 2405010729517222987}
   m_SourcePrefab: {fileID: 100100000, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}
 --- !u!1 &2745458957846179637 stripped
 GameObject:
@@ -224,7 +219,7 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &3214397304085762483
+--- !u!114 &2405010729517222987
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -233,13 +228,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 2745458957846179637}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1883d17541ccdd94da9b422cc94b5a80, type: 3}
+  m_Script: {fileID: 11500000, guid: dab21b58a88eee34aadf8efb8bb1df78, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Scripts::CookingToolCounterController
   ShowTopMostFoldoutHeaderGroup: 1
   counterTopPoint: {fileID: 8825809207230479060}
-  visualGameObjectArray:
-  - {fileID: 2065621576494931859}
+  visualGameObjectArray: []
+  acceptedToolTypes: 0100000003000000
 --- !u!4 &7660886705994528244 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6913807303263569228, guid: c80eb2c166190364c92bd5719bea2e24, type: 3}

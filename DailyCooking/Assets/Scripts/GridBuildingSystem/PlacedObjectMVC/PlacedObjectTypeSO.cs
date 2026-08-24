@@ -33,6 +33,10 @@ public class PlacedObjectTypeSO : SerializableScriptableObject
     [Tooltip("Optional. When set, this appliance hosts the single CookingTool with the chosen recipe lists.")]
     public CookingToolConfigSO cookingToolConfigSO;
 
+    [Header("Tool Item")]
+    [Tooltip("True when this PlacedObjectTypeSO represents a carryable cooking tool (sold in shop, stored, placed on counters).")]
+    public bool isTool;
+
 
     public int GetRotationAngle(Dir dir) {
         switch (dir) {

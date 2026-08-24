@@ -146,6 +146,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     {
         SpawnKitchenObjectServerRpc(kitchenObjectSO.Guid, kitchenObjectParent.GetNetworkObject(), index);
     }
+
     [Rpc(SendTo.Server)]
     private void SpawnKitchenObjectServerRpc(string kitchenObjectSOGuid, NetworkObjectReference networkObjectReference, int index = 0)
     {
@@ -186,9 +187,71 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         kitchenObject.SetKitchenObjectParent(kitchenObjectParent, index);
         OnSpawnKitchenObjectCompleted?.Invoke();
     }
+    public void SpawnToolItem(PlacedObjectTypeSO toolTypeSO, PlayerStateMachine player)
+    {
+        if (toolTypeSO == null || player == null)
+            return;
+        SpawnToolItemServerRpc(toolTypeSO.Guid, player.GetNetworkObject());
+    }
 
     [Rpc(SendTo.Server)]
-    public void CreatePlacedObjectViewServerRpc(Vector3 worldPosition, string placeObjectTypeSOGuid, 
+    private void SpawnToolItemServerRpc(string toolTypeSOGuid, NetworkObjectReference playerReference)
+    {
+        PlacedObjectTypeSO toolTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(toolTypeSOGuid);
+        if (toolTypeSO == null || toolTypeSO.prefab == null)
+            return;
+
+        playerReference.TryGet(out NetworkObject playerNetworkObject);
+        PlayerStateMachine player = playerNetworkObject != null ? playerNetworkObject.GetComponent<PlayerStateMachine>() : null;
+        if (player == null || player.HasKitchenObject())
+            return;
+
+        GameObject toolGO = Instantiate(toolTypeSO.prefab);
+        NetworkObject toolNetworkObject = toolGO.GetComponent<NetworkObject>();
+
+        CookingToolItem toolItem = toolGO.GetComponent<CookingToolItem>();
+        if (toolItem == null)
+        {
+            Destroy(toolGO);
+            return;
+        }
+
+        if (toolTypeSO.cookingToolConfigSO != null)
+            toolItem.SetCookingToolConfig(toolTypeSO.cookingToolConfigSO);
+        toolItem.SetPlacedObjectTypeSOGuid(toolTypeSO.Guid);
+
+        if (!toolNetworkObject.IsSpawned)
+            toolNetworkObject.Spawn(true);
+
+        toolItem.SetKitchenObjectParent(player);
+
+        GameManager.Instance.RemoveInventoryDataServerRpc(toolTypeSO.Guid);
+    }
+
+    public void RequestSpawnToolItem(PlacedObjectTypeSO toolTypeSO)
+    {
+        if (toolTypeSO == null || !toolTypeSO.isTool)
+            return;
+        PlayerStateMachine player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerStateMachine>();
+        if (player == null || player.HasKitchenObject())
+            return;
+        SpawnToolItemServerRpc(toolTypeSO.Guid, player.GetNetworkObject());
+    }
+
+    public void ReturnToolItemToInventory(CookingToolItem toolItem)
+    {
+        if (toolItem == null)
+            return;
+        string guid = toolItem.PlacedObjectTypeSOGuid;
+        NetworkObject toolNetworkObject = toolItem.GetComponent<NetworkObject>();
+        if (toolNetworkObject != null && toolNetworkObject.IsSpawned)
+            toolNetworkObject.Despawn();
+        if (!string.IsNullOrEmpty(guid))
+            GameManager.Instance.AddInventoryDataServerRpc(guid);
+    }
+
+    [Rpc(SendTo.Server)]
+    public void CreatePlacedObjectViewServerRpc(Vector3 worldPosition, string placeObjectTypeSOGuid,
         Vector2Int origin, Dir dir, ulong targetClientId, bool isPreview)
     {
         if (PrefabSpawnService.Instance != null)
