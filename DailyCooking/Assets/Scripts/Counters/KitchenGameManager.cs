@@ -216,12 +216,22 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
             return;
         }
 
-        if (toolTypeSO.cookingToolConfigSO != null)
-            toolItem.SetCookingToolConfig(toolTypeSO.cookingToolConfigSO);
+        if (toolTypeSO.cookingToolConfigSO == null)
+        {
+            Destroy(toolGO);
+            return;
+        }
+
+        toolItem.SetCookingToolConfig(toolTypeSO.cookingToolConfigSO);
         toolItem.SetPlacedObjectTypeSOGuid(toolTypeSO.Guid);
 
+        toolNetworkObject.Spawn(true);
+
         if (!toolNetworkObject.IsSpawned)
-            toolNetworkObject.Spawn(true);
+        {
+            Destroy(toolGO);
+            return;
+        }
 
         toolItem.SetKitchenObjectParent(player);
 

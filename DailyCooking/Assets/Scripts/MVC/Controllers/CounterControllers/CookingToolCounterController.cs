@@ -68,7 +68,9 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         NetworkObject counterNetworkObject = GetNetworkObject();
         toolItem.NetworkObject.TrySetParent(counterNetworkObject.transform, false);
         toolItem.DisableFollow();
-        toolItem.transform.localPosition = Vector3.zero;
+
+        Transform topPoint = GetKitchenObjectFollowTransform();
+        toolItem.transform.localPosition = topPoint != null ? topPoint.localPosition : Vector3.zero;
         toolItem.transform.localRotation = Quaternion.identity;
 
         _installedToolItem = toolItem;
