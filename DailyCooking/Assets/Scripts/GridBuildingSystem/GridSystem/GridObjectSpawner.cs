@@ -37,6 +37,43 @@ public class GridObjectSpawner
             canBuild = false;
             return canBuild;
         }
+
+        // Dedicated-counter requirement for tools (server authority)
+        if (placedObjectTypeSO != null && placedObjectTypeSO.isTool && placedObjectTypeSO.requiresUnderlyingCounter)
+        {
+            if (placedObjectTypeSO.allowedUnderlyingCounters != null && placedObjectTypeSO.allowedUnderlyingCounters.Count > 0)
+            {
+                bool hasRequired = false;
+                foreach (var placedObject in gridObject)
+                {
+                    if (placedObject == null) continue;
+                    var view = placedObject.GetPlacedObject();
+                    if (view == null) continue;
+                    foreach (var allowed in placedObjectTypeSO.allowedUnderlyingCounters)
+                    {
+                        if (allowed != null && view.GetPlacedObjectTypeSOGuid() == allowed.Guid)
+                        {
+                            hasRequired = true;
+                            break;
+                        }
+                    }
+                    if (hasRequired) break;
+                }
+                if (!hasRequired) return false;
+            }
+            else
+            {
+                bool hasCounter = false;
+                foreach (var placedObject in gridObject)
+                {
+                    if (placedObject != null && placedObject.GetPlacedObject() != null && placedObject.GetPlacedObject().InventoryTabType == InventoryTabType.Counter)
+                    { hasCounter = true; break; }
+                }
+                if (!hasCounter) return false;
+            }
+            return true;
+        }
+
         foreach (var placedObject in gridObject)
         {
             if (placedObject == null ||

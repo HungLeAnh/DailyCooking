@@ -147,12 +147,52 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
 
     private void RefreshVisual(Vector3 position) {
         if (visual != null) {
-            KitchenGameManager.Instance.DestroyPlacedObject(visual.GetComponent<NetworkObject>());
+            if (KitchenGameManager.Instance != null)
+            {
+                var netObj = visual.GetComponent<NetworkObject>();
+                if (netObj != null)
+                {
+                    KitchenGameManager.Instance.DestroyPlacedObject(netObj);
+                }
+                else if (visual.gameObject != null)
+                {
+                    Destroy(visual.gameObject);
+                }
+            }
+            else if (visual.gameObject != null)
+            {
+                Destroy(visual.gameObject);
+            }
             visual = null;
         }
 
         if (placedObjectTypeSO != null)
         {
+            if (placedObjectTypeSO.prefab == null)
+            {
+                Debug.LogError($"BuildingGhost: Missing prefab for PlacedObjectTypeSO '{placedObjectTypeSO.name}' Guid={placedObjectTypeSO.Guid}", placedObjectTypeSO);
+                ShowCanvas(false);
+                return;
+            }
+            // Guard sentinel - resolve to mouse snapped pos (option a)
+            if (position == -Vector3.one)
+            {
+                Vector3 snapped = GridBuildingSystem.Instance.BuildingPlacementManager.GetMouseWorldSnappedPosition();
+                if (snapped == -Vector3.one)
+                {
+                    var gm = GridBuildingSystem.Instance.GridManager;
+                    if (gm != null)
+                    {
+                        snapped = gm.GetWorldPosition(0, 0);
+                        snapped.y = 0f;
+                    }
+                    else
+                    {
+                        snapped = Vector3.zero;
+                    }
+                }
+                position = snapped;
+            }
             pendingSpawnPosition = position;
             KitchenGameManager.Instance.OnSpawnRequestCompleted -= OnSpawnRequestCompletedHandler;
             KitchenGameManager.Instance.OnSpawnRequestCompleted += OnSpawnRequestCompletedHandler;

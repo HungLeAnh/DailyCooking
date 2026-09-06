@@ -183,10 +183,35 @@ public class UIInventoryPopup : UIPopup
 
     public void PlacingItem(PlacedObjectTypeSO itemToInspect)
     {
+        // Resolve spawn position at mouse snapped pos (option a). Fallback to grid origin if ray misses.
+        Vector3 ResolveSpawnPosition()
+        {
+            Vector3 snapped = GridBuildingSystem.Instance.BuildingPlacementManager.GetMouseWorldSnappedPosition();
+            if (snapped != -Vector3.one) return snapped;
+            var gm = GridBuildingSystem.Instance.GridManager;
+            if (gm != null)
+            {
+                Vector3 origin = gm.GetWorldPosition(0, 0);
+                origin.y = 0f;
+                return origin;
+            }
+            return Vector3.zero;
+        }
+
+        // Tools are now grid-placed static appliances (PanToolPlaced/PotToolPlaced) on StoveCounter.
+        // Keep isTool for Tool-tab filtering but route through grid placement like counters.
         if (itemToInspect != null && itemToInspect.isTool)
         {
-            KitchenGameManager.Instance.RequestSpawnToolItem(itemToInspect);
-            HidePopup();
+            if (listItem.Exists(o => o.PlacedObjectTypeSO == itemToInspect))
+            {
+                int itemIndex = listItem.FindIndex(o => o.PlacedObjectTypeSO == itemToInspect);
+                selectedItemId = itemIndex;
+            }
+            Vector3 spawnPos = ResolveSpawnPosition();
+            GridBuildingSystem.Instance.BuildingPlacementManager
+                .SetPlacedObjectTypeSO(itemToInspect, spawnPos);
+            isPlacingObject = true;
+            HidePopup(new Param { isPlacingObject = true });
             return;
         }
 
@@ -198,10 +223,11 @@ public class UIInventoryPopup : UIPopup
         }
 
 
+        Vector3 spawnPosDefault = ResolveSpawnPosition();
         GridBuildingSystem.Instance.BuildingPlacementManager
-            .SetPlacedObjectTypeSO(listItem[selectedItemId].PlacedObjectTypeSO,-Vector3.one);
+            .SetPlacedObjectTypeSO(listItem[selectedItemId].PlacedObjectTypeSO, spawnPosDefault);
         isPlacingObject = true;
-        HidePopup();
+        HidePopup(new Param { isPlacingObject = true });
     }
 
 

@@ -18,6 +18,11 @@ public class PrefabSpawnService : NetworkPersistentSingleton<PrefabSpawnService>
 
         var placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(placeObjectTypeSOGuid);
         if (placedObjectTypeSO == null) return;
+        if (placedObjectTypeSO.prefab == null)
+        {
+            Debug.LogError($"PrefabSpawnService: Missing prefab for PlacedObjectTypeSO '{placedObjectTypeSO.name}' Guid={placeObjectTypeSOGuid}", placedObjectTypeSO);
+            return;
+        }
 
         Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition,
             Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0),

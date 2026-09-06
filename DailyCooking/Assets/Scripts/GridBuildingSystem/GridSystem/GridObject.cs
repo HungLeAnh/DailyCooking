@@ -64,6 +64,15 @@ public class GridObject
         }
         return true;
     }
+
+    public bool CanBuild(PlacedObjectTypeSO toPlace, Dir dir)
+    {
+        // Tools with dedicated-counter requirement are handled in BuildingPlacementManager
+        // with allowedUnderlyingCounters check; allow stacking on dedicated counter.
+        if (toPlace != null && toPlace.isTool && toPlace.requiresUnderlyingCounter)
+            return true;
+        return CanBuild(toPlace != null ? toPlace.itemType.TabType : InventoryTabType.Counter, dir);
+    }
     public override string ToString()
     {
         return x + ", " + z;

@@ -64,6 +64,44 @@ public class BuildingPlacementManager : IBuildingPlacementManager
                 canBuild = false;
                 break;
             }
+
+            // Dedicated-counter requirement: Pan/Pot (isTool + requiresUnderlyingCounter) must sit on StoveCounter
+            if (placedObjectTypeSO.isTool && placedObjectTypeSO.requiresUnderlyingCounter)
+            {
+                bool hasRequiredCounter = false;
+                foreach (var placedObject in gridObject)
+                {
+                    if (placedObject == null) continue;
+                    var view = placedObject.GetPlacedObject();
+                    if (view == null) continue;
+                    if (placedObjectTypeSO.allowedUnderlyingCounters != null && placedObjectTypeSO.allowedUnderlyingCounters.Count > 0)
+                    {
+                        foreach (var allowed in placedObjectTypeSO.allowedUnderlyingCounters)
+                        {
+                            if (allowed != null && view.GetPlacedObjectTypeSOGuid() == allowed.Guid)
+                            {
+                                hasRequiredCounter = true;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: any counter is sufficient
+                        if (view.InventoryTabType == InventoryTabType.Counter)
+                            hasRequiredCounter = true;
+                    }
+                    if (hasRequiredCounter) break;
+                }
+                if (!hasRequiredCounter)
+                {
+                    canBuild = false;
+                    break;
+                }
+                // Tool stacking on dedicated counter is allowed — skip standard CanBuild blocking
+                continue;
+            }
+
             foreach (var placedObject in gridObject)
             {
                 if (placedObject == null || 
@@ -73,6 +111,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
                     break;
                 }
             }
+            if (!canBuild) break;
         }
 
         if (canBuild)
@@ -80,13 +119,8 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
             Vector3 placedObjectWorldPosition = gridManager.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
-            KitchenGameManager.Instance.OnSpawnRequestCompleted = (spawnedObject) =>
-            {
-                Debug.Log("Event callback Guid: "+spawnedObject.GetComponent<PlacedObjectView>().GetPlacedObjectTypeSOGuid());
-                GridBuildingSystem.Instance.UpdateGridDataServerRpc(spawnedObject.GetComponent<NetworkObject>());
-                KitchenGameManager.Instance.OnSpawnRequestCompleted = null;
-
-            };
+            KitchenGameManager.Instance.OnSpawnRequestCompleted -= HandlePlacedObjectSpawnCompleted;
+            KitchenGameManager.Instance.OnSpawnRequestCompleted += HandlePlacedObjectSpawnCompleted;
 
             PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir,
                 placedObjectTypeSO, NetworkManager.Singleton.LocalClientId,false);
@@ -269,6 +303,13 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             placedObjectTypeSO = this.placedObjectTypeSO,
             position = targetPosition
         });
+    }
+
+    private void HandlePlacedObjectSpawnCompleted(NetworkObject spawnedObject)
+    {
+        KitchenGameManager.Instance.OnSpawnRequestCompleted -= HandlePlacedObjectSpawnCompleted;
+        Debug.Log("Event callback Guid: "+spawnedObject.GetComponent<PlacedObjectView>().GetPlacedObjectTypeSOGuid());
+        GridBuildingSystem.Instance.UpdateGridDataServerRpc(spawnedObject.GetComponent<NetworkObject>());
     }
 
     public void FireOnObjectPlacedEvent()
