@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e7747bdf78fa6141a2f81d16ff91e5f, type: 3}
   m_Name: Pot
   m_EditorClassIdentifier: Scripts::PlacedObjectTypeSO
-  _guid: 
+  _guid: 2d3bfc08163a5834784f51005fbe5fb3
   id: Pot
   nameString: Pot
-  prefab: {fileID: 2893463115186537498, guid: 07191169975895f4aad111f4041e695f, type: 3}
+  prefab: {fileID: 5049683964695028882, guid: 78fc12d092ae44b997f97f8b5f47c2ce, type: 3}
   visual: {fileID: 0}
   icon: {fileID: 0}
   width: 1
@@ -25,3 +25,6 @@ MonoBehaviour:
     _tabType: 3
   cookingToolConfigSO: {fileID: 11400000, guid: e7c7f442a5a44e34fb8b08a2333ab566, type: 2}
   isTool: 1
+  requiresUnderlyingCounter: 1
+  allowedUnderlyingCounters:
+  - {fileID: 11400000, guid: 5b81ed65ae3b6144289206c5e1142af8, type: 2}

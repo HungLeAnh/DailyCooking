@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e7747bdf78fa6141a2f81d16ff91e5f, type: 3}
   m_Name: Pan
   m_EditorClassIdentifier: Scripts::PlacedObjectTypeSO
-  _guid: 
+  _guid: a8fa3bbfaff79ef4ea0fe072600cc3fd
   id: Pan
   nameString: Pan
-  prefab: {fileID: 2893463115186537498, guid: 07191169975895f4aad111f4041e695f, type: 3}
+  prefab: {fileID: 5049683964695028882, guid: 9be185125d5a4b8b933740a9f15739ba, type: 3}
   visual: {fileID: 0}
   icon: {fileID: 0}
   width: 1
@@ -25,3 +25,6 @@ MonoBehaviour:
     _tabType: 3
   cookingToolConfigSO: {fileID: 11400000, guid: 20ad1bc2e8cf1504686738e194b83f4b, type: 2}
   isTool: 1
+  requiresUnderlyingCounter: 1
+  allowedUnderlyingCounters:
+  - {fileID: 11400000, guid: 5b81ed65ae3b6144289206c5e1142af8, type: 2}

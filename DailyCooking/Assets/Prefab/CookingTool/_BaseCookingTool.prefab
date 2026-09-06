@@ -41,6 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6349459341066746734}
   - component: {fileID: 9202884289748628511}
+  - component: {fileID: -4974422150347824267}
   - component: {fileID: 4487132799419500801}
   m_Layer: 0
   m_Name: _BaseCookingTool
@@ -93,6 +94,19 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &-4974422150347824267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3835830830082720915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29007807c35615c418883b54b6a23802, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::PlacedObjectView
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &4487132799419500801
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,7 +397,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7722325605210638887, guid: 09cf4adfd2d8ce24eb6e4f1fca19992b, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -170
+      value: -120
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

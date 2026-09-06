@@ -37,6 +37,12 @@ public class PlacedObjectTypeSO : SerializableScriptableObject
     [Tooltip("True when this PlacedObjectTypeSO represents a carryable cooking tool (sold in shop, stored, placed on counters).")]
     public bool isTool;
 
+    [Header("Placement Requirement")]
+    [Tooltip("If true, this object can only be placed on top of one of the allowed counters.")]
+    public bool requiresUnderlyingCounter;
+    [Tooltip("List of counters that are allowed underneath. If empty, any counter is allowed. Used when requiresUnderlyingCounter is true.")]
+    public List<PlacedObjectTypeSO> allowedUnderlyingCounters = new List<PlacedObjectTypeSO>();
+
 
     public int GetRotationAngle(Dir dir) {
         switch (dir) {

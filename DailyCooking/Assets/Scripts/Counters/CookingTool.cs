@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent, IHasOptionalSO
+public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent, IHasOptionalSO, IDestroyable, IPlaceable
 {
     public enum State
     {
@@ -44,6 +45,9 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     private DrinkRecipeSO _drinkRecipeSO;
     private CombineRecipeSO _combineRecipeSO;
     private BurningRecipeSO _burningRecipeSO;
+
+    private Action onDestroySelf;
+    public Action OnDestroySelf { get => onDestroySelf; set => onDestroySelf += value; }
 
     public State CurrentState => _netState.Value;
     public float CookingTimer => _netCookingTimer.Value;
@@ -570,5 +574,27 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
     {
+    }
+
+    public void DestroySelf()
+    {
+        OnDestroySelf?.Invoke();
+        if (NetworkObject != null && NetworkObject.IsSpawned)
+        {
+            NetworkObject.Despawn();
+        }
+        else if (gameObject != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(this);
+        }
+    }
+
+    public bool CanRemove()
+    {
+        return !HasKitchenObject();
     }
 }

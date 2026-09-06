@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class CookingToolCounterController : ClearCounterController, IHasOptionalSO
 {
+    // Legacy: dedicated counter no longer hosts carryable CookingToolItem.
+    // Cooking tools are now grid-placed static appliances (PanToolPlaced/PotToolPlaced).
+    // This controller is kept for StoveCounter highlight/selection but does not manage tool install.
     [SerializeField] private List<CookingToolConfigSO.CookingToolType> acceptedToolTypes = new List<CookingToolConfigSO.CookingToolType>();
 
     private CookingTool _cookingTool;
-    private CookingToolItem _installedToolItem;
 
-    public bool HasToolInstalled() => _installedToolItem != null;
+    public bool HasToolInstalled() => _cookingTool != null && _cookingTool.HasKitchenObject() == false ? false : _cookingTool != null;
 
     protected override void OnRestartGame(object sender)
     {
@@ -24,73 +26,18 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        // 1) Player is carrying a cooking tool -> try to install it on this counter.
-        if (playerStateMachine.HasKitchenObject())
-        {
-            CookingToolItem toolItem = playerStateMachine.GetKitchenObject().GetComponent<CookingToolItem>();
-            if (toolItem != null)
-            {
-                if (!HasToolInstalled() && IsCompatible(toolItem))
-                {
-                    InstallTool(toolItem, playerStateMachine);
-                }
-                return;
-            }
-        }
+        // Tools are no longer carryable; delegate to base counter behavior.
+        // If a static CookingTool is attached as child, forward cooking interaction directly.
+        if (_cookingTool == null)
+            _cookingTool = GetComponentInChildren<CookingTool>();
 
-        // 2) A tool is installed -> normal cooking interaction (or remove when empty).
-        if (HasToolInstalled())
+        if (_cookingTool != null)
         {
             HandleCookingInteraction(playerStateMachine);
             return;
         }
 
-        // 3) No tool installed -> default counter behavior.
         base.InteractEvent(playerStateMachine);
-    }
-
-    private bool IsCompatible(CookingToolItem toolItem)
-    {
-        CookingToolConfigSO config = toolItem.CookingTool != null ? toolItem.CookingTool.GetConfig() : null;
-        if (config == null)
-            return false;
-
-        foreach (CookingToolConfigSO.CookingToolType type in config.EffectiveToolTypes)
-        {
-            if (acceptedToolTypes.Contains(type))
-                return true;
-        }
-        return false;
-    }
-
-    private void InstallTool(CookingToolItem toolItem, PlayerStateMachine player)
-    {
-        NetworkObject counterNetworkObject = GetNetworkObject();
-        toolItem.NetworkObject.TrySetParent(counterNetworkObject.transform, false);
-        toolItem.DisableFollow();
-
-        Transform topPoint = GetKitchenObjectFollowTransform();
-        toolItem.transform.localPosition = topPoint != null ? topPoint.localPosition : Vector3.zero;
-        toolItem.transform.localRotation = Quaternion.identity;
-
-        _installedToolItem = toolItem;
-        _cookingTool = toolItem.CookingTool;
-
-        player.ClearKitchenObject();
-    }
-
-    private void RemoveTool(PlayerStateMachine player)
-    {
-        if (_installedToolItem == null)
-            return;
-
-        CookingToolItem toolItem = _installedToolItem;
-        toolItem.NetworkObject.TrySetParent((Transform)null);
-        toolItem.EnableFollow(player.GetKitchenObjectFollowTransform());
-        player.SetKitchenObject(toolItem);
-
-        _installedToolItem = null;
-        _cookingTool = null;
     }
 
     private void HandleCookingInteraction(PlayerStateMachine playerStateMachine)
@@ -110,8 +57,7 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
             }
             else
             {
-                // Empty-handed on an empty tool -> detach the tool back to the player.
-                RemoveTool(playerStateMachine);
+                // Empty-handed on empty static tool -> no carry removal (tools are grid-placed)
             }
         }
         else
