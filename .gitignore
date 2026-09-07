@@ -3,12 +3,22 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 /[Ll]ibrary/
+DailyCooking/[Ll]ibrary/
+DailyCooking/.utmp/
 /[Tt]emp/
+DailyCooking/[Tt]emp/
 /[Oo]bj/
+DailyCooking/[Oo]bj/
 /[Bb]uild/
+DailyCooking/[Bb]uild/
+DailyCooking/Build/
 /[Bb]uilds/
 /[Ll]ogs/
+DailyCooking/[Ll]ogs/
+DailyCooking/Logs/
 /[Uu]ser[Ss]ettings/
+DailyCooking/[Uu]ser[Ss]ettings/
+DailyCooking/UserSettings/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
@@ -25,6 +35,7 @@
 
 # Visual Studio cache directory
 .vs/
+DailyCooking/.vs/
 
 # Gradle cache directory
 .gradle/
@@ -33,8 +44,11 @@
 ExportedObj/
 .consulo/
 *.csproj
+DailyCooking/*.csproj
 *.unityproj
 *.sln
+DailyCooking/*.sln
+DailyCooking/*.slnx
 *.suo
 *.tmp
 *.user
