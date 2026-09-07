@@ -6,7 +6,10 @@ using UnityEngine.InputSystem;
 public class GameInput : PersistentSingleton<GameInput>
 {
     private const string PLAYER_PREFS_BINDINGS = "InputBindings";
+    [Obsolete("Use buildingGhostRayDistance (serialized) instead. Kept for backward compat.")]
     private const float INTERACT_DISTANCE_MAX = 999f;
+    [SerializeField, Tooltip("Max raycast distance for BuildingGhost hit test. Former magic 999f extracted to inspector.")]
+    private float buildingGhostRayDistance = 100f;
     
     public event EventHandler OnInteract1Performed;
     public event EventHandler OnInteract2Performed;
@@ -181,7 +184,7 @@ public class GameInput : PersistentSingleton<GameInput>
     }
     public bool CheckTouchOverBuildingGhost(Vector2 position)
     {
-        float interactDistance = INTERACT_DISTANCE_MAX;
+        float interactDistance = buildingGhostRayDistance;
         Ray ray = Camera.main.ScreenPointToRay(position);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayerMask))
         {

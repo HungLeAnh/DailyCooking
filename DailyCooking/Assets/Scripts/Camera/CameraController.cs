@@ -158,10 +158,23 @@ public class CameraController : MonoBehaviour
     #region Zoom
     private void HandleZoom(object sender, float scrollValueY)
     {
-        _cinemachineCamera.Lens.FieldOfView = Mathf.Clamp(
-            _cinemachineCamera.Lens.FieldOfView - scrollValueY * zoomSpeed,
-            zoomBounds.x,
-            zoomBounds.y);
+        var lens = _cinemachineCamera.Lens;
+        if (lens.Orthographic)
+        {
+            lens.OrthographicSize = Mathf.Clamp(
+                lens.OrthographicSize - scrollValueY * zoomSpeed * 0.1f,
+                zoomBounds.x,
+                zoomBounds.y);
+            _cinemachineCamera.Lens = lens;
+        }
+        else
+        {
+            lens.FieldOfView = Mathf.Clamp(
+                lens.FieldOfView - scrollValueY * zoomSpeed,
+                zoomBounds.x,
+                zoomBounds.y);
+            _cinemachineCamera.Lens = lens;
+        }
     }
     #endregion
 }

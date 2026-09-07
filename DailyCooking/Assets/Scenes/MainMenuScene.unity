@@ -224,8 +224,8 @@ Camera:
   near clip plane: 0.01
   far clip plane: 1000
   field of view: 62.3821
-  orthographic: 0
-  orthographic size: NaN
+  orthographic: 1
+  orthographic size: 8
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -977,6 +977,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1932eaa9ebe7a2e4d94b44109dcdcdc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buildingGhostRayDistance: 100
   touchTimeThreshold: 0.1
   dragThreshold: 10
   buildingGhostLayerMask:

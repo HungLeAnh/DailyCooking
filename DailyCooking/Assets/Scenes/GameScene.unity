@@ -3403,8 +3403,8 @@ Camera:
   near clip plane: 0.01
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
-  orthographic size: NaN
+  orthographic: 1
+  orthographic size: 8
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -4228,7 +4228,7 @@ MonoBehaviour:
   minimumDistance: 0.2
   directionThreshold: 0.1
   zoomSpeed: 0.5
-  zoomBounds: {x: 20, y: 100}
+  zoomBounds: {x: 4, y: 12}
 --- !u!114 &1678368737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4283,11 +4283,11 @@ MonoBehaviour:
     CustomLookAtTarget: 0
   Lens:
     FieldOfView: 60
-    OrthographicSize: NaN
+    OrthographicSize: 8
     NearClipPlane: 0.01
     FarClipPlane: 1000
     Dutch: 0
-    ModeOverride: 0
+    ModeOverride: 1
     PhysicalProperties:
       GateFit: 2
       SensorSize: {x: 1, y: 1}
