@@ -49,7 +49,32 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     private void Start()
     {
         SwitchState(new MainMenuState(this));
-        MultiplayerManager.Instance.OnPlayerDataNetworkListChanged += Instance_OnPlayerDataNetworkListChanged;
+        if (MultiplayerManager.Instance != null)
+            MultiplayerManager.Instance.OnPlayerDataNetworkListChanged += Instance_OnPlayerDataNetworkListChanged;
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (MultiplayerManager.Instance != null)
+            MultiplayerManager.Instance.OnPlayerDataNetworkListChanged -= Instance_OnPlayerDataNetworkListChanged;
+        if (gameData != null)
+        {
+            gameData.RestaurantData.OnLevelChange -= SaveGame;
+            gameData.RestaurantData.OnExpChange -= SaveGame;
+            gameData.RestaurantData.OnLevelUp -= ShowLevelUpPopup;
+            gameData.RestaurantData.OnResourceChange -= SaveGame;
+            if (gameData.PlayersStats != null)
+            {
+                foreach (var player in gameData.PlayersStats)
+                    player.OnResourceChange -= SaveGame;
+            }
+            gameData.InventoryData.OnInventoryDataChanged -= SaveGame;
+            gameData.GridData.OnGridDataChanged -= SaveGame;
+            gameData.TutorialData.OnTutorialDataChanged -= SaveGame;
+            gameData.MenuData.OnMenuDataChanged -= SaveGame;
+            gameData.ShopData.OnResourceChange -= SaveGame;
+            gameData.PostBoxData.OnResourceChange -= SaveGame;
+        }
     }
 
     private void ShowLevelUpPopup(int level)

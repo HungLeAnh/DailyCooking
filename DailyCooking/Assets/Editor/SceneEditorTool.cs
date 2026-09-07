@@ -1,41 +1,40 @@
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
 using System.IO;
+using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEditor.UI;
+using UnityEngine;
 
-public class SceneEditorTool
+public class SceneEditorWindow : EditorWindow
 {
-    private static string scenesFolder = "Assets/Scenes"; // Specify your scenes folder here
+    private const string ScenesFolder = "Assets/Scenes";
+    private List<string> scenePaths;
+    private Vector2 _scroll;
 
     [MenuItem("Tools/Scene Editor Tool/Scene")]
-    public static void OpenScene()
+    private static void Open() => GetWindow<SceneEditorWindow>("Scene Editor");
+
+    private void OnEnable()
     {
-        SceneEditorWindow window = EditorWindow.GetWindow<SceneEditorWindow>();
-        window.titleContent = new GUIContent("Scene Editor");
-        window.Show();
+        RefreshSceneList();
     }
 
-    public class SceneEditorWindow : EditorWindow
+    private void OnGUI()
     {
-        private List<string> scenePaths;
+        _scroll = EditorGUILayout.BeginScrollView(_scroll);
 
-        private void OnEnable()
+        GUILayout.Label("Scenes in Folder", EditorStyles.boldLabel);
+
+        if (GUILayout.Button("Refresh", EditorStyles.miniButton))
         {
-            scenePaths = new List<string>();
-            string[] guids = AssetDatabase.FindAssets("t:Scene", new[] { scenesFolder });
-            foreach (string guid in guids)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                scenePaths.Add(path);
-            }
+            RefreshSceneList();
         }
 
-        private void OnGUI()
+        if (scenePaths == null || scenePaths.Count == 0)
         {
-            GUILayout.Label("Scenes in Folder", EditorStyles.boldLabel);
-
+            EditorGUILayout.HelpBox($"No scenes found in {ScenesFolder}.", MessageType.Info);
+        }
+        else
+        {
             foreach (string scenePath in scenePaths)
             {
                 if (GUILayout.Button(Path.GetFileNameWithoutExtension(scenePath)))
@@ -45,12 +44,25 @@ public class SceneEditorTool
             }
         }
 
-        private void OpenScene(string scenePath)
+        EditorGUILayout.EndScrollView();
+    }
+
+    private void RefreshSceneList()
+    {
+        scenePaths = new List<string>();
+        string[] guids = AssetDatabase.FindAssets("t:Scene", new[] { ScenesFolder });
+        foreach (string guid in guids)
         {
-            if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-            {
-                EditorSceneManager.OpenScene(scenePath);
-            }
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            scenePaths.Add(path);
+        }
+    }
+
+    private void OpenScene(string scenePath)
+    {
+        if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+        {
+            EditorSceneManager.OpenScene(scenePath);
         }
     }
 }
