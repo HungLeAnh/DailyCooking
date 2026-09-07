@@ -65,9 +65,10 @@ public class GridInitializer : IGridInitializer
 
     public void InitDefaultCounters()
     {
+        string json = GameDefine.GetDefaultGridJson();
         List<GridObjectData>[,] gridObjectDataList = 
             JsonConvert.DeserializeObject<List<GridObjectData>[,]>
-            (GameDefine.GridArrayDataInit,gameManager.DataHandler.Settings);
+            (json,gameManager.DataHandler.Settings);
         gridManager.AddGridObjectData(gridObjectDataList);
     }
 }

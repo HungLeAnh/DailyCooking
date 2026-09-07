@@ -1,7 +1,7 @@
 # DailyCooking Project Overview
 
 ## Project Summary
-**DailyCooking** is a multiplayer cooking simulation game built using **Unity 2023.4.1f1**. The project follows a highly structured, data-driven architecture to manage gameplay complexity, networked state synchronization, and UI orchestration.
+**DailyCooking** is a multiplayer cooking simulation game built using **Unity 6000.3.9f1** (Unity 6). The project follows a highly structured, data-driven architecture to manage gameplay complexity, networked state synchronization, and UI orchestration.
 
 ## Core Architecture
 The project adheres to several key architectural patterns to ensure scalability and maintainability:
@@ -20,10 +20,10 @@ The project adheres to several key architectural patterns to ensure scalability 
     The project utilizes **Netcode for GameObjects**. It follows a strict Server/Host-authoritative model, where state changes are requested via `ServerRpc` and synchronized across clients.
 
 ## Technology Stack
-*   **Engine/Rendering:** Unity 2023.4.1f1 with Universal Render Pipeline (URP).
-*   **Networking:** Netcode for GameObjects.
-*   **Input:** Unity Input System (via `GameInput` wrapper).
-*   **AI/Tools Integration:** An active MCP (Model Context Protocol) bridge is implemented on HTTP port 8080, facilitating AI-driven development and editor management.
+*   **Engine/Rendering:** Unity 6000.3.9f1 (Unity 6) with Universal Render Pipeline (URP) 17.3.0.
+*   **Networking:** Netcode for GameObjects 2.9.2 + Unity Transport 2.6.0 + Relay (Multiplayer Services).
+*   **Input:** Unity Input System 1.18.0 (via `GameInput` wrapper).
+*   **AI/Tools Integration:** MCP-for-Unity bridge on stdio port 6401 (`com.coplaydev.unity-mcp`), CodeMonkey Utils.
 
 ## Project Organization
 The `Assets/` directory is organized by functionality:
