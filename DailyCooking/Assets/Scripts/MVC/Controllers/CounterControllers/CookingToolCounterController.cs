@@ -11,7 +11,9 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     private CookingTool _cookingTool;
 
-    public bool HasToolInstalled() => _cookingTool != null && _cookingTool.HasKitchenObject() == false ? false : _cookingTool != null;
+    public bool HasToolInstalled() => _cookingTool != null;
+
+    public bool HasFood() => _cookingTool != null && _cookingTool.HasKitchenObject();
 
     protected override void OnRestartGame(object sender)
     {
@@ -50,9 +52,19 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
                 if (_cookingTool.HasRecipeWithInput(inputKitchenObjectSO))
                 {
                     playerStateMachine.GetKitchenObject().SetKitchenObjectParent(_cookingTool);
-                    _cookingTool.SetCookingRecipeSO();
-                    _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
-                    _cookingTool.ShowLocalOptionMenu(inputKitchenObjectSO);
+                    if (_cookingTool.RequiresOptionChoice(inputKitchenObjectSO))
+                    {
+                        // Pending choice: stay Idle so server guard doesn't soft-lock in Cooking with 0 time.
+                        // Popup cancel leaves food in Idle, player can take it back.
+                        _cookingTool.UpdateCookingState(CookingTool.State.Idle);
+                        _cookingTool.ShowLocalOptionMenu(inputKitchenObjectSO);
+                    }
+                    else
+                    {
+                        _cookingTool.SetCookingRecipeSO();
+                        if (_cookingTool.HasValidRecipe())
+                            _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
+                    }
                 }
             }
             else

@@ -13,11 +13,8 @@ public class CookingToolConfigSO : ScriptableObject
         Combine,
     }
 
-    [Header("Strategy")]
-    public CookingToolType toolType;
-
     [Header("Tool Types (recipe categories this tool can process)")]
-    [Tooltip("When empty, falls back to a single 'toolType'. Set multiple (e.g. DeepFry + Combine) for tools like the Pot.")]
+    [Tooltip("Set multiple (e.g. DeepFry + Combine) for tools like the Pot.")]
     public List<CookingToolType> toolTypes = new List<CookingToolType>();
 
     public List<CookingToolType> EffectiveToolTypes
@@ -26,22 +23,23 @@ public class CookingToolConfigSO : ScriptableObject
         {
             if (toolTypes != null && toolTypes.Count > 0)
                 return toolTypes;
-            return new List<CookingToolType> { toolType };
+            return new List<CookingToolType>();
         }
     }
 
     public bool Supports(CookingToolType type)
     {
-        return EffectiveToolTypes.Contains(type);
+        return toolTypes != null && toolTypes.Contains(type);
     }
-
-    [Header("Visual")]
-    [Tooltip("Optional cosmetic mesh spawned on this tool at runtime (pan/pot/etc.). Not networked.")]
-    public GameObject visualPrefab;
-    public float visualScale = 1f;
 
     [Header("Option Menu (Combine)")]
     [Tooltip("True when this tool uses the option-menu flow (Combine/Pot).")]
     public bool supportsOptionMenu;
+
+    private void OnValidate()
+    {
+        if (supportsOptionMenu && (toolTypes == null || !toolTypes.Contains(CookingToolType.Combine)))
+            UnityEngine.Debug.LogError($"{name}: option menu requires Combine in toolTypes.", this);
+    }
 
 }
