@@ -11,14 +11,93 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     private CookingTool _cookingTool;
 
-    public bool HasToolInstalled() => _cookingTool != null;
+    public bool HasToolInstalled() => TryResolveTool();
 
-    public bool HasFood() => _cookingTool != null && _cookingTool.HasKitchenObject();
+    public bool HasFood() => TryResolveTool() && _cookingTool.HasKitchenObject();
+
+    // Child-first (scene-parented setups), then same grid cell (stacked placed tools).
+    private bool TryResolveTool()
+    {
+        if (_cookingTool == null)
+            _cookingTool = GetComponentInChildren<CookingTool>();
+        if (_cookingTool == null)
+            _cookingTool = FindStackedToolOnCell();
+        return _cookingTool != null;
+    }
+
+    private CookingTool FindStackedToolOnCell()
+    {
+        foreach (PlacedObjectView view in ViewsOnCellsOf(GetComponent<PlacedObjectView>()))
+        {
+            if (view == null || view.gameObject == gameObject)
+                continue;
+            CookingTool tool = view.GetComponentInChildren<CookingTool>();
+            if (tool != null)
+                return tool;
+        }
+        return null;
+    }
+
+    // Pan clicked directly (not IInteractable): route to this counter's controller.
+    public static CookingToolCounterController FindControllerForTool(CookingTool tool)
+    {
+        if (tool == null)
+            return null;
+        CookingToolCounterController ancestor = tool.GetComponentInParent<CookingToolCounterController>();
+        if (ancestor != null)
+            return ancestor;
+        PlacedObjectView toolView = tool.GetComponent<PlacedObjectView>();
+        foreach (PlacedObjectView view in ViewsOnCellsOf(toolView))
+        {
+            if (view == null || (toolView != null && view.gameObject == toolView.gameObject))
+                continue;
+            CookingToolCounterController controller = view.GetComponent<CookingToolCounterController>();
+            if (controller != null)
+                return controller;
+        }
+        return null;
+    }
+
+    private static IEnumerable<PlacedObjectView> ViewsOnCellsOf(PlacedObjectView view)
+    {
+        GridBuildingSystem gbs = GridBuildingSystem.Instance;
+        if (view == null || gbs == null || gbs.GridManager?.Grid == null)
+            yield break;
+        List<Vector2Int> cells;
+        try { cells = view.GetGridPositionList(); }
+        catch { yield break; }
+        if (cells == null)
+            yield break;
+        foreach (Vector2Int cell in cells)
+        {
+            List<GridObject> cellObjects = null;
+            try { cellObjects = gbs.GridManager.Grid.GetGridObject(cell.x, cell.y); }
+            catch { continue; }
+            if (cellObjects == null)
+                continue;
+            foreach (GridObject gridObject in cellObjects)
+            {
+                PlacedObjectView other = gridObject?.GetPlacedObject();
+                if (other != null)
+                    yield return other;
+            }
+        }
+    }
+
+    public override bool CanRemove()
+    {
+        // Don't yank the counter out from under a tool that holds food.
+        TryResolveTool();
+        if (_cookingTool != null && _cookingTool.HasKitchenObject())
+            return false;
+        return base.CanRemove();
+    }
 
     protected override void OnRestartGame(object sender)
     {
         base.OnRestartGame(sender);
 
+        TryResolveTool();
         if (_cookingTool != null && _cookingTool.HasKitchenObject())
             _cookingTool.GetKitchenObject().DestroySelf();
 
@@ -28,18 +107,14 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        // Tools are no longer carryable; delegate to base counter behavior.
-        // If a static CookingTool is attached as child, forward cooking interaction directly.
-        if (_cookingTool == null)
-            _cookingTool = GetComponentInChildren<CookingTool>();
-
-        if (_cookingTool != null)
+        // Tools are grid-placed (stacked on the counter cell) or scene-parented; resolve either way.
+        if (!TryResolveTool())
         {
-            HandleCookingInteraction(playerStateMachine);
+            base.InteractEvent(playerStateMachine);
             return;
         }
 
-        base.InteractEvent(playerStateMachine);
+        HandleCookingInteraction(playerStateMachine);
     }
 
     private void HandleCookingInteraction(PlayerStateMachine playerStateMachine)
@@ -95,17 +170,17 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     public float GetProgress()
     {
-        return _cookingTool != null ? _cookingTool.GetProgress() : 0f;
+        return TryResolveTool() ? _cookingTool.GetProgress() : 0f;
     }
 
     public bool IsDone()
     {
-        return _cookingTool != null && _cookingTool.IsDone();
+        return TryResolveTool() && _cookingTool.IsDone();
     }
 
     public void SetOptionKitchenObjectSO(int index)
     {
-        if (_cookingTool != null)
+        if (TryResolveTool())
         {
             _cookingTool.SetOptionKitchenObjectSO(index);
             if (_cookingTool.CookingTimeMax > 0f)
@@ -115,7 +190,7 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     public List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)
     {
-        return _cookingTool != null ? _cookingTool.GetListKitchenObjectList(kitchenObjectSO) : new List<KitchenObjectSO>();
+        return TryResolveTool() ? _cookingTool.GetListKitchenObjectList(kitchenObjectSO) : new List<KitchenObjectSO>();
     }
 
     public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)

@@ -6,7 +6,7 @@ using UnityEngine;
 public sealed class CookingPresenter
 {
     private const float UiEpsilon = 0.005f;
-    private const string OptionTitle = "Select way to process ingredient:";
+    private const string OptionTitle = "Select way to process:";
 
     private ProgressBarUI _progress;
     private BurnWarningUI _burnUI;

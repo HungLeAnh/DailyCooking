@@ -166,9 +166,21 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         Ray ray = Camera.main.ScreenPointToRay(e);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance))
         {
-            if (raycastHit.transform.TryGetComponent(out IInteractable interactableObject))
+            // Interactables and tool meshes can live on child transforms: walk up the hierarchy.
+            IInteractable interactableObject = raycastHit.transform.GetComponentInParent<IInteractable>();
+            if (interactableObject == null)
             {
-                if (!Context.Highlightable.Contains(raycastHit.transform.GetComponent<IHighlightable>()))
+                // Clicked a stacked tool (not IInteractable itself): forward to its counter's controller.
+                CookingTool tool = raycastHit.transform.GetComponentInParent<CookingTool>();
+                if (tool != null)
+                    interactableObject = CookingToolCounterController.FindControllerForTool(tool);
+            }
+            if (interactableObject != null)
+            {
+                IHighlightable gate = raycastHit.transform.GetComponentInParent<IHighlightable>();
+                if (gate == null && interactableObject is Component interactableComponent)
+                    gate = interactableComponent.GetComponent<IHighlightable>();
+                if (gate != null && !Context.Highlightable.Contains(gate))
                     return;
 
 

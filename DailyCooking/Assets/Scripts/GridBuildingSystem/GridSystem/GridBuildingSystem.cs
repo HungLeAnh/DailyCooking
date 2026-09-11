@@ -167,9 +167,12 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         Ray ray = Camera.main.ScreenPointToRay(e);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance, counterLayerMask))
         {
-            if (raycastHit.transform.TryGetComponent<PlacedObjectView>(out PlacedObjectView targetPlaceObjectView))
+            // Tools (e.g. pan mesh) live on child transforms: walk up to the owning placed object.
+            PlacedObjectView targetPlaceObjectView = raycastHit.transform.GetComponentInParent<PlacedObjectView>();
+            if (targetPlaceObjectView != null)
             {
-                if(targetPlaceObjectView.transform.GetComponent<IPlaceable>().CanRemove())
+                IPlaceable placeable = targetPlaceObjectView.GetComponent<IPlaceable>();
+                if (placeable != null && placeable.CanRemove())
                     BuildingPlacementManager.HandleExistingObjectInteraction(targetPlaceObjectView, raycastHit.transform.position);
                 else
                 {
