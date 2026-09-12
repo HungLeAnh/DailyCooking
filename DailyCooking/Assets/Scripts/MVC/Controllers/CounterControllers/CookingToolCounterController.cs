@@ -193,7 +193,4 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         return TryResolveTool() ? _cookingTool.GetListKitchenObjectList(kitchenObjectSO) : new List<KitchenObjectSO>();
     }
 
-    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
-    {
-    }
 }

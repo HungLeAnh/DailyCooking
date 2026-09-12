@@ -367,11 +367,6 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         return NetworkObject;
     }
 
-    public CookingToolConfigSO GetConfig()
-    {
-        return Config;
-    }
-
     public void SetCookingToolConfig(CookingToolConfigSO config)
     {
         cookingToolConfig = config;
@@ -409,10 +404,6 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         _ = Config;
         _ = RecipeDatabase;
         return _resolver.GetOptions(kitchenObjectSO);
-    }
-
-    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
-    {
     }
 
     // IDestroyable / IPlaceable

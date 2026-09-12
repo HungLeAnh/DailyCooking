@@ -161,11 +161,6 @@ public class CuttingCounterController : BaseCounterController, IHasProgress, IHa
         return ProgressNormalized;
     }
 
-    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
-    {
-        throw new NotImplementedException();
-    }
-
     public void UpdateProgressBar(float progressPrecentage)
     {
         progressBarUI.OnProgressChanged(progressPrecentage);

@@ -7,6 +7,8 @@ public interface IHasOptionalSO
     {
         return null;
     }
-    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList);
+    public virtual void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
+    {
+    }
 
 }
