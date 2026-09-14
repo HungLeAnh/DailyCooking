@@ -16,6 +16,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     }
 
     [SerializeField] private float cellSize = 2f;
+    [SerializeField] private DefaultGridConfigSO DefaultGridConfigSO;
     [SerializeField] private PlacedObjectDatabase placedObjectDatabase;
     [SerializeField] private NavMeshSurface navMeshSurface;
 
@@ -121,7 +122,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
 
         gridInitializer = new GridInitializer(gridManager, this.gameManager,
             roadContainer, roadPrefab, roadCornerPrefab,
-            floorContainer, floorPrefab);
+            floorContainer, floorPrefab,DefaultGridConfigSO);
 
         gridInitializer.InitRoad();
         gridInitializer.InitFloor();

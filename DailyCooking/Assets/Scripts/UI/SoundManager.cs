@@ -35,12 +35,6 @@ public class SoundManager : PersistentSingleton<SoundManager>
         PlaySound(AudioClipRefsSO.objectPickup, sourceTransform.position);
     }
 
-    private void CuttingCounter_OnAnyCut(object sender, System.EventArgs e)
-    {
-        CuttingCounterController cuttingCounter = sender as CuttingCounterController;
-        PlaySound(AudioClipRefsSO.chop, cuttingCounter.transform.position);
-    }
-
     private AudioSource GetPooledAudioSource()
     {
         for (int i = 0; i < audioSourcePool.Count; i++)
@@ -104,6 +98,12 @@ public class SoundManager : PersistentSingleton<SoundManager>
     {
         return PlaySound(AudioClipRefsSO.stoveSizzle, position, loop);
 
+    }
+    public AudioSource PlayChopSound(Vector3 position, bool loop = false)
+    {
+        if (AudioClipRefsSO == null || AudioClipRefsSO.chop == null || AudioClipRefsSO.chop.Length == 0)
+            return null;
+        return PlaySound(AudioClipRefsSO.chop, position, loop);
     }
     public void StopSound(AudioSource audioSource)
     {

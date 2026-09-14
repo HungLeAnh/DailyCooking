@@ -8,13 +8,13 @@ public sealed class RecipeResolver
     private CookingToolConfigSO _config;
     private IReadOnlyList<CookingToolConfigSO.CookingToolType> _types =
         Array.Empty<CookingToolConfigSO.CookingToolType>();
-    private RecipeDatabaseSO _db;
 
     private FryingRecipeSO _frying;
     private BakingRecipeSO _baking;
     private DeepFryRecipeSO _deepFry;
     private DrinkRecipeSO _drink;
     private CombineRecipeSO _combine;
+    private CuttingRecipeSO _cutting;
     private BurningRecipeSO _burning;
 
     private bool _lookupDone;
@@ -38,9 +38,13 @@ public sealed class RecipeResolver
             if (_deepFry != null) return _deepFry.output;
             if (_drink != null) return _drink.output;
             if (_combine != null) return _combine.output;
+            if (_cutting != null) return _cutting.output;
             return null;
         }
     }
+
+    public CuttingRecipeSO CuttingRecipe => _cutting;
+    public bool IsCutting => _cutting != null;
 
     public KitchenObjectSO BurningOutput => _burning != null ? _burning.output : null;
     public BurningRecipeSO BurningRecipe => _burning;
@@ -53,10 +57,6 @@ public sealed class RecipeResolver
             : Array.Empty<CookingToolConfigSO.CookingToolType>();
     }
 
-    public void SetDatabase(RecipeDatabaseSO db)
-    {
-        _db = db;
-    }
 
     public void ResetSlot()
     {
@@ -65,6 +65,7 @@ public sealed class RecipeResolver
         _deepFry = null;
         _drink = null;
         _combine = null;
+        _cutting = null;
         CookingTimeMax = 0f;
         _lookupDone = false;
         _recipeResolved = false;
@@ -84,26 +85,29 @@ public sealed class RecipeResolver
 
     public bool HasRecipe(KitchenObjectSO input)
     {
-        if (_config == null || input == null || _db == null)
+        if (_config == null || input == null || KitchenGameManager.Instance.RecipeDatabase == null)
             return false;
         for (int i = 0; i < _types.Count; i++)
         {
             switch (_types[i])
             {
                 case CookingToolConfigSO.CookingToolType.Frying:
-                    if (_db.GetFryingRecipe(input) != null) return true;
+                    if (KitchenGameManager.Instance.RecipeDatabase.GetFryingRecipe(input) != null) return true;
                     break;
                 case CookingToolConfigSO.CookingToolType.Baking:
-                    if (_db.GetBakingRecipe(input) != null) return true;
+                    if (KitchenGameManager.Instance.RecipeDatabase.GetBakingRecipe(input) != null) return true;
                     break;
                 case CookingToolConfigSO.CookingToolType.DeepFry:
-                    if (_db.GetDeepFryRecipe(input) != null) return true;
+                    if (KitchenGameManager.Instance.RecipeDatabase.GetDeepFryRecipe(input) != null) return true;
                     break;
                 case CookingToolConfigSO.CookingToolType.Beverage:
-                    if (_db.GetDrinkRecipeByIngredient(input) != null) return true;
+                    if (KitchenGameManager.Instance.RecipeDatabase.GetDrinkRecipeByIngredient(input) != null) return true;
                     break;
                 case CookingToolConfigSO.CookingToolType.Combine:
-                    if (_db.GetCombineRecipe(input) != null) return true;
+                    if (KitchenGameManager.Instance.RecipeDatabase.GetCombineRecipe(input) != null) return true;
+                    break;
+                case CookingToolConfigSO.CookingToolType.Cutting:
+                    if (KitchenGameManager.Instance.RecipeDatabase.GetCuttingRecipe(input) != null) return true;
                     break;
             }
         }
@@ -112,11 +116,11 @@ public sealed class RecipeResolver
 
     public bool RequiresOption(KitchenObjectSO input, bool supportsMenu)
     {
-        if (_config == null || !supportsMenu || input == null || _db == null)
+        if (_config == null || !supportsMenu || input == null || KitchenGameManager.Instance.RecipeDatabase == null)
             return false;
         if (!Supports(CookingToolConfigSO.CookingToolType.Combine))
             return false;
-        return _db.GetCombineRecipe(input) != null;
+        return KitchenGameManager.Instance.RecipeDatabase.GetCombineRecipe(input) != null;
     }
 
     public void ResolveFor(KitchenObjectSO input)
@@ -125,32 +129,37 @@ public sealed class RecipeResolver
         _baking = null;
         _deepFry = null;
         _drink = null;
+        _cutting = null;
         CookingTimeMax = 0f;
         _lookupDone = true;
         _recipeResolved = false;
-        if (_config == null || input == null || _db == null)
+        if (_config == null || input == null || KitchenGameManager.Instance.RecipeDatabase == null)
             return;
         for (int i = 0; i < _types.Count; i++)
         {
             switch (_types[i])
             {
                 case CookingToolConfigSO.CookingToolType.Frying:
-                    _frying = _db.GetFryingRecipe(input);
+                    _frying = KitchenGameManager.Instance.RecipeDatabase.GetFryingRecipe(input);
                     if (_frying != null) { CookingTimeMax = _frying.fryingTimerMax; _recipeResolved = true; return; }
                     break;
                 case CookingToolConfigSO.CookingToolType.Baking:
-                    _baking = _db.GetBakingRecipe(input);
+                    _baking = KitchenGameManager.Instance.RecipeDatabase.GetBakingRecipe(input);
                     if (_baking != null) { CookingTimeMax = _baking.bakingTimerMax; _recipeResolved = true; return; }
                     break;
                 case CookingToolConfigSO.CookingToolType.DeepFry:
-                    _deepFry = _db.GetDeepFryRecipe(input);
+                    _deepFry = KitchenGameManager.Instance.RecipeDatabase.GetDeepFryRecipe(input);
                     if (_deepFry != null) { CookingTimeMax = _deepFry.deepFryTimerMax; _recipeResolved = true; return; }
                     break;
                 case CookingToolConfigSO.CookingToolType.Beverage:
-                    _drink = _db.GetDrinkRecipeByIngredient(input);
+                    _drink = KitchenGameManager.Instance.RecipeDatabase.GetDrinkRecipeByIngredient(input);
                     if (_drink != null) { CookingTimeMax = _drink.drinkTimerMax; _recipeResolved = true; return; }
                     break;
                 case CookingToolConfigSO.CookingToolType.Combine:
+                    break;
+                case CookingToolConfigSO.CookingToolType.Cutting:
+                    _cutting = KitchenGameManager.Instance.RecipeDatabase.GetCuttingRecipe(input);
+                    if (_cutting != null) { CookingTimeMax = _cutting.cuttingProgressMax; _recipeResolved = true; return; }
                     break;
             }
         }
@@ -165,7 +174,7 @@ public sealed class RecipeResolver
 
     public void ResolveBurning(KitchenObjectSO input)
     {
-        _burning = input != null && _db != null ? _db.GetBurningRecipe(input) : null;
+        _burning = input != null && KitchenGameManager.Instance.RecipeDatabase != null ? KitchenGameManager.Instance.RecipeDatabase.GetBurningRecipe(input) : null;
         BurningTimeMax = _burning != null ? _burning.burningTimerMax : 0f;
     }
 
@@ -182,16 +191,16 @@ public sealed class RecipeResolver
         _burningResolved = true;
     }
 
-    // Non-alloc hot path: index directly into DB list. Returns false if nothing applied.
+    // Non-alloc hot path: index directly into KitchenGameManager.Instance.RecipeDatabase list. Returns false if nothing applied.
     public bool EnsureCombine(KitchenObjectSO input, int netIndex)
     {
         if (!Supports(CookingToolConfigSO.CookingToolType.Combine))
             return false;
         if (netIndex < 0 || netIndex == _appliedCombineIndex)
             return false;
-        if (input == null || _db == null)
+        if (input == null || KitchenGameManager.Instance.RecipeDatabase == null)
             return false;
-        var list = _db.GetCombineRecipesForInput(input);
+        var list = KitchenGameManager.Instance.RecipeDatabase.GetCombineRecipesForInput(input);
         if (list == null || (uint)netIndex >= (uint)list.Count)
             return false;
         KitchenObjectSO chosen = list[netIndex].output;
@@ -206,9 +215,9 @@ public sealed class RecipeResolver
     {
         if (!Supports(CookingToolConfigSO.CookingToolType.Combine))
             return false;
-        if (input == null || _db == null)
+        if (input == null || KitchenGameManager.Instance.RecipeDatabase == null)
             return false;
-        var list = _db.GetCombineRecipesForInput(input);
+        var list = KitchenGameManager.Instance.RecipeDatabase.GetCombineRecipesForInput(input);
         if (list == null || (uint)index >= (uint)list.Count)
             return false;
         _appliedCombineIndex = index;
@@ -219,7 +228,7 @@ public sealed class RecipeResolver
     private void ApplyCombine(KitchenObjectSO input, KitchenObjectSO chosenOutput)
     {
         _combine = null;
-        var list = _db != null ? _db.GetCombineRecipesForInput(input) : null;
+        var list = KitchenGameManager.Instance.RecipeDatabase != null ? KitchenGameManager.Instance.RecipeDatabase.GetCombineRecipesForInput(input) : null;
         if (list != null)
         {
             foreach (CombineRecipeSO r in list)
@@ -242,7 +251,7 @@ public sealed class RecipeResolver
         var result = new List<KitchenObjectSO>();
         if (!Supports(CookingToolConfigSO.CookingToolType.Combine))
             return result;
-        var list = _db != null ? _db.GetCombineRecipesForInput(input) : null;
+        var list = KitchenGameManager.Instance.RecipeDatabase != null ? KitchenGameManager.Instance.RecipeDatabase.GetCombineRecipesForInput(input) : null;
         if (list == null)
             return result;
         foreach (CombineRecipeSO r in list)

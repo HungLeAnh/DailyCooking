@@ -33,12 +33,11 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     private readonly CookingClock _clock = new CookingClock();
     private readonly CookingPresenter _presenter = new CookingPresenter();
 
-    private CookingToolConfigSO _cachedConfig;
     private bool _configResolved;
-    private RecipeDatabaseSO _recipeDatabase;
-
     private Action onDestroySelf;
     public Action OnDestroySelf { get => onDestroySelf; set => onDestroySelf += value; }
+
+    public event Action OnCut;
 
     public State CurrentState => _netState.Value;
     public float CookingTimer => _netCookingTimer.Value;
@@ -46,44 +45,23 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     public float CookingTimeMax => _resolver.CookingTimeMax;
     public float BurningTimeMax => _resolver.BurningTimeMax;
 
-    private CookingToolConfigSO Config
+    private void InitializeConfig()
     {
-        get
-        {
-            if (!_configResolved)
-            {
-                _configResolved = true;
-                _cachedConfig = cookingToolConfig;
-                if (_cachedConfig == null)
-                {
-                    PlacedObjectView placedObjectView = GetComponentInParent<PlacedObjectView>();
-                    _cachedConfig = placedObjectView != null && placedObjectView.PlacedObjectTypeSO != null
-                        ? placedObjectView.PlacedObjectTypeSO.cookingToolConfigSO
-                        : null;
-                }
-                _resolver.SetConfig(_cachedConfig);
-            }
-            return _cachedConfig;
-        }
+        if (_configResolved) return;
+        _configResolved = true;
+        _resolver.SetConfig(cookingToolConfig);
     }
 
-    private RecipeDatabaseSO RecipeDatabase
+    private void InitializeDependencies()
     {
-        get
-        {
-            if (_recipeDatabase == null && KitchenGameManager.Instance != null)
-            {
-                _recipeDatabase = KitchenGameManager.Instance.RecipeDatabase;
-                _resolver.SetDatabase(_recipeDatabase);
-            }
-            return _recipeDatabase;
-        }
+        InitializeConfig();
     }
 
     private void Awake()
     {
         _presenter.Init(progressBarUI, burnWarningUI, combineDetailUI, burnShowProgressAmount);
         _resolver.CombineResolved += _presenter.OnCombineResolved;
+        InitializeConfig();
     }
 
     private void OnDestroy()
@@ -94,8 +72,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        _ = Config;
-        _ = RecipeDatabase;
+        InitializeDependencies();
         _presenter.Init(progressBarUI, burnWarningUI, combineDetailUI, burnShowProgressAmount);
         _netState.OnValueChanged += HandleStateChanged;
         _netCombineRecipeIndex.OnValueChanged += HandleCombineIndexChanged;
@@ -135,11 +112,27 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     public bool RequiresOptionChoice(KitchenObjectSO input)
     {
-        _ = Config;
-        return _resolver.RequiresOption(input, Config != null && Config.supportsOptionMenu);
+        return _resolver.RequiresOption(input, cookingToolConfig != null && cookingToolConfig.supportsOptionMenu);
     }
 
     public bool HasValidRecipe() => _resolver.HasValidRecipe;
+
+    public bool IsCuttingTool
+    {
+        get
+        {
+            return _resolver.Supports(CookingToolConfigSO.CookingToolType.Cutting);
+        }
+    }
+
+    public bool IsCuttingActive
+    {
+        get
+        {
+            _resolver.EnsureResolved(_slot.CurrentSO);
+            return _resolver.IsCutting;
+        }
+    }
 
     private void UpdateTickEnabled()
     {
@@ -162,22 +155,61 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     // Recipe delegates (resolver owns state; callers read resolver.Output, not facade getters).
     public bool HasRecipeWithInput(KitchenObjectSO input)
     {
-        _ = Config;
-        _ = RecipeDatabase;
         return _resolver.HasRecipe(input);
     }
 
     public void SetCookingRecipeSO()
     {
-        _ = Config;
-        _ = RecipeDatabase;
         _resolver.ResolveFor(_slot.CurrentSO);
     }
 
     public void SetBurningRecipeSO(KitchenObjectSO kitchenObjectSO)
     {
-        _ = RecipeDatabase;
         _resolver.ResolveBurning(kitchenObjectSO);
+    }
+
+    public void Cut()
+    {
+        float cookingSpeed = 1f;
+        try { cookingSpeed = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).CookingSpeed; }
+        catch { cookingSpeed = 1f; }
+        CutServerRpc(cookingSpeed);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void CutServerRpc(float cookingSpeed)
+    {
+        if (!_slot.Has || !HasRecipeWithInput(_slot.CurrentSO))
+            return;
+        _resolver.EnsureResolved(_slot.CurrentSO);
+        if (!_resolver.IsCutting || !_resolver.HasValidRecipe)
+            return;
+
+        _netCookingTimer.Value += (int)cookingSpeed;
+        _clock.Reset(_netCookingTimer.Value, _netBurningTimer.Value);
+        CutFeedbackClientRpc();
+
+        if (_netCookingTimer.Value >= _resolver.CookingTimeMax)
+        {
+            KitchenObjectSO output = _resolver.CookingOutput;
+            _slot.Current.DestroySelf();
+            KitchenObject.SpawnKitchenObject(output, this);
+            _netCookingTimer.Value = 0f;
+            _clock.Reset(0f, 0f);
+            _presenter.Reset();
+            _resolver.ResolveFor(_slot.CurrentSO);
+        }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void CutFeedbackClientRpc()
+    {
+        _clock.Reset(_netCookingTimer.Value, _netBurningTimer.Value);
+        if (progressBarUI != null && _resolver.CookingTimeMax > 0f)
+            progressBarUI.OnProgressChanged(Mathf.Clamp01(_netCookingTimer.Value / _resolver.CookingTimeMax));
+        OnCut?.Invoke();
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.PlayChopSound(transform.position);
     }
 
     public void UpdateCookingState(State state)
@@ -194,7 +226,6 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             return;
         if (state == State.Cooking)
         {
-            _ = RecipeDatabase;
             _resolver.EnsureCombine(_slot.CurrentSO, _netCombineRecipeIndex.Value);
             _resolver.EnsureResolved(_slot.CurrentSO);
             if (!_resolver.HasValidRecipe)
@@ -244,6 +275,8 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
                 _resolver.EnsureResolved(_slot.CurrentSO);
                 if (!_resolver.HasValidRecipe)
                     break;
+                if (_resolver.IsCutting)
+                    break;
                 _clock.AddSync(Time.deltaTime);
                 if (_clock.ShouldSync())
                 {
@@ -289,6 +322,16 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     private void UpdateUI()
     {
+        if (_netState.Value == State.Idle && _slot.Has)
+        {
+            _resolver.EnsureResolved(_slot.CurrentSO);
+            if (_resolver.IsCutting && _resolver.CookingTimeMax > 0f)
+            {
+                if (progressBarUI != null)
+                    progressBarUI.OnProgressChanged(Mathf.Clamp01(_netCookingTimer.Value / _resolver.CookingTimeMax));
+                return;
+            }
+        }
         _presenter.Draw(_netState.Value, _clock, _resolver, this, progressBarUI, burnWarningUI, transform.position);
     }
 
@@ -297,8 +340,6 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         _slot.Set(kitchenObject);
         _resolver.ResetSlot();
-        _ = Config;
-        _ = RecipeDatabase;
         _resolver.ResolveFor(_slot.CurrentSO);
         _clock.Reset(_netCookingTimer.Value, _netBurningTimer.Value);
         _presenter.Reset();
@@ -329,7 +370,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         burnWarningUI.Hide();
         if (IsServer)
             _netFood.Value = new NetworkObjectReference();
-        if (Config != null && _resolver.Supports(CookingToolConfigSO.CookingToolType.Combine))
+        if (cookingToolConfig != null && _resolver.Supports(CookingToolConfigSO.CookingToolType.Combine))
             ResetCombineIndexServerRpc();
         UpdateTickEnabled();
     }
@@ -354,6 +395,12 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     public float GetProgress()
     {
+        if (_netState.Value == State.Idle && _slot.Has)
+        {
+            _resolver.EnsureResolved(_slot.CurrentSO);
+            if (_resolver.IsCutting)
+                return _resolver.CookingTimeMax > 0f ? _netCookingTimer.Value / _resolver.CookingTimeMax : 0f;
+        }
         if (_netState.Value == State.Cooking)
             return _resolver.CookingTimeMax > 0f ? _clock.LocalCook / _resolver.CookingTimeMax : 0f;
         if (_netState.Value == State.Cooked)
@@ -367,19 +414,10 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         return NetworkObject;
     }
 
-    public void SetCookingToolConfig(CookingToolConfigSO config)
-    {
-        cookingToolConfig = config;
-        _cachedConfig = config;
-        _configResolved = true;
-        _resolver.SetConfig(config);
-    }
 
     // IHasOptionalSO
     public void SetOptionKitchenObjectSO(int index)
     {
-        _ = Config;
-        _ = RecipeDatabase;
         if (_resolver.ApplyOption(_slot.CurrentSO, index))
             SetOptionKitchenObjectServerRpc(index);
     }
@@ -392,17 +430,13 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     public void ShowLocalOptionMenu(KitchenObjectSO input)
     {
-        _ = Config;
-        _ = RecipeDatabase;
-        if (Config == null || !Config.supportsOptionMenu || !_resolver.Supports(CookingToolConfigSO.CookingToolType.Combine))
+        if (cookingToolConfig == null || !cookingToolConfig.supportsOptionMenu || !_resolver.Supports(CookingToolConfigSO.CookingToolType.Combine))
             return;
         _presenter.ShowOptionMenu(input, _resolver.GetOptions(input), this);
     }
 
     public List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)
     {
-        _ = Config;
-        _ = RecipeDatabase;
         return _resolver.GetOptions(kitchenObjectSO);
     }
 

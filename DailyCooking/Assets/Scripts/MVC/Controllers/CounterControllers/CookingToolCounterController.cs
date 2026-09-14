@@ -168,6 +168,15 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         }
     }
 
+    public override void InteractAlternateEvent(PlayerStateMachine playerStateMachine)
+    {
+        if (!TryResolveTool())
+            return;
+        if (!_cookingTool.HasKitchenObject())
+            return;
+        _cookingTool.Cut();
+    }
+
     public float GetProgress()
     {
         return TryResolveTool() ? _cookingTool.GetProgress() : 0f;

@@ -13,9 +13,11 @@ public class GridInitializer : IGridInitializer
     private Transform floorContainer;
     private GameObject floorPrefab;
 
+    private DefaultGridConfigSO defaultGridConfigSO;
+
     public GridInitializer(IGridManager gridManager, IGameManager gameManager, 
         Transform roadContainer, GameObject roadPrefab, GameObject roadCornerPrefab, 
-        Transform floorContainer, GameObject floorPrefab)
+        Transform floorContainer, GameObject floorPrefab,DefaultGridConfigSO defaultGridConfigSO)
     {
         this.gridManager = gridManager;
         this.gameManager = gameManager;
@@ -24,7 +26,7 @@ public class GridInitializer : IGridInitializer
         this.roadCornerPrefab = roadCornerPrefab;
         this.floorContainer = floorContainer;
         this.floorPrefab = floorPrefab;
-
+        this.defaultGridConfigSO = defaultGridConfigSO;
     }
 
     public void InitRoad()
@@ -65,7 +67,7 @@ public class GridInitializer : IGridInitializer
 
     public void InitDefaultCounters()
     {
-        string json = GameDefine.GetDefaultGridJson();
+        string json = defaultGridConfigSO.gridArrayJson;
         List<GridObjectData>[,] gridObjectDataList = 
             JsonConvert.DeserializeObject<List<GridObjectData>[,]>
             (json,gameManager.DataHandler.Settings);

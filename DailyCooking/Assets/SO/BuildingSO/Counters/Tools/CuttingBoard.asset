@@ -10,16 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e7747bdf78fa6141a2f81d16ff91e5f, type: 3}
-  m_Name: CuttingCounter
+  m_Name: CuttingBoard
   m_EditorClassIdentifier: Scripts::PlacedObjectTypeSO
-  _guid: 74268350f66e75a42929093c253fe95f
-  id: 4
-  nameString: Cutting Counter
-  prefab: {fileID: 5777116932338227740, guid: 0945551b093e7d349ab643d351c75d53, type: 3}
+  _guid: 
+  id: CuttingBoard
+  nameString: Cutting Board
+  prefab: {fileID: 5049683964695028882, guid: 6711fff3d45258d48b04b050c43ced58, type: 3}
   visual: {fileID: 0}
-  icon: {fileID: 21300000, guid: 11bd3f331905fab42800353d5b4d6107, type: 3}
+  icon: {fileID: 0}
   width: 1
   height: 1
   itemType:
     _typeColor: {r: 0, g: 0, b: 0, a: 0}
-    _tabType: 0
+    _tabType: 3
+  cookingToolConfigSO: {fileID: 11400000, guid: 5aabdc787471479488cac1186c2b1139, type: 2}
+  isTool: 1
+  requiresUnderlyingCounter: 1
+  allowedUnderlyingCounters:
+  - {fileID: 11400000, guid: bc571c2f81ae71245b19e8a3748b8b72, type: 2}

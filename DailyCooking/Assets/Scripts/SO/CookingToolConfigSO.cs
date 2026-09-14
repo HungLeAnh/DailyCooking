@@ -11,6 +11,7 @@ public class CookingToolConfigSO : ScriptableObject
         DeepFry,
         Beverage,
         Combine,
+        Cutting,
     }
 
     [Header("Tool Types (recipe categories this tool can process)")]

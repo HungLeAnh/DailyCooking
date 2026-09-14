@@ -116,24 +116,6 @@ public class TutorialDataTests
 
 public class GameDefineTests
 {
-    [Test] public void GetDefaultGridJson_ReturnsValidJson()
-    {
-        string json = GameDefine.GetDefaultGridJson();
-        Assert.IsFalse(string.IsNullOrEmpty(json));
-        Assert.IsTrue(json.Contains("PlacedObjectTypeSOGuid"), "JSON should contain PlacedObjectTypeSOGuid");
-        Assert.IsTrue(json.Length > 1000, "JSON should be substantial (>1000 chars)");
-        // Basic structure check
-        Assert.IsTrue(json.TrimStart().StartsWith("[[["), "Should start with [[[");
-    }
-    [Test] public void GetDefaultGridJson_FallbackNotEmpty()
-    {
-#pragma warning disable CS0618
-        string legacy = GameDefine.GridArrayDataInit;
-#pragma warning restore CS0618
-        Assert.IsFalse(string.IsNullOrEmpty(legacy));
-        string resolved = GameDefine.GetDefaultGridJson();
-        Assert.IsFalse(string.IsNullOrEmpty(resolved));
-    }
     [Test] public void DefaultGridConfigSO_Exists_InResources()
     {
         var so = Resources.Load<DefaultGridConfigSO>("DefaultGridConfig");
