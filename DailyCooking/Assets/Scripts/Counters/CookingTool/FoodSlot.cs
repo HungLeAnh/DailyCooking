@@ -7,7 +7,6 @@ public sealed class FoodSlot
     private KitchenObject _food;
 
     public KitchenObject Current => _food;
-    public KitchenObjectSO CurrentSO => _food != null ? _food.GetKitchenObjectSO() : null;
     public bool Has => _food != null;
 
     public void Set(KitchenObject food)

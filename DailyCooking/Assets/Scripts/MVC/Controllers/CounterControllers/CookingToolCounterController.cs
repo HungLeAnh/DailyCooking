@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class CookingToolCounterController : ClearCounterController, IHasOptionalSO
 {
-    // Legacy: dedicated counter no longer hosts carryable CookingToolItem.
-    // Cooking tools are now grid-placed static appliances (PanToolPlaced/PotToolPlaced).
-    // This controller is kept for StoveCounter highlight/selection but does not manage tool install.
     [SerializeField] private List<CookingToolConfigSO.CookingToolType> acceptedToolTypes = new List<CookingToolConfigSO.CookingToolType>();
 
     private CookingTool _cookingTool;
@@ -15,11 +12,8 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     public bool HasFood() => TryResolveTool() && _cookingTool.HasKitchenObject();
 
-    // Child-first (scene-parented setups), then same grid cell (stacked placed tools).
     private bool TryResolveTool()
     {
-        if (_cookingTool == null)
-            _cookingTool = GetComponentInChildren<CookingTool>();
         if (_cookingTool == null)
             _cookingTool = FindStackedToolOnCell();
         return _cookingTool != null;

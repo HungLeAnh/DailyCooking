@@ -103,7 +103,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         if (_slot.TryResolveFrom(_netFood.Value))
         {
             _resolver.ResetSlot();
-            _resolver.EnsureResolved(_slot.CurrentSO);
+            _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
             _clock.Reset(_netCookingTimer.Value, _netBurningTimer.Value);
             _presenter.Reset();
             UpdateTickEnabled();
@@ -129,7 +129,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         get
         {
-            _resolver.EnsureResolved(_slot.CurrentSO);
+            _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
             return _resolver.IsCutting;
         }
     }
@@ -149,7 +149,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     private void HandleCombineIndexChanged(int previousValue, int newValue)
     {
-        _resolver.EnsureCombine(_slot.CurrentSO, newValue);
+        _resolver.EnsureCombine(_slot.Current.GetKitchenObjectSO(), newValue);
     }
 
     // Recipe delegates (resolver owns state; callers read resolver.Output, not facade getters).
@@ -160,7 +160,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     public void SetCookingRecipeSO()
     {
-        _resolver.ResolveFor(_slot.CurrentSO);
+        _resolver.ResolveFor(_slot.Current.GetKitchenObjectSO());
     }
 
     public void SetBurningRecipeSO(KitchenObjectSO kitchenObjectSO)
@@ -179,9 +179,9 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     [Rpc(SendTo.Server)]
     private void CutServerRpc(float cookingSpeed)
     {
-        if (!_slot.Has || !HasRecipeWithInput(_slot.CurrentSO))
+        if (!_slot.Has || !HasRecipeWithInput(_slot.Current.GetKitchenObjectSO()))
             return;
-        _resolver.EnsureResolved(_slot.CurrentSO);
+        _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
         if (!_resolver.IsCutting || !_resolver.HasValidRecipe)
             return;
 
@@ -197,7 +197,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             _netCookingTimer.Value = 0f;
             _clock.Reset(0f, 0f);
             _presenter.Reset();
-            _resolver.ResolveFor(_slot.CurrentSO);
+            _resolver.ResolveFor(_slot.Current.GetKitchenObjectSO());
         }
     }
 
@@ -226,8 +226,8 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             return;
         if (state == State.Cooking)
         {
-            _resolver.EnsureCombine(_slot.CurrentSO, _netCombineRecipeIndex.Value);
-            _resolver.EnsureResolved(_slot.CurrentSO);
+            _resolver.EnsureCombine(_slot.Current.GetKitchenObjectSO(), _netCombineRecipeIndex.Value);
+            _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
             if (!_resolver.HasValidRecipe)
                 return;
         }
@@ -255,7 +255,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             }
         }
 
-        _resolver.EnsureCombine(_slot.CurrentSO, _netCombineRecipeIndex.Value);
+        _resolver.EnsureCombine(_slot.Current.GetKitchenObjectSO(), _netCombineRecipeIndex.Value);
         _clock.Tick(_netState.Value, Time.deltaTime, IsServer, _netCookingTimer.Value, _netBurningTimer.Value);
 
         if (IsServer)
@@ -272,7 +272,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             case State.Idle:
                 break;
             case State.Cooking:
-                _resolver.EnsureResolved(_slot.CurrentSO);
+                _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
                 if (!_resolver.HasValidRecipe)
                     break;
                 if (_resolver.IsCutting)
@@ -293,7 +293,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
                     _netBurningTimer.Value = 0f;
                     _clock.Reset(_clock.LocalCook, 0f);
                     _presenter.Reset();
-                    _resolver.ResolveBurning(_slot.CurrentSO);
+                    _resolver.ResolveBurning(_slot.Current.GetKitchenObjectSO());
                     _resolver.MarkBurningResolved();
                 }
                 break;
@@ -324,7 +324,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         if (_netState.Value == State.Idle && _slot.Has)
         {
-            _resolver.EnsureResolved(_slot.CurrentSO);
+            _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
             if (_resolver.IsCutting && _resolver.CookingTimeMax > 0f)
             {
                 if (progressBarUI != null)
@@ -340,7 +340,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         _slot.Set(kitchenObject);
         _resolver.ResetSlot();
-        _resolver.ResolveFor(_slot.CurrentSO);
+        _resolver.ResolveFor(_slot.Current.GetKitchenObjectSO());
         _clock.Reset(_netCookingTimer.Value, _netBurningTimer.Value);
         _presenter.Reset();
         progressBarUI.Hide();
@@ -397,7 +397,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         if (_netState.Value == State.Idle && _slot.Has)
         {
-            _resolver.EnsureResolved(_slot.CurrentSO);
+            _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
             if (_resolver.IsCutting)
                 return _resolver.CookingTimeMax > 0f ? _netCookingTimer.Value / _resolver.CookingTimeMax : 0f;
         }
@@ -418,7 +418,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     // IHasOptionalSO
     public void SetOptionKitchenObjectSO(int index)
     {
-        if (_resolver.ApplyOption(_slot.CurrentSO, index))
+        if (_resolver.ApplyOption(_slot.Current.GetKitchenObjectSO(), index))
             SetOptionKitchenObjectServerRpc(index);
     }
 

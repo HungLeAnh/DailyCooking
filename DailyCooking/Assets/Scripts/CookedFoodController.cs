@@ -1,17 +1,3 @@
-// CookedFoodController.cs
-//
-// Runtime visual component for the Cooked Food/CookedFoodLit shader.
-// Drives the shader's "_CookAmount" property (0 = raw pink, 1 = fully seared/browned)
-// via MaterialPropertyBlocks, so the source material assets are NEVER modified.
-//
-// Modes:
-//  - Gameplay  : pulls cook progress from the parent CookingTool (stove/oven/fryer)
-//                while it is cooking. Place a cookable food on a cooking counter and
-//                it will sear in real time.
-//  - AutoAnimate: oscillates 0..1 for preview.
-//  - Manual    : uses the serialized `cook` value.
-//
-// Attach to a GameObject that has (or has a child with) a MeshRenderer using a CookedFoodLit material.
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -75,7 +61,6 @@ public class CookedFoodController : MonoBehaviour
 
     private float GetGameplayCook()
     {
-        if (kitchenObject == null) kitchenObject = GetComponent<KitchenObject>();
         if (kitchenObject == null) return 0f;
 
         IKitchenObjectParent parent = kitchenObject.GetKitchenObjectParent();
@@ -89,7 +74,6 @@ public class CookedFoodController : MonoBehaviour
 
     public void SetCook(float value)
     {
-        if (meshRenderers == null || meshRenderers.Length == 0) CacheRenderers();
         if (meshRenderers == null || propertyBlocks == null) return;
         for (int i = 0; i < meshRenderers.Length; i++)
         {
@@ -102,7 +86,7 @@ public class CookedFoodController : MonoBehaviour
 
     private void OnValidate()
     {
-        if (meshRenderers == null) CacheRenderers();
+        CacheRenderers();
         SetCook(gameplayDriven ? GetGameplayCook() : cook);
     }
 }
