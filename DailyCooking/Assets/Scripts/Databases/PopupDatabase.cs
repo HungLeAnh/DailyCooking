@@ -25,7 +25,6 @@ public class PopupDatabase : ScriptableObject
 
     public PopupData GetPopup(UIPopupType popupType)
     {
-        if (_popupDict == null) Initialize();
         _popupDict.TryGetValue(popupType, out var popup);
         return popup;
     }

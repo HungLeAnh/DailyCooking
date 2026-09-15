@@ -28,7 +28,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     [SerializeField] private long gamePlayingTimeMultiply = 60;
     [SerializeField] private List<KitchenObjectSO> kitchenObjectSOList;
     [SerializeField] private RecipeDatabaseSO recipeDatabase;
-    [SerializeField] private PopupDatabase popupDatabase;
 
     private State state;
 
@@ -48,7 +47,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
 
     public Dictionary<string, KitchenObjectSO> KitchenObjectSODic { get => kitchenObjectSODic; set => kitchenObjectSODic = value; }
     public RecipeDatabaseSO RecipeDatabase { get => recipeDatabase; }
-    public PopupDatabase PopupDatabase { get => popupDatabase; }
 
     protected override void Awake()
     {
@@ -60,8 +58,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         {
             kitchenObjectSODic[kitchenObjectSO.Guid] = kitchenObjectSO;
         }
-        recipeDatabase?.Initialize();
-        popupDatabase?.Initialize();
+        recipeDatabase.Initialize();
 
         if (IsServer && KitchenObjectPool.Instance != null)
         {

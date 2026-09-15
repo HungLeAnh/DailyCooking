@@ -10,7 +10,12 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>, IUIPopupManag
 
     private Dictionary<UIPopupType,UIPopup> uiPopupDictionary = new Dictionary<UIPopupType,UIPopup>();
     private List<UIPopup> visiblePopupList = new List<UIPopup>();
+    protected override void Awake()
+    {
+        base.Awake();
+        popupDatabase?.Initialize();
 
+    }
     public void HidePopup(UIPopupType popupType,object param = null)
     {
         if (!uiPopupDictionary.ContainsKey(popupType))

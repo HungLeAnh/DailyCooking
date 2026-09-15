@@ -84,38 +84,27 @@ public class RecipeDatabaseSO : ScriptableObject
         }
     }
 
-    public CuttingRecipeSO[] GetCuttingRecipes() => cuttingRecipes?.ToArray();
-    public FryingRecipeSO[] GetFryingRecipes() => fryingRecipes?.ToArray();
-    public BurningRecipeSO[] GetBurningRecipes() => burningRecipes?.ToArray();
-    public CombineRecipeSO[] GetCombineRecipes() => combineRecipes?.ToArray();
-    public BakingRecipeSO[] GetBakingRecipes() => bakingRecipes?.ToArray();
-    public DeepFryRecipeSO[] GetDeepFryRecipes() => deepFryRecipes?.ToArray();
-    public DrinkRecipeSO[] GetDrinkRecipes() => drinkRecipes?.ToArray();
 
     public CuttingRecipeSO GetCuttingRecipe(KitchenObjectSO input)
     {
-        if (_cuttingCache == null) Initialize();
         _cuttingCache.TryGetValue(input, out var recipe);
         return recipe;
     }
 
     public FryingRecipeSO GetFryingRecipe(KitchenObjectSO input)
     {
-        if (_fryingCache == null) Initialize();
         _fryingCache.TryGetValue(input, out var recipe);
         return recipe;
     }
 
     public BurningRecipeSO GetBurningRecipe(KitchenObjectSO input)
     {
-        if (_burningCache == null) Initialize();
         _burningCache.TryGetValue(input, out var recipe);
         return recipe;
     }
 
     public CombineRecipeSO GetCombineRecipe(KitchenObjectSO input)
     {
-        if (_combineCache == null) Initialize();
         if (_combineCache.TryGetValue(input, out var list) && list.Count > 0)
             return list[0];
         return null;
@@ -123,7 +112,6 @@ public class RecipeDatabaseSO : ScriptableObject
 
     public List<CombineRecipeSO> GetCombineRecipesForInput(KitchenObjectSO input)
     {
-        if (_combineCache == null) Initialize();
         if (input == null || !_combineCache.TryGetValue(input, out var list))
             return null;
         return list;
@@ -131,21 +119,18 @@ public class RecipeDatabaseSO : ScriptableObject
 
     public BakingRecipeSO GetBakingRecipe(KitchenObjectSO input)
     {
-        if (_bakingCache == null) Initialize();
         _bakingCache.TryGetValue(input, out var recipe);
         return recipe;
     }
 
     public DeepFryRecipeSO GetDeepFryRecipe(KitchenObjectSO input)
     {
-        if (_deepFryCache == null) Initialize();
         _deepFryCache.TryGetValue(input, out var recipe);
         return recipe;
     }
 
     public DrinkRecipeSO GetDrinkRecipeByIngredient(KitchenObjectSO input)
     {
-        if (_drinkIngredientCache == null) Initialize();
         if (_drinkIngredientCache.TryGetValue(input, out var list) && list.Count > 0)
             return list[0];
         return null;
@@ -153,7 +138,6 @@ public class RecipeDatabaseSO : ScriptableObject
 
     public DrinkRecipeSO GetDrinkRecipe(List<KitchenObjectSO> inputs)
     {
-        if (_drinkCache == null) Initialize();
         if (inputs == null || inputs.Count == 0) return null;
         foreach (var recipe in _drinkCache)
         {
