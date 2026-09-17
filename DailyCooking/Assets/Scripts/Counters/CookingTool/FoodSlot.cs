@@ -7,7 +7,7 @@ public sealed class FoodSlot
     private KitchenObject _food;
 
     public KitchenObject Current => _food;
-    public bool Has => _food != null;
+    public bool HasFood => _food != null;
 
     public void Set(KitchenObject food)
     {

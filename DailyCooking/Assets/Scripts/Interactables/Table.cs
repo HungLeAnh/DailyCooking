@@ -12,8 +12,7 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     private bool[] isSeatOccupied;
     private KitchenObject[] kitchenObjects;
     private bool isInitialized;
-    private Action onDestroySelf;
-    public Action OnDestroySelf { get => onDestroySelf;  set => onDestroySelf += value; }
+    public event Action OnDestroySelf;
     public override void OnNetworkSpawn()
     {
         InitializeArrays();

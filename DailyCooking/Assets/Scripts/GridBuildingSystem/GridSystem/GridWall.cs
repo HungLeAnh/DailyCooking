@@ -9,9 +9,8 @@ public class GridWall : NetworkBehaviour, IPlaceable, IDestroyable
     [SerializeField] private GameObject[] visualGameObjectArray;
     [SerializeField] private GameObject[] visualGameObjectShadowArray;
     private NetworkVariable<bool> isPlaced = new NetworkVariable<bool>(false);
-    private Action onDestroySelf;
     public NetworkVariable<bool> IsPlaced { get => isPlaced; set => isPlaced = value; }
-    public Action OnDestroySelf { get => onDestroySelf; set => onDestroySelf += value; }
+    public event Action OnDestroySelf;
 
     private void Start()
     {

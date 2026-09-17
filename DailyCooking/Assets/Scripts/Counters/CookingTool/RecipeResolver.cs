@@ -18,7 +18,6 @@ public sealed class RecipeResolver
     private BurningRecipeSO _burning;
 
     private bool _lookupDone;
-    private bool _recipeResolved;
     private bool _burningResolved;
     private int _appliedCombineIndex = -2;
 
@@ -68,7 +67,6 @@ public sealed class RecipeResolver
         _cutting = null;
         CookingTimeMax = 0f;
         _lookupDone = false;
-        _recipeResolved = false;
         _burningResolved = false;
         _appliedCombineIndex = -2;
     }
@@ -132,7 +130,6 @@ public sealed class RecipeResolver
         _cutting = null;
         CookingTimeMax = 0f;
         _lookupDone = true;
-        _recipeResolved = false;
         if (_config == null || input == null || KitchenGameManager.Instance.RecipeDatabase == null)
             return;
         for (int i = 0; i < _types.Count; i++)
@@ -141,25 +138,25 @@ public sealed class RecipeResolver
             {
                 case CookingToolConfigSO.CookingToolType.Frying:
                     _frying = KitchenGameManager.Instance.RecipeDatabase.GetFryingRecipe(input);
-                    if (_frying != null) { CookingTimeMax = _frying.fryingTimerMax; _recipeResolved = true; return; }
+                    if (_frying != null) { CookingTimeMax = _frying.fryingTimerMax; return; }
                     break;
                 case CookingToolConfigSO.CookingToolType.Baking:
                     _baking = KitchenGameManager.Instance.RecipeDatabase.GetBakingRecipe(input);
-                    if (_baking != null) { CookingTimeMax = _baking.bakingTimerMax; _recipeResolved = true; return; }
+                    if (_baking != null) { CookingTimeMax = _baking.bakingTimerMax; return; }
                     break;
                 case CookingToolConfigSO.CookingToolType.DeepFry:
                     _deepFry = KitchenGameManager.Instance.RecipeDatabase.GetDeepFryRecipe(input);
-                    if (_deepFry != null) { CookingTimeMax = _deepFry.deepFryTimerMax; _recipeResolved = true; return; }
+                    if (_deepFry != null) { CookingTimeMax = _deepFry.deepFryTimerMax; return; }
                     break;
                 case CookingToolConfigSO.CookingToolType.Beverage:
                     _drink = KitchenGameManager.Instance.RecipeDatabase.GetDrinkRecipeByIngredient(input);
-                    if (_drink != null) { CookingTimeMax = _drink.drinkTimerMax; _recipeResolved = true; return; }
+                    if (_drink != null) { CookingTimeMax = _drink.drinkTimerMax; return; }
                     break;
                 case CookingToolConfigSO.CookingToolType.Combine:
                     break;
                 case CookingToolConfigSO.CookingToolType.Cutting:
                     _cutting = KitchenGameManager.Instance.RecipeDatabase.GetCuttingRecipe(input);
-                    if (_cutting != null) { CookingTimeMax = _cutting.cuttingProgressMax; _recipeResolved = true; return; }
+                    if (_cutting != null) { CookingTimeMax = _cutting.cuttingProgressMax; return; }
                     break;
             }
         }
@@ -242,7 +239,6 @@ public sealed class RecipeResolver
         }
         CookingTimeMax = _combine != null ? _combine.combineTimerMax : 0f;
         _lookupDone = true;
-        _recipeResolved = CookingTimeMax > 0f;
         CombineResolved?.Invoke(_combine);
     }
 

@@ -9,7 +9,6 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     [SerializeField] private Transform counterTopPoint;
     [SerializeField] private MeshRenderer[] visualGameObjectArray;
 
-    private Action onDestroySelf;
     private KitchenObject _kitchenObject;
     public KitchenObject KitchenObject
     {
@@ -20,7 +19,7 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
         }
     }
 
-    public Action OnDestroySelf { get =>onDestroySelf; set => onDestroySelf += value; }
+    public event Action OnDestroySelf;
 
     protected virtual void Awake()
     {

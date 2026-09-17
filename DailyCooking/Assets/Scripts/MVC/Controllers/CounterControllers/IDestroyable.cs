@@ -2,7 +2,7 @@
 
 public interface IDestroyable
 {
-    public Action OnDestroySelf { get ; set; }
+    event Action OnDestroySelf;
     public void DestroySelf();
 
 }

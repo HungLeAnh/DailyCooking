@@ -34,8 +34,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     private readonly CookingPresenter _presenter = new CookingPresenter();
 
     private bool _configResolved;
-    private Action onDestroySelf;
-    public Action OnDestroySelf { get => onDestroySelf; set => onDestroySelf += value; }
+    public event Action OnDestroySelf;
 
     public event Action OnCut;
 
@@ -50,11 +49,6 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         if (_configResolved) return;
         _configResolved = true;
         _resolver.SetConfig(cookingToolConfig);
-    }
-
-    private void InitializeDependencies()
-    {
-        InitializeConfig();
     }
 
     private void Awake()
@@ -72,7 +66,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        InitializeDependencies();
+        InitializeConfig();
         _presenter.Init(progressBarUI, burnWarningUI, combineDetailUI, burnShowProgressAmount);
         _netState.OnValueChanged += HandleStateChanged;
         _netCombineRecipeIndex.OnValueChanged += HandleCombineIndexChanged;
@@ -97,7 +91,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     private void TryResolveFoodReference()
     {
-        if (_slot.Has)
+        if (_slot.HasFood)
             return;
         if (_slot.TryResolveFrom(_netFood.Value))
         {
@@ -127,6 +121,8 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         get
         {
+            if (!_slot.HasFood)
+                return false;
             _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
             return _resolver.IsCutting;
         }
@@ -141,6 +137,8 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     private void HandleCombineIndexChanged(int previousValue, int newValue)
     {
+        if (!_slot.HasFood)
+            return;
         _resolver.EnsureCombine(_slot.Current.GetKitchenObjectSO(), newValue);
     }
 
@@ -182,6 +180,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     private void CutServerRpc(float cookingSpeed)
     {
         if (!_slot.Has || !HasRecipeWithInput(_slot.Current.GetKitchenObjectSO()))
+        if (!_slot.HasFood || !HasRecipeWithInput(_slot.Current.GetKitchenObjectSO()))
             return;
         _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
         if (!_resolver.IsCutting || !_resolver.HasValidRecipe)
@@ -233,7 +232,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         if (state != State.Idle && state != State.Cooking)
             return;
-        if (state == State.Cooking && !_slot.Has)
+        if (state == State.Cooking && !_slot.HasFood)
             return;
         if (state == State.Cooking)
         {
@@ -257,10 +256,10 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     private void Update()
     {
-        if (!_slot.Has)
+        if (!_slot.HasFood)
         {
             TryResolveFoodReference();
-            if (!_slot.Has)
+            if (!_slot.HasFood)
                 return;
         }
 
@@ -344,7 +343,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     private void UpdateUI(KitchenObjectSO currentSO = null)
     {
-        if (_netState.Value == State.Idle && _slot.Has)
+        if (_netState.Value == State.Idle && _slot.HasFood)
         {
             _resolver.EnsureResolved(currentSO ?? _slot.Current.GetKitchenObjectSO());
             if (_resolver.IsCutting && _resolver.CookingTimeMax > 0f)
@@ -404,7 +403,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     public bool HasKitchenObject(int index = 0)
     {
-        return _slot.Has;
+        return _slot.HasFood;
     }
 
     // IHasProgress
@@ -415,7 +414,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     public float GetProgress()
     {
-        if (_netState.Value == State.Idle && _slot.Has)
+        if (_netState.Value == State.Idle && _slot.HasFood)
         {
             _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
             if (_resolver.IsCutting)
@@ -438,6 +437,8 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     // IHasOptionalSO
     public void SetOptionKitchenObjectSO(int index)
     {
+        if (!_slot.HasFood)
+            return;
         if (_resolver.ApplyOption(_slot.Current.GetKitchenObjectSO(), index))
             SetOptionKitchenObjectServerRpc(index);
     }
