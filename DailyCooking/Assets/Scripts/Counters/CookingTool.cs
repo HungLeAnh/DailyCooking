@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-// Facade: owns NetworkVariables + RPCs + Unity lifecycle only.
-// Logic lives in FoodSlot / RecipeResolver / CookingClock / CookingPresenter.
 public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent, IHasOptionalSO, IDestroyable, IPlaceable
 {
     public enum State
@@ -179,7 +177,6 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     [Rpc(SendTo.Server)]
     private void CutServerRpc(float cookingSpeed)
     {
-        if (!_slot.Has || !HasRecipeWithInput(_slot.Current.GetKitchenObjectSO()))
         if (!_slot.HasFood || !HasRecipeWithInput(_slot.Current.GetKitchenObjectSO()))
             return;
         _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
