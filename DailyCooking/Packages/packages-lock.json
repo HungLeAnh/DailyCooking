@@ -14,7 +14,7 @@
       "dependencies": {
         "com.unity.ugui": "1.0.0"
       },
-      "hash": "8b76751edaaf8ba86698977a89861561f5799f47"
+      "hash": "4d00ad8c608bf42c8668fdf192130fc16e21a130"
     },
     "com.coffee.unmask": {
       "version": "https://github.com/mob-sakai/UnmaskForUGUI.git",
@@ -140,12 +140,13 @@
       }
     },
     "com.unity.film-internal-utilities": {
-      "version": "0.19.2-preview",
+      "version": "0.20.0-preview",
       "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.timeline": "1.2.18",
-        "com.unity.modules.uielements": "1.0.0"
+        "com.unity.modules.uielements": "1.0.0",
+        "com.unity.modules.imageconversion": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -535,12 +536,12 @@
       }
     },
     "com.unity.toonshader": {
-      "version": "0.11.0-preview",
+      "version": "0.15.0-preview",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.render-pipelines.core": "10.0.0",
-        "com.unity.film-internal-utilities": "0.19.2-preview"
+        "com.unity.render-pipelines.core": "17.0.3",
+        "com.unity.film-internal-utilities": "0.20.0-preview"
       },
       "url": "https://packages.unity.com"
     },

@@ -108,7 +108,7 @@ public class FlexibleGridLayout : LayoutGroup
         {
             CalculateWrappingLayout();
             float parentWidth = rectTransform.rect.width;
-            SetLayoutInputForAxis(parentWidth, parentWidth, -1, 0);
+            SetLayoutInputForAxis(parentWidth, parentWidth, parentWidth, -1, 0);
         }
         else
         {
@@ -169,13 +169,13 @@ public class FlexibleGridLayout : LayoutGroup
     {
         if (wrapContent)
         {
-            SetLayoutInputForAxis(totalHeight, totalHeight, -1, 1);
+            SetLayoutInputForAxis(totalHeight, totalHeight, totalHeight, -1, 1);
         }
         else
         {
             if (rectChildren.Count == 0)
             {
-                SetLayoutInputForAxis(padding.top + padding.bottom, padding.top + padding.bottom, -1, 1);
+                SetLayoutInputForAxis(padding.top + padding.bottom, padding.top + padding.bottom, padding.top + padding.bottom, -1, 1);
                 return;
             }
 
@@ -184,7 +184,7 @@ public class FlexibleGridLayout : LayoutGroup
                 + (spacing.y * (totalRows - 1))
                 + padding.top + padding.bottom;
 
-            SetLayoutInputForAxis(totalPreferredHeight, totalPreferredHeight, -1, 1);
+            SetLayoutInputForAxis(totalPreferredHeight, totalPreferredHeight, totalPreferredHeight, -1, 1);
         }
     }
 
