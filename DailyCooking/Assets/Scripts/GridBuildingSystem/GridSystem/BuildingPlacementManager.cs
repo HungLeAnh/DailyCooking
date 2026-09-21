@@ -65,8 +65,8 @@ public class BuildingPlacementManager : IBuildingPlacementManager
                 break;
             }
 
-            // Dedicated-counter requirement: Pan/Pot (isTool + requiresUnderlyingCounter) must sit on StoveCounter
-            if (placedObjectTypeSO.isTool && placedObjectTypeSO.requiresUnderlyingCounter)
+            // Tools must sit on an underlying counter: Pan/Pot on StoveCounter, etc.
+            if (placedObjectTypeSO.isTool)
             {
                 bool hasRequiredCounter = false;
                 foreach (var placedObject in gridObject)
@@ -98,7 +98,14 @@ public class BuildingPlacementManager : IBuildingPlacementManager
                     canBuild = false;
                     break;
                 }
-                // Tool stacking on dedicated counter is allowed — skip standard CanBuild blocking
+                // One tool per slot — stacking is not allowed
+                if (ToolSlotResolver.TryFindUnderlyingCounter(gridManager.Grid, placedObjectTypeSO, gridPosition, out PlacedObjectView slotCounterView) &&
+                    ToolSlotResolver.IsToolSlotOccupied(gridManager.Grid, slotCounterView, gridPosition))
+                {
+                    canBuild = false;
+                    break;
+                }
+                // Slot free — skip standard CanBuild blocking
                 continue;
             }
 
@@ -119,6 +126,12 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
             Vector3 placedObjectWorldPosition = gridManager.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
                 new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
+            if (placedObjectTypeSO.isTool &&
+                ToolSlotResolver.TryFindUnderlyingCounter(gridManager.Grid, placedObjectTypeSO, placedObjectOrigin, out PlacedObjectView toolCounterView) &&
+                ToolSlotResolver.TryGetToolSlotPosition(toolCounterView, placedObjectOrigin, out Vector3 toolSlotPos))
+            {
+                placedObjectWorldPosition = toolSlotPos;
+            }
             KitchenGameManager.Instance.OnSpawnRequestCompleted -= HandlePlacedObjectSpawnCompleted;
             KitchenGameManager.Instance.OnSpawnRequestCompleted += HandlePlacedObjectSpawnCompleted;
 

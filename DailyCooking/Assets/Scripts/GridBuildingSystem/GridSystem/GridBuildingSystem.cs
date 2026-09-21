@@ -227,6 +227,12 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
         Vector3 placedObjectWorldPosition = gridManager.Grid.GetWorldPosition(origin) +
             new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.Grid.GetCellSize();
+        if (placedObjectTypeSO.isTool &&
+            ToolSlotResolver.TryFindUnderlyingCounter(gridManager.Grid, placedObjectTypeSO, origin, out PlacedObjectView toolCounterView) &&
+            ToolSlotResolver.TryGetToolSlotPosition(toolCounterView, origin, out Vector3 toolSlotPos))
+        {
+            placedObjectWorldPosition = toolSlotPos;
+        }
         if (!GridObjectSpawner.IsObjectPlaced(gridManager.Grid, placedObjectTypeSO, origin,dir))
         {
             return;

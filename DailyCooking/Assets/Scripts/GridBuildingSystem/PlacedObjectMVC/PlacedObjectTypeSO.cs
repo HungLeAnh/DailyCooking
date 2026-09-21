@@ -34,13 +34,10 @@ public class PlacedObjectTypeSO : SerializableScriptableObject
     public CookingToolConfigSO cookingToolConfigSO;
 
     [Header("Tool Item")]
-    [Tooltip("True when this PlacedObjectTypeSO represents a carryable cooking tool (sold in shop, stored, placed on counters).")]
+    [Tooltip("True when this PlacedObjectTypeSO represents a carryable cooking tool (sold in shop, stored, placed on counters). Every tool must sit on one of the allowed counters below.")]
     public bool isTool;
 
-    [Header("Placement Requirement")]
-    [Tooltip("If true, this object can only be placed on top of one of the allowed counters.")]
-    public bool requiresUnderlyingCounter;
-    [Tooltip("List of counters that are allowed underneath. If empty, any counter is allowed. Used when requiresUnderlyingCounter is true.")]
+    [Tooltip("List of counters that are allowed underneath. If empty, any counter is allowed.")]
     public List<PlacedObjectTypeSO> allowedUnderlyingCounters = new List<PlacedObjectTypeSO>();
 
 

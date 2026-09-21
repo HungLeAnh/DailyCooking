@@ -67,9 +67,9 @@ public class GridObject
 
     public bool CanBuild(PlacedObjectTypeSO toPlace, Dir dir)
     {
-        // Tools with dedicated-counter requirement are handled in BuildingPlacementManager
-        // with allowedUnderlyingCounters check; allow stacking on dedicated counter.
-        if (toPlace != null && toPlace.isTool && toPlace.requiresUnderlyingCounter)
+        // Tools are validated against allowedUnderlyingCounters in BuildingPlacementManager;
+        // allow stacking on the underlying counter here.
+        if (toPlace != null && toPlace.isTool)
             return true;
         return CanBuild(toPlace != null ? toPlace.itemType.TabType : InventoryTabType.Counter, dir);
     }

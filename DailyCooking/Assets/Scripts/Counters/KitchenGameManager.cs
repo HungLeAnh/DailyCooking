@@ -217,7 +217,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
             Debug.LogError($"KitchenGameManager: Missing prefab for PlacedObjectTypeSO '{placedObjectTypeSO.name}' Guid={placeObjectTypeSOGuid}", placedObjectTypeSO);
             return;
         }
-        Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition, Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0), GridBuildingSystem.Instance.Container).transform;
+        Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, ResolveToolSlotPosition(worldPosition, placedObjectTypeSO, origin), Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0), GridBuildingSystem.Instance.Container).transform;
         var networkObject = placedObjectTransform.GetComponent<NetworkObject>();
         PlacedObjectView placedObjectView = networkObject.GetComponent<PlacedObjectView>();
         placedObjectView.Intialize(placeObjectTypeSOGuid, origin, dir, isPreview);
@@ -226,6 +226,18 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         networkObject.ChangeOwnership(targetClientId);
 
         NotifyClientOfSpawnClientRpc(networkObject, RpcTarget.Single(targetClientId, RpcTargetUse.Temp));
+    }
+
+    private static Vector3 ResolveToolSlotPosition(Vector3 worldPosition, PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin)
+    {
+        if (placedObjectTypeSO != null && placedObjectTypeSO.isTool &&
+            GridBuildingSystem.Instance != null && GridBuildingSystem.Instance.GridManager != null &&
+            ToolSlotResolver.TryFindUnderlyingCounter(GridBuildingSystem.Instance.GridManager.Grid, placedObjectTypeSO, origin, out PlacedObjectView counterView) &&
+            ToolSlotResolver.TryGetToolSlotPosition(counterView, origin, out Vector3 slotPos))
+        {
+            return slotPos;
+        }
+        return worldPosition;
     }
 
     private void HandleSpawnRequestCompleted(NetworkObject spawnedObject)

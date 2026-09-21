@@ -38,8 +38,8 @@ public class GridObjectSpawner
             return canBuild;
         }
 
-        // Dedicated-counter requirement for tools (server authority)
-        if (placedObjectTypeSO != null && placedObjectTypeSO.isTool && placedObjectTypeSO.requiresUnderlyingCounter)
+        // Tools must sit on an underlying counter (server authority)
+        if (placedObjectTypeSO != null && placedObjectTypeSO.isTool)
         {
             if (placedObjectTypeSO.allowedUnderlyingCounters != null && placedObjectTypeSO.allowedUnderlyingCounters.Count > 0)
             {
@@ -71,6 +71,10 @@ public class GridObjectSpawner
                 }
                 if (!hasCounter) return false;
             }
+            // One tool per slot — stacking is not allowed (server authority)
+            if (ToolSlotResolver.TryFindUnderlyingCounter(grid, placedObjectTypeSO, origin, out PlacedObjectView slotCounterView) &&
+                ToolSlotResolver.IsToolSlotOccupied(grid, slotCounterView, origin))
+                return false;
             return true;
         }
 

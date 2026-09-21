@@ -24,7 +24,7 @@ public class PrefabSpawnService : NetworkPersistentSingleton<PrefabSpawnService>
             return;
         }
 
-        Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition,
+        Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, ResolveSpawnPosition(worldPosition, placeObjectTypeSOGuid, placedObjectTypeSO, origin),
             Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0),
             GridBuildingSystem.Instance.Container).transform;
         var networkObject = placedObjectTransform.GetComponent<NetworkObject>();
@@ -35,6 +35,18 @@ public class PrefabSpawnService : NetworkPersistentSingleton<PrefabSpawnService>
         networkObject.ChangeOwnership(targetClientId);
 
         NotifyClientOfSpawnClientRpc(networkObject, RpcTarget.Single(targetClientId, RpcTargetUse.Temp));
+    }
+
+    private static Vector3 ResolveSpawnPosition(Vector3 worldPosition, string placeObjectTypeSOGuid, PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin)
+    {
+        if (placedObjectTypeSO != null && placedObjectTypeSO.isTool &&
+            GridBuildingSystem.Instance != null && GridBuildingSystem.Instance.GridManager != null &&
+            ToolSlotResolver.TryFindUnderlyingCounter(GridBuildingSystem.Instance.GridManager.Grid, placedObjectTypeSO, origin, out PlacedObjectView counterView) &&
+            ToolSlotResolver.TryGetToolSlotPosition(counterView, origin, out Vector3 slotPos))
+        {
+            return slotPos;
+        }
+        return worldPosition;
     }
 
     [Rpc(SendTo.SpecifiedInParams)]

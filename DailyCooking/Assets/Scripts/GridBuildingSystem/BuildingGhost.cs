@@ -138,6 +138,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
             return;
 
         targetPosition.y = 1f;
+        ApplyToolSlotHeight(ref targetPosition);
         visualContainer.position = Vector3.Lerp(visualContainer.position, targetPosition, Time.deltaTime * 20f);
         visual.position = Vector3.Lerp(visual.position, targetPosition, Time.deltaTime * 20f);
         visual.rotation = Quaternion.Lerp(visual.localRotation, targetQuaternion, Time.deltaTime * 20f);
@@ -198,6 +199,8 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
             KitchenGameManager.Instance.OnSpawnRequestCompleted += OnSpawnRequestCompletedHandler;
 
             position.y = 1f;
+            ApplyToolSlotHeight(ref position);
+            pendingSpawnPosition = position;
             Debug.Log("Creating Placed Object at: " + position);
             PlacedObjectFactory.Create(position, Vector2Int.zero, Dir.Down,
                 placedObjectTypeSO, NetworkManager.Singleton.LocalClientId,true);
@@ -220,7 +223,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
         ShowCanvas(true);
 
         visualContainer.position = pendingSpawnPosition;
-        visual.position = new Vector3(pendingSpawnPosition.x, 4f, pendingSpawnPosition.z);
+        visual.position = pendingSpawnPosition;
     }
 
 
@@ -291,8 +294,23 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
     public void SnapTo(Vector3 targetPoint)
     {
         targetPoint.y = 1f;
+        ApplyToolSlotHeight(ref targetPoint);
         visualContainer.position = targetPoint;
         visual.localRotation =  targetQuaternion;
+    }
+
+    private void ApplyToolSlotHeight(ref Vector3 pos)
+    {
+        if (placedObjectTypeSO == null || !placedObjectTypeSO.isTool) return;
+        GridBuildingSystem gbs = GridBuildingSystem.Instance;
+        if (gbs == null || gbs.GridManager == null) return;
+        gbs.GridManager.GetXZ(new Vector3(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y), Mathf.RoundToInt(pos.z)), out int x, out int z);
+        Vector2Int origin = gbs.GridManager.ValidateGridPosition(new Vector2Int(x, z));
+        if (ToolSlotResolver.TryFindUnderlyingCounter(gbs.GridManager.Grid, placedObjectTypeSO, origin, out PlacedObjectView counterView) &&
+            ToolSlotResolver.TryGetToolSlotPosition(counterView, origin, out Vector3 slotPos))
+        {
+            pos = slotPos;
+        }
     }
 }
 

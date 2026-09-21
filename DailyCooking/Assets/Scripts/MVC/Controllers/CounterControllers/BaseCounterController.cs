@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -8,6 +9,8 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
 
     [SerializeField] private Transform counterTopPoint;
     [SerializeField] private MeshRenderer[] visualGameObjectArray;
+    [Tooltip("Additional top slots for multi-cell counters, ordered to match GetGridPositionList() cell order. Empty = single slot (counterTopPoint).")]
+    [SerializeField] private List<Transform> topSlots = new List<Transform>();
 
     private KitchenObject _kitchenObject;
     public KitchenObject KitchenObject
@@ -67,7 +70,25 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     }
     public Transform GetKitchenObjectFollowTransform(int index = 0)
     {
-        return counterTopPoint;
+        return GetTopSlotTransform(index) ?? counterTopPoint;
+    }
+
+    public virtual int GetTopSlotCount()
+    {
+        if (topSlots != null && topSlots.Count > 0)
+            return topSlots.Count;
+        return counterTopPoint != null ? 1 : 0;
+    }
+
+    public virtual Transform GetTopSlotTransform(int index)
+    {
+        if (topSlots != null && topSlots.Count > 0)
+        {
+            if (index < 0 || index >= topSlots.Count)
+                return null;
+            return topSlots[index];
+        }
+        return index == 0 ? counterTopPoint : null;
     }
     public void SetKitchenObject(KitchenObject kitchenObject, int index = 0)
     {
