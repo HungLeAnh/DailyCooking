@@ -3,13 +3,15 @@ guid: ab84b53e40d90d64ba29301d9f74837a
 AssetOrigin:
   serializedVersion: 1
   productId: 317493
-  packageName: Character Pack - Auto Character Generator, Hyper Casual, Optimized
-    Models
+  packageName: Character Pack - Auto Character Generator, Hyper Casual, Optimized Models
   packageVersion: 1.0
   assetPath: Assets/LutorGames/CharacterPack/Art/Edirot Icons/Block.png
   uploadId: 810102
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: 2537882373423050008
+    second: Block_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -61,7 +63,9 @@ TextureImporter:
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
+  spriteTessellationMethod: 0
   spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -129,7 +133,29 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: Block_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81d2b95829e583320800000000000000
+      internalID: 2537882373423050008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []

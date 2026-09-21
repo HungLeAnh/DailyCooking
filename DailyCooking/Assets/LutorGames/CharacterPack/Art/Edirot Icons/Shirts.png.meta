@@ -3,13 +3,15 @@ guid: b5c3d0df0666e2e468dac9604c558cae
 AssetOrigin:
   serializedVersion: 1
   productId: 317493
-  packageName: Character Pack - Auto Character Generator, Hyper Casual, Optimized
-    Models
+  packageName: Character Pack - Auto Character Generator, Hyper Casual, Optimized Models
   packageVersion: 1.0
   assetPath: Assets/LutorGames/CharacterPack/Art/Edirot Icons/Shirts.png
   uploadId: 810102
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: -5741852857094109015
+    second: Shirts_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -61,7 +63,9 @@ TextureImporter:
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
+  spriteTessellationMethod: 0
   spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -129,7 +133,29 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: Shirts_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a808548f37d050b0800000000000000
+      internalID: -5741852857094109015
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []

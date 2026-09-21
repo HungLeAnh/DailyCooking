@@ -3,13 +3,15 @@ guid: 42a9b9b31c6dec4419609a6c108fc99d
 AssetOrigin:
   serializedVersion: 1
   productId: 317493
-  packageName: Character Pack - Auto Character Generator, Hyper Casual, Optimized
-    Models
+  packageName: Character Pack - Auto Character Generator, Hyper Casual, Optimized Models
   packageVersion: 1.0
   assetPath: Assets/LutorGames/CharacterPack/Art/Edirot Icons/Horn.png
   uploadId: 810102
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: 8080504193523864044
+    second: Horn_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -61,7 +63,9 @@ TextureImporter:
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
+  spriteTessellationMethod: 0
   spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -129,7 +133,29 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: Horn_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce15b0d60c7b32070800000000000000
+      internalID: 8080504193523864044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
