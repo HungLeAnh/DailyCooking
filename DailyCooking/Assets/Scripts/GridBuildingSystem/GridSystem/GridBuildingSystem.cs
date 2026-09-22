@@ -219,8 +219,9 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     }
 
     [Rpc(SendTo.Server)]
-    public void SpawnObjectServerRpc(string placedObjectTypeSOGuid,Vector2Int origin,Dir dir)
+    public void SpawnObjectServerRpc(string placedObjectTypeSOGuid,Vector2Int origin,Dir dir, RpcParams rpcParams = default)
     {
+        if (string.IsNullOrEmpty(placedObjectTypeSOGuid)) return;
         PlacedObjectTypeSO placedObjectTypeSO = GetPlacedObjectTypeSOByGuid(placedObjectTypeSOGuid);
         if (placedObjectTypeSO == null) return;
 
@@ -237,9 +238,11 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         {
             return;
         }
-        
+
+        // Use the RPC sender as owner — LocalClientId on the server is always the host.
+        ulong ownerClientId = rpcParams.Receive.SenderClientId;
         PlacedObjectFactory.Create(placedObjectWorldPosition, origin, dir,
-            placedObjectTypeSO,NetworkManager.Singleton.LocalClientId,false);
+            placedObjectTypeSO, ownerClientId, false);
     }
     [Rpc(SendTo.Server)]
     public void UpdateGridDataServerRpc(NetworkObjectReference networkObjectReference)

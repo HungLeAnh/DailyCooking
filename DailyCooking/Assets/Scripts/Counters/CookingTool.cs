@@ -20,11 +20,11 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     [SerializeField] private CombineDetailUI combineDetailUI;
     [SerializeField] private CookingToolConfigSO cookingToolConfig;
 
-    private readonly NetworkVariable<State> _netState = new NetworkVariable<State>(State.Idle);
-    private readonly NetworkVariable<float> _netCookingTimer = new NetworkVariable<float>(0f);
-    private readonly NetworkVariable<float> _netBurningTimer = new NetworkVariable<float>(0f);
-    private readonly NetworkVariable<int> _netCombineRecipeIndex = new NetworkVariable<int>(-1);
-    private readonly NetworkVariable<NetworkObjectReference> _netFood = new NetworkVariable<NetworkObjectReference>();
+    private readonly NetworkVariable<State> _netState = new NetworkVariable<State>(State.Idle, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<float> _netCookingTimer = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<float> _netBurningTimer = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<int> _netCombineRecipeIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<NetworkObjectReference> _netFood = new NetworkVariable<NetworkObjectReference>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private readonly FoodSlot _slot = new FoodSlot();
     private readonly RecipeResolver _resolver = new RecipeResolver();
@@ -177,6 +177,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     [Rpc(SendTo.Server)]
     private void CutServerRpc(float cookingSpeed)
     {
+        if (cookingSpeed <= 0f || cookingSpeed > 10f) return;
         if (!_slot.HasFood || !HasRecipeWithInput(_slot.Current.GetKitchenObjectSO()))
             return;
         _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());

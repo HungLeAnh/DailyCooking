@@ -65,6 +65,15 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     }
     private void NetworkManager_ConnectionApprovalCallback(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
     {
+        // Host-authoritative gate: capacity + duplicate-client guard.
+        // Payload validation (PlayerId) happens in SetplayerIdServerRpc via SenderClientId.
+        if (playerDataNetworkList.Count >= MAX_PLAYER_AMOUNT)
+        {
+            connectionApprovalResponse.Approved = false;
+            connectionApprovalResponse.Reason = "Room full";
+            connectionApprovalResponse.CreatePlayerObject = false;
+            return;
+        }
         connectionApprovalResponse.Approved = true;
         connectionApprovalResponse.CreatePlayerObject = false;
     }
@@ -81,7 +90,10 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     [Rpc(SendTo.Server)]
     private void SyncDataToNewClientServerRpc(ulong clientId)
     {
+        if (GameManager.Instance?.GameData == null || GameManager.Instance.DataHandler == null) return;
+        GameManager.Instance.GameData.SyncVersion++;
         string jsonData = GameManager.Instance.DataHandler.ConvertGameDataToJson(GameManager.Instance.GameData);
+        if (string.IsNullOrEmpty(jsonData)) return;
 
         LoadGameDataClientRpc(jsonData, RpcTarget.Single(clientId, RpcTargetUse.Temp));
     }
@@ -89,6 +101,9 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     private void LoadGameDataClientRpc(string jsonData, RpcParams rpcParams = default)
     {
         if (GameManager.Instance == null) return;
+        if (string.IsNullOrEmpty(jsonData)) return;
+        try
+        {
         if (GameManager.Instance.DataHandler == null)
         {
             var tempHandler = new FileDataHandler(Application.persistentDataPath, "GameData_temp");
@@ -98,23 +113,40 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         {
             GameManager.Instance.GameData = GameManager.Instance.DataHandler.LoadFromJson(jsonData);
         }
+        if (GameManager.Instance.GameData == null) return;
         OnDataSyncToNewClient?.Invoke(this, EventArgs.Empty);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"LoadGameDataClientRpc failed: {e.Message}");
+        }
     }
     [Rpc(SendTo.Server)]
     private void SetplayerNameServerRpc(string playerName, RpcParams serverRpcParams = default)
     {
+        if (string.IsNullOrWhiteSpace(playerName)) return;
+        string clean = playerName.Trim();
+        if (clean.Length > 32) clean = clean.Substring(0, 32);
         int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        if (playerDataIndex < 0 || playerDataIndex >= playerDataNetworkList.Count) return;
 
         PlayerData playerData = playerDataNetworkList[playerDataIndex];
 
-        playerData.playerName = playerName;
+        playerData.playerName = clean;
 
         playerDataNetworkList[playerDataIndex] = playerData;
     }
     [Rpc(SendTo.Server)]
     private void SetplayerIdServerRpc(string playerId, RpcParams serverRpcParams = default)
     {
+        if (string.IsNullOrEmpty(playerId) || playerId.Length > 128) return;
         int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        if (playerDataIndex < 0 || playerDataIndex >= playerDataNetworkList.Count) return;
+        // Prevent duplicate PlayerIds (one account, one slot).
+        for (int i = 0; i < playerDataNetworkList.Count; i++)
+        {
+            if (i != playerDataIndex && playerDataNetworkList[i].playerId.ToString() == playerId) return;
+        }
 
         PlayerData playerData = playerDataNetworkList[playerDataIndex];
 

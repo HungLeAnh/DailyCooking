@@ -34,7 +34,7 @@ public class BotStateMachine
 
     public void Update()
     {
-        if (!botController.IsHost || !botController.IsServer)
+        if (!botController.IsServer)
             return; 
 
         if (currentState != null)

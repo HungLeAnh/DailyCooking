@@ -10,10 +10,10 @@ using UnityEngine.EventSystems;
 [Serializable]
 public class PlacedObjectView : NetworkBehaviour
 {
-    private NetworkVariable<FixedString64Bytes> placedObjectTypeSOGuid = new NetworkVariable<FixedString64Bytes>();
-    private NetworkVariable<Vector2Int> origin = new NetworkVariable<Vector2Int>();
-    private NetworkVariable<Dir> dir = new NetworkVariable<Dir>();
-    private NetworkVariable<bool> isPreview = new NetworkVariable<bool>();
+    private NetworkVariable<FixedString64Bytes> placedObjectTypeSOGuid = new NetworkVariable<FixedString64Bytes>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<Vector2Int> origin = new NetworkVariable<Vector2Int>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<Dir> dir = new NetworkVariable<Dir>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<bool> isPreview = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private PlacedObjectTypeSO placedObjectTypeSO;
     public Vector2Int Origin => origin.Value;
     public Dir Dir => dir.Value;

@@ -55,12 +55,19 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
     [Rpc(SendTo.Server)]
     private void TryAddIngredientServerRpc(string kitchenObjectSOGuid)
     {
+        if (string.IsNullOrEmpty(kitchenObjectSOGuid)) return;
+        KitchenObjectSO so = KitchenGameManager.Instance != null ? KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuid) : null;
+        if (so == null) return;
+        if (!validKitchenObjectSOList.Contains(so)) return;
+        if (_ingredientSOList.Contains(so)) return;
         TryAddIngredientClientRpc(kitchenObjectSOGuid);
     }
     [Rpc(SendTo.ClientsAndHost)]
     private void TryAddIngredientClientRpc(string kitchenObjectSOGuid)
     {
         KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuid);
+        if (kitchenObjectSO == null) return;
+        if (_ingredientSOList.Contains(kitchenObjectSO)) return;
         _ingredientSOList.Add(kitchenObjectSO);
         OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
         {
@@ -136,6 +143,18 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
 
     }
     public void Serve()
+    {
+        if (IsServer)
+        {
+            ServeClientRpc();
+        }
+        else
+        {
+            RequestServeServerRpc();
+        }
+    }
+    [Rpc(SendTo.Server)]
+    private void RequestServeServerRpc()
     {
         ServeClientRpc();
     }

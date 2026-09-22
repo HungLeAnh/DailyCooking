@@ -29,11 +29,33 @@ public class KitchenObject : NetworkBehaviour
     }
     public void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent, int index = 0)
     {
-        SetKitchenObjectParentClientRpc(kitchenObjectParent.GetNetworkObject(),index);
+        if (kitchenObjectParent == null) return;
+        var parentNetObj = kitchenObjectParent.GetNetworkObject();
+        if (parentNetObj == null || !parentNetObj.IsSpawned) return;
+        if (!IsSpawned) return;
+        if (IsServer)
+        {
+            ApplyKitchenObjectParentClientRpc(parentNetObj, index);
+        }
+        else
+        {
+            RequestKitchenObjectParentServerRpc(parentNetObj, index);
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestKitchenObjectParentServerRpc(NetworkObjectReference networkObjectReference, int index = 0)
+    {
+        if (!networkObjectReference.TryGet(out NetworkObject parentNetObj) || parentNetObj == null || !parentNetObj.IsSpawned) return;
+        var parent = parentNetObj.GetComponentInChildren<CookingTool>();
+        IKitchenObjectParent validated = parent != null ? (IKitchenObjectParent)parent : parentNetObj.GetComponent<IKitchenObjectParent>();
+        if (validated == null) return;
+        if (validated.HasKitchenObject(index)) return;
+        ApplyKitchenObjectParentClientRpc(parentNetObj, index);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void SetKitchenObjectParentClientRpc(NetworkObjectReference networkObjectReference, int index = 0)
+    private void ApplyKitchenObjectParentClientRpc(NetworkObjectReference networkObjectReference, int index = 0)
     {
         //Debug.Log("SetKitchenObjectParentClientRpc called with networkObjectReference: " + networkObjectReference.NetworkObjectId);
         networkObjectReference.TryGet(out NetworkObject kitchenObjectParentNetworkObject);
@@ -76,6 +98,7 @@ public class KitchenObject : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void DestroySelfServerRpc(int index = 0)
     {
+        if (!IsSpawned) return;
         ClearKitchenObjectOnParentClientRpc(index);
         var netObj = gameObject.GetComponent<NetworkObject>();
         netObj.Despawn();
@@ -91,6 +114,7 @@ public class KitchenObject : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     public void ClearKitchenObjectOnParentClientRpc(int index = 0)
     {
+        if (kitchenObjectParent == null) return;
         kitchenObjectParent.ClearKitchenObject(index);
     }
 

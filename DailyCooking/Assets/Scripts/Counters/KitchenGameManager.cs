@@ -152,9 +152,9 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     [Rpc(SendTo.Server)]
     private void SpawnKitchenObjectServerRpc(string kitchenObjectSOGuid, NetworkObjectReference networkObjectReference, int index = 0)
     {
-        KitchenObjectSO kitchenObjectSO = kitchenObjectSODic[kitchenObjectSOGuid];
+        if (string.IsNullOrEmpty(kitchenObjectSOGuid) || !kitchenObjectSODic.TryGetValue(kitchenObjectSOGuid, out KitchenObjectSO kitchenObjectSO) || kitchenObjectSO == null) return;
 
-        networkObjectReference.TryGet(out NetworkObject kitchenObjectParentNetworkObject);
+        if (!networkObjectReference.TryGet(out NetworkObject kitchenObjectParentNetworkObject) || kitchenObjectParentNetworkObject == null || !kitchenObjectParentNetworkObject.IsSpawned) return;
         IKitchenObjectParent kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponentInChildren<CookingTool>();
         if (kitchenObjectParent == null)
         {

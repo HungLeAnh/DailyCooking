@@ -16,9 +16,10 @@ public class RefillerKitchenObject : KitchenObject
     [Rpc(SendTo.Server)]
     public void RefillContainerServerRpc(NetworkBehaviourReference containerCounter)
     {
+        if (refillKitchenObjectSO == null) return;
         var kitchenObjectSO = GetKitchenObjectSO() as RefillerKitchenObjectSO;
-        //Debug.Log("kitchenObjectSO refillingAmount: " + kitchenObjectSO.refillingAmount);
-        containerCounter.TryGet(out NetworkBehaviour containerCounterNetworkBehaviour);
+        if (kitchenObjectSO == null) return;
+        if (!containerCounter.TryGet(out NetworkBehaviour containerCounterNetworkBehaviour) || containerCounterNetworkBehaviour == null) return;
         if (containerCounterNetworkBehaviour is IContainerCounter containerCounterInterface)
         {
             //Debug.Log("RefillContainerClientRpc called with containerCounter: " + containerCounterInterface);

@@ -26,20 +26,20 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     private BotStateMachine stateMachine;
     private List<FoodSO> waitingFood;
     private float clockTimerMax = GameDefine.EMOTION_DURATION;
-    private NetworkVariable<float> clockTimer = new NetworkVariable<float>(0f);
-    private NetworkVariable<float> tipPercentage = new NetworkVariable<float>();
-    private NetworkVariable<bool> isActiveInGame = new NetworkVariable<bool>(false);
-    private NetworkVariable<bool> isBubbleFrameActive = new NetworkVariable<bool>(false);
-    private NetworkVariable<bool> isFoodBubbleActive = new NetworkVariable<bool>(false);
-    private NetworkVariable<bool> isOrderBubbleActive = new NetworkVariable<bool>(false);
-    private NetworkVariable<bool> isEmotionBubbleActive = new NetworkVariable<bool>(false);
-    private NetworkVariable<bool> isNavMeshStopped = new NetworkVariable<bool>(false);
-    private NetworkVariable<EmotionType> currentEmotion = new NetworkVariable<EmotionType>(EmotionType.None);
-    private NetworkVariable<int> targetSeatIndex = new NetworkVariable<int>(-1);
-    private NetworkVariable<ulong> targetTableNetworkVariable = new NetworkVariable<ulong>(0);
-    private NetworkVariable<BotStateType> currentStateType = new NetworkVariable<BotStateType>(BotStateType.Idle);
-    private NetworkVariable<Vector3> roamPosX = new NetworkVariable<Vector3>(Vector3.zero);
-    private NetworkVariable<Vector3> roamPosZ = new NetworkVariable<Vector3>(Vector3.zero);
+    private NetworkVariable<float> clockTimer = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<float> tipPercentage = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<bool> isActiveInGame = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<bool> isBubbleFrameActive = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<bool> isFoodBubbleActive = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<bool> isOrderBubbleActive = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<bool> isEmotionBubbleActive = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<bool> isNavMeshStopped = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<EmotionType> currentEmotion = new NetworkVariable<EmotionType>(EmotionType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<int> targetSeatIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<ulong> targetTableNetworkVariable = new NetworkVariable<ulong>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<BotStateType> currentStateType = new NetworkVariable<BotStateType>(BotStateType.Idle, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<Vector3> roamPosX = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<Vector3> roamPosZ = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
 
     private Table targetTable = null;
@@ -56,59 +56,18 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();        
+        base.OnNetworkSpawn();
 
-        IsActiveInGame.OnValueChanged += (oldVal, newVal) => {
-            SetVisualActive(newVal);
-        };
-        isEmotionBubbleActive.OnValueChanged += (oldVal, newVal) => {
-            emotionBubble.SetActive(newVal);
-        };
-        isFoodBubbleActive.OnValueChanged += (oldVal, newVal) => {
-            foodBubble.SetActive(newVal);
-        };
-        isOrderBubbleActive.OnValueChanged += (oldVal, newVal) => {
-            orderBubble.SetActive(newVal);
-        };
-        isBubbleFrameActive.OnValueChanged += (oldVal, newVal) => {
-            BubbleFrame.SetActive(newVal);
-        };
-        isNavMeshStopped.OnValueChanged += (oldVal, newVal) => {
-            NavMeshAgent.isStopped = isNavMeshStopped.Value;
-            NavMeshAgent.updatePosition = !isNavMeshStopped.Value;
-            NavMeshAgent.updateRotation = !isNavMeshStopped.Value;
-            
-        };
-        currentEmotion.OnValueChanged += (oldVal, newVal) => {
-            OnEmotionChanged?.Invoke(newVal);
-        };
-        clockTimer.OnValueChanged += (oldVal, newVal) => {
-            OnClockTimerChanged?.Invoke((clockTimerMax - newVal) / clockTimerMax);
-        };
-
-        targetTableNetworkVariable.OnValueChanged += (oldVal, newVal) =>
-        {
-            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetTableNetworkVariable.Value, out NetworkObject netObj))
-            {
-                if (netObj.TryGetComponent(out Table table))
-                {
-                    targetTable = table;
-                }
-                else
-                {
-                    targetTable = null;
-
-                }
-            }
-            else
-            {
-                targetTable = null;
-            }
-
-        };
-        currentStateType.OnValueChanged += (oldVal, newVal) => {
-            SetStateMachineState(newVal);
-        };
+        IsActiveInGame.OnValueChanged += HandleActiveChanged;
+        isEmotionBubbleActive.OnValueChanged += HandleEmotionBubbleChanged;
+        isFoodBubbleActive.OnValueChanged += HandleFoodBubbleChanged;
+        isOrderBubbleActive.OnValueChanged += HandleOrderBubbleChanged;
+        isBubbleFrameActive.OnValueChanged += HandleBubbleFrameChanged;
+        isNavMeshStopped.OnValueChanged += HandleNavMeshStoppedChanged;
+        currentEmotion.OnValueChanged += HandleEmotionChanged;
+        clockTimer.OnValueChanged += HandleClockChanged;
+        targetTableNetworkVariable.OnValueChanged += HandleTargetTableChanged;
+        currentStateType.OnValueChanged += HandleStateChanged;
 
         SetVisualActive(IsActiveInGame.Value);
         BubbleFrame.SetActive(isBubbleFrameActive.Value);
@@ -131,11 +90,55 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         }
         SetStateMachineState(currentStateType.Value);
     }
+
+    private void HandleActiveChanged(bool oldVal, bool newVal) => SetVisualActive(newVal);
+    private void HandleEmotionBubbleChanged(bool oldVal, bool newVal) => emotionBubble.SetActive(newVal);
+    private void HandleFoodBubbleChanged(bool oldVal, bool newVal) => foodBubble.SetActive(newVal);
+    private void HandleOrderBubbleChanged(bool oldVal, bool newVal) => orderBubble.SetActive(newVal);
+    private void HandleBubbleFrameChanged(bool oldVal, bool newVal) => BubbleFrame.SetActive(newVal);
+    private void HandleNavMeshStoppedChanged(bool oldVal, bool newVal)
+    {
+        if (NavMeshAgent == null) return;
+        NavMeshAgent.isStopped = newVal;
+        NavMeshAgent.updatePosition = !newVal;
+        NavMeshAgent.updateRotation = !newVal;
+    }
+    private void HandleEmotionChanged(EmotionType oldVal, EmotionType newVal) => OnEmotionChanged?.Invoke(newVal);
+    private void HandleClockChanged(float oldVal, float newVal) => OnClockTimerChanged?.Invoke((clockTimerMax - newVal) / clockTimerMax);
+    private void HandleTargetTableChanged(ulong oldVal, ulong newVal)
+    {
+        if (NetworkManager.Singleton == null) return;
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(newVal, out NetworkObject netObj)
+            && netObj.TryGetComponent(out Table table))
+        {
+            targetTable = table;
+        }
+        else
+        {
+            targetTable = null;
+        }
+    }
+    private void HandleStateChanged(BotStateType oldVal, BotStateType newVal) => SetStateMachineState(newVal);
+
+    public override void OnNetworkDespawn()
+    {
+        IsActiveInGame.OnValueChanged -= HandleActiveChanged;
+        isEmotionBubbleActive.OnValueChanged -= HandleEmotionBubbleChanged;
+        isFoodBubbleActive.OnValueChanged -= HandleFoodBubbleChanged;
+        isOrderBubbleActive.OnValueChanged -= HandleOrderBubbleChanged;
+        isBubbleFrameActive.OnValueChanged -= HandleBubbleFrameChanged;
+        isNavMeshStopped.OnValueChanged -= HandleNavMeshStoppedChanged;
+        currentEmotion.OnValueChanged -= HandleEmotionChanged;
+        clockTimer.OnValueChanged -= HandleClockChanged;
+        targetTableNetworkVariable.OnValueChanged -= HandleTargetTableChanged;
+        currentStateType.OnValueChanged -= HandleStateChanged;
+        base.OnNetworkDespawn();
+    }
     private void Awake()
     {
         stateMachine = new BotStateMachine(this);
 
-        if (IsHost||IsServer)
+        if (IsServer)
         {
             isFoodBubbleActive.Value = false;
             isOrderBubbleActive.Value = false;
@@ -151,14 +154,14 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
     public void PlayAnimation(BotAnimation.State animationState)
     {
-        if (!IsHost || !IsServer) return;
+        if (!IsServer) return;
         networkAnimator.Animator.StopPlayback();
         networkAnimator.Animator.Play(animationState.ToString());
     }
 
     private void Update()
     {
-        if(!IsHost || !IsServer) return;
+        if(!IsServer) return;
 
         stateMachine.Update();
         if(currentEmotion.Value != EmotionType.None)
@@ -279,7 +282,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         waitingFood.Add(food);
 
         bubbleFoodUI.SetOrder(waitingFood);
-        if(IsServer || IsHost)
+        if(IsServer)
         {
             isBubbleFrameActive.Value = true;
             isOrderBubbleActive.Value = false;
@@ -404,12 +407,12 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     }
     public void StopNavMesh()
     {
-        if (IsHost || IsServer)
+        if (IsServer)
             isNavMeshStopped.Value = true;
     }
     public void StartNavMesh()
     {
-        if(IsHost || IsServer)
+        if(IsServer)
             isNavMeshStopped.Value = false;    
     }
 

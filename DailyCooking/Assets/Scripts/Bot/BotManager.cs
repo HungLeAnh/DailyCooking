@@ -57,7 +57,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        if (IsHost || IsServer)
+        if (IsServer)
         {
             //Debug.Log("Initializing BotManager pools...");
             foreach (var prefab in botPrefabs)
@@ -78,7 +78,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     private void Start()
     {
-        if(!IsHost||!IsServer) return;
+        if(!IsServer) return;
 
         GameManager.Instance.OnStateChanged += GameManager_OnStateChanged;
     }
@@ -97,7 +97,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public void StartSpawnBot()
     {
-        if (!IsHost || !IsServer) return;
+        if (!IsServer) return;
 
         StartCoroutine(WaitForSecond(10, () => {
             StartCoroutine(SpawnBotRoutine());
@@ -106,7 +106,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public void StopSpawnBot()
     {
-        if (!IsHost || !IsServer) return;
+        if (!IsServer) return;
 
         StopCoroutine(SpawnBotRoutine());
         var botsToReturn = new List<GameObject>(activeBots);
@@ -118,7 +118,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public void Initialize()
     {
-        if (!IsHost || !IsServer || pools.Count == 0) return;
+        if (!IsServer || pools.Count == 0) return;
 
         int botsPerPool = poolSize / pools.Count;
         for (int i = 0; i < pools.Count; i++)
@@ -159,7 +159,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public GameObject GetBot()
     {
-        if (!IsHost || !IsServer || pools.Count == 0) return null;
+        if (!IsServer || pools.Count == 0) return null;
 
         int randomIndex = UnityEngine.Random.Range(0, pools.Count);
         var bot = pools[randomIndex].Get();
@@ -172,7 +172,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public void SpawnBot(GameObject bot)
     {
-        if (!IsHost || !IsServer) return;
+        if (!IsServer) return;
 
         var posX = new Vector3(-3f, 0f, GridBuildingSystem.Instance.GridManager.GetHeightMax() * GridBuildingSystem.Instance.GridManager.GetCellSize() + 5f);
         var posZ = new Vector3(GridBuildingSystem.Instance.GridManager.GetWidthMax() * GridBuildingSystem.Instance.GridManager.GetCellSize() + 5f, 0f, -3f);
@@ -181,7 +181,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public void ReturnBotToPool(GameObject bot)
     {
-        if (!IsHost || !IsServer || bot == null) return;
+        if (!IsServer || bot == null) return;
         if (!activeBots.Contains(bot)) return;
 
         var botController = bot.GetComponent<BotCustomerController>();
@@ -199,7 +199,7 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     public void KickAllBots()
     {
-        if (!IsHost || !IsServer) return;
+        if (!IsServer) return;
 
         var botsToReturn = new List<GameObject>(activeBots);
         foreach(var bot in botsToReturn)

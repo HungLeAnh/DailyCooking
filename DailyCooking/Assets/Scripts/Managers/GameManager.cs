@@ -176,8 +176,20 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         savedDataHandler.Save(SavedDataList);
     }
 
+    private float lastSaveTime;
     public void SaveGame()
     {
+        if (dataHandler == null || gameData == null) return;
+        // Debounce: avoid disk write storms from NetworkVariable fan-out.
+        if (Time.time - lastSaveTime < 1f) return;
+        lastSaveTime = Time.time;
+        dataHandler.Save(gameData);
+    }
+
+    public void SaveGameImmediate()
+    {
+        if (dataHandler == null || gameData == null) return;
+        lastSaveTime = Time.time;
         dataHandler.Save(gameData);
     }
 
@@ -191,7 +203,10 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void UpdateRestaurantNameServerRpc(string name)
     {
-        UpdateRestaurantNameClientRpc(name);
+        if (GameData == null || string.IsNullOrWhiteSpace(name)) return;
+        string clean = name.Trim();
+        if (clean.Length > 24) clean = clean.Substring(0, 24);
+        UpdateRestaurantNameClientRpc(clean);
     }
     [Rpc(SendTo.ClientsAndHost)]
     private void UpdateRestaurantNameClientRpc(string name)
@@ -201,6 +216,9 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void UpdateRestaurantCoinServerRpc(int addCoins)
     {
+        if (GameData?.RestaurantData == null) return;
+        if (addCoins < -100000 || addCoins > 100000) return;
+        if (GameData.RestaurantData.Coins + addCoins < 0) return;
         UpdateRestaurantCoinClientRpc(addCoins);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -211,6 +229,8 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void UpdateRestaurantExpServerRpc(int addExp)
     {
+        if (GameData?.RestaurantData == null) return;
+        if (addExp < 0 || addExp > 10000) return;
         UpdateRestaurantExpClientRpc(addExp);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -221,6 +241,9 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void UpdateRestaurantGemsServerRpc(int addGems)
     {
+        if (GameData?.RestaurantData == null) return;
+        if (addGems < -1000 || addGems > 1000) return;
+        if (GameData.RestaurantData.Gems + addGems < 0) return;
         UpdateRestaurantGemsClientRpc(addGems);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -231,6 +254,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void AddInventoryDataServerRpc(string guid)
     {
+        if (GameData == null || string.IsNullOrEmpty(guid)) return;
         AddInventoryDataClientRpc(guid);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -241,6 +265,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void RemoveInventoryDataServerRpc(string guid)
     {
+        if (GameData?.InventoryData == null || string.IsNullOrEmpty(guid)) return;
         RemoveInventoryDataClientRpc(guid);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -251,6 +276,8 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void AddDishToMenuServerRpc(string foodGuid)
     {
+        if (GameData == null || string.IsNullOrEmpty(foodGuid)) return;
+        if (ConfigManager.Instance?.ConfigFood?.FoodItems?.Find(x => x.Guid == foodGuid) == null) return;
         AddDishToMenuClientRpc(foodGuid);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -267,6 +294,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void RemoveDishFromMenuServerRpc(string foodGuid)
     {
+        if (GameData == null || string.IsNullOrEmpty(foodGuid)) return;
         RemoveDishFromMenuClientRpc(foodGuid);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -283,6 +311,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void UnlockDishServerRpc(string guid)
     {
+        if (GameData == null || string.IsNullOrEmpty(guid)) return;
         UnlockDishClientRpc(guid);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -293,6 +322,10 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void PurchaseUpgradeServerRpc(string upgradeGuid)
     {
+        if (GameData == null || string.IsNullOrEmpty(upgradeGuid)) return;
+        var upgrade = ConfigManager.Instance?.ConfigUpgrade?.Upgrades?.Find(x => x.Guid == upgradeGuid);
+        if (upgrade == null) return;
+        if (GameData.IsUpgradePurchased(upgrade)) return;
         PurchaseUpgradeClientRpc(upgradeGuid);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -309,11 +342,14 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.Server)]
     public void UpdatePostBoxDataServerRpc(string kitchenObjectSOGuid)
     {
+        if (string.IsNullOrEmpty(kitchenObjectSOGuid)) return;
+        if (GridBuildingSystem.Instance?.PostBox == null) return;
         GridBuildingSystem.Instance.PostBox.AddPackage(kitchenObjectSOGuid);
     }
     [Rpc(SendTo.Server)]
     public void RemovePostBoxDataServerRpc(string kitchenObjectSOGuid)
     {
+        if (GameData?.PostBoxData == null || string.IsNullOrEmpty(kitchenObjectSOGuid)) return;
         RemovePostBoxDataClientRpc(kitchenObjectSOGuid);
     } 
     [Rpc(SendTo.ClientsAndHost)]

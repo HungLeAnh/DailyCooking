@@ -5,6 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class GameData
 {
+    public int SyncVersion { get; set; } = 1;
     public List<PlayerStats> PlayersStats { get; private set; } = new List<PlayerStats>();
     public RestaurantData RestaurantData { get; private set; } = new RestaurantData();
     public InventoryData InventoryData { get; private set; } = new InventoryData();
