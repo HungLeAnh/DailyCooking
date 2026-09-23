@@ -51,22 +51,8 @@ public class UIRewardPopup : UIPopup
             Destroy(item.gameObject);
         }
         rewardItems.Clear();
-        if (_openParam != null)
-        {
-            Param popupParam = _openParam as Param;
-            foreach (var item in popupParam.reward)
-            {
-                if (item.id == nameof(RewardType.Coin))
-                {
-                    GameManager.Instance.UpdateRestaurantCoinServerRpc(item.amount);
-                }
-                else if (item.id == nameof(RewardType.Gem))
-                {
-                    GameManager.Instance.UpdateRestaurantGemsServerRpc(item.amount);
-
-                }
-            }
-        }
+        // Display only: the server grants the reward (GameManager.ClaimDailyFreeServerRpc).
+        _openParam = null;
     }
 
     private Sprite GetRewardIcon(string rewardId)

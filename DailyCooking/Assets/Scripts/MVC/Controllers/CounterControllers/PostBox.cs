@@ -115,7 +115,7 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
             return;
 
         refillerKitchenObject.SetRefillKitchenObject(packageSO);
-        GameManager.Instance.RemovePostBoxDataServerRpc(packageGuid);
+        GameManager.Instance.ServerRemovePostBoxPackage(packageGuid);
         kitchenObjectSOGuidList.RemoveAt(index);
     }
 

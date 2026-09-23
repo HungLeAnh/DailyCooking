@@ -15,9 +15,29 @@ public class UIUpgradeItem : MonoBehaviour
 
     private UpgradeSO upgradeData;
     private bool isPurchased = false;
+    private GameData subscribedGameData;
     private void Start()
     {
-        GameManager.Instance.GameData.RestaurantData.OnLevelChange += PlayerStats_OnLevelChange;
+        subscribedGameData = GameManager.Instance.GameData;
+        subscribedGameData.RestaurantData.OnLevelChange += PlayerStats_OnLevelChange;
+        subscribedGameData.UpgradeData.OnMenuDataChanged += UpgradeData_OnChanged;
+    }
+
+    private void OnDestroy()
+    {
+        if (subscribedGameData == null)
+            return;
+        subscribedGameData.RestaurantData.OnLevelChange -= PlayerStats_OnLevelChange;
+        subscribedGameData.UpgradeData.OnMenuDataChanged -= UpgradeData_OnChanged;
+    }
+
+    // The purchase is confirmed by the server (GameManager.PurchaseUpgradeServerRpc).
+    private void UpgradeData_OnChanged()
+    {
+        if (upgradeData == null || isPurchased)
+            return;
+        isPurchased = GameManager.Instance.GameData.IsUpgradePurchased(upgradeData);
+        SetPurchased(isPurchased);
     }
 
     private void PlayerStats_OnLevelChange()
@@ -63,10 +83,6 @@ public class UIUpgradeItem : MonoBehaviour
 
     private void OnUpgradeButtonClick()
     {
-        if (UpgradeManager.Instance.PurchaseUpgrade(upgradeData))
-        {
-            SetPurchased(true);
-            isPurchased = true;
-        }
+        UpgradeManager.Instance.PurchaseUpgrade(upgradeData);
     }
 }

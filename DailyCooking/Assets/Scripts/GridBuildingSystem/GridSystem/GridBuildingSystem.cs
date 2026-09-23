@@ -221,21 +221,16 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             gridInitializer.InitDefaultCounters();
         }
     }
+    // Server only: called by the server-validated expansion upgrade purchase.
     public void ExpandGrid(float amount)
     {
         if (!IsServer)
         {
-            ExpandGridServerRpc();
+            Debug.LogWarning("GridBuildingSystem.ExpandGrid must run on the server.");
             return;
         }
         gridManager.ExpandGrid();
         OnGridSizeChangedOnServer();
-    }
-    // TODO(Phase 4): expansion becomes part of the server-validated upgrade purchase.
-    [Rpc(SendTo.Server)]
-    private void ExpandGridServerRpc()
-    {
-        ExpandGrid(0f);
     }
 
     // Sent before any object spawns into the new cells, so clients have them ready.

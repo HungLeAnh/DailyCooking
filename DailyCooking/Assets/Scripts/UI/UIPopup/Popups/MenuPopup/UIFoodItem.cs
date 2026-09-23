@@ -103,17 +103,35 @@ public class UIFoodItem : MonoBehaviour
         });
 
     }
+    // The server charges and unlocks; the item unlocks here once the menu data says so.
     private void UnlockDish()
     {
         if (GameManager.Instance.GameData.RestaurantData.Coins >= foodSO.unlockPrice)
         {
-            GameManager.Instance.UpdateRestaurantCoinServerRpc(-foodSO.unlockPrice);
+            MenuData menuData = GameManager.Instance.GameData.MenuData;
+            menuData.OnMenuDataChanged -= MenuData_OnMenuDataChanged;
+            menuData.OnMenuDataChanged += MenuData_OnMenuDataChanged;
             GameManager.Instance.UnlockDishServerRpc(foodSO.Guid);
-            SetLockState(false);
         }
         else
         {
             UIManager.Instance.ShowAlertMessage("Not enough coins to unlock this dish.");
         }
+    }
+
+    private void MenuData_OnMenuDataChanged()
+    {
+        MenuData menuData = GameManager.Instance.GameData.MenuData;
+        if (!menuData.unlockedDishes.Contains(foodSO))
+            return;
+        menuData.OnMenuDataChanged -= MenuData_OnMenuDataChanged;
+        isLocked = false;
+        SetLockState(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (GameManager.Instance != null && GameManager.Instance.GameData != null)
+            GameManager.Instance.GameData.MenuData.OnMenuDataChanged -= MenuData_OnMenuDataChanged;
     }
 }

@@ -21,7 +21,7 @@ public class UIShopPopup : UIPopup
      
     private List<UIShopCategoryItem> _shopCategoryItems = new List<UIShopCategoryItem>();
 
-    private DateTime _targetTime;
+    private DateTime _shownResetDate;
     private IEnumerator _timer24HrsCoroutine;
 
     public Button CloseButton => closeButton;
@@ -35,19 +35,28 @@ public class UIShopPopup : UIPopup
     {
         base.SetupPopup();
         Initialize();
-        _targetTime = DateTime.Today.AddDays(1);
     }
     public override void HidePopup(object param)
     {
         base.HidePopup(param);
         if (_timer24HrsCoroutine != null)
             StopCoroutine(_timer24HrsCoroutine);
+        _timer24HrsCoroutine = null;
+        if (GameManager.Instance != null && GameManager.Instance.GameData != null)
+            GameManager.Instance.GameData.ShopData.OnResourceChange -= RefreshDailyFreeItems;
     }
     public override void ShowPopup(object param)
     {
         base.ShowPopup(param);
-        SetUpShopDailyFree();
+        ShopData shopData = GameManager.Instance.GameData.ShopData;
+        shopData.OnResourceChange -= RefreshDailyFreeItems;
+        shopData.OnResourceChange += RefreshDailyFreeItems;
+        RefreshDailyFreeItems();
 
+        if (_timer24HrsCoroutine != null)
+            StopCoroutine(_timer24HrsCoroutine);
+        _timer24HrsCoroutine = CountDownToDailyReset();
+        StartCoroutine(_timer24HrsCoroutine);
     }
     public void Initialize()
     {
@@ -128,44 +137,40 @@ public class UIShopPopup : UIPopup
     {
         UIPopupManager.Instance.HidePopup(UIPopupType.UIShopPopup);
     }
-    private void SetUpShopDailyFree()
+    // Re-reads today's claim counts (the server resets them each UTC day) into the daily items.
+    public void RefreshDailyFreeItems()
     {
-        bool success = GameManager.Instance.GameData.ShopData.RefreshDailyShopOffer();
-        if (success)
+        GameManager.Instance.GameData.ShopData.RefreshDailyShopOffer();
+        _shownResetDate = DateTime.UtcNow.Date;
+        for (int i = 0; i < _dailyOfferContainer.childCount; i++)
         {
-            for (int i = 0; i < _dailyOfferContainer.childCount; i++)
-            {
-                GameObject item = _dailyOfferContainer.GetChild(i).gameObject;
+            GameObject item = _dailyOfferContainer.GetChild(i).gameObject;
 
-                if (item == null)
-                    continue;
+            if (item == null)
+                continue;
 
-                item.SetActive(true);
-                var dailyFreeItem = item.GetComponent<UIDailyFreeItem>();
-                dailyFreeItem.Setup(i);
-            }
+            item.SetActive(true);
+            var dailyFreeItem = item.GetComponent<UIDailyFreeItem>();
+            dailyFreeItem.Setup(i);
         }
-        _timer24HrsCoroutine = CountDown24Hours();
-        StartCoroutine(_timer24HrsCoroutine);
     }
-    private IEnumerator CountDown24Hours()
+    // Counts down to the next UTC midnight, when the daily offers reset.
+    private IEnumerator CountDownToDailyReset()
     {
-        TimeSpan timeRemaining = _targetTime - DateTime.Now;
-
-        while(timeRemaining.TotalSeconds > 0)
+        var wait = new WaitForSeconds(1);
+        while (true)
         {
-            string timeString = string.Format("{0:00}:{1:00}:{2:00}",
+            DateTime utcNow = DateTime.UtcNow;
+            if (utcNow.Date != _shownResetDate)
+                RefreshDailyFreeItems();
+
+            TimeSpan timeRemaining = utcNow.Date.AddDays(1) - utcNow;
+            timerText.text = string.Format("{0:00}:{1:00}:{2:00}",
                 timeRemaining.Hours + (timeRemaining.Days * 24),
                 timeRemaining.Minutes,
                 timeRemaining.Seconds);
-
-            timerText.text = timeString;
-            yield return new WaitForSeconds(1);
-            timeRemaining = _targetTime - DateTime.Now;
+            yield return wait;
         }
-        yield return new WaitForSeconds(1);
-        StopCoroutine(_timer24HrsCoroutine);
-        SetUpShopDailyFree();
     }
     public void OnPurchase(int id)
     {

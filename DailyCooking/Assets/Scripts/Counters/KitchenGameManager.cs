@@ -105,11 +105,11 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     {
         OnStateChanged?.Invoke(this, EventArgs.Empty);
     }
+    // Server only: a player collected a customer's payment.
     public void CollectCash(int cash, int exp)
     {
-        GameManager.Instance.UpdateRestaurantCoinServerRpc(cash);
-        GameManager.Instance.UpdateRestaurantExpServerRpc(exp);
-
+        GameManager.Instance.ServerAddCoins(cash);
+        GameManager.Instance.ServerAddExp(exp);
     }
 
     private void Update()

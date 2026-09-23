@@ -152,6 +152,7 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     {
         return GetKitchenObject(index) != null;
     }
+    // Server only: the plate's eaten state replicates to clients by itself.
     public void SetEatenViual(int index, int cash, int exp)
     {
         var tablewareObject = GetKitchenObject(index) as TablewareKitchenObject;
@@ -160,16 +161,6 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
         {
             tablewareObject.SetEaten(cash, exp);
         }
-    }
-    [Rpc(SendTo.Server)]
-    public void SetEatenVisualServerRpc(int index, int cash, int exp)
-    {
-        SetEatenVisualClientRpc(index, cash, exp);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void SetEatenVisualClientRpc(int index, int cash, int exp)
-    {
-        SetEatenViual(index, cash, exp);
     }
     public void DestroySelf()
     {

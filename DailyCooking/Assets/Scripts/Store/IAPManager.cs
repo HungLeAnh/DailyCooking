@@ -87,20 +87,21 @@ public class IAPManager : MonoBehaviour
         var product = order.CartOrdered.Items().First()?.Product;
         Debug.Log($"Purchase failed for {product?.definition.id}, reason: {order.FailureReason}");
     }
+    // Host only (see BuyProduct); Phase 5 moves this before ConfirmPurchase and adds validation.
     private void GrantReward(string productId)
     {
         switch (productId)
         {
             case ProductIDs.GEMPACK1:
-                GameManager.Instance.UpdateRestaurantGemsServerRpc(50);
+                GameManager.Instance.ServerAddGems(50);
                 break;
 
             case ProductIDs.GEMPACK2:
-                GameManager.Instance.UpdateRestaurantGemsServerRpc(100);
+                GameManager.Instance.ServerAddGems(100);
                 break;
 
             case ProductIDs.GEMPACK3:
-                GameManager.Instance.UpdateRestaurantGemsServerRpc(200);
+                GameManager.Instance.ServerAddGems(200);
                 break;
 
             default:
@@ -110,6 +111,12 @@ public class IAPManager : MonoBehaviour
     }
     public void BuyProduct(ProductKeys key)
     {
+        // Gems belong to the restaurant save, which only the host owns.
+        if (GameManager.Instance == null || !GameManager.Instance.IsServer || GameManager.Instance.GameData == null)
+        {
+            UIManager.Instance.ShowAlertMessage("Only the restaurant owner can buy gems.");
+            return;
+        }
         string productId = key switch
         {
             ProductKeys.gempack1=> ProductIDs.GEMPACK1,

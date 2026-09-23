@@ -101,7 +101,9 @@ public class UICharacterPopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
-        
+        GameManager.Instance.GameData.CosmeticData.OnCosmeticDataChanged -= CosmeticData_OnCosmeticDataChanged;
+        GameManager.Instance.GameData.CosmeticData.OnCosmeticDataChanged += CosmeticData_OnCosmeticDataChanged;
+
         foreach (var part in customizationParts)
         {
             part.Initialise(ConfigManager.Instance.CustomizationData);
@@ -124,13 +126,8 @@ public class UICharacterPopup : UIPopup
     public override void HidePopup(object param = null)
     {
         base.HidePopup(param);
-        //Debug.Log("Unsubscribe ItemSelected");
-
-        for (int i = 0; i < listItem.Count; i++)
-        {
-
-        }
-
+        if (GameManager.Instance != null && GameManager.Instance.GameData != null)
+            GameManager.Instance.GameData.CosmeticData.OnCosmeticDataChanged -= CosmeticData_OnCosmeticDataChanged;
     }
 
     public void FillInventory(string type)
@@ -238,10 +235,8 @@ public class UICharacterPopup : UIPopup
             {
                 if (GameManager.Instance.GameData.RestaurantData.Coins >= price)
                 {
-                    GameManager.Instance.UpdateRestaurantCoinServerRpc(-price);
-                    GameManager.Instance.GameData.CosmeticData.UnlockCosmetic(currentCosmeticsData.Type, index);
-                    GameManager.Instance.SaveGame();
-                    FillInvetoryItems(currentCosmeticsData.Cosmetics);
+                    // The list refreshes when the server's unlock arrives (CosmeticData_OnCosmeticDataChanged).
+                    GameManager.Instance.UnlockCosmeticServerRpc(currentCosmeticsData.Type, index);
                 }
                 else
                 {
@@ -284,17 +279,21 @@ public class UICharacterPopup : UIPopup
 
         parts.Remove(currentCustomizationPart);
     }
+    // The host stores the look in its save and mirrors it to everyone.
     private void SaveCustom()
     {
-        var playerData = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
         Dictionary<string, int> customizations = new Dictionary<string, int>();
         foreach (var part in customizationParts)
         {
-            Debug.Log($"Saving {part.Type} with index {part.Index}");
             customizations.Add(part.Type, part.Index);
         }
-        playerData.UpdatePlayerCustomization(customizations);
+        GameManager.Instance.RequestSaveCustomization(customizations);
+    }
 
+    private void CosmeticData_OnCosmeticDataChanged()
+    {
+        if (currentCosmeticsData != null)
+            FillInvetoryItems(currentCosmeticsData.Cosmetics);
     }
     private void OnChangeTab(string type)
     {

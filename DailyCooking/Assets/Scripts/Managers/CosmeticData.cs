@@ -1,10 +1,14 @@
+using System;
 using System.Collections.Generic;
 
 [System.Serializable]
 public class CosmeticData
 {
+    [NonSerialized]
+    public Action OnCosmeticDataChanged;
+
     public Dictionary<string, List<int>> UnlockedCosmetics { get; private set; } = new Dictionary<string, List<int>>();
-    
+
     public void UnlockCosmetic(string type, int index)
     {
         if (!UnlockedCosmetics.ContainsKey(type))
@@ -15,6 +19,7 @@ public class CosmeticData
         if (!UnlockedCosmetics[type].Contains(index))
         {
             UnlockedCosmetics[type].Add(index);
+            OnCosmeticDataChanged?.Invoke();
         }
     }
 

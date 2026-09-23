@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
@@ -24,6 +25,9 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     [SerializeField] private SkinnedMeshRenderer[] highlightGameObjectArray;
 
     private BotStateMachine stateMachine;
+    // The order, replicated as food guids (menu indices shift when the menu changes);
+    // waitingFood is the local resolved copy used by the bubble and the serve check.
+    private NetworkList<FixedString64Bytes> orderedFoodGuids;
     private List<FoodSO> waitingFood;
     private float clockTimerMax = GameDefine.EMOTION_DURATION;
     private NetworkVariable<float> clockTimer = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -68,6 +72,8 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         clockTimer.OnValueChanged += HandleClockChanged;
         targetTableNetworkVariable.OnValueChanged += HandleTargetTableChanged;
         currentStateType.OnValueChanged += HandleStateChanged;
+        orderedFoodGuids.OnListChanged += OrderedFoodGuids_OnListChanged;
+        RebuildWaitingFood();
 
         SetVisualActive(IsActiveInGame.Value);
         BubbleFrame.SetActive(isBubbleFrameActive.Value);
@@ -132,6 +138,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         clockTimer.OnValueChanged -= HandleClockChanged;
         targetTableNetworkVariable.OnValueChanged -= HandleTargetTableChanged;
         currentStateType.OnValueChanged -= HandleStateChanged;
+        orderedFoodGuids.OnListChanged -= OrderedFoodGuids_OnListChanged;
         base.OnNetworkDespawn();
     }
     private void Awake()
@@ -147,6 +154,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
         }
         waitingFood = new List<FoodSO>();
+        orderedFoodGuids = new NetworkList<FixedString64Bytes>();
 
 
         OnDeselected();
@@ -262,6 +270,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         }
     }
 
+    // Server only.
     public bool OrderFood()
     {
         var food = KitchenGameManager.Instance.GetUnlockedFood();
@@ -270,27 +279,30 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
             Leave();
             return false;
         }
-        var foodIndex = KitchenGameManager.Instance.GetFoodIndex(food);
-        OrderFoodClientRpc(foodIndex);
+        orderedFoodGuids.Add(food.Guid);
+
+        isBubbleFrameActive.Value = true;
+        isOrderBubbleActive.Value = false;
+        isFoodBubbleActive.Value = true;
+        currentEmotion.Value = EmotionType.Happy;
+        clockTimer.Value = 0f;
 
         return true;
     }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void OrderFoodClientRpc(int foodIndex)
+    private void OrderedFoodGuids_OnListChanged(NetworkListEvent<FixedString64Bytes> changeEvent)
     {
-        var food = KitchenGameManager.Instance.GetFoodByIndex(foodIndex);
-        waitingFood.Add(food);
-
-        bubbleFoodUI.SetOrder(waitingFood);
-        if(IsServer)
+        RebuildWaitingFood();
+    }
+    private void RebuildWaitingFood()
+    {
+        waitingFood.Clear();
+        foreach (FixedString64Bytes guid in orderedFoodGuids)
         {
-            isBubbleFrameActive.Value = true;
-            isOrderBubbleActive.Value = false;
-            isFoodBubbleActive.Value = true;
-            currentEmotion.Value = EmotionType.Happy;
-            clockTimer.Value = 0f;
+            FoodSO food = ConfigManager.Instance.ConfigFood.FoodItems.Find(x => x.Guid == guid.ToString());
+            if (food != null)
+                waitingFood.Add(food);
         }
-
+        bubbleFoodUI.SetOrder(waitingFood);
     }
     public void ShowOrder()
     {
@@ -320,15 +332,9 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         targetTableNetworkVariable.Value = 0;
         targetSeatIndex.Value = -1;
-        ResetBotClientRpc();
+        orderedFoodGuids.Clear();
         StopBubbleServerRpc();
         currentStateType.Value = BotStateType.Idle;
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ResetBotClientRpc()
-    {
-        waitingFood.Clear();
-
     }
     public void InitBot(Vector3 roamPositionX, Vector3 roamPositionZ)
     {
@@ -382,8 +388,10 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         visual.SetActive(active);
     }
 
+    // Server only: the customer pays once; the plate keeps the payment until a player collects it.
     public void FinishEating()
     {
+        if (!IsServer) return;
         int cash = 0;
         int exp = 0;
         foreach (var food in waitingFood)
@@ -392,18 +400,9 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
             exp += food.exp;
         }
         cash += (int)(cash * tipPercentage.Value);
-        targetTable.SetEatenVisualServerRpc(TargetSeatIndex.Value, cash, exp);
+        if (targetTable != null)
+            targetTable.SetEatenViual(TargetSeatIndex.Value, cash, exp);
         ResetSeat();
-    }
-    [Rpc(SendTo.Server)]
-    public void FinishEatingServerRpc()
-    {
-        FinishEatingClientRpc();
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void FinishEatingClientRpc()
-    {
-        FinishEating();
     }
     public void StopNavMesh()
     {

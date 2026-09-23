@@ -19,21 +19,23 @@ public class UIShopItem : MonoBehaviour
     public ConfigShopItem ConfigShopItem => configShopItem;
     private void OnDestroy()
     {
-        if (GameManager.Instance == null)
+        if (GameManager.Instance == null || GameManager.Instance.GameData == null)
             return;
-        GameManager.Instance.GameData.RestaurantData.OnLevelChange += OnLevelChanged;
+        GameManager.Instance.GameData.RestaurantData.OnLevelChange -= OnLevelChanged;
     }
     public void SetItem(ConfigShopItem item,ShopItemCategory itemCategory)
     {
-        this.gameObject.SetActive(true);    
+        this.gameObject.SetActive(true);
         this.configShopItem = item;
         this.itemCategory = itemCategory;
 
+        GameManager.Instance.GameData.RestaurantData.OnLevelChange -= OnLevelChanged;
         GameManager.Instance.GameData.RestaurantData.OnLevelChange += OnLevelChanged;
 
         //imageIcon.sprite = item.Icon;
         textName.text = item.Name;
         textPrice.text = MathUtil.NumberFormat(item.Price);
+        ButtonBuy.onClick.RemoveListener(OnClickButtonBuy);
         ButtonBuy.onClick.AddListener(OnClickButtonBuy);
         if(item.UnlockLevel > GameManager.Instance.GameData.RestaurantData.Level)
         {

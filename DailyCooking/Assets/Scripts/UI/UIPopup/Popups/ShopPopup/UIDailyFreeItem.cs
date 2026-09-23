@@ -18,7 +18,7 @@ public class UIDailyFreeItem : MonoBehaviour
 
     public void Setup(int id)
     {
-        if(id> ShopManager.Instance.DailyFreeCurrency.Count)
+        if(id >= ShopManager.Instance.DailyFreeCurrency.Count)
         {
             gameObject.SetActive(false);
             return;
@@ -60,14 +60,15 @@ public class UIDailyFreeItem : MonoBehaviour
 
         AdsManager.Instance.ShowRewardedAds(type.ToString(), () =>
         {
+            // The server checks today's count and grants the reward; the shop refreshes when
+            // the count update arrives (UIShopPopup listens to ShopData).
+            GameManager.Instance.ClaimDailyFreeServerRpc(configItem.Id);
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIRewardPopup, new UIRewardPopup.Param
             {
-                reward = new RewardData[]{ 
-                    new RewardData(configItem.Id.ToString(),amount) 
+                reward = new RewardData[]{
+                    new RewardData(configItem.Id.ToString(),amount)
                 }
             });
-            GameManager.Instance.GameData.IncreaseShopDailyFreeWatchCount(configItem.Id);
-            _shopView.SetupPopup();
         });
         
     }

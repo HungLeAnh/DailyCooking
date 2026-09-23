@@ -12,20 +12,10 @@ public class UICurrencyItem : MonoBehaviour
     {
         buyButton.onClick.AddListener(OnBuyClicked);
     }
+    // The server only accepts offers listed in ShopManager.CurrencyExchangeOffers.
     private void OnBuyClicked()
     {
-        if(GameManager.Instance.GameData.RestaurantData.Gems < cost)
-        {
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup,
-                new UIGameNotiPopup.Param
-                {
-                    Title = "Warning",
-                    Message = "Not enough gems to buy this currency."
-                });
-            return;
-        }
-        GameManager.Instance.UpdateRestaurantGemsServerRpc(-cost);
-        ShopManager.Instance.BuyCurrency(type,currencyAmount);
+        ShopManager.Instance.ExchangeCurrency(type, cost, currencyAmount);
     }
 
 }

@@ -6,7 +6,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 [DefaultExecutionOrder(-1)]
-public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
+public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
 {
     private const string SavedDataFileName = "SavedData";
     public event EventHandler OnPlayerSpawned;
@@ -28,7 +28,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     private GameObject playerGameObject;
     public FileDataHandler DataHandler => dataHandler;
 
-    public GameData GameData { get => gameData; set => gameData = value; }
+    public GameData GameData => gameData;
     public GameManagerBaseState State => currentState;
 
     public List<SavedData> SavedDataList { get => savedDataList; set => savedDataList = value; }
@@ -75,6 +75,8 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
                 player.OnResourceChange += SaveGame;
         }
         gameData.OnPlayerStatsAdded += GameData_OnPlayerStatsAdded;
+        gameData.UpgradeData.OnMenuDataChanged += SaveGame;
+        gameData.CosmeticData.OnCosmeticDataChanged += SaveGame;
         gameData.InventoryData.OnInventoryDataChanged += SaveGame;
         gameData.GridData.OnGridDataChanged += SaveGame;
         gameData.TutorialData.OnTutorialDataChanged += SaveGame;
@@ -96,6 +98,8 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
                 player.OnResourceChange -= SaveGame;
         }
         gameData.OnPlayerStatsAdded -= GameData_OnPlayerStatsAdded;
+        gameData.UpgradeData.OnMenuDataChanged -= SaveGame;
+        gameData.CosmeticData.OnCosmeticDataChanged -= SaveGame;
         gameData.InventoryData.OnInventoryDataChanged -= SaveGame;
         gameData.GridData.OnGridDataChanged -= SaveGame;
         gameData.TutorialData.OnTutorialDataChanged -= SaveGame;
@@ -110,14 +114,28 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         SaveGame();
     }
 
+    // Display only: the server already granted the reward (see ServerAddExp).
     private void ShowLevelUpPopup(int level)
     {
         UIPopupManager.Instance.ShowPopup(UIPopupType.UILevelUpPopup,
         new UILevelUpPopup.Param
         {
             reward = new RewardData[]
-        { new RewardData(RewardData.RewardType.Coin.ToString(), level * 100) }
+        { new RewardData(RewardData.RewardType.Coin.ToString(), EconomyRules.GetLevelUpRewardCoins(level)) }
         });
+    }
+
+    // A joining client replaces its GameData with the host's snapshot.
+    public void ReplaceGameDataFromHost(GameData hostGameData)
+    {
+        if (gameData != null)
+            gameData.RestaurantData.OnLevelUp -= ShowLevelUpPopup;
+        gameData = hostGameData;
+        if (gameData != null)
+        {
+            gameData.MenuData.LoadMenuData();
+            gameData.RestaurantData.OnLevelUp += ShowLevelUpPopup;
+        }
     }
     private void Update()
     {
@@ -309,169 +327,6 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         currentState.Enter();
         OnStateChanged?.Invoke(this,EventArgs.Empty);
     }
-    [Rpc(SendTo.Server)]
-    public void UpdateRestaurantNameServerRpc(string name)
-    {
-        if (GameData == null || string.IsNullOrWhiteSpace(name)) return;
-        string clean = name.Trim();
-        if (clean.Length > 24) clean = clean.Substring(0, 24);
-        UpdateRestaurantNameClientRpc(clean);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdateRestaurantNameClientRpc(string name)
-    {
-        GameData.RestaurantData.UpdateRestaurantName(name);
-    }
-    [Rpc(SendTo.Server)]
-    public void UpdateRestaurantCoinServerRpc(int addCoins)
-    {
-        if (GameData?.RestaurantData == null) return;
-        if (addCoins < -100000 || addCoins > 100000) return;
-        if (GameData.RestaurantData.Coins + addCoins < 0) return;
-        UpdateRestaurantCoinClientRpc(addCoins);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdateRestaurantCoinClientRpc(int addCoins)
-    {
-        GameData.RestaurantData.UpdateRestaurantCoins(addCoins);
-    }
-    [Rpc(SendTo.Server)]
-    public void UpdateRestaurantExpServerRpc(int addExp)
-    {
-        if (GameData?.RestaurantData == null) return;
-        if (addExp < 0 || addExp > 10000) return;
-        UpdateRestaurantExpClientRpc(addExp);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdateRestaurantExpClientRpc(int addExp)
-    {
-        GameData.RestaurantData.UpdateRestaurantExp(addExp);
-    }
-    [Rpc(SendTo.Server)]
-    public void UpdateRestaurantGemsServerRpc(int addGems)
-    {
-        if (GameData?.RestaurantData == null) return;
-        if (addGems < -1000 || addGems > 1000) return;
-        if (GameData.RestaurantData.Gems + addGems < 0) return;
-        UpdateRestaurantGemsClientRpc(addGems);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdateRestaurantGemsClientRpc(int addGems)
-    {
-        GameData.RestaurantData.UpdateRestaurantGems(addGems);
-    }
-    [Rpc(SendTo.Server)]
-    public void AddInventoryDataServerRpc(string guid)
-    {
-        if (GameData == null || string.IsNullOrEmpty(guid)) return;
-        AddInventoryDataClientRpc(guid);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void AddInventoryDataClientRpc(string guid)
-    {
-        gameData?.AddInventoryData(guid);
-    }
-    // Server only: inventory changes decided by the server (placing, picking up, buying).
-    public void ServerAddInventory(string guid)
-    {
-        if (!IsServer || GameData == null || string.IsNullOrEmpty(guid)) return;
-        AddInventoryDataClientRpc(guid);
-    }
-    public void ServerRemoveInventory(string guid)
-    {
-        if (!IsServer || GameData?.InventoryData == null || string.IsNullOrEmpty(guid)) return;
-        RemoveInventoryDataClientRpc(guid);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void RemoveInventoryDataClientRpc(string guid)
-    {
-        gameData?.RemoveInventoryData(guid);
-    }
-    [Rpc(SendTo.Server)]
-    public void AddDishToMenuServerRpc(string foodGuid)
-    {
-        if (GameData == null || string.IsNullOrEmpty(foodGuid)) return;
-        if (ConfigManager.Instance?.ConfigFood?.FoodItems?.Find(x => x.Guid == foodGuid) == null) return;
-        AddDishToMenuClientRpc(foodGuid);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void AddDishToMenuClientRpc(string foodGuid)
-    {
-        var dish = ConfigManager.Instance.ConfigFood.FoodItems.Find(x => x.Guid == foodGuid);
-        if(dish == null) 
-        {
-            Debug.LogError($"Dish with guid {foodGuid} not found in config.");
-            return;
-        }
-        GameData.AddDishToMenu(dish);
-    }
-    [Rpc(SendTo.Server)]
-    public void RemoveDishFromMenuServerRpc(string foodGuid)
-    {
-        if (GameData == null || string.IsNullOrEmpty(foodGuid)) return;
-        RemoveDishFromMenuClientRpc(foodGuid);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void RemoveDishFromMenuClientRpc(string foodGuid)
-    {
-        var dish = ConfigManager.Instance.ConfigFood.FoodItems.Find(x => x.Guid == foodGuid);
-        if(dish == null) 
-        {
-            Debug.LogError($"Dish with guid {foodGuid} not found in config.");
-            return;
-        }
-        GameData.RemoveDishFromMenu(dish);
-    }
-    [Rpc(SendTo.Server)]
-    public void UnlockDishServerRpc(string guid)
-    {
-        if (GameData == null || string.IsNullOrEmpty(guid)) return;
-        UnlockDishClientRpc(guid);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UnlockDishClientRpc(string guid)
-    {
-        GameData.UnlockDish(guid);
-    }
-    [Rpc(SendTo.Server)]
-    public void PurchaseUpgradeServerRpc(string upgradeGuid)
-    {
-        if (GameData == null || string.IsNullOrEmpty(upgradeGuid)) return;
-        var upgrade = ConfigManager.Instance?.ConfigUpgrade?.Upgrades?.Find(x => x.Guid == upgradeGuid);
-        if (upgrade == null) return;
-        if (GameData.IsUpgradePurchased(upgrade)) return;
-        PurchaseUpgradeClientRpc(upgradeGuid);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void PurchaseUpgradeClientRpc(string upgradeGuid)
-    {
-        var upgrade = ConfigManager.Instance.ConfigUpgrade.Upgrades.Find(x => x.Guid == upgradeGuid);
-        if(upgrade == null) 
-        {
-            Debug.LogError($"Upgrade with guid {upgradeGuid} not found in config.");
-            return;
-        }
-        GameData.PurchaseUpgrade(upgrade);
-    }
-    [Rpc(SendTo.Server)]
-    public void UpdatePostBoxDataServerRpc(string kitchenObjectSOGuid)
-    {
-        if (string.IsNullOrEmpty(kitchenObjectSOGuid)) return;
-        if (GridBuildingSystem.Instance?.PostBox == null) return;
-        GridBuildingSystem.Instance.PostBox.AddPackage(kitchenObjectSOGuid);
-    }
-    [Rpc(SendTo.Server)]
-    public void RemovePostBoxDataServerRpc(string kitchenObjectSOGuid)
-    {
-        if (GameData?.PostBoxData == null || string.IsNullOrEmpty(kitchenObjectSOGuid)) return;
-        RemovePostBoxDataClientRpc(kitchenObjectSOGuid);
-    } 
-    [Rpc(SendTo.ClientsAndHost)]
-    private void RemovePostBoxDataClientRpc(string kitchenObjectSOGuid)
-    {
-        GameData.PostBoxData.RemovePackage(kitchenObjectSOGuid);
-    }
-
     private void Instance_OnPlayerDataNetworkListChanged(object sender, EventArgs e)
     {
         if (gameData == null) return;

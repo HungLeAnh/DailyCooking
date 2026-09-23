@@ -1,23 +1,20 @@
-﻿using System;
-
+// Client-side front for upgrades: the server checks the level, price and ownership again,
+// charges the coins and applies the reward (GameManager.Economy.PurchaseUpgradeServerRpc).
 public class UpgradeManager : PersistentSingleton<UpgradeManager>
 {
-    public event Action<UpgradeSO> OnUpgradePurchased;
+    // Returns false when the purchase was refused locally; the UI updates from UpgradeData once
+    // the server confirms.
     public bool PurchaseUpgrade(UpgradeSO upgrade)
     {
-        if(GameManager.Instance.GameData.RestaurantData.Coins >= upgrade.UpgradeCosts)
+        GameData gameData = GameManager.Instance.GameData;
+        if (gameData.IsUpgradePurchased(upgrade))
+            return false;
+        if (gameData.RestaurantData.Level < upgrade.LevelUnlocked)
         {
-            if (!GameManager.Instance.GameData.UpgradeData.PurchasedUpgrades.Contains(upgrade.Guid))
-            {
-                GameManager.Instance.PurchaseUpgradeServerRpc(upgrade.Guid);
-                GameManager.Instance.UpdateRestaurantCoinServerRpc(-upgrade.UpgradeCosts);
-                GetUpgradeReward(upgrade.UpgradeTarget, upgrade.UpgradeValue);
-                OnUpgradePurchased?.Invoke(upgrade);
-                return true;
-            }
+            UIManager.Instance.ShowAlertMessage($"Reach Level {upgrade.LevelUnlocked} to unlock this upgrade.");
             return false;
         }
-        else
+        if (gameData.RestaurantData.Coins < upgrade.UpgradeCosts)
         {
             UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup,
                   new UIGameNotiPopup.Param
@@ -27,26 +24,7 @@ public class UpgradeManager : PersistentSingleton<UpgradeManager>
                   });
             return false;
         }
-    }
-    public void GetUpgradeReward(UpgradeTarget upgradeTarget,float amount)
-    {
-        switch (upgradeTarget)
-        {
-            case UpgradeTarget.MoveSpeed:
-                GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).UpdatePlayerMoveSpeed(amount);
-                break;
-            case UpgradeTarget.CookingSpeed:
-                GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).UpdatePlayerCookingSpeed(amount);
-                break;
-            case UpgradeTarget.CarryingCapacity:
-                GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).UpdatePlayerCarryingCapacity(amount);
-                break;
-            case UpgradeTarget.TipIncrease:
-                GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).UpdatePlayerTipIncrease(amount);
-                break;
-            case UpgradeTarget.ExpansionRestaurant:
-                GridBuildingSystem.Instance.ExpandGrid(amount);
-                break;
-        }
+        GameManager.Instance.PurchaseUpgradeServerRpc(upgrade.Guid);
+        return true;
     }
 }

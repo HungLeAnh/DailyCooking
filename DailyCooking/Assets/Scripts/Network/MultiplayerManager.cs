@@ -104,15 +104,8 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         if (string.IsNullOrEmpty(jsonData)) return;
         try
         {
-        if (GameManager.Instance.DataHandler == null)
-        {
-            var tempHandler = new FileDataHandler(Application.persistentDataPath, "GameData_temp");
-            GameManager.Instance.GameData = tempHandler.LoadFromJson(jsonData);
-        }
-        else
-        {
-            GameManager.Instance.GameData = GameManager.Instance.DataHandler.LoadFromJson(jsonData);
-        }
+        var snapshotHandler = GameManager.Instance.DataHandler ?? new FileDataHandler(Application.persistentDataPath, "GameData_temp");
+        GameManager.Instance.ReplaceGameDataFromHost(snapshotHandler.LoadFromJson(jsonData));
         if (GameManager.Instance.GameData == null) return;
         OnDataSyncToNewClient?.Invoke(this, EventArgs.Empty);
         }

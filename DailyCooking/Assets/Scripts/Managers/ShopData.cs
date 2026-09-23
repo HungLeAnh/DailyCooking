@@ -24,17 +24,23 @@ public class ShopData
         dailyFreeItemGemCount += 1;
         OnResourceChange?.Invoke();
     }
+    // Resets the daily free counts once per UTC day. Returns true when it reset.
+    // The server's (host's) clock decides for claims; clients only use this for display.
     public bool RefreshDailyShopOffer()
     {
-        if (GameManager.Instance.GameData.ShopData.DateLastRefreshShopDailyFree < DateTime.UtcNow)
+        return RefreshDailyShopOffer(DateTime.UtcNow);
+    }
+    public bool RefreshDailyShopOffer(DateTime utcNow)
+    {
+        if (_dateLastRefreshShopDailyFree.Date < utcNow.Date)
         {
-            GameManager.Instance.GameData.ShopData.DateLastRefreshShopDailyFree = DateTime.UtcNow;
+            _dateLastRefreshShopDailyFree = utcNow;
             dailyFreeItemCoinCount = 0;
             dailyFreeItemGemCount = 0;
+            OnResourceChange?.Invoke();
             return true;
         }
-        else
-            return false;
+        return false;
     }
 }
 

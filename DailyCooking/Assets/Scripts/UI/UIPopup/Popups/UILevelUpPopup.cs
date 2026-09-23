@@ -51,24 +51,8 @@ public class UILevelUpPopup : UIPopup
             Destroy(item.gameObject);
         }
         rewardItems.Clear();
-        if (_openParam != null)
-        {
-            if (GameManager.Instance.IsHost || GameManager.Instance.IsServer)
-            {
-                Param popupParam = _openParam as Param;
-                foreach (var item in popupParam.reward)
-                {
-                    if (item.id == nameof(RewardData.RewardType.Coin))
-                    {
-                        GameManager.Instance.UpdateRestaurantCoinServerRpc(item.amount);
-                    }
-                    else if (item.id == nameof(RewardData.RewardType.Gem))
-                    {
-                        GameManager.Instance.UpdateRestaurantGemsServerRpc(item.amount);
-                    }
-                }
-            }
-        }
+        // Display only: the server granted the reward when the level went up (GameManager.ServerAddExp).
+        _openParam = null;
     }
 
     private Sprite GetRewardIcon(string rewardId)

@@ -1828,12 +1828,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dailyFreeCurrency:
-  - Id: 3
+  - Id: 4
     Count: 3
     Reward: 100
-  - Id: 2
+  - Id: 3
     Count: 3
     Reward: 5
+  currencyExchangeOffers:
+  - RewardType: 4
+    GemCost: 30
+    RewardAmount: 600
+  - RewardType: 4
+    GemCost: 100
+    RewardAmount: 2400
+  - RewardType: 4
+    GemCost: 200
+    RewardAmount: 5000
 --- !u!114 &1533714586
 MonoBehaviour:
   m_ObjectHideFlags: 0

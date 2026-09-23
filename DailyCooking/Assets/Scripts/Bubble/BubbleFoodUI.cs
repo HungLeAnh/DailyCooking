@@ -16,6 +16,8 @@ public class BubbleFoodUI: MonoBehaviour
     {
         foreach (Transform child in dishContainerTransform)
         {
+            if (child.gameObject == dishPrefab)
+                continue;
             Destroy(child.gameObject);
         }
         foreach (var food in foods)

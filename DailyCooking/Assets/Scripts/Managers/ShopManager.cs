@@ -1,60 +1,64 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
+public class CurrencyExchangeOffer
+{
+    public ShopItemType RewardType = ShopItemType.Coin;
+    public int GemCost;
+    public int RewardAmount;
+}
+
+// Client-side front for shop actions: checks the balance for instant feedback, then sends an
+// intent to the server, which looks the price up again and applies the purchase
+// (GameManager.Economy).
 public class ShopManager : PersistentSingleton<ShopManager>
 {
     [Header("Free Currency")]
     [SerializeField] private List<DailyFreeCurrency> dailyFreeCurrency = new List<DailyFreeCurrency>();
 
+    [Header("Currency Exchange")]
+    [Tooltip("Gem-to-currency offers the server accepts. Must match the UICurrencyItem entries in the shop.")]
+    [SerializeField] private List<CurrencyExchangeOffer> currencyExchangeOffers = new List<CurrencyExchangeOffer>
+    {
+        new CurrencyExchangeOffer { RewardType = ShopItemType.Coin, GemCost = 30, RewardAmount = 600 },
+        new CurrencyExchangeOffer { RewardType = ShopItemType.Coin, GemCost = 100, RewardAmount = 2400 },
+        new CurrencyExchangeOffer { RewardType = ShopItemType.Coin, GemCost = 200, RewardAmount = 5000 },
+    };
+
     public List<DailyFreeCurrency> DailyFreeCurrency { get => dailyFreeCurrency; set => dailyFreeCurrency = value; }
+    public List<CurrencyExchangeOffer> CurrencyExchangeOffers => currencyExchangeOffers;
 
     public void OnPurchase(ConfigShopItem item, List<ShopReward> rewards)
     {
         if(item.Price > GameManager.Instance.GameData.RestaurantData.Coins)
         {
-            Debug.Log("Not enough coins to buy this item.");
-            UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup, 
-                new UIGameNotiPopup.Param {Title = "warning", 
-                                            Message = "Not enough money to buy this item."
-                });
+            ShowNotEnough("Not enough money to buy this item.");
             return;
         }
-        GameManager.Instance.UpdateRestaurantCoinServerRpc(-item.Price);
-        if(item.Type == ShopItemType.Item)
-        {
-            foreach (var reward in rewards)
-            {
-                for (int i = 0; i < reward.Amount; i++)
-                {
-                    GameManager.Instance.AddInventoryDataServerRpc(reward.Guid);
-                }
-            }
-
-        }
-        if (item.Type == ShopItemType.Ingredient)
-        {
-            foreach (var reward in rewards)
-            {
-                var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(reward.Guid);
-                GameManager.Instance.UpdatePostBoxDataServerRpc(kitchenObjectSO.Guid);
-            }
-        }
+        GameManager.Instance.BuyShopItemServerRpc(item.Id);
     }
 
-    public void BuyCurrency(ShopItemType type, int currencyAmount)
+    public void ExchangeCurrency(ShopItemType rewardType, int gemCost, int rewardAmount)
     {
-        switch (type)
+        if (GameManager.Instance.GameData.RestaurantData.Gems < gemCost)
         {
-            case ShopItemType.Coin:
-                GameManager.Instance.UpdateRestaurantCoinServerRpc(currencyAmount);
-                break;
-            case ShopItemType.Gem:
-                GameManager.Instance.UpdateRestaurantGemsServerRpc(currencyAmount);
-                break;
-            default:
-                break;
+            ShowNotEnough("Not enough gems to buy this currency.");
+            return;
         }
+        GameManager.Instance.ExchangeCurrencyServerRpc(rewardType, gemCost, rewardAmount);
+    }
+
+    public CurrencyExchangeOffer FindExchangeOffer(ShopItemType rewardType, int gemCost, int rewardAmount)
+    {
+        return currencyExchangeOffers.Find(offer =>
+            offer.RewardType == rewardType && offer.GemCost == gemCost && offer.RewardAmount == rewardAmount);
+    }
+
+    private static void ShowNotEnough(string message)
+    {
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup,
+            new UIGameNotiPopup.Param { Title = "warning", Message = message });
     }
 }
