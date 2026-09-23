@@ -87,43 +87,26 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
         }
     }
 
+    // Runs on the server (see PlayerStateMachine.InteractServerRpc).
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        //Debug.Log("ContainerCounterController: InteractEvent called! Player has kitchen object: " + playerStateMachine.HasKitchenObject() + ", fill amount: " + networkContainerData.Value.FillAmount);
-
         if (!playerStateMachine.HasKitchenObject())
         {
-            if(string.IsNullOrEmpty(networkContainerData.Value.KitchenObjectSOGuid.ToString()) || networkContainerData.Value.FillAmount == 0f)
+            if(string.IsNullOrEmpty(networkContainerData.Value.KitchenObjectSOGuid.ToString()) || networkContainerData.Value.FillAmount <= 0f)
             {
-                UIManager.Instance.ShowAlertMessage("This is empty!");
+                playerStateMachine.ShowAlert("This is empty!");
                 return;
             }
-            else if(networkContainerData.Value.FillAmount > 0f)
-            {
-                KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(networkContainerData.Value.KitchenObjectSOGuid.ToString());
-                //Debug.Log("Spawning kitchen object with SO guid: " + networkContainerData.Value.KitchenObjectSOGuid.ToString() + ", fill amount: " + networkContainerData.Value.FillAmount);
-                KitchenObject.SpawnKitchenObject(kitchenObjectSO, playerStateMachine);
-                UpdateContainerData();
-            }
+            KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(networkContainerData.Value.KitchenObjectSOGuid.ToString());
+            if (KitchenObject.SpawnKitchenObject(kitchenObjectSO, playerStateMachine) != null)
+                TakeOneFromContainer();
         }
-        else if(playerStateMachine.HasKitchenObject())
+        else if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
         {
-            //Debug.Log("current container data: " + networkContainerData.Value.KitchenObjectSOGuid.ToString() + ", fill amount: " + networkContainerData.Value.FillAmount);
-            if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
-            {
-                if (!string.IsNullOrEmpty(this.networkContainerData.Value.KitchenObjectSOGuid.ToString()))
-                {
-                    if (refillerKitchenObject.RefillKitchenObjectSO.Guid != this.networkContainerData.Value.KitchenObjectSOGuid.ToString())
-                    {
-                        UIManager.Instance.ShowAlertMessage("Cannot refill container with different ingredient type ");
-                        return;
-                    }
-                }
-                refillerKitchenObject.RefillContainerServerRpc(this);
-
-                playerStateMachine.GetKitchenObject().DestroySelf();
-
-            }
+            if (refillerKitchenObject.RefillContainer(this))
+                refillerKitchenObject.DestroySelf();
+            else
+                playerStateMachine.ShowAlert("Cannot refill container with different ingredient type ");
         }
     }
 
@@ -132,35 +115,22 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
         return new List<KitchenObjectSO> { KitchenGameManager.Instance.GetKitchenObjectSOByGuid(networkContainerData.Value.KitchenObjectSOGuid.ToString()) };
     }
 
-    public void Refill(float fillAmount, string kitchenObjectSOGuid)
+    // Server only. Returns false when the container holds a different ingredient.
+    public bool Refill(float fillAmount, string kitchenObjectSOGuid)
     {
-        //Debug.Log("Trying to refill container counter with guid: " + kitchenObjectSOGuid+ " is empty: " + string.IsNullOrEmpty(this.networkContainerData.Value.KitchenObjectSOGuid.ToString())
-        //    + " is whitespace: " + string.IsNullOrWhiteSpace(this.networkContainerData.Value.KitchenObjectSOGuid.ToString()));
-        if(kitchenObjectSOGuid == this.networkContainerData.Value.KitchenObjectSOGuid.ToString() || string.IsNullOrEmpty(this.networkContainerData.Value.KitchenObjectSOGuid.ToString()))
-        {
-            PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
-            string guid = placedObjectView.GetPlacedObjectTypeSOGuid();
-            placedObjectView.GetGridPositionList().ForEach(gridPosition =>
-            {
-                 GameManager.Instance.GameData.GridData.ChangeGridObjectData(gridPosition.x, gridPosition.y,
-                     new ContainerData(new List<ContainerDataSerializable> { new ContainerDataSerializable(kitchenObjectSOGuid, fillAmount) }, guid, gridPosition, placedObjectView.Dir, placedObjectView.InventoryTabType),
-                     placedObjectView.GetPlacedObjectTypeSOGuid());
-            });
-            this.networkContainerData.Value = new ContainerDataSerializable(kitchenObjectSOGuid, fillAmount);
+        if (!IsServer) return false;
+        string currentGuid = this.networkContainerData.Value.KitchenObjectSOGuid.ToString();
+        bool isEmpty = string.IsNullOrEmpty(currentGuid) || this.networkContainerData.Value.FillAmount <= 0f;
+        if (!isEmpty && kitchenObjectSOGuid != currentGuid)
+            return false;
 
-        }
-        else
-        {
-            UIManager.Instance.ShowAlertMessage("Cannot refill container counter with different ingredient type ");
-        }
+        this.networkContainerData.Value = new ContainerDataSerializable(kitchenObjectSOGuid, fillAmount);
+        SaveContainerData();
+        return true;
+    }
 
-    }
-    public void UpdateContainerData()
-    {
-        UpdateContainerDataServerRpc();
-    }
-    [Rpc(SendTo.Server)]
-    private void UpdateContainerDataServerRpc()
+    // Server only: one ingredient was taken out.
+    private void TakeOneFromContainer()
     {
         var data = networkContainerData.Value;
         if (networkContainerData.Value.FillAmount - 1f <= 0f)
@@ -172,10 +142,10 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
             data.FillAmount--;
             networkContainerData.Value = data;
         }
-        UpdateContainerDataClientRpc();
+        SaveContainerData();
     }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdateContainerDataClientRpc() 
+    // Server only: the host's GridData is the save; clients read the NetworkVariable.
+    private void SaveContainerData()
     {
         PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
         string guid = placedObjectView.GetPlacedObjectTypeSOGuid();

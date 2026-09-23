@@ -1,4 +1,5 @@
-﻿public class ClearCounterController : BaseCounterController
+﻿// Interaction logic runs on the server (see PlayerStateMachine.InteractServerRpc).
+public class ClearCounterController : BaseCounterController
 {
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {

@@ -34,8 +34,9 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     {
         //KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
     }
-    protected virtual void OnDestroy()
+    public override void OnDestroy()
     {
+        base.OnDestroy();
         if (KitchenGameManager.Instance == null)
             return;
         //KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
@@ -90,22 +91,10 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
         }
         return index == 0 ? counterTopPoint : null;
     }
+    // Called on every peer when a kitchen object's replicated parent becomes this counter.
     public void SetKitchenObject(KitchenObject kitchenObject, int index = 0)
     {
         KitchenObject = kitchenObject;
-
-        if (kitchenObject != null && kitchenObject.GetKitchenObjectOptionalProcessSO() != null)
-        {
-            UIPopupManager.Instance.ShowPopup(
-                UIPopupType.UIOptionMenuPopup,
-                new UIOptionMenuPopup.Param
-                {
-                    sender = this,
-                    objectSO = kitchenObject.GetKitchenObjectSO(),
-                    Title = "Select way to process ingredient:"
-                }
-            );
-        }
     }
     public virtual void InteractEvent(PlayerStateMachine playerStateMachine)
     {
@@ -161,8 +150,7 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     public void DestroySelf()
     {
         OnDestroySelf?.Invoke();
-        NetworkObject.Despawn();
-        Destroy(this);
+        NetworkObject.Despawn(true);
     }
 
     public virtual bool CanRemove()

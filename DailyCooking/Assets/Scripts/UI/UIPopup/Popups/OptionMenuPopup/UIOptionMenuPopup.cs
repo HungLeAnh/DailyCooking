@@ -60,7 +60,7 @@ public class UIOptionMenuPopup : UIPopup
         Show();
         var inputParam = _openParam as Param;
         _title.text = inputParam.Title;
-        _optionalCounter = (IHasOptionalSO)sender;
+        _optionalCounter = sender as IHasOptionalSO;
         if (_optionalCounter == null)
             return;
 
@@ -82,8 +82,8 @@ public class UIOptionMenuPopup : UIPopup
         Show();
         var inputParam = _openParam as Param;
         _title.text = inputParam.Title;
-        _optionalCounter = (IHasOptionalSO)sender;
-        if (_optionalCounter == null ) 
+        _optionalCounter = sender as IHasOptionalSO;
+        if (_optionalCounter == null )
             return;
 
         var processSO = kitchenObjectSO.processSO;
@@ -104,14 +104,20 @@ public class UIOptionMenuPopup : UIPopup
 
     private void MenuItem_OnSelectedOption(int kitchenObjectIndex)
     {
-        _optionalCounter.SetOptionKitchenObjectSO(kitchenObjectIndex);
-        Hide();
+        SendChoice(kitchenObjectIndex);
     }
 
 
     private void MenuItem_OnSelectedFood(int foodindex)
     {
-        _optionalCounter.SetOptionKitchenObjectSO(foodindex);
+        SendChoice(foodindex);
+    }
+
+    // The server applies the choice for the local player.
+    private void SendChoice(int index)
+    {
+        if (_optionalCounter != null && PlayerStateMachine.LocalInstance != null)
+            PlayerStateMachine.LocalInstance.RequestOption(_optionalCounter, index);
         Hide();
     }
 

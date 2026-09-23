@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent, IHasOptionalSO, IDestroyable, IPlaceable
+public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent, IDestroyable, IPlaceable
 {
     public enum State
     {
@@ -56,9 +56,10 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         InitializeConfig();
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         _resolver.CombineResolved -= _presenter.OnCombineResolved;
+        base.OnDestroy();
     }
 
     public override void OnNetworkSpawn()
@@ -156,28 +157,17 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         _resolver.ResolveBurning(kitchenObjectSO);
     }
 
-    public void Cut()
+    // Server only: one cut by actor, at the actor's own cooking speed.
+    public void Cut(PlayerStateMachine actor)
     {
+        if (!IsServer) return;
         float cookingSpeed = 1f;
-        var gameManager = GameManager.Instance;
-        var sessionManager = SessionManager.Instance;
-        if (gameManager != null && gameManager.GameData != null && sessionManager != null)
-        {
-            var stats = gameManager.GameData.GetPlayerStatsById(sessionManager.PlayerId);
-            if (stats != null)
-                cookingSpeed = stats.CookingSpeed;
-            else
-                Debug.LogWarning("CookingTool.Cut: missing player stats, default CookingSpeed=1.", this);
-        }
+        PlayerStats stats = actor != null ? actor.GetOwnerStats() : null;
+        if (stats != null)
+            cookingSpeed = stats.CookingSpeed;
         else
-            Debug.LogWarning("CookingTool.Cut: GameManager/SessionManager not ready, default CookingSpeed=1.", this);
-        CutServerRpc(cookingSpeed);
-    }
-
-    [Rpc(SendTo.Server)]
-    private void CutServerRpc(float cookingSpeed)
-    {
-        if (cookingSpeed <= 0f || cookingSpeed > 10f) return;
+            Debug.LogWarning("CookingTool.Cut: missing player stats, default CookingSpeed=1.", this);
+        if (cookingSpeed <= 0f) return;
         if (!_slot.HasFood || !HasRecipeWithInput(_slot.Current.GetKitchenObjectSO()))
             return;
         _resolver.EnsureResolved(_slot.Current.GetKitchenObjectSO());
@@ -220,14 +210,10 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             SoundManager.Instance.PlayChopSound(transform.position);
     }
 
+    // Server only.
     public void UpdateCookingState(State state)
     {
-        UpdateCookingStateServerRpc(state);
-    }
-
-    [Rpc(SendTo.Server)]
-    private void UpdateCookingStateServerRpc(State state)
-    {
+        if (!IsServer) return;
         if (state != State.Idle && state != State.Cooking)
             return;
         if (state == State.Cooking && !_slot.HasFood)
@@ -387,16 +373,11 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         progressBarUI.Hide();
         burnWarningUI.Hide();
         if (IsServer)
+        {
             _netFood.Value = new NetworkObjectReference();
-        if (cookingToolConfig != null && _resolver.Supports(CookingToolConfigSO.CookingToolType.Combine))
-            ResetCombineIndexServerRpc();
-    }
-
-    [Rpc(SendTo.Server)]
-    private void ResetCombineIndexServerRpc()
-    {
-        if (_netCombineRecipeIndex.Value != -1)
-            _netCombineRecipeIndex.Value = -1;
+            if (_netCombineRecipeIndex.Value != -1)
+                _netCombineRecipeIndex.Value = -1;
+        }
     }
 
     public bool HasKitchenObject(int index = 0)
@@ -432,26 +413,23 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     }
 
 
-    // IHasOptionalSO
-    public void SetOptionKitchenObjectSO(int index)
+    // Server only: picks the combine option for the food in the slot. Returns false for a bad index.
+    public bool ApplyOption(int index)
     {
-        if (!_slot.HasFood)
-            return;
-        if (_resolver.ApplyOption(_slot.Current.GetKitchenObjectSO(), index))
-            SetOptionKitchenObjectServerRpc(index);
-    }
-
-    [Rpc(SendTo.Server)]
-    private void SetOptionKitchenObjectServerRpc(int index)
-    {
+        if (!IsServer || !_slot.HasFood)
+            return false;
+        if (!_resolver.ApplyOption(_slot.Current.GetKitchenObjectSO(), index))
+            return false;
         _netCombineRecipeIndex.Value = index;
+        return true;
     }
 
-    public void ShowLocalOptionMenu(KitchenObjectSO input)
+    // Server: shows the combine options for input to the actor, if this tool offers a menu.
+    public void ShowOptionMenu(PlayerStateMachine actor, IHasOptionalSO sender, KitchenObjectSO input)
     {
         if (cookingToolConfig == null || !cookingToolConfig.supportsOptionMenu || !_resolver.Supports(CookingToolConfigSO.CookingToolType.Combine))
             return;
-        _presenter.ShowOptionMenu(input, _resolver.GetOptions(input), this);
+        actor.ShowOptionMenu(sender, _resolver.GetOptions(input), CookingPresenter.OptionTitle);
     }
 
     public List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)

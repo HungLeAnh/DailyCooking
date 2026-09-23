@@ -420,7 +420,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         if(targetTable != null && TargetSeatIndex.Value >= 0)
         {
-            targetTable.ResetSeatServerRpc(TargetSeatIndex.Value);
+            targetTable.ResetSeat(TargetSeatIndex.Value);
         }
     }
     public void Leave()

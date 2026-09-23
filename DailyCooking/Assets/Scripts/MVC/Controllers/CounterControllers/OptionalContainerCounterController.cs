@@ -9,7 +9,6 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
 {
     private NetworkList<ContainerDataSerializable> kitchenObjectSONetworkList = new NetworkList<ContainerDataSerializable>();
 
-    private PlayerStateMachine playerStateMachine;
     public override void OnNetworkSpawn()
     {
         GridBuildingSystem.Instance.OnObjectSpawned += GridBuildingSystem_OnObjectSpawned;
@@ -77,70 +76,43 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             }
         }
     }
+    // Runs on the server (see PlayerStateMachine.InteractServerRpc).
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         if (!playerStateMachine.HasKitchenObject())
         {
             if (kitchenObjectSONetworkList == null || kitchenObjectSONetworkList.Count == 0)
             {
-                UIManager.Instance.ShowAlertMessage($"This is empty!");
+                playerStateMachine.ShowAlert("This is empty!");
                 return;
             }
-            //Debug.Log("Player does not have kitchen object, showing option menu");
-            this.playerStateMachine = playerStateMachine;
-            var kitchenObjectSOList = GetContainerKitchenObjectType();
-            OnShowOptionMenu(kitchenObjectSOList);
-
+            // One entry per list slot so the picked index matches kitchenObjectSONetworkList.
+            var options = new List<KitchenObjectSO>();
+            foreach (var containerData in kitchenObjectSONetworkList)
+                options.Add(KitchenGameManager.Instance.GetKitchenObjectSOByGuid(containerData.KitchenObjectSOGuid.ToString()));
+            playerStateMachine.ShowOptionMenu(this, options, "Select ingredient to make: ");
         }
-        else if (playerStateMachine.HasKitchenObject())
+        else if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
         {
-            //Debug.Log("Player has kitchen object:" + playerStateMachine.GetKitchenObject());
-            if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
-            {
-                refillerKitchenObject.RefillContainerServerRpc(this);
-
-                playerStateMachine.GetKitchenObject().DestroySelf();
-
-            }
+            if (refillerKitchenObject.RefillContainer(this))
+                refillerKitchenObject.DestroySelf();
         }
     }
 
-    public void SetOptionKitchenObjectSO(int index)
+    // Server: the actor picked an ingredient; index is into kitchenObjectSONetworkList.
+    public void ApplyOption(PlayerStateMachine actor, int index)
     {
-        if (!this.playerStateMachine.HasKitchenObject())
-        {
-            var containerData = kitchenObjectSONetworkList[index];
-            // ContainerDataSerializable stores the SO guid in KitchenObjectSOGuid
-            string soGuid = containerData.KitchenObjectSOGuid.ToString();
-            var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(soGuid);
-
-            if (kitchenObjectSO != null)
-            {
-
-                UpdateContainerData(containerData,index);
-                KitchenObject.SpawnKitchenObject(kitchenObjectSO, this.playerStateMachine);
-            }
-            else
-            {
-                Debug.LogError($"SetOptionKitchenObjectSO: KitchenObjectSO not found for guid {soGuid}");
-            }
-        }
-        this.playerStateMachine = null;
-    }
-
-    public void OnShowOptionMenu(List<KitchenObjectSO> kitchenObjectSOList)
-    {
-        if(GridBuildingSystem.Instance.BuildingPlacementManager.IsBuilding)
+        if (actor.HasKitchenObject() || index < 0 || index >= kitchenObjectSONetworkList.Count)
             return;
-        //Debug.Log("Showing option menu for container counter with " + kitchenObjectSOList.Count + " options");
-        UIPopupManager.Instance.ShowPopup(
-        UIPopupType.UIOptionMenuPopup,
-        new UIOptionMenuPopup.Param
+        var containerData = kitchenObjectSONetworkList[index];
+        var kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(containerData.KitchenObjectSOGuid.ToString());
+        if (kitchenObjectSO == null)
         {
-            sender = this,
-            optionalList = kitchenObjectSOList,
-            Title = "Select ingredient to make: "
-        });
+            Debug.LogError($"ApplyOption: KitchenObjectSO not found for guid {containerData.KitchenObjectSOGuid}");
+            return;
+        }
+        if (KitchenObject.SpawnKitchenObject(kitchenObjectSO, actor) != null)
+            TakeOneFromContainer(index);
     }
 
     public List<KitchenObjectSO> GetContainerKitchenObjectType()
@@ -151,26 +123,19 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             .ToList();
     }
 
-    public void Refill(float fillAmount, string kitchenObjectSOGuid)
+    // Server only.
+    public bool Refill(float fillAmount, string kitchenObjectSOGuid)
     {
-        PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
-        string guid = placedObjectView.GetPlacedObjectTypeSOGuid();
+        if (!IsServer) return false;
         kitchenObjectSONetworkList.Add(new ContainerDataSerializable(kitchenObjectSOGuid, fillAmount));
-        placedObjectView.GetGridPositionList().ForEach(gridPosition =>
-        {
-            GameManager.Instance.GameData.GridData.ChangeGridObjectData(gridPosition.x, gridPosition.y,
-                new ContainerData(kitchenObjectSONetworkList.AsNativeArray().ToList(), guid, gridPosition, placedObjectView.Dir, placedObjectView.InventoryTabType),
-                placedObjectView.GetPlacedObjectTypeSOGuid());
-        });
-        
+        SaveContainerData();
+        return true;
     }
-    public void UpdateContainerData(ContainerDataSerializable containerData,int index)
+
+    // Server only: one ingredient of entry index was taken out.
+    private void TakeOneFromContainer(int index)
     {
-        UpdateContainerDataServerRpc(containerData,index);
-    }
-    [Rpc(SendTo.Server)]
-    private void UpdateContainerDataServerRpc(ContainerDataSerializable containerData,int index)
-    {
+        var containerData = kitchenObjectSONetworkList[index];
         if (containerData.FillAmount - 1f <= 0f)
         {
             kitchenObjectSONetworkList.RemoveAt(index);
@@ -180,10 +145,11 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             containerData.FillAmount--;
             kitchenObjectSONetworkList[index] = containerData;
         }
-        UpdateContainerDataClientRpc();
+        SaveContainerData();
     }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdateContainerDataClientRpc()
+
+    // Server only: the host's GridData is the save; clients read the NetworkList.
+    private void SaveContainerData()
     {
         PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
         string guid = placedObjectView.GetPlacedObjectTypeSOGuid();

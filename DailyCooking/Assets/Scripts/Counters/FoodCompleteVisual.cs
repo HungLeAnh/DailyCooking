@@ -23,8 +23,13 @@ public class FoodCompleteVisual : MonoBehaviour
             foreach (var item in kitchenObjectSOGameObject.GameObjectList)
             {
                 item.SetActive(false);
-            } 
+            }
         }
+        // The plate may already hold ingredients (late join), which fired before Start subscribed.
+        if (tablewareKitchenObject.IsEaten)
+            return;
+        foreach (KitchenObjectSO ingredient in tablewareKitchenObject.GetKitchenObjectSOList())
+            ShowIngredient(ingredient);
     }
     private void OnDestroy()
     {
@@ -45,10 +50,14 @@ public class FoodCompleteVisual : MonoBehaviour
 
     private void TablewareKitchenObject_OnIngredientAdded(object sender, TablewareKitchenObject.OnIngredientAddedEventArgs e)
     {
+        ShowIngredient(e.KitchenObjectSO);
+    }
 
+    private void ShowIngredient(KitchenObjectSO ingredient)
+    {
         foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in KitchenObjectSO_GameObjectList)
         {
-            if (kitchenObjectSOGameObject.kitchenObjectSO == e.KitchenObjectSO)
+            if (kitchenObjectSOGameObject.kitchenObjectSO == ingredient)
             {
                 foreach (var item in kitchenObjectSOGameObject.GameObjectList)
                 {

@@ -6,7 +6,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
+public partial class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
 {
     public PlayerStateContext Context { get; set; }
 
@@ -105,13 +105,14 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         SetCharacterMesh();
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         if(GameInput.Instance != null)
             GameInput.Instance.OnMouseClickPerformed -= PlayerStateMachine_OnMouseClickPerformed;
 
         Context = null;
         _stateManager.Dispose();
+        base.OnDestroy();
     }
     private void Update()
     {
@@ -187,7 +188,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
                 if (interactableObject != Context.SelectedInteractableObject)
                 {
                     SetInteractableObject(interactableObject, raycastHit.transform);
-                    Context.SelectedInteractableObject.InteractEvent(this);
+                    RequestInteract(Context.SelectedInteractableObject, false);
                 }
                 else if (interactableObject == Context.SelectedInteractableObject)
                 {
@@ -197,18 +198,18 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
                         if (progress == null)
                         {
                             SetInteractableObject(interactableObject, raycastHit.transform);
-                            Context.SelectedInteractableObject.InteractEvent(this);
+                            RequestInteract(Context.SelectedInteractableObject, false);
                         }
                         else
                         {
 
                             if (progress.IsDone() || progress.GetProgress() == -1)
                             {
-                                Context.SelectedInteractableObject.InteractEvent(this);
+                                RequestInteract(Context.SelectedInteractableObject, false);
                             }
                             else
                             {
-                                Context.SelectedInteractableObject.InteractAlternateEvent(this);
+                                RequestInteract(Context.SelectedInteractableObject, true);
                             }
                         }
                     }
@@ -247,7 +248,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         }
         if (colliderHitArray.Length > 0)
         {
-            List<IHighlightable> newHighlightables = new List<IHighlightable>(Context.Highlightable);
+            List<IHighlightable> newHighlightables = new List<IHighlightable>();
             foreach (Collider hit in colliderHitArray)
             {
                 if (hit.transform.TryGetComponent(out IHighlightable highlightable))

@@ -1,16 +1,57 @@
-﻿using System.Collections.Generic;
 using System;
 using UnityEngine;
 using Unity.Netcode;
 
+// Which parent holds a kitchen object, replicated so every peer (and late joiners) agree.
+public struct KitchenObjectParentSlot : INetworkSerializable, IEquatable<KitchenObjectParentSlot>
+{
+    public bool HasParent;
+    public NetworkBehaviourReference Parent;
+    public int Index;
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref HasParent);
+        serializer.SerializeValue(ref Parent);
+        serializer.SerializeValue(ref Index);
+    }
+
+    public bool Equals(KitchenObjectParentSlot other)
+    {
+        return HasParent == other.HasParent && Parent.Equals(other.Parent) && Index == other.Index;
+    }
+}
+
 public class KitchenObject : NetworkBehaviour
 {
     [SerializeField] protected KitchenObjectSO kitchenObjectSO;
+    private readonly NetworkVariable<KitchenObjectParentSlot> parentSlot = new NetworkVariable<KitchenObjectParentSlot>(
+        default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private IKitchenObjectParent kitchenObjectParent;
+    private int kitchenObjectParentIndex;
+    private bool isParentPending;
     private FollowTransform kitchenObjectFollowTransform;
     protected virtual void Awake()
     {
         kitchenObjectFollowTransform = GetComponent<FollowTransform>();
+    }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        parentSlot.OnValueChanged += ParentSlot_OnValueChanged;
+        ApplyParentSlot(parentSlot.Value);
+    }
+    public override void OnNetworkDespawn()
+    {
+        parentSlot.OnValueChanged -= ParentSlot_OnValueChanged;
+        DetachFromLocalParent();
+        base.OnNetworkDespawn();
+    }
+    protected virtual void Update()
+    {
+        // A late joiner can spawn this object before its parent; retry until the parent exists.
+        if (isParentPending)
+            ApplyParentSlot(parentSlot.Value);
     }
     public KitchenObjectSO GetKitchenObjectSO()
     {
@@ -18,104 +59,107 @@ public class KitchenObject : NetworkBehaviour
     }
     public KitchenObjectOptionalProcessSO GetKitchenObjectOptionalProcessSO()
     {
-        if (kitchenObjectSO == null) 
+        if (kitchenObjectSO == null)
             return null;
 
         if (kitchenObjectSO.processSO != null)
             return kitchenObjectSO.processSO;
         else
             return null;
-        
-    }
-    public void SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent, int index = 0)
-    {
-        if (kitchenObjectParent == null) return;
-        var parentNetObj = kitchenObjectParent.GetNetworkObject();
-        if (parentNetObj == null || !parentNetObj.IsSpawned) return;
-        if (!IsSpawned) return;
-        if (IsServer)
-        {
-            ApplyKitchenObjectParentClientRpc(parentNetObj, index);
-        }
-        else
-        {
-            RequestKitchenObjectParentServerRpc(parentNetObj, index);
-        }
+
     }
 
-    [Rpc(SendTo.Server)]
-    private void RequestKitchenObjectParentServerRpc(NetworkObjectReference networkObjectReference, int index = 0)
+    // Server only. Returns false when the target slot is already taken.
+    public bool SetKitchenObjectParent(IKitchenObjectParent kitchenObjectParent, int index = 0)
     {
-        if (!networkObjectReference.TryGet(out NetworkObject parentNetObj) || parentNetObj == null || !parentNetObj.IsSpawned) return;
-        var parent = parentNetObj.GetComponentInChildren<CookingTool>();
-        IKitchenObjectParent validated = parent != null ? (IKitchenObjectParent)parent : parentNetObj.GetComponent<IKitchenObjectParent>();
-        if (validated == null) return;
-        if (validated.HasKitchenObject(index)) return;
-        ApplyKitchenObjectParentClientRpc(parentNetObj, index);
+        if (!IsServer)
+        {
+            Debug.LogWarning($"{name}: SetKitchenObjectParent must run on the server.", this);
+            return false;
+        }
+        if (!IsSpawned || !TryCreateParentSlot(kitchenObjectParent, index, out KitchenObjectParentSlot slot))
+            return false;
+        parentSlot.Value = slot;
+        return true;
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ApplyKitchenObjectParentClientRpc(NetworkObjectReference networkObjectReference, int index = 0)
+    // Server only, before Spawn(): the spawn message then already carries the parent.
+    public bool InitializeParent(IKitchenObjectParent kitchenObjectParent, int index = 0)
     {
-        //Debug.Log("SetKitchenObjectParentClientRpc called with networkObjectReference: " + networkObjectReference.NetworkObjectId);
-        networkObjectReference.TryGet(out NetworkObject kitchenObjectParentNetworkObject);
-        IKitchenObjectParent kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponentInChildren<CookingTool>();
+        if (!TryCreateParentSlot(kitchenObjectParent, index, out KitchenObjectParentSlot slot))
+            return false;
+        parentSlot.Value = slot;
+        return true;
+    }
+
+    private bool TryCreateParentSlot(IKitchenObjectParent kitchenObjectParent, int index, out KitchenObjectParentSlot slot)
+    {
+        slot = default;
+        if (!(kitchenObjectParent is NetworkBehaviour parentBehaviour) || !parentBehaviour.IsSpawned)
+            return false;
+        KitchenObject current = kitchenObjectParent.GetKitchenObject(index);
+        if (current != null && current != this)
+            return false;
+        slot = new KitchenObjectParentSlot { HasParent = true, Parent = parentBehaviour, Index = index };
+        return true;
+    }
+
+    private void ParentSlot_OnValueChanged(KitchenObjectParentSlot previousValue, KitchenObjectParentSlot newValue)
+    {
+        ApplyParentSlot(newValue);
+    }
+
+    private void ApplyParentSlot(KitchenObjectParentSlot slot)
+    {
+        isParentPending = false;
+        if (!slot.HasParent)
+        {
+            DetachFromLocalParent();
+            return;
+        }
+        if (!slot.Parent.TryGet(out NetworkBehaviour parentBehaviour) || !(parentBehaviour is IKitchenObjectParent newParent))
+        {
+            isParentPending = true;
+            return;
+        }
+        if (newParent == kitchenObjectParent && slot.Index == kitchenObjectParentIndex)
+            return;
+
+        DetachFromLocalParent();
+        kitchenObjectParent = newParent;
+        kitchenObjectParentIndex = slot.Index;
+        newParent.SetKitchenObject(this, slot.Index);
+        kitchenObjectFollowTransform.setTargetTransform(newParent.GetKitchenObjectFollowTransform(slot.Index));
+    }
+
+    // Clears the slot this object occupied, using the index it was stored under.
+    private void DetachFromLocalParent()
+    {
         if (kitchenObjectParent == null)
+            return;
+        if (kitchenObjectParent as UnityEngine.Object != null &&
+            kitchenObjectParent.GetKitchenObject(kitchenObjectParentIndex) == this)
         {
-            kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponent<IKitchenObjectParent>();
+            kitchenObjectParent.ClearKitchenObject(kitchenObjectParentIndex);
         }
-
-        if (this.kitchenObjectParent != null)
-        {
-            this.kitchenObjectParent.ClearKitchenObject(index);
-        }
-
-        this.kitchenObjectParent = kitchenObjectParent;
-        if (kitchenObjectParent.HasKitchenObject(index))
-        {
-            Debug.LogError(this.gameObject.name + " already has a parent that has a kitchen object!! Parent: " 
-                + kitchenObjectParent.GetNetworkObject().name);
-            //Debug.LogError("IKitchenObjectParent already has a KitchenObject!!");
-        }
-        kitchenObjectParent.SetKitchenObject(this, index);
-
-        kitchenObjectFollowTransform.setTargetTransform(kitchenObjectParent.GetKitchenObjectFollowTransform(index));
-
+        kitchenObjectParent = null;
     }
+
     public IKitchenObjectParent GetKitchenObjectParent()
     {
         return kitchenObjectParent;
     }
 
-    public void ResetState()
-    {
-        kitchenObjectParent = null;
-    }
+    // Server only. Despawning clears the parent slot on every peer (OnNetworkDespawn).
     public void DestroySelf(int index = 0)
     {
-        DestroySelfServerRpc(index);
-    }
-    [Rpc(SendTo.Server)]
-    private void DestroySelfServerRpc(int index = 0)
-    {
+        if (!IsServer)
+        {
+            Debug.LogWarning($"{name}: DestroySelf must run on the server.", this);
+            return;
+        }
         if (!IsSpawned) return;
-        ClearKitchenObjectOnParentClientRpc(index);
-        var netObj = gameObject.GetComponent<NetworkObject>();
-        netObj.Despawn();
-        if (KitchenObjectPool.Instance != null && kitchenObjectSO != null)
-        {
-            KitchenObjectPool.Instance.ReturnKitchenObject(gameObject, kitchenObjectSO.Guid);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    public void ClearKitchenObjectOnParentClientRpc(int index = 0)
-    {
-        if (kitchenObjectParent == null) return;
-        kitchenObjectParent.ClearKitchenObject(index);
+        NetworkObject.Despawn(true);
     }
 
     public bool TryGetTableware(out TablewareKitchenObject tablewareKitchenObject)
@@ -132,8 +176,8 @@ public class KitchenObject : NetworkBehaviour
         }
     }
 
-    public static void SpawnKitchenObject(KitchenObjectSO kitchenObjectSO, IKitchenObjectParent kitchenObjectParent)
+    public static KitchenObject SpawnKitchenObject(KitchenObjectSO kitchenObjectSO, IKitchenObjectParent kitchenObjectParent)
     {
-        KitchenGameManager.Instance.SpawnKitchenObject(kitchenObjectSO, kitchenObjectParent);
-    }    
+        return KitchenGameManager.Instance.SpawnKitchenObject(kitchenObjectSO, kitchenObjectParent);
+    }
 }

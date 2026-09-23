@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// UI + sound + option menu. Plain C# (not a MonoBehaviour) so the prefab is unchanged;
+// UI + sound. Plain C# (not a MonoBehaviour) so the prefab is unchanged;
 // the CookingTool facade constructs it with serialized refs.
 public sealed class CookingPresenter
 {
+    public const string OptionTitle = "Select way to process:";
     private const float UiEpsilon = 0.005f;
-    private const string OptionTitle = "Select way to process:";
 
     private ProgressBarUI _progress;
     private BurnWarningUI _burnUI;
@@ -116,19 +116,5 @@ public sealed class CookingPresenter
                 burnUI?.Hide();
                 break;
         }
-    }
-
-    public void ShowOptionMenu(KitchenObjectSO input, List<KitchenObjectSO> options, IHasOptionalSO sender)
-    {
-        if (input == null || options == null || options.Count == 0 || sender == null)
-            return;
-        UIPopupManager.Instance.ShowPopup(
-            UIPopupType.UIOptionMenuPopup,
-            new UIOptionMenuPopup.Param
-            {
-                sender = sender,
-                optionalList = options,
-                Title = OptionTitle
-            });
     }
 }

@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System;
 using UnityEngine;
+using Unity.Collections;
 using Unity.Netcode;
 
 public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightable
@@ -18,56 +19,72 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
     [SerializeField] private GameObject[] tablewareGameObjectArray;
     [SerializeField] private GameObject[] eatenGameObjectArray;
 
-    private List<KitchenObjectSO> _ingredientSOList;
-    private bool isEaten = false;
+    // Replicated plate state, so late joiners see the same plate.
+    private NetworkList<FixedString64Bytes> ingredientGuids;
+    private readonly NetworkVariable<bool> isEaten = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<bool> isServed = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    private readonly List<KitchenObjectSO> _ingredientSOList = new List<KitchenObjectSO>();
+
+    // Server only: what the customer paid, collected when a player picks up the eaten plate.
     private int cash;
     private int exp;
+
+    public bool IsEaten => isEaten.Value;
+    public bool IsServed => isServed.Value;
 
     protected override void Awake()
     {
         base.Awake();
-        _ingredientSOList = new List<KitchenObjectSO>();
+        ingredientGuids = new NetworkList<FixedString64Bytes>();
     }
 
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        ingredientGuids.OnListChanged += IngredientGuids_OnListChanged;
+        isEaten.OnValueChanged += IsEaten_OnValueChanged;
+        isServed.OnValueChanged += IsServed_OnValueChanged;
+
+        // Late join: rebuild the local list from the replicated one.
+        _ingredientSOList.Clear();
+        foreach (FixedString64Bytes guid in ingredientGuids)
+            AddLocalIngredient(guid.ToString());
+        if (isEaten.Value)
+            ApplyEatenVisual();
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        ingredientGuids.OnListChanged -= IngredientGuids_OnListChanged;
+        isEaten.OnValueChanged -= IsEaten_OnValueChanged;
+        isServed.OnValueChanged -= IsServed_OnValueChanged;
+        base.OnNetworkDespawn();
+    }
+
+    // Server only. Returns true when the ingredient was added to the plate.
     public bool TryAddIngredient(KitchenObjectSO kitchenObjectSO)
     {
-
-        //Debug.Log("Try add ingredient");
-        if (!validKitchenObjectSOList.Contains(kitchenObjectSO))
-        {
-            //Debug.Log("add invalid object");
+        if (!IsServer || kitchenObjectSO == null)
             return false;
-        }
-        if (_ingredientSOList.Contains(kitchenObjectSO))
-        {
-            //Already has this type
-            //Debug.Log("Already has this type object");
+        if (!validKitchenObjectSOList.Contains(kitchenObjectSO) || _ingredientSOList.Contains(kitchenObjectSO))
             return false;
-        }
-        else
-        {
-            TryAddIngredientServerRpc(kitchenObjectSO.Guid);
-
-            return true;
-        }
+        ingredientGuids.Add(kitchenObjectSO.Guid);
+        return true;
     }
-    [Rpc(SendTo.Server)]
-    private void TryAddIngredientServerRpc(string kitchenObjectSOGuid)
+
+    private void IngredientGuids_OnListChanged(NetworkListEvent<FixedString64Bytes> changeEvent)
     {
-        if (string.IsNullOrEmpty(kitchenObjectSOGuid)) return;
-        KitchenObjectSO so = KitchenGameManager.Instance != null ? KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuid) : null;
-        if (so == null) return;
-        if (!validKitchenObjectSOList.Contains(so)) return;
-        if (_ingredientSOList.Contains(so)) return;
-        TryAddIngredientClientRpc(kitchenObjectSOGuid);
+        if (changeEvent.Type == NetworkListEvent<FixedString64Bytes>.EventType.Add)
+            AddLocalIngredient(changeEvent.Value.ToString());
     }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void TryAddIngredientClientRpc(string kitchenObjectSOGuid)
+
+    private void AddLocalIngredient(string kitchenObjectSOGuid)
     {
         KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(kitchenObjectSOGuid);
-        if (kitchenObjectSO == null) return;
-        if (_ingredientSOList.Contains(kitchenObjectSO)) return;
+        if (kitchenObjectSO == null || _ingredientSOList.Contains(kitchenObjectSO)) return;
         _ingredientSOList.Add(kitchenObjectSO);
         OnIngredientAdded?.Invoke(this, new OnIngredientAddedEventArgs
         {
@@ -78,16 +95,17 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
     {
         return _ingredientSOList;
     }
+
+    // Runs on the server (see PlayerStateMachine.InteractServerRpc).
     public void InteractEvent(PlayerStateMachine playerStateMachine)
     {
-        if (!isEaten)
+        if (!isEaten.Value || playerStateMachine.HasKitchenObject())
             return;
 
-        if (!playerStateMachine.HasKitchenObject())
+        if (SetKitchenObjectParent(playerStateMachine) && (cash > 0 || exp > 0))
         {
-            SetKitchenObjectParent(playerStateMachine);
-            KitchenGameManager.Instance.CollectCash(cash,exp);
-            cash = 0;   
+            KitchenGameManager.Instance.CollectCash(cash, exp);
+            cash = 0;
             exp = 0;
         }
     }
@@ -126,11 +144,25 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
             visualGameObject.SetActive(false);
         }
     }
+
+    // Server only: the customer finished eating and paid cash/exp.
     public void SetEaten(int cash, int exp)
     {
+        if (!IsServer)
+            return;
         this.cash = cash;
         this.exp = exp;
-        isEaten = true;
+        isEaten.Value = true;
+    }
+
+    private void IsEaten_OnValueChanged(bool previousValue, bool newValue)
+    {
+        if (newValue)
+            ApplyEatenVisual();
+    }
+
+    private void ApplyEatenVisual()
+    {
         foreach (var visualGameObject in tablewareGameObjectArray)
         {
             visualGameObject.SetActive(false);
@@ -140,27 +172,18 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
             eatenGameObject.SetActive(true);
         }
         OnEaten?.Invoke(this, EventArgs.Empty);
-
     }
+
+    // Server only.
     public void Serve()
     {
         if (IsServer)
-        {
-            ServeClientRpc();
-        }
-        else
-        {
-            RequestServeServerRpc();
-        }
+            isServed.Value = true;
     }
-    [Rpc(SendTo.Server)]
-    private void RequestServeServerRpc()
+
+    private void IsServed_OnValueChanged(bool previousValue, bool newValue)
     {
-        ServeClientRpc();
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ServeClientRpc()
-    {
-        OnServed?.Invoke(this, EventArgs.Empty);
+        if (newValue)
+            OnServed?.Invoke(this, EventArgs.Empty);
     }
 }

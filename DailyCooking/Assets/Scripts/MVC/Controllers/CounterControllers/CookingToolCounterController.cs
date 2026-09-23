@@ -120,13 +120,14 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
                 KitchenObjectSO inputKitchenObjectSO = playerStateMachine.GetKitchenObject().GetKitchenObjectSO();
                 if (_cookingTool.HasRecipeWithInput(inputKitchenObjectSO))
                 {
-                    playerStateMachine.GetKitchenObject().SetKitchenObjectParent(_cookingTool);
+                    if (!playerStateMachine.GetKitchenObject().SetKitchenObjectParent(_cookingTool))
+                        return;
                     if (_cookingTool.RequiresOptionChoice(inputKitchenObjectSO))
                     {
                         // Pending choice: stay Idle so server guard doesn't soft-lock in Cooking with 0 time.
                         // Popup cancel leaves food in Idle, player can take it back.
                         _cookingTool.UpdateCookingState(CookingTool.State.Idle);
-                        _cookingTool.ShowLocalOptionMenu(inputKitchenObjectSO);
+                        _cookingTool.ShowOptionMenu(playerStateMachine, this, inputKitchenObjectSO);
                     }
                     else
                     {
@@ -168,7 +169,7 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
             return;
         if (!_cookingTool.HasKitchenObject())
             return;
-        _cookingTool.Cut();
+        _cookingTool.Cut(playerStateMachine);
     }
 
     public float GetProgress()
@@ -181,14 +182,13 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         return TryResolveTool() && _cookingTool.IsDone();
     }
 
-    public void SetOptionKitchenObjectSO(int index)
+    // Server: the actor picked a combine option for the food waiting in the tool.
+    public void ApplyOption(PlayerStateMachine actor, int index)
     {
-        if (TryResolveTool())
-        {
-            _cookingTool.SetOptionKitchenObjectSO(index);
-            if (_cookingTool.CookingTimeMax > 0f)
-                _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
-        }
+        if (!TryResolveTool() || _cookingTool.CurrentState != CookingTool.State.Idle)
+            return;
+        if (_cookingTool.ApplyOption(index) && _cookingTool.CookingTimeMax > 0f)
+            _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
     }
 
     public List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)

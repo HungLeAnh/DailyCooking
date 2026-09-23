@@ -15,7 +15,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
 
     public event Action<NetworkObject> OnSpawnRequestCompleted;
     public event EventHandler OnStateChanged;
-    public Action OnSpawnKitchenObjectCompleted;
 
     public enum State
     {
@@ -29,7 +28,8 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     [SerializeField] private List<KitchenObjectSO> kitchenObjectSOList;
     [SerializeField] private RecipeDatabaseSO recipeDatabase;
 
-    private State state;
+    private readonly NetworkVariable<State> state = new NetworkVariable<State>(
+        State.Editing, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private long earnGoal;
     private long serveGoal;
@@ -43,7 +43,7 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     public long EarnGoal { get => earnGoal; set => earnGoal = value; }
     public long ServeGoal { get => serveGoal; set => serveGoal = value; }
 
-    public State CurrentState => state;
+    public State CurrentState => state.Value;
 
     public Dictionary<string, KitchenObjectSO> KitchenObjectSODic { get => kitchenObjectSODic; set => kitchenObjectSODic = value; }
     public RecipeDatabaseSO RecipeDatabase { get => recipeDatabase; }
@@ -51,7 +51,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     protected override void Awake()
     {
         base.Awake();
-        state = State.Editing;
         unlockIngredient = new List<KitchenObjectSO>();
         kitchenObjectSODic = new Dictionary<string, KitchenObjectSO>();
         foreach (var kitchenObjectSO in kitchenObjectSOList)
@@ -59,17 +58,15 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
             kitchenObjectSODic[kitchenObjectSO.Guid] = kitchenObjectSO;
         }
         recipeDatabase.Initialize();
-
-        if (IsServer && KitchenObjectPool.Instance != null)
-        {
-            KitchenObjectPool.Instance.PrewarmPools(kitchenObjectSOList);
-        }
     }
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+        state.OnValueChanged += State_OnValueChanged;
         BotManager.Instance.Initialize();
-        ChangeState(State.Open);
+        if (IsServer)
+            state.Value = State.Open;
+        OnStateChanged?.Invoke(this, EventArgs.Empty);
         BotManager.Instance.StartSpawnBot();
         if (PrefabSpawnService.Instance != null)
         {
@@ -78,9 +75,16 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         }
     }
 
-    public void OnDestroy()
+    public override void OnNetworkDespawn()
+    {
+        state.OnValueChanged -= State_OnValueChanged;
+        base.OnNetworkDespawn();
+    }
+
+    public override void OnDestroy()
     {
         unlockIngredient.Clear();
+        base.OnDestroy();
     }
     public void Start()
     {
@@ -89,9 +93,22 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     {
         unlockIngredient.Clear();
     }
+    // Any player may open or close the restaurant; the server owns the value.
     public void ChangeState(State newState)
     {
-        state = newState;
+        if (IsServer)
+            state.Value = newState;
+        else
+            ChangeStateServerRpc(newState);
+    }
+    [Rpc(SendTo.Server)]
+    private void ChangeStateServerRpc(State newState)
+    {
+        if (newState != State.Open && newState != State.Close) return;
+        state.Value = newState;
+    }
+    private void State_OnValueChanged(State previousValue, State newValue)
+    {
         OnStateChanged?.Invoke(this, EventArgs.Empty);
     }
     public void CollectCash(int cash, int exp)
@@ -107,15 +124,15 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     }
     public bool IsOpening()
     {
-        return state == State.Open;
+        return state.Value == State.Open;
     }
     public bool IsClosing()
     {
-        return state == State.Close;
+        return state.Value == State.Close;
     }
     public bool IsEditing()
     {
-        return state == State.Editing;
+        return state.Value == State.Editing;
 
     }
     public FoodSO GetUnlockedFood()
@@ -144,50 +161,27 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         else
             return null;
     }
-    public void SpawnKitchenObject(KitchenObjectSO kitchenObjectSO, IKitchenObjectParent kitchenObjectParent, int index = 0)
+    // Server only. Spawns the object already parented, so clients never see it unparented.
+    // Returns null when the parent slot is taken or the spawn is not allowed.
+    public KitchenObject SpawnKitchenObject(KitchenObjectSO kitchenObjectSO, IKitchenObjectParent kitchenObjectParent, int index = 0)
     {
-        SpawnKitchenObjectServerRpc(kitchenObjectSO.Guid, kitchenObjectParent.GetNetworkObject(), index);
-    }
-
-    [Rpc(SendTo.Server)]
-    private void SpawnKitchenObjectServerRpc(string kitchenObjectSOGuid, NetworkObjectReference networkObjectReference, int index = 0)
-    {
-        if (string.IsNullOrEmpty(kitchenObjectSOGuid) || !kitchenObjectSODic.TryGetValue(kitchenObjectSOGuid, out KitchenObjectSO kitchenObjectSO) || kitchenObjectSO == null) return;
-
-        if (!networkObjectReference.TryGet(out NetworkObject kitchenObjectParentNetworkObject) || kitchenObjectParentNetworkObject == null || !kitchenObjectParentNetworkObject.IsSpawned) return;
-        IKitchenObjectParent kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponentInChildren<CookingTool>();
-        if (kitchenObjectParent == null)
+        if (!IsServer)
         {
-            kitchenObjectParent = kitchenObjectParentNetworkObject.GetComponent<IKitchenObjectParent>();
+            Debug.LogWarning("KitchenGameManager.SpawnKitchenObject must run on the server.");
+            return null;
         }
+        if (kitchenObjectSO == null || kitchenObjectSO.prefab == null || kitchenObjectParent == null) return null;
+        if (!kitchenObjectSODic.ContainsKey(kitchenObjectSO.Guid)) return null;
+        if (kitchenObjectParent.HasKitchenObject(index)) return null;
 
-        if (kitchenObjectParent.HasKitchenObject())
+        KitchenObject kitchenObject = Instantiate(kitchenObjectSO.prefab).GetComponent<KitchenObject>();
+        if (!kitchenObject.InitializeParent(kitchenObjectParent, index))
         {
-            //Parent already spawn an object
-            return;
+            Destroy(kitchenObject.gameObject);
+            return null;
         }
-
-        GameObject kitchenObjectGO;
-        if (KitchenObjectPool.Instance != null && KitchenObjectPool.Instance.HasPool(kitchenObjectSOGuid))
-        {
-            kitchenObjectGO = KitchenObjectPool.Instance.GetKitchenObject(kitchenObjectSOGuid);
-        }
-        else
-        {
-            kitchenObjectGO = Instantiate(kitchenObjectSO.prefab).gameObject;
-        }
-
-        Transform kitchenObjectTransform = kitchenObjectGO.transform;
-        NetworkObject kitchenObjectNetworkObject = kitchenObjectTransform.GetComponent<NetworkObject>();
-        if (!kitchenObjectNetworkObject.IsSpawned)
-        {
-            kitchenObjectNetworkObject.Spawn(true);
-        }
-
-        KitchenObject kitchenObject = kitchenObjectTransform.GetComponent<KitchenObject>();
-
-        kitchenObject.SetKitchenObjectParent(kitchenObjectParent, index);
-        OnSpawnKitchenObjectCompleted?.Invoke();
+        kitchenObject.NetworkObject.Spawn(true);
+        return kitchenObject;
     }
 
 

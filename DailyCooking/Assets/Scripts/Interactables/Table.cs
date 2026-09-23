@@ -8,25 +8,27 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     [SerializeField] private List<Transform> seats = new List<Transform>();
     [SerializeField] private List<Transform> kitchenObjectFollowPoints = new List<Transform>();
     [SerializeField] private GameObject[] visualGameObjectArray;
-    
-    private bool[] isSeatOccupied;
+
+    // Server-written, so every peer and late joiners agree on which seats are taken.
+    private NetworkList<bool> isSeatOccupied;
+    // Filled on every peer from the kitchen objects' replicated parent.
     private KitchenObject[] kitchenObjects;
-    private bool isInitialized;
     public event Action OnDestroySelf;
+
+    private void Awake()
+    {
+        isSeatOccupied = new NetworkList<bool>();
+        kitchenObjects = new KitchenObject[seats.Count];
+    }
     public override void OnNetworkSpawn()
     {
-        InitializeArrays();
-    }
-    private void Start()
-    {
-        InitializeArrays();
-    }
-    private void InitializeArrays()
-    {
-        if (isInitialized) return;
-        isSeatOccupied = new bool[seats.Count];
-        kitchenObjects = new KitchenObject[seats.Count];
-        isInitialized = true;
+        base.OnNetworkSpawn();
+        if (IsServer && isSeatOccupied.Count != seats.Count)
+        {
+            isSeatOccupied.Clear();
+            for (int i = 0; i < seats.Count; i++)
+                isSeatOccupied.Add(false);
+        }
     }
     private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
     {
@@ -36,19 +38,25 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
         }
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         if(TableManager.Instance != null)
             TableManager.Instance.UnregisterTable(this);
         //if(KitchenGameManager.Instance != null)
         //    KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
+        base.OnDestroy();
+    }
+
+    private bool IsSeatOccupied(int seatIndex)
+    {
+        return seatIndex >= 0 && seatIndex < isSeatOccupied.Count && isSeatOccupied[seatIndex];
     }
 
     public int GetAvailableSeat()
     {
         for (int i = 0; i < seats.Count; i++)
         {
-            if (!isSeatOccupied[i] && kitchenObjects[i] == null)
+            if (!IsSeatOccupied(i) && kitchenObjects[i] == null)
             {
                 return i;
             }
@@ -56,9 +64,10 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
         return -1; // No available seat
     }
 
+    // Server only.
     public bool OccupySeat(int seatIndex)
     {
-        if (!isInitialized || seatIndex < 0 || seatIndex >= seats.Count || isSeatOccupied[seatIndex])
+        if (!IsServer || seatIndex < 0 || seatIndex >= isSeatOccupied.Count || isSeatOccupied[seatIndex])
         {
             return false; // Invalid seat index or seat is already occupied
         }
@@ -66,19 +75,11 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
         isSeatOccupied[seatIndex] = true;
         return true;
     }
-    [Rpc(SendTo.Server)]
-    public void OccupySeatServerRpc(int seatIndex)
-    {
-        OccupySeatClientRpc(seatIndex);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void OccupySeatClientRpc(int seatIndex)
-    {
-        OccupySeat(seatIndex);
-    }
+    // Server only.
     public void ResetTable()
     {
-        for (int i = 0; i < isSeatOccupied.Length; i++)
+        if (!IsServer) return;
+        for (int i = 0; i < isSeatOccupied.Count; i++)
         {
             isSeatOccupied[i] = false;
         }
@@ -88,27 +89,17 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
             if(kitchenObjects[i] != null)
             {
                 kitchenObjects[i].DestroySelf(i);
-                kitchenObjects[i] = null;
             }
         }
     }
+    // Server only.
     public void ResetSeat(int index)
     {
-        if(index < 0 || index >= isSeatOccupied.Length)
+        if (!IsServer || index < 0 || index >= isSeatOccupied.Count)
         {
             return;
         }
         isSeatOccupied[index] = false;
-    }
-    [Rpc(SendTo.Server)]
-    public void ResetSeatServerRpc(int index)
-    {
-        ResetSeatClientRpc(index);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ResetSeatClientRpc(int index)
-    {
-        ResetSeat(index);
     }
     public Transform GetSeatTransform(int seatIndex)
     {
@@ -130,7 +121,7 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
 
     public void SetKitchenObject(KitchenObject kitchenObject, int index = 0)
     {
-        if (kitchenObjects != null && index >= 0 && index < kitchenObjectFollowPoints.Count)
+        if (index >= 0 && index < kitchenObjects.Length)
         {
             kitchenObjects[index] = kitchenObject;
         }
@@ -139,53 +130,31 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
 
     public KitchenObject GetKitchenObject(int index = 0)
     {
-        if (kitchenObjects != null && index >= 0 && index < kitchenObjects.Length)
+        if (index >= 0 && index < kitchenObjects.Length)
         {
             return kitchenObjects[index];
         }
         return null;
     }
 
+    // Called on every peer when the plate at index leaves this table.
     public void ClearKitchenObject(int index = 0)
     {
-        ClearKitchenObjectServerRpc(index);
-    }
-    [Rpc(SendTo.Server)]
-    private void ClearKitchenObjectServerRpc(int index = 0)
-    {
-        ClearKitchenObjectClientRpc(index);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ClearKitchenObjectClientRpc(int index = 0)
-    {
-        if (kitchenObjects != null && index >= 0 &&
-            index < kitchenObjects.Length &&
-            index < seats.Count)
-        {
-            kitchenObjects[index] = null;
-            isSeatOccupied[index] = false;
-
-        }
+        if (index < 0 || index >= kitchenObjects.Length)
+            return;
+        kitchenObjects[index] = null;
+        // Taking the plate away frees the seat, as before.
+        if (IsServer)
+            ResetSeat(index);
     }
 
     public bool HasKitchenObject(int index = 0)
     {
-        Debug.Log("Table kitchen object length: " + kitchenObjects.Length);
-        if(kitchenObjects != null && 
-            kitchenObjects.Length > 0 && 
-            index < kitchenObjects.Length)
-        {
-            Debug.Log("Check kitchen object at index " + index + ": " + (kitchenObjects[index]));
-            return kitchenObjects[index] != null;
-        }
-        else
-        {
-            return false;
-        }
+        return GetKitchenObject(index) != null;
     }
     public void SetEatenViual(int index, int cash, int exp)
     {
-        var tablewareObject = kitchenObjects[index] as TablewareKitchenObject;
+        var tablewareObject = GetKitchenObject(index) as TablewareKitchenObject;
 
         if(tablewareObject != null)
         {
@@ -205,13 +174,12 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
     public void DestroySelf()
     {
         OnDestroySelf?.Invoke();
-        NetworkObject.Despawn();
-        Destroy(this);
+        NetworkObject.Despawn(true);
     }
 
     public bool CanRemove()
     {
-        for(int i = 0; i < isSeatOccupied.Length; i++)
+        for(int i = 0; i < isSeatOccupied.Count; i++)
         {
             if (isSeatOccupied[i])
                 return false;

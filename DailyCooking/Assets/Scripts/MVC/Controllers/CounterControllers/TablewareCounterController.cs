@@ -20,8 +20,9 @@ public class TablewareCounterController : BaseCounterController
     public int TablewareSpawnAmount { get => _tablewareSpawnAmount; set => _tablewareSpawnAmount = value; }
     public float SpawnTimer { get => _spawnTimer; set => _spawnTimer = value; }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _tablewareVisualGameObjectList = new List<GameObject>();
     }
 

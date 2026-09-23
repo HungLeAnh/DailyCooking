@@ -1,31 +1,37 @@
-﻿using System;
+﻿using Unity.Collections;
 using Unity.Netcode;
-using UnityEngine;
 
 public class RefillerKitchenObject : KitchenObject
 {
-    private KitchenObjectSO refillKitchenObjectSO;
+    // The ingredient this box refills, replicated so clients can check it too.
+    private readonly NetworkVariable<FixedString64Bytes> refillKitchenObjectSOGuid = new NetworkVariable<FixedString64Bytes>(
+        default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-    public KitchenObjectSO RefillKitchenObjectSO { get => refillKitchenObjectSO; set => refillKitchenObjectSO = value; }
+    public KitchenObjectSO RefillKitchenObjectSO
+    {
+        get
+        {
+            string guid = refillKitchenObjectSOGuid.Value.ToString();
+            if (string.IsNullOrEmpty(guid) || KitchenGameManager.Instance == null)
+                return null;
+            return KitchenGameManager.Instance.GetKitchenObjectSOByGuid(guid);
+        }
+    }
 
+    // Server only.
     public void SetRefillKitchenObject(KitchenObjectSO value)
     {
-        refillKitchenObjectSO = value;
-        //Debug.Log("RefillKitchenObjectSO set to: " + refillKitchenObjectSO);
+        if (!IsServer) return;
+        refillKitchenObjectSOGuid.Value = value != null ? value.Guid : string.Empty;
     }
-    [Rpc(SendTo.Server)]
-    public void RefillContainerServerRpc(NetworkBehaviourReference containerCounter)
+
+    // Server only. Returns true when the container accepted the refill.
+    public bool RefillContainer(IContainerCounter containerCounter)
     {
-        if (refillKitchenObjectSO == null) return;
-        var kitchenObjectSO = GetKitchenObjectSO() as RefillerKitchenObjectSO;
-        if (kitchenObjectSO == null) return;
-        if (!containerCounter.TryGet(out NetworkBehaviour containerCounterNetworkBehaviour) || containerCounterNetworkBehaviour == null) return;
-        if (containerCounterNetworkBehaviour is IContainerCounter containerCounterInterface)
-        {
-            //Debug.Log("RefillContainerClientRpc called with containerCounter: " + containerCounterInterface);
-            //Debug.Log("RefillContainerClientRpc called with kitchenObjectSO.refillingAmount: " + kitchenObjectSO.refillingAmount);
-            //Debug.Log("RefillContainerClientRpc called with refillKitchenObjectSO.Guid: " + refillKitchenObjectSO.Guid);
-            containerCounterInterface.Refill(kitchenObjectSO.refillingAmount, refillKitchenObjectSO.Guid);
-        }
+        if (!IsServer || containerCounter == null) return false;
+        KitchenObjectSO refillSO = RefillKitchenObjectSO;
+        if (refillSO == null) return false;
+        if (!(GetKitchenObjectSO() is RefillerKitchenObjectSO refillerSO)) return false;
+        return containerCounter.Refill(refillerSO.refillingAmount, refillSO.Guid);
     }
 }

@@ -21,6 +21,11 @@ public class FoodDetailUI : MonoBehaviour
         tablewareKitchenObject.OnIngredientAdded += TablewareKitchenObject_OnIngredientAdded;
         tablewareKitchenObject.OnServed += TablewareKitchenObject_OnServed;
 
+        // The plate may already hold ingredients (late join), which fired before Start subscribed.
+        foreach (KitchenObjectSO ingredient in tablewareKitchenObject.GetKitchenObjectSOList())
+            AddIngredientIcon(ingredient);
+        if (tablewareKitchenObject.IsServed)
+            _container.SetActive(false);
     }
     
     private void TablewareKitchenObject_OnServed(object sender, EventArgs e)
