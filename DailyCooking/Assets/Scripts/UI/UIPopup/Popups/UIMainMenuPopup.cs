@@ -23,7 +23,8 @@ public class UIMainMenuPopup : UIPopup
             {
                 OnSubmit = async (name, password) =>
                 {
-                    GameManager.Instance.NewGame(name, password);
+                    if (!GameManager.Instance.NewGame(name, password))
+                        return;
                     string joinCode = await MultiplayerManager.Instance.StartHostSessionAsync();
                     if (!string.IsNullOrEmpty(joinCode))
                     {
@@ -42,7 +43,8 @@ public class UIMainMenuPopup : UIPopup
             {
                 OnSubmit = async (name, password) =>
                 {
-                    GameManager.Instance.LoadGame(name, password);
+                    if (!GameManager.Instance.LoadGame(name, password))
+                        return;
                     string joinCode = await MultiplayerManager.Instance.StartHostSessionAsync();
                     if (!string.IsNullOrEmpty(joinCode))
                     {

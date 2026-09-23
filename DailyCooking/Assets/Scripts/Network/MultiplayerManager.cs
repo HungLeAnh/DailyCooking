@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Netcode;
@@ -91,7 +92,6 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     private void SyncDataToNewClientServerRpc(ulong clientId)
     {
         if (GameManager.Instance?.GameData == null || GameManager.Instance.DataHandler == null) return;
-        GameManager.Instance.GameData.SyncVersion++;
         string jsonData = GameManager.Instance.DataHandler.ConvertGameDataToJson(GameManager.Instance.GameData);
         if (string.IsNullOrEmpty(jsonData)) return;
 
@@ -176,13 +176,12 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         }
         return default;
     }
-    public PlayerData GetLatestPlayerData()
+    public IEnumerable<PlayerData> GetAllPlayerData()
     {
-        if (playerDataNetworkList.Count > 0)
+        foreach (PlayerData playerData in playerDataNetworkList)
         {
-            return playerDataNetworkList[playerDataNetworkList.Count - 1];
+            yield return playerData;
         }
-        return default;
     }
     public void StartSinglePlayer()
     {
@@ -235,6 +234,9 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
 
             OnTryingToJoinGame?.Invoke(this, EventArgs.Empty);
 
+            // The host's snapshot replaces GameData; never keep a local save attached.
+            GameManager.Instance.ClearActiveSave();
+
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Client_OnClientConnectCallback;
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Client_OnClientDisconnectCallback;
 
@@ -248,6 +250,10 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     }
     public void ShutdownAndReset()
     {
+        // Flush the host's save while it is still the server, then detach the file.
+        if (GameManager.Instance != null)
+            GameManager.Instance.ClearActiveSave(discardData: false);
+
         if (NetworkManager.Singleton != null)
         {
             // 1. Unsubscribe from global network events to prevent duplicates

@@ -11,7 +11,9 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 using System;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace PW
 {

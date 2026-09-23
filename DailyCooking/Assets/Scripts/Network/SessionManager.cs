@@ -40,12 +40,12 @@ public class SessionManager : PersistentSingleton<SessionManager>
         try
         {
             await UnityServices.InitializeAsync();
-            PlayGamesPlatform.DebugLogEnabled = true;
             //await SignInAnonymouslyAsync();
             SetupEvents();
 
 #if UNITY_ANDROID
             //Initialize PlayGamesPlatform
+            PlayGamesPlatform.DebugLogEnabled = Debug.isDebugBuild;
             PlayGamesPlatform.Activate();
             LoginGooglePlayGames();
 #endif
@@ -99,6 +99,7 @@ public class SessionManager : PersistentSingleton<SessionManager>
     #region Google Play Games
     public void LoginGooglePlayGames()
     {
+#if UNITY_ANDROID
         PlayGamesPlatform.Instance.Authenticate((success) =>
         {
             if (success == SignInStatus.Success)
@@ -107,7 +108,6 @@ public class SessionManager : PersistentSingleton<SessionManager>
 
                 PlayGamesPlatform.Instance.RequestServerSideAccess(true, code =>
                 {
-                    Debug.Log("Authorization code: " + code);
                     googlePlayGameToken = code;
                 });
             }
@@ -116,14 +116,21 @@ public class SessionManager : PersistentSingleton<SessionManager>
                 Debug.Log("Login Unsuccessful");
             }
         });
+#else
+        Debug.Log("Google Play Games is only available on Android.");
+#endif
     }
     public void StartSignInWithGooglePlayGames()
     {
+#if UNITY_ANDROID
         if (!PlayGamesPlatform.Instance.IsAuthenticated()||!HasGooglePlayGamesID())
         {
             LoginGooglePlayGames();
         }
         SignInOrLinkWithGooglePlayGames();
+#else
+        Debug.Log("Google Play Games is only available on Android.");
+#endif
     }
     private async void SignInOrLinkWithGooglePlayGames()
     {

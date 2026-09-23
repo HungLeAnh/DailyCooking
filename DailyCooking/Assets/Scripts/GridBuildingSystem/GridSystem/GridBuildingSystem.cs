@@ -190,19 +190,16 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     public void UnlockGrid()
     {
         gridManager.UnlockGrid(GameDefine.GridSize,GameDefine.GridSize);
-        gameManager.GameData.UpdateGridData(gridManager.Grid);
         gridInitializer.InitFloor();
         if (!GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
         {
             gridInitializer.InitDefaultCounters();
-            gameManager.GameData.UpdateGridData(gridManager.Grid);
         }
         SetBlocker();
     }
     public void ExpandGrid(float amount)
     {
         gridManager.ExpandGrid();
-        gameManager.GameData.UpdateGridData(gridManager.Grid);
         SetBlocker();
         gridInitializer.InitFloor();
     }
@@ -270,9 +267,6 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             }
 
             this.GetComponent<IModuleItem>()?.RegisterItem();
-
-            GameManager.Instance.GameData.UpdateGridData(GridManager.Grid);
-
         }
 
     }

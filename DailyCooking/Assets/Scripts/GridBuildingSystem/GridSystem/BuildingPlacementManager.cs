@@ -150,7 +150,6 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             }
 
             GridBuildingSystem.Instance.OnObjectPlacedEventServerRpc();
-            gameManager.GameData.UpdateGridData(gridManager.Grid);
             DeselectObjectType();
             return true;
 
@@ -183,8 +182,6 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         if(placedObjectTypeSO == null)
         {
             DeselectObjectType();
-            gameManager.GameData.UpdateGridData(gridManager.Grid);
-
             return;
         }
         this.placedObjectTypeSO = placedObjectTypeSO;

@@ -46,7 +46,17 @@ public class GridData
         HeightMax = grid.GetHeightMax();
         cellSize = grid.GetCellSize();
         originPosition = grid.GetOriginPosition();
-        Resize2DArray(GridArrayData, widthMax, heightMax);
+        GridArrayData = Resize2DArray(GridArrayData, widthMax, heightMax);
+    }
+
+    // Grows GridArrayData to WidthMax x HeightMax, keeping existing cells.
+    public void EnsureArraySize()
+    {
+        if (widthMax <= 0 || heightMax <= 0)
+            return;
+        if (GridArrayData != null && GridArrayData.GetLength(0) >= widthMax && GridArrayData.GetLength(1) >= heightMax)
+            return;
+        GridArrayData = Resize2DArray(GridArrayData, widthMax, heightMax);
     }
 
     private void Grid_OnGridObjectChanged(object sender, GridXZ<GridObject>.OnGridObjectChangedEventArgs e)

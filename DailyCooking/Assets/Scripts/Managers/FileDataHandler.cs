@@ -1,7 +1,5 @@
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using UnityEngine;
 
 public class FileDataHandler
 {
@@ -14,63 +12,31 @@ public class FileDataHandler
     {
         this.dataDirPath = dirPath;
         this.dataFileName = fileName;
-        settings = new JsonSerializerSettings
-        {
-            ContractResolver = new CustomContractResolver(),
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            Error = (sender, args) =>
-            {
-                args.ErrorContext.Handled = true;
-            },
-            TypeNameHandling = TypeNameHandling.Auto,
-            Formatting = Formatting.Indented
-        };
-        settings.Converters.Add(new UniversalUnityConverter());
+        settings = SaveJson.CreateSettings();
     }
 
     public GameData Load()
     {
-        string fullPath = Path.Combine(dataDirPath, dataFileName);
-        if (!File.Exists(fullPath)) return null;
-
-        string data = File.ReadAllText(fullPath);
-        try
-        {
-            GameData gameData = JsonConvert.DeserializeObject<GameData>(data,settings);
-            return gameData;
-
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Error loading data from file: {fullPath} {e}");
-            return null;
-        }
+        return SaveJson.ReadWithBackup<GameData>(Path.Combine(dataDirPath, dataFileName), settings);
     }
     public GameData LoadFromJson(string jsonData)
     {
         try
         {
-            GameData gameData = JsonConvert.DeserializeObject<GameData>(jsonData, settings);
-            return gameData;
+            return JsonConvert.DeserializeObject<GameData>(jsonData, settings);
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"Error loading data from JSON: {e}");
+            UnityEngine.Debug.LogError($"Error loading data from JSON: {e}");
             return null;
         }
     }
     public void Save(GameData data)
     {
-        string fullPath = Path.Combine(dataDirPath, dataFileName);
-        Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-        
-        string jsonData = JsonConvert.SerializeObject(data, Formatting.Indented, settings);
-        
-        File.WriteAllText(fullPath, jsonData);
+        SaveJson.WriteAtomic(Path.Combine(dataDirPath, dataFileName), ConvertGameDataToJson(data));
     }
     public string ConvertGameDataToJson(GameData data)
     {
-        return JsonConvert.SerializeObject(data, Formatting.Indented, settings);
+        return JsonConvert.SerializeObject(data, settings);
     }
 }
-

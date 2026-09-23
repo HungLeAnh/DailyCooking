@@ -70,7 +70,7 @@ public class GridInitializer : IGridInitializer
         string json = defaultGridConfigSO.gridArrayJson;
         List<GridObjectData>[,] gridObjectDataList = 
             JsonConvert.DeserializeObject<List<GridObjectData>[,]>
-            (json,gameManager.DataHandler.Settings);
+            (json, SaveJson.CreateSettings());
         gridManager.AddGridObjectData(gridObjectDataList);
     }
 }

@@ -53,28 +53,61 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
             MultiplayerManager.Instance.OnPlayerDataNetworkListChanged += Instance_OnPlayerDataNetworkListChanged;
     }
 
-    protected virtual void OnDestroy()
+    public override void OnDestroy()
     {
         if (MultiplayerManager.Instance != null)
             MultiplayerManager.Instance.OnPlayerDataNetworkListChanged -= Instance_OnPlayerDataNetworkListChanged;
-        if (gameData != null)
+        UnsubscribeSaveEvents();
+        base.OnDestroy();
+    }
+
+    private void SubscribeSaveEvents()
+    {
+        if (gameData == null) return;
+        UnsubscribeSaveEvents();
+        gameData.RestaurantData.OnLevelChange += SaveGame;
+        gameData.RestaurantData.OnExpChange += SaveGame;
+        gameData.RestaurantData.OnLevelUp += ShowLevelUpPopup;
+        gameData.RestaurantData.OnResourceChange += SaveGame;
+        if (gameData.PlayersStats != null)
         {
-            gameData.RestaurantData.OnLevelChange -= SaveGame;
-            gameData.RestaurantData.OnExpChange -= SaveGame;
-            gameData.RestaurantData.OnLevelUp -= ShowLevelUpPopup;
-            gameData.RestaurantData.OnResourceChange -= SaveGame;
-            if (gameData.PlayersStats != null)
-            {
-                foreach (var player in gameData.PlayersStats)
-                    player.OnResourceChange -= SaveGame;
-            }
-            gameData.InventoryData.OnInventoryDataChanged -= SaveGame;
-            gameData.GridData.OnGridDataChanged -= SaveGame;
-            gameData.TutorialData.OnTutorialDataChanged -= SaveGame;
-            gameData.MenuData.OnMenuDataChanged -= SaveGame;
-            gameData.ShopData.OnResourceChange -= SaveGame;
-            gameData.PostBoxData.OnResourceChange -= SaveGame;
+            foreach (var player in gameData.PlayersStats)
+                player.OnResourceChange += SaveGame;
         }
+        gameData.OnPlayerStatsAdded += GameData_OnPlayerStatsAdded;
+        gameData.InventoryData.OnInventoryDataChanged += SaveGame;
+        gameData.GridData.OnGridDataChanged += SaveGame;
+        gameData.TutorialData.OnTutorialDataChanged += SaveGame;
+        gameData.MenuData.OnMenuDataChanged += SaveGame;
+        gameData.ShopData.OnResourceChange += SaveGame;
+        gameData.PostBoxData.OnResourceChange += SaveGame;
+    }
+
+    private void UnsubscribeSaveEvents()
+    {
+        if (gameData == null) return;
+        gameData.RestaurantData.OnLevelChange -= SaveGame;
+        gameData.RestaurantData.OnExpChange -= SaveGame;
+        gameData.RestaurantData.OnLevelUp -= ShowLevelUpPopup;
+        gameData.RestaurantData.OnResourceChange -= SaveGame;
+        if (gameData.PlayersStats != null)
+        {
+            foreach (var player in gameData.PlayersStats)
+                player.OnResourceChange -= SaveGame;
+        }
+        gameData.OnPlayerStatsAdded -= GameData_OnPlayerStatsAdded;
+        gameData.InventoryData.OnInventoryDataChanged -= SaveGame;
+        gameData.GridData.OnGridDataChanged -= SaveGame;
+        gameData.TutorialData.OnTutorialDataChanged -= SaveGame;
+        gameData.MenuData.OnMenuDataChanged -= SaveGame;
+        gameData.ShopData.OnResourceChange -= SaveGame;
+        gameData.PostBoxData.OnResourceChange -= SaveGame;
+    }
+
+    private void GameData_OnPlayerStatsAdded(PlayerStats playerStats)
+    {
+        playerStats.OnResourceChange += SaveGame;
+        SaveGame();
     }
 
     private void ShowLevelUpPopup(int level)
@@ -89,6 +122,18 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     private void Update()
     {
         currentState?.Update();
+        FlushPendingSave();
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+            SaveGameImmediate();
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveGameImmediate();
     }
 
     public void InitializePlayer()
@@ -127,48 +172,59 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     {
         Destroy(playerGameObject);
     }
-    public void NewGame(string gameDataName, string password)
+    public bool NewGame(string gameDataName, string password)
     {
-        gameData = new GameData();
+        if (!IsValidGameDataName(gameDataName))
+        {
+            UIManager.Instance.ShowAlertMessage("Invalid restaurant name.");
+            return false;
+        }
+        if (SavedDataList.Any(s => s.GameDataName == gameDataName))
+        {
+            // Creating it again would overwrite the existing save file.
+            UIManager.Instance.ShowAlertMessage("A restaurant with this name already exists.");
+            return false;
+        }
+        ClearActiveSave();
+        gameData = GameData.CreateNew();
         dataHandler = new FileDataHandler(
             Application.persistentDataPath,
             fileName + "_" + gameDataName
         );
         SavedDataList.Add(new SavedData(gameDataName, password));
         savedDataHandler.Save(SavedDataList);
+        SubscribeSaveEvents();
+        SaveGameImmediate();
+        return true;
     }
 
-    public void LoadGame(string gameDataName, string password)
+    public bool LoadGame(string gameDataName, string password)
     {
         var savedData = SavedDataList.FirstOrDefault(s => s.GameDataName == gameDataName && s.Password == password);
         if (savedData == null)
         {
             Debug.LogError("Invalid game data name or password.");
-            return;
+            UIManager.Instance.ShowAlertMessage("Invalid restaurant name or password.");
+            return false;
         }
-        dataHandler = new FileDataHandler(
+        ClearActiveSave();
+        var handler = new FileDataHandler(
             Application.persistentDataPath,
             fileName + "_" + gameDataName
         );
-        gameData = dataHandler.Load();
-        gameData.MenuData.LoadMenuData();
-        gameData.RestaurantData.OnLevelChange += SaveGame;
-        gameData.RestaurantData.OnExpChange += SaveGame;
-        gameData.RestaurantData.OnLevelUp += ShowLevelUpPopup;
-        gameData.RestaurantData.OnResourceChange += SaveGame;
-        if(gameData.PlayersStats != null)
+        var loadedData = handler.Load();
+        if (loadedData == null)
         {
-            foreach(var player in gameData.PlayersStats)            
-            {
-                player.OnResourceChange += SaveGame;
-            }
+            Debug.LogError($"Save file for '{gameDataName}' is missing or unreadable.");
+            UIManager.Instance.ShowAlertMessage("This restaurant's save could not be loaded.");
+            return false;
         }
-        gameData.InventoryData.OnInventoryDataChanged += SaveGame;
-        gameData.GridData.OnGridDataChanged += SaveGame;
-        gameData.TutorialData.OnTutorialDataChanged += SaveGame;
-        gameData.MenuData.OnMenuDataChanged += SaveGame;
-        gameData.ShopData.OnResourceChange += SaveGame;
-        gameData.PostBoxData.OnResourceChange += SaveGame;
+        dataHandler = handler;
+        gameData = loadedData;
+        gameData.Migrate();
+        gameData.MenuData.LoadMenuData();
+        SubscribeSaveEvents();
+        return true;
     }
     public void DeleteSavedData(SavedData savedData)
     {
@@ -176,21 +232,74 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
         savedDataHandler.Save(SavedDataList);
     }
 
+    // Flushes the active save (host only) and forgets its file, so joining someone else's
+    // restaurant can never write their data over this device's save file.
+    // discardData=false keeps GameData readable while the game scene is still tearing down.
+    public void ClearActiveSave(bool discardData = true)
+    {
+        SaveGameImmediate();
+        UnsubscribeSaveEvents();
+        dataHandler = null;
+        isSaveDirty = false;
+        if (discardData)
+            gameData = null;
+    }
+
+    private static bool IsValidGameDataName(string gameDataName)
+    {
+        return !string.IsNullOrWhiteSpace(gameDataName) &&
+            gameDataName.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) < 0;
+    }
+
+    private const float SAVE_INTERVAL = 1f;
     private float lastSaveTime;
+    private bool isSaveDirty;
+
+    // Marks the save dirty; FlushPendingSave writes it at most once per SAVE_INTERVAL,
+    // so bursts of data events cost one write and the last change is never dropped.
     public void SaveGame()
     {
-        if (dataHandler == null || gameData == null) return;
-        // Debounce: avoid disk write storms from NetworkVariable fan-out.
-        if (Time.time - lastSaveTime < 1f) return;
-        lastSaveTime = Time.time;
-        dataHandler.Save(gameData);
+        if (!CanSave()) return;
+        isSaveDirty = true;
     }
 
     public void SaveGameImmediate()
     {
-        if (dataHandler == null || gameData == null) return;
-        lastSaveTime = Time.time;
-        dataHandler.Save(gameData);
+        if (!CanSave()) return;
+        WriteSave();
+    }
+
+    private void FlushPendingSave()
+    {
+        if (!isSaveDirty || Time.unscaledTime - lastSaveTime < SAVE_INTERVAL) return;
+        if (!CanSave())
+        {
+            isSaveDirty = false;
+            return;
+        }
+        WriteSave();
+    }
+
+    private void WriteSave()
+    {
+        isSaveDirty = false;
+        lastSaveTime = Time.unscaledTime;
+        try
+        {
+            dataHandler.Save(gameData);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to save game data: {e}");
+        }
+    }
+
+    // Only the host owns the restaurant save.
+    private bool CanSave()
+    {
+        if (dataHandler == null || gameData == null) return false;
+        var networkManager = NetworkManager.Singleton;
+        return networkManager == null || !networkManager.IsListening || networkManager.IsServer;
     }
 
     public void SwitchState(GameManagerBaseState newState)
@@ -361,7 +470,15 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     private void Instance_OnPlayerDataNetworkListChanged(object sender, EventArgs e)
     {
         if (gameData == null) return;
-        gameData.TryAddPlayerStats(MultiplayerManager.Instance.GetLatestPlayerData().playerId.ToString());
+        // Entries arrive with an empty id and get it later, and several clients can join
+        // at once, so check every connected player instead of only the latest entry.
+        // Clients mirror new entries locally; only the host's copy is saved.
+        foreach (var playerData in MultiplayerManager.Instance.GetAllPlayerData())
+        {
+            string playerId = playerData.playerId.ToString();
+            if (!string.IsNullOrEmpty(playerId))
+                gameData.TryAddPlayerStats(playerId);
+        }
     }
     public void HideJoyStick()
     {

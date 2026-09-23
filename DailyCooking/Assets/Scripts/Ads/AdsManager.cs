@@ -20,6 +20,10 @@ public class AdsManager : PersistentSingleton<AdsManager>
     private const string InterstitialAdUnitId = "5rzvxdtegit9amc8";
     private const string RewardedAdUnitId = "4hamsbcysnxm8xlp";
     private const string BannerAdUnitId = "";
+#else
+    private const string InterstitialAdUnitId = "";
+    private const string RewardedAdUnitId = "";
+    private const string BannerAdUnitId = "";
 #endif
 
     private int interstitialRetryAttempt;
@@ -30,6 +34,11 @@ public class AdsManager : PersistentSingleton<AdsManager>
 
     public void Start()
     {
+        if (string.IsNullOrEmpty(RewardedAdUnitId) || string.IsNullOrEmpty(InterstitialAdUnitId))
+        {
+            Debug.Log("AdsManager: no ad units for this platform, ads disabled.");
+            return;
+        }
         // Register OnInitFailed and OnInitSuccess listeners
         LevelPlay.OnInitSuccess += SdkInitializationCompletedEvent;
         LevelPlay.OnInitFailed += SdkInitializationFailedEvent;
@@ -45,19 +54,19 @@ public class AdsManager : PersistentSingleton<AdsManager>
     }
     public bool IsRewardedAdsLoaded()
     {
-        return rewardedAd.IsAdReady();
+        return rewardedAd != null && rewardedAd.IsAdReady();
     }
     public bool IsInterstitialAdsLoaded()
     {
-        return interstitialAd.IsAdReady();
+        return interstitialAd != null && interstitialAd.IsAdReady();
     }
     private void LoadIntertitialAds()
     {
-        interstitialAd.LoadAd();
+        interstitialAd?.LoadAd();
     }
     private void LoadRewardAds()
     {
-        rewardedAd.LoadAd();
+        rewardedAd?.LoadAd();
     }
     private void CreateRewardedAd()
     {
@@ -122,14 +131,14 @@ public class AdsManager : PersistentSingleton<AdsManager>
 
     public void ShowInterstitialAds(string placementName = "")
     {
-        if (interstitialAd.IsAdReady())
+        if (IsInterstitialAdsLoaded())
         {
             interstitialAd.ShowAd(placementName);
         }
     }
     public void ShowRewardedAds(string placementName = "", Action callback = null)
     {
-        if (rewardedAd.IsAdReady())
+        if (IsRewardedAdsLoaded())
         {
             callBackAction = callback;
             rewardedAd.ShowAd(placementName);
@@ -149,9 +158,11 @@ public class AdsManager : PersistentSingleton<AdsManager>
     }
     private void RewardedOnAdDisplayedEvent(LevelPlayAdInfo adInfo) { }
     private void RewardedOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError error) { }
-    private void RewardedOnAdRewardedEvent(LevelPlayAdInfo adInfo, LevelPlayReward adReward) 
+    private void RewardedOnAdRewardedEvent(LevelPlayAdInfo adInfo, LevelPlayReward adReward)
     {
-        callBackAction?.Invoke();
+        var callback = callBackAction;
+        callBackAction = null;
+        callback?.Invoke();
     }
     private void RewardedOnAdClosedEvent(LevelPlayAdInfo adInfo) 
     {

@@ -5,7 +5,13 @@ using UnityEngine;
 [System.Serializable]
 public class GameData
 {
-    public int SyncVersion { get; set; } = 1;
+    public const int CURRENT_SAVE_VERSION = 2;
+
+    [System.NonSerialized]
+    public Action<PlayerStats> OnPlayerStatsAdded;
+
+    // Saves written before versioning have no SaveVersion field and load as 1.
+    public int SaveVersion { get; set; } = 1;
     public List<PlayerStats> PlayersStats { get; private set; } = new List<PlayerStats>();
     public RestaurantData RestaurantData { get; private set; } = new RestaurantData();
     public InventoryData InventoryData { get; private set; } = new InventoryData();
@@ -16,10 +22,22 @@ public class GameData
     public ShopData ShopData { get; private set; } = new ShopData();
     public PostBoxData PostBoxData { get; private set; } = new PostBoxData();
     public CosmeticData CosmeticData { get; private set; } = new CosmeticData();
-    public void UpdateGridData(GridXZ<GridObject> grid)
+
+    public static GameData CreateNew()
     {
-        //GridData.UpdateGridData(grid);
-    }   
+        return new GameData { SaveVersion = CURRENT_SAVE_VERSION };
+    }
+
+    // Upgrades data loaded from an older save to the current layout.
+    public void Migrate()
+    {
+        if (SaveVersion < 2)
+        {
+            // v1 saves could keep a grid array smaller than the grid size after an expansion.
+            GridData.EnsureArraySize();
+        }
+        SaveVersion = CURRENT_SAVE_VERSION;
+    }
     public void AddInventoryData(string guid)
     {
         InventoryData.Add(guid);
@@ -90,9 +108,8 @@ public class GameData
         if (GetPlayerStatsById(playerId) != null) return;
         //Debug.Log($"Adding player stats for player {playerId}");
         var playerStats = new PlayerStats(playerId);
-        playerStats.OnResourceChange += () => GameManager.Instance.SaveGame();
         PlayersStats.Add(playerStats);
-        GameManager.Instance.SaveGame();
+        OnPlayerStatsAdded?.Invoke(playerStats);
     }
 
 }
