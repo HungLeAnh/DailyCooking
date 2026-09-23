@@ -13,7 +13,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
     private const float TIME_SCALE_PAUSED = 0f;
     private const float TIME_SCALE_UNPAUSED = 1f;
 
-    public event Action<NetworkObject> OnSpawnRequestCompleted;
     public event EventHandler OnStateChanged;
 
     public enum State
@@ -68,11 +67,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
             state.Value = State.Open;
         OnStateChanged?.Invoke(this, EventArgs.Empty);
         BotManager.Instance.StartSpawnBot();
-        if (PrefabSpawnService.Instance != null)
-        {
-            PrefabSpawnService.Instance.OnSpawnRequestCompleted -= HandleSpawnRequestCompleted;
-            PrefabSpawnService.Instance.OnSpawnRequestCompleted += HandleSpawnRequestCompleted;
-        }
     }
 
     public override void OnNetworkDespawn()
@@ -182,114 +176,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         }
         kitchenObject.NetworkObject.Spawn(true);
         return kitchenObject;
-    }
-
-
-    [Rpc(SendTo.Server)]
-    public void CreatePlacedObjectViewServerRpc(Vector3 worldPosition, string placeObjectTypeSOGuid,
-        Vector2Int origin, Dir dir, ulong targetClientId, bool isPreview)
-    {
-        if (PrefabSpawnService.Instance != null)
-        {
-            PrefabSpawnService.Instance.OnSpawnRequestCompleted -= HandleSpawnRequestCompleted;
-            PrefabSpawnService.Instance.OnSpawnRequestCompleted += HandleSpawnRequestCompleted;
-            PrefabSpawnService.Instance.SpawnPlacedObjectDirect(worldPosition, placeObjectTypeSOGuid, origin, dir, targetClientId, isPreview);
-        }
-        else
-        {
-            SpawnPlacedObjectFallback(worldPosition, placeObjectTypeSOGuid, origin, dir, targetClientId, isPreview);
-        }
-    }
-
-    private void SpawnPlacedObjectFallback(Vector3 worldPosition, string placeObjectTypeSOGuid,
-        Vector2Int origin, Dir dir, ulong targetClientId, bool isPreview)
-    {
-        PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(placeObjectTypeSOGuid);
-        if (placedObjectTypeSO == null) return;
-        if (placedObjectTypeSO.prefab == null)
-        {
-            Debug.LogError($"KitchenGameManager: Missing prefab for PlacedObjectTypeSO '{placedObjectTypeSO.name}' Guid={placeObjectTypeSOGuid}", placedObjectTypeSO);
-            return;
-        }
-        Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, ResolveToolSlotPosition(worldPosition, placedObjectTypeSO, origin), Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0), GridBuildingSystem.Instance.Container).transform;
-        var networkObject = placedObjectTransform.GetComponent<NetworkObject>();
-        PlacedObjectView placedObjectView = networkObject.GetComponent<PlacedObjectView>();
-        placedObjectView.Intialize(placeObjectTypeSOGuid, origin, dir, isPreview);
-
-        networkObject.Spawn();
-        networkObject.ChangeOwnership(targetClientId);
-
-        NotifyClientOfSpawnClientRpc(networkObject, RpcTarget.Single(targetClientId, RpcTargetUse.Temp));
-    }
-
-    private static Vector3 ResolveToolSlotPosition(Vector3 worldPosition, PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin)
-    {
-        if (placedObjectTypeSO != null && placedObjectTypeSO.isTool &&
-            GridBuildingSystem.Instance != null && GridBuildingSystem.Instance.GridManager != null &&
-            ToolSlotResolver.TryFindUnderlyingCounter(GridBuildingSystem.Instance.GridManager.Grid, placedObjectTypeSO, origin, out PlacedObjectView counterView) &&
-            ToolSlotResolver.TryGetToolSlotPosition(counterView, origin, out Vector3 slotPos))
-        {
-            return slotPos;
-        }
-        return worldPosition;
-    }
-
-    private void HandleSpawnRequestCompleted(NetworkObject spawnedObject)
-    {
-        if (PrefabSpawnService.Instance != null)
-        {
-            PrefabSpawnService.Instance.OnSpawnRequestCompleted -= HandleSpawnRequestCompleted;
-        }
-        OnSpawnRequestCompleted?.Invoke(spawnedObject);
-    }
-
-    [Rpc(SendTo.SpecifiedInParams)]
-    private void NotifyClientOfSpawnClientRpc(NetworkObjectReference spawnedObjectRef, RpcParams rpcParams)
-    {
-        if (spawnedObjectRef.TryGet(out NetworkObject netObj))
-        {
-            OnSpawnRequestCompleted?.Invoke(netObj);
-        }
-    }
-    public void DestroyPlacedObject(NetworkObject networkObject)
-    {
-        if (networkObject == null) return;
-        if (!networkObject.IsSpawned)
-        {
-            // Preview ghost not yet spawned or already despawned on client - destroy locally
-            if (networkObject.gameObject != null)
-            {
-                UnityEngine.Object.Destroy(networkObject.gameObject);
-            }
-            return;
-        }
-        DestroyPlacedObjectServerRpc(networkObject);
-    }
-    [Rpc(SendTo.Server)]
-    private void DestroyPlacedObjectServerRpc(NetworkObjectReference placedObjectNetworkObjectReference)
-    {
-        if (!placedObjectNetworkObjectReference.TryGet(out NetworkObject placedObjectNetworkObject) || placedObjectNetworkObject == null)
-        {
-            //This object is already destroyed or invalid reference
-            return;
-        }
-        var destroyable = placedObjectNetworkObject.GetComponent<IDestroyable>();
-        if (destroyable != null)
-        {
-            destroyable.DestroySelf();
-        }
-        else
-        {
-            // Fallback for PlacedObjectView / preview ghosts that don't implement IDestroyable
-            if (placedObjectNetworkObject.IsSpawned)
-            {
-                placedObjectNetworkObject.Despawn(true);
-            }
-            else if (placedObjectNetworkObject.gameObject != null)
-            {
-                UnityEngine.Object.Destroy(placedObjectNetworkObject.gameObject);
-            }
-        }
     }
 
 }

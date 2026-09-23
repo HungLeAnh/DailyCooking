@@ -1,8 +1,7 @@
 
 using System.Collections.Generic;
-using Unity.Netcode;
-using UnityEngine;
 
+// Server only: respawns saved (or default) grid objects.
 public class GridObjectSpawner
 {
     public static void SpawnObjectsFromData(GridXZ<GridObject> grid, List<GridObjectData>[,] gridObjectDataList)
@@ -22,72 +21,13 @@ public class GridObjectSpawner
 
     }
 
+    // Multi-cell objects are saved once per covered cell; after the first copy spawns, the
+    // placement check rejects the others because their cells are already taken.
     private static void SpawnObject(GridXZ<GridObject> grid, GridObjectData objectData)
     {
-        GridBuildingSystem.Instance.SpawnObjectServerRpc(objectData.PlacedObjectTypeSOGuid,objectData.Origin,objectData.Dir);
+        PlacedObjectTypeSO placedObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(objectData.PlacedObjectTypeSOGuid);
+        if (!PlacementRules.CanPlace(grid, placedObjectTypeSO, objectData.Origin, objectData.Dir, requireUnlockedCells: false))
+            return;
+        GridBuildingSystem.Instance.SpawnPlacedObject(placedObjectTypeSO, objectData.Origin, objectData.Dir);
     }
-
-    public static bool IsObjectPlaced(GridXZ<GridObject> grid, PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir)
-    {
-        bool canBuild = true;
-
-        var gridObject = grid.GetGridObject((int)origin.x, (int)origin.y);
-        if (gridObject == null)
-        {
-            canBuild = false;
-            return canBuild;
-        }
-
-        // Tools must sit on an underlying counter (server authority)
-        if (placedObjectTypeSO != null && placedObjectTypeSO.isTool)
-        {
-            if (placedObjectTypeSO.allowedUnderlyingCounters != null && placedObjectTypeSO.allowedUnderlyingCounters.Count > 0)
-            {
-                bool hasRequired = false;
-                foreach (var placedObject in gridObject)
-                {
-                    if (placedObject == null) continue;
-                    var view = placedObject.GetPlacedObject();
-                    if (view == null) continue;
-                    foreach (var allowed in placedObjectTypeSO.allowedUnderlyingCounters)
-                    {
-                        if (allowed != null && view.GetPlacedObjectTypeSOGuid() == allowed.Guid)
-                        {
-                            hasRequired = true;
-                            break;
-                        }
-                    }
-                    if (hasRequired) break;
-                }
-                if (!hasRequired) return false;
-            }
-            else
-            {
-                bool hasCounter = false;
-                foreach (var placedObject in gridObject)
-                {
-                    if (placedObject != null && placedObject.GetPlacedObject() != null && placedObject.GetPlacedObject().InventoryTabType == InventoryTabType.Counter)
-                    { hasCounter = true; break; }
-                }
-                if (!hasCounter) return false;
-            }
-            // One tool per slot — stacking is not allowed (server authority)
-            if (ToolSlotResolver.TryFindUnderlyingCounter(grid, placedObjectTypeSO, origin, out PlacedObjectView slotCounterView) &&
-                ToolSlotResolver.IsToolSlotOccupied(grid, slotCounterView, origin))
-                return false;
-            return true;
-        }
-
-        foreach (var placedObject in gridObject)
-        {
-            if (placedObject == null ||
-                !placedObject.CanBuild(placedObjectTypeSO.itemType.TabType, dir))
-            {
-                canBuild = false;
-                break;
-            }
-        }
-        return canBuild;
-    }
-
 }

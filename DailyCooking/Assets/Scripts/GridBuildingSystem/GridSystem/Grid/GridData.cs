@@ -125,6 +125,18 @@ public class GridData
             }
         }
     }
+    // Removes the saved entry of one specific placed object (walls of one type can share a cell).
+    public void RemoveGridObjectData(int x, int z, string guid, Vector2Int origin, Dir dir)
+    {
+        if (x < 0 || x >= widthMax || z < 0 || z >= heightMax || GridArrayData == null)
+            return;
+        var gridObjectDatas = GridArrayData[x, z];
+        if (gridObjectDatas == null)
+            return;
+        int removed = gridObjectDatas.RemoveAll(data => data.PlacedObjectTypeSOGuid == guid && data.Origin == origin && data.Dir == dir);
+        if (removed > 0)
+            OnGridDataChanged?.Invoke();
+    }
     public void UpdateGridData(GridXZ<GridObject> grid)
     {
         if (grid == null) return;

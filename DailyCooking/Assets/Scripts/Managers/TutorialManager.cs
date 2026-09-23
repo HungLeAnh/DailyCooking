@@ -56,48 +56,62 @@ public class TutorialManager : PersistentSingleton<TutorialManager>
         GameManager.Instance.HideJoyStick();
         UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].StartTutorial();
+        tutorialPanelDictionary[TutorialType.FirstTimePlaying].OnTutorialClosed -= TutorialManager_OnTutorialFirstTimePlayingClosed;
         tutorialPanelDictionary[TutorialType.FirstTimePlaying].OnTutorialClosed
             += TutorialManager_OnTutorialFirstTimePlayingClosed;
     }
 
     private void TutorialManager_OnTutorialFirstTimePlayingClosed(object sender, EventArgs e)
     {
+        tutorialPanelDictionary[TutorialType.FirstTimePlaying].OnTutorialClosed -= TutorialManager_OnTutorialFirstTimePlayingClosed;
         ShowGameMachanicTutorial();
     }
     public void ShowBuildingTutorial()
     {
         tutorialPanelDictionary[TutorialType.BuildingTutorial].StartTutorial();
+        tutorialPanelDictionary[TutorialType.BuildingTutorial].OnTutorialClosed -= TutorialManager_OnBuildingTutorialClosed;
         tutorialPanelDictionary[TutorialType.BuildingTutorial].OnTutorialClosed += TutorialManager_OnBuildingTutorialClosed;
     }
 
     private void TutorialManager_OnBuildingTutorialClosed(object sender, EventArgs e)
     {
+        tutorialPanelDictionary[TutorialType.BuildingTutorial].OnTutorialClosed -= TutorialManager_OnBuildingTutorialClosed;
         ShowMenuTutorial();
     }
 
     public void ShowMenuTutorial()
     {
         tutorialPanelDictionary[TutorialType.MenuTutorial].StartTutorial();
+        tutorialPanelDictionary[TutorialType.MenuTutorial].OnTutorialClosed -= TutorialManager_OnTutorialMenuClosed;
         tutorialPanelDictionary[TutorialType.MenuTutorial].OnTutorialClosed
             += TutorialManager_OnTutorialMenuClosed;
     }
 
     private void TutorialManager_OnTutorialMenuClosed(object sender, EventArgs e)
     {
+        tutorialPanelDictionary[TutorialType.MenuTutorial].OnTutorialClosed -= TutorialManager_OnTutorialMenuClosed;
         ShowGameMachanicTutorial();
     }    
     public void ShowGameMachanicTutorial()
     {
         UIHUDManager.Instance.HideAllUIElement();
         tutorialPanelDictionary[TutorialType.GameMechanic].StartTutorial();
+        tutorialPanelDictionary[TutorialType.GameMechanic].OnTutorialClosed -= TutorialManager_OnTutorialGameMechanicClosed;
         tutorialPanelDictionary[TutorialType.GameMechanic].OnTutorialClosed
             += TutorialManager_OnTutorialGameMechanicClosed;
     }
 
     private void TutorialManager_OnTutorialGameMechanicClosed(object sender, EventArgs e)
     {
-        GameManager.Instance.GameData.TutorialData.SetHasPlayedFirstTime(true);
-        GridBuildingSystem.Instance.UnlockGrid();
+        tutorialPanelDictionary[TutorialType.GameMechanic].OnTutorialClosed -= TutorialManager_OnTutorialGameMechanicClosed;
+        // Only a brand-new restaurant unlocks its starting area (and default counters, which
+        // need HasPlayedFirstTime still false). Reopening the guide from Settings changes nothing.
+        var tutorialData = GameManager.Instance.GameData.TutorialData;
+        if (!tutorialData.HasPlayedFirstTime && GameManager.Instance.IsServer)
+        {
+            GridBuildingSystem.Instance.UnlockGrid();
+            tutorialData.SetHasPlayedFirstTime(true);
+        }
         UIHUDManager.Instance.ShowAllUIElement();
     }
 }

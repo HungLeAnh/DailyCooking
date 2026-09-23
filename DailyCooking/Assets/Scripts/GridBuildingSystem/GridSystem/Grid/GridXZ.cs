@@ -133,7 +133,34 @@ public class GridXZ<TGridObject> {
         
     }
 
-    public void TriggerGridObjectChanged(int x, int z) 
+    // Like GetXZ, but reports positions outside the grid instead of clamping them onto the edge.
+    public bool TryGetXZ(Vector3 worldPosition, out int x, out int z)
+    {
+        x = Mathf.RoundToInt((worldPosition - originPosition).x / cellSize);
+        z = Mathf.RoundToInt((worldPosition - originPosition).z / cellSize);
+        return x >= 0 && z >= 0 && x < widthMax && z < heightMax;
+    }
+
+    // Cells the restaurant owns: the same rule GridInitializer.InitFloor uses to lay floor tiles.
+    public bool IsCellUnlocked(int x, int z)
+    {
+        if (x < 0 || z < 0 || x >= widthMax || z >= heightMax)
+            return false;
+        return z < heightMin || x < widthMin;
+    }
+
+    // Applies a size decided by the server (unlock/expand) on a client.
+    public void SetSize(int widthMin, int heightMin, int widthMax, int heightMax)
+    {
+        this.widthMin = widthMin;
+        this.heightMin = heightMin;
+        this.widthMax = widthMax;
+        this.heightMax = heightMax;
+        gridArray = Resize2DArray(gridArray, widthMax, heightMax);
+        OnGridSizeChanged?.Invoke();
+    }
+
+    public void TriggerGridObjectChanged(int x, int z)
     {
         OnGridObjectChanged?.Invoke(this, new OnGridObjectChangedEventArgs { x = x, z = z });
     }

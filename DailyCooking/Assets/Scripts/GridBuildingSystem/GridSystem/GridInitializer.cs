@@ -48,6 +48,10 @@ public class GridInitializer : IGridInitializer
 
     public void InitFloor()
     {
+        // Rebuilt after every unlock/expand; drop the previous tiles instead of stacking copies.
+        for (int i = floorContainer.childCount - 1; i >= 0; i--)
+            GameObject.Destroy(floorContainer.GetChild(i).gameObject);
+
         for (int x = 0; x < gridManager.GetWidthMax(); x++)
         {
             for (int z = 0; z < gridManager.GetHeightMax(); z++)

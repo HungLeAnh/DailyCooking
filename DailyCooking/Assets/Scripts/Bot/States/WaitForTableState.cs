@@ -31,7 +31,7 @@ public class WaitForTableState : BotState
         if (availableTable != null)
         {
             PlacedObjectView availablePlacedObject = availableTable.GetComponent<PlacedObjectView>();
-            if (availablePlacedObject != null && !availablePlacedObject.IsPreview.Value)
+            if (availablePlacedObject != null)
             {
                 int seatIndex = availableTable.GetAvailableSeat();
                 if (seatIndex != -1)

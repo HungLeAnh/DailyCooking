@@ -69,9 +69,13 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     public bool IsInitialized { get => isInitialized; set => isInitialized = value; }
     public PostBox PostBox { get => postBox; set => postBox = value; }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
-
+        if (GameInput.Instance != null)
+            GameInput.Instance.OnMouseClickPerformed -= GameInput_OnMouseClickPerformed;
+        if (MultiplayerManager.Instance != null)
+            MultiplayerManager.Instance.OnDataSyncToNewClient -= MultiplayerManager_OnDataSyncToNewClient;
+        base.OnDestroy();
     }
     protected override void Awake()
     {
@@ -95,8 +99,14 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             if (GameManager.Instance?.GameData != null)
                 Initialize();
             else
-                MultiplayerManager.Instance.OnDataSyncToNewClient += (object sender, EventArgs e) => Initialize();
+                MultiplayerManager.Instance.OnDataSyncToNewClient += MultiplayerManager_OnDataSyncToNewClient;
         }
+    }
+
+    private void MultiplayerManager_OnDataSyncToNewClient(object sender, EventArgs e)
+    {
+        MultiplayerManager.Instance.OnDataSyncToNewClient -= MultiplayerManager_OnDataSyncToNewClient;
+        Initialize();
     }
 
     private void Initialize()
@@ -150,6 +160,15 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
     {
         navMeshSurface.BuildNavMesh();
     }
+    // Bots path on the server only; refresh after the floor changes size.
+    private void RebuildNavMesh()
+    {
+        if (!IsServer) return;
+        if (navMeshSurface.navMeshData == null)
+            navMeshSurface.BuildNavMesh();
+        else
+            navMeshSurface.UpdateNavMesh(navMeshSurface.navMeshData);
+    }
     private void SetBlocker()
     {
         blockerX.localPosition = new Vector3(0f, 0f, gridManager.GetHeightMax() * gridManager.GetCellSize() + 5f);
@@ -187,21 +206,59 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             }
         }
     }
+    // Server only: first-time unlock of the starting area (plus default counters for a new restaurant).
     public void UnlockGrid()
     {
+        if (!IsServer)
+        {
+            Debug.LogWarning("GridBuildingSystem.UnlockGrid must run on the server.");
+            return;
+        }
         gridManager.UnlockGrid(GameDefine.GridSize,GameDefine.GridSize);
-        gridInitializer.InitFloor();
+        OnGridSizeChangedOnServer();
         if (!GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
         {
             gridInitializer.InitDefaultCounters();
         }
-        SetBlocker();
     }
     public void ExpandGrid(float amount)
     {
+        if (!IsServer)
+        {
+            ExpandGridServerRpc();
+            return;
+        }
         gridManager.ExpandGrid();
-        SetBlocker();
+        OnGridSizeChangedOnServer();
+    }
+    // TODO(Phase 4): expansion becomes part of the server-validated upgrade purchase.
+    [Rpc(SendTo.Server)]
+    private void ExpandGridServerRpc()
+    {
+        ExpandGrid(0f);
+    }
+
+    // Sent before any object spawns into the new cells, so clients have them ready.
+    private void OnGridSizeChangedOnServer()
+    {
+        var grid = gridManager.Grid;
+        ApplyGridSizeClientRpc(grid.GetWidthMin(), grid.GetHeightMin(), grid.GetWidthMax(), grid.GetHeightMax());
+        RefreshGridArea();
+        RebuildNavMesh();
+    }
+
+    [Rpc(SendTo.NotServer)]
+    private void ApplyGridSizeClientRpc(int widthMin, int heightMin, int widthMax, int heightMax)
+    {
+        if (gridManager == null) return;
+        gridManager.Grid.SetSize(widthMin, heightMin, widthMax, heightMax);
+        RefreshGridArea();
+    }
+
+    private void RefreshGridArea()
+    {
         gridInitializer.InitFloor();
+        SetBlocker();
     }
     public PlacedObjectTypeSO GetPlacedObjectTypeSOByGuid(string Guid)
     {
@@ -215,66 +272,80 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         }
     }
 
-    [Rpc(SendTo.Server)]
-    public void SpawnObjectServerRpc(string placedObjectTypeSOGuid,Vector2Int origin,Dir dir, RpcParams rpcParams = default)
+    // Server only. Placed objects stay server-owned so they survive their builder leaving.
+    public NetworkObject SpawnPlacedObject(PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir)
     {
-        if (string.IsNullOrEmpty(placedObjectTypeSOGuid)) return;
-        PlacedObjectTypeSO placedObjectTypeSO = GetPlacedObjectTypeSOByGuid(placedObjectTypeSOGuid);
-        if (placedObjectTypeSO == null) return;
-
-        Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-        Vector3 placedObjectWorldPosition = gridManager.Grid.GetWorldPosition(origin) +
-            new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.Grid.GetCellSize();
-        if (placedObjectTypeSO.isTool &&
-            ToolSlotResolver.TryFindUnderlyingCounter(gridManager.Grid, placedObjectTypeSO, origin, out PlacedObjectView toolCounterView) &&
-            ToolSlotResolver.TryGetToolSlotPosition(toolCounterView, origin, out Vector3 toolSlotPos))
+        if (!IsServer || placedObjectTypeSO == null) return null;
+        if (placedObjectTypeSO.prefab == null)
         {
-            placedObjectWorldPosition = toolSlotPos;
+            Debug.LogError($"GridBuildingSystem: Missing prefab for PlacedObjectTypeSO '{placedObjectTypeSO.name}' Guid={placedObjectTypeSO.Guid}", placedObjectTypeSO);
+            return null;
         }
-        if (!GridObjectSpawner.IsObjectPlaced(gridManager.Grid, placedObjectTypeSO, origin,dir))
+        Vector3 worldPosition = PlacementRules.GetWorldPosition(gridManager.Grid, placedObjectTypeSO, origin, dir);
+        Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition,
+            Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0), counterContainer).transform;
+        placedObjectTransform.GetComponent<PlacedObjectView>().Intialize(placedObjectTypeSO.Guid, origin, dir);
+        NetworkObject networkObject = placedObjectTransform.GetComponent<NetworkObject>();
+        networkObject.Spawn();
+        return networkObject;
+    }
+
+    // A player places an item from the restaurant inventory.
+    [Rpc(SendTo.Server)]
+    public void PlaceObjectServerRpc(string placedObjectTypeSOGuid, Vector2Int origin, Dir dir, RpcParams rpcParams = default)
+    {
+        ulong senderClientId = rpcParams.Receive.SenderClientId;
+        PlacedObjectTypeSO placedObjectTypeSO = string.IsNullOrEmpty(placedObjectTypeSOGuid) ? null : GetPlacedObjectTypeSOByGuid(placedObjectTypeSOGuid);
+        if (placedObjectTypeSO == null || gridManager == null || GameManager.Instance.GameData == null) return;
+
+        if (GameManager.Instance.GameData.InventoryData.Count(placedObjectTypeSOGuid) <= 0)
         {
+            PlayerStateMachine.FindForClient(senderClientId)?.ShowAlert("This item is not in the inventory.");
+            return;
+        }
+        if (!PlacementRules.CanPlace(gridManager.Grid, placedObjectTypeSO, origin, dir, requireUnlockedCells: true))
+        {
+            PlayerStateMachine.FindForClient(senderClientId)?.ShowAlert("Can't build here!");
             return;
         }
 
-        // Use the RPC sender as owner — LocalClientId on the server is always the host.
-        ulong ownerClientId = rpcParams.Receive.SenderClientId;
-        PlacedObjectFactory.Create(placedObjectWorldPosition, origin, dir,
-            placedObjectTypeSO, ownerClientId, false);
-    }
-    [Rpc(SendTo.Server)]
-    public void UpdateGridDataServerRpc(NetworkObjectReference networkObjectReference)
-    {
-        if(networkObjectReference.TryGet(out NetworkObject networkObject))
-        {
-            UpdateGridDataClientRpc(networkObject);
-
-        }
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdateGridDataClientRpc(NetworkObjectReference networkObjectReference)
-    {
-        if(networkObjectReference.TryGet(out NetworkObject networkObject))
-        {
-            PlacedObjectView placedObjectView = networkObject.GetComponent<PlacedObjectView>();
-            //Debug.Log("PlaceObjectType : "+placedObjectView.PlacedObjectTypeSO);
-            //Debug.Log("PlaceObjectTypeGuid : "+placedObjectView.GetPlacedObjectTypeSOGuid());
-            //Debug.Log("GridManager : " + GridManager);
-            List<Vector2Int> gridPositionList = placedObjectView.GetGridPositionList();
-            foreach (var gridPosition in gridPositionList)
-            {
-                GridManager.Grid.AddGridObjectData(gridPosition.x, gridPosition.y,
-                    new GridObject(GridManager.Grid, placedObjectView, gridPosition.x, gridPosition.y));
-            }
-
-            this.GetComponent<IModuleItem>()?.RegisterItem();
-        }
-
-    }
-    [Rpc(SendTo.Server)]
-    public void OnObjectPlacedEventServerRpc()
-    {
+        GameManager.Instance.ServerRemoveInventory(placedObjectTypeSOGuid);
+        SpawnPlacedObject(placedObjectTypeSO, origin, dir);
         OnObjectPlacedEventClientRpc();
     }
+
+    // A player picks up a placed object to move it; it goes back to the inventory right away,
+    // so cancelling or quitting mid-move never loses it.
+    [Rpc(SendTo.Server)]
+    public void PickUpPlacedObjectServerRpc(NetworkObjectReference placedObjectReference, RpcParams rpcParams = default)
+    {
+        if (!placedObjectReference.TryGet(out NetworkObject placedObjectNetworkObject)) return;
+        PlacedObjectView placedObjectView = placedObjectNetworkObject.GetComponent<PlacedObjectView>();
+        if (placedObjectView == null || GameManager.Instance.GameData == null) return;
+
+        IPlaceable placeable = placedObjectView.GetComponent<IPlaceable>();
+        if (placeable != null && !placeable.CanRemove())
+        {
+            PlayerStateMachine.FindForClient(rpcParams.Receive.SenderClientId)?.ShowAlert("Item is used, cannot remove.");
+            return;
+        }
+
+        string placedObjectTypeSOGuid = placedObjectView.GetPlacedObjectTypeSOGuid();
+        foreach (Vector2Int gridPosition in placedObjectView.GetGridPositionList())
+        {
+            GameManager.Instance.GameData.GridData.RemoveGridObjectData(gridPosition.x, gridPosition.y,
+                placedObjectTypeSOGuid, placedObjectView.Origin, placedObjectView.Dir);
+        }
+
+        IDestroyable destroyable = placedObjectView.GetComponent<IDestroyable>();
+        if (destroyable != null)
+            destroyable.DestroySelf();
+        else
+            placedObjectNetworkObject.Despawn(true);
+
+        GameManager.Instance.ServerAddInventory(placedObjectTypeSOGuid);
+    }
+
     [Rpc(SendTo.ClientsAndHost)]
     private void OnObjectPlacedEventClientRpc()
     {

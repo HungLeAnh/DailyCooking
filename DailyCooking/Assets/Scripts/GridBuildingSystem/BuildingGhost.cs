@@ -57,10 +57,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
                 GridBuildingSystem.Instance.BuildingPlacementManager.OnSelectedChanged -= Instance_OnSelectedChanged;
             }
         }
-        if (KitchenGameManager.Instance != null)
-        {
-            KitchenGameManager.Instance.OnSpawnRequestCompleted -= OnSpawnRequestCompletedHandler;
-        }
+        DestroyLocalPreview();
     }
 
     private void Instance_OnObjectSpawned()
@@ -147,25 +144,7 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
     }
 
     private void RefreshVisual(Vector3 position) {
-        if (visual != null) {
-            if (KitchenGameManager.Instance != null)
-            {
-                var netObj = visual.GetComponent<NetworkObject>();
-                if (netObj != null)
-                {
-                    KitchenGameManager.Instance.DestroyPlacedObject(netObj);
-                }
-                else if (visual.gameObject != null)
-                {
-                    Destroy(visual.gameObject);
-                }
-            }
-            else if (visual.gameObject != null)
-            {
-                Destroy(visual.gameObject);
-            }
-            visual = null;
-        }
+        DestroyLocalPreview();
 
         if (placedObjectTypeSO != null)
         {
@@ -194,17 +173,16 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
                 }
                 position = snapped;
             }
-            pendingSpawnPosition = position;
-            KitchenGameManager.Instance.OnSpawnRequestCompleted -= OnSpawnRequestCompletedHandler;
-            KitchenGameManager.Instance.OnSpawnRequestCompleted += OnSpawnRequestCompletedHandler;
-
             position.y = 1f;
             ApplyToolSlotHeight(ref position);
             pendingSpawnPosition = position;
-            Debug.Log("Creating Placed Object at: " + position);
-            PlacedObjectFactory.Create(position, Vector2Int.zero, Dir.Down,
-                placedObjectTypeSO, NetworkManager.Singleton.LocalClientId,true);
-            
+
+            visual = CreateLocalPreview(placedObjectTypeSO, position);
+            SetLayerRecursive(visual.gameObject, LayerMask.NameToLayer("BuildingGhost"));
+            ShowCanvas(true);
+
+            visualContainer.position = pendingSpawnPosition;
+            visual.position = pendingSpawnPosition;
         }
         else
         {
@@ -212,18 +190,38 @@ public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost>
         }
     }
 
-    private void OnSpawnRequestCompletedHandler(NetworkObject spawnedObject)
+    // The preview exists only on this client. It is a copy of the prefab created under an
+    // inactive holder, so its scripts, NavMeshObstacles and network components are switched off
+    // before they ever run; colliders stay for drag raycasts. The holder mirrors the container
+    // real placed objects live in, so local positions match.
+    private Transform CreateLocalPreview(PlacedObjectTypeSO previewTypeSO, Vector3 position)
     {
-        KitchenGameManager.Instance.OnSpawnRequestCompleted -= OnSpawnRequestCompletedHandler;
-        //Debug.Log("Spawned Object: " + spawnedObject.name);
-        PlacedObjectView placedObjectView = spawnedObject.GetComponent<PlacedObjectView>();
+        GameObject source = previewTypeSO.visual != null ? previewTypeSO.visual : previewTypeSO.prefab;
+        Transform container = GridBuildingSystem.Instance.Container;
+        var holder = new GameObject("BuildingGhostPreview");
+        holder.SetActive(false);
+        if (container != null)
+        {
+            holder.transform.SetPositionAndRotation(container.position, container.rotation);
+            holder.transform.localScale = container.lossyScale;
+        }
 
-        visual = placedObjectView.transform;
-        SetLayerRecursive(visual.gameObject, LayerMask.NameToLayer("BuildingGhost"));
-        ShowCanvas(true);
+        GameObject preview = Instantiate(source, position, Quaternion.identity, holder.transform);
+        foreach (MonoBehaviour behaviour in preview.GetComponentsInChildren<MonoBehaviour>(true))
+            behaviour.enabled = false;
+        foreach (UnityEngine.AI.NavMeshObstacle obstacle in preview.GetComponentsInChildren<UnityEngine.AI.NavMeshObstacle>(true))
+            obstacle.enabled = false;
 
-        visualContainer.position = pendingSpawnPosition;
-        visual.position = pendingSpawnPosition;
+        holder.SetActive(true);
+        return preview.transform;
+    }
+
+    private void DestroyLocalPreview()
+    {
+        if (visual == null)
+            return;
+        Destroy(visual.parent != null ? visual.parent.gameObject : visual.gameObject);
+        visual = null;
     }
 
 

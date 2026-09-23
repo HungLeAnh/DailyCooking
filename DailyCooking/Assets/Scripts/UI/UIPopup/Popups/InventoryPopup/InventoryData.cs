@@ -30,6 +30,7 @@ public class InventoryData
             if (item.PlacedObjectTypeSOGuid == currentItemStack.Item.PlacedObjectTypeSOGuid)
             {
                 currentItemStack.Amount += count;
+                OnInventoryDataChanged?.Invoke();
                 return;
             }
         }
@@ -124,6 +125,16 @@ public class InventoryData
             }
         }
 
+        return 0;
+    }
+
+    public int Count(string placedObjectTypeSOGuid)
+    {
+        for (int i = 0; i < _items.Count; i++)
+        {
+            if (_items[i].Item.PlacedObjectTypeSOGuid == placedObjectTypeSOGuid)
+                return _items[i].Amount;
+        }
         return 0;
     }
 

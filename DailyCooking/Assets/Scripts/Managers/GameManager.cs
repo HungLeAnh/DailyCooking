@@ -369,18 +369,23 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
     [Rpc(SendTo.ClientsAndHost)]
     private void AddInventoryDataClientRpc(string guid)
     {
-        gameData.AddInventoryData(guid);
-    } 
-    [Rpc(SendTo.Server)]
-    public void RemoveInventoryDataServerRpc(string guid)
+        gameData?.AddInventoryData(guid);
+    }
+    // Server only: inventory changes decided by the server (placing, picking up, buying).
+    public void ServerAddInventory(string guid)
     {
-        if (GameData?.InventoryData == null || string.IsNullOrEmpty(guid)) return;
+        if (!IsServer || GameData == null || string.IsNullOrEmpty(guid)) return;
+        AddInventoryDataClientRpc(guid);
+    }
+    public void ServerRemoveInventory(string guid)
+    {
+        if (!IsServer || GameData?.InventoryData == null || string.IsNullOrEmpty(guid)) return;
         RemoveInventoryDataClientRpc(guid);
     }
     [Rpc(SendTo.ClientsAndHost)]
     private void RemoveInventoryDataClientRpc(string guid)
     {
-        gameData.RemoveInventoryData(guid);
+        gameData?.RemoveInventoryData(guid);
     }
     [Rpc(SendTo.Server)]
     public void AddDishToMenuServerRpc(string foodGuid)

@@ -19,8 +19,6 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     private PlacedObjectTypeSO placedObjectTypeSO;
     private Dir dir = Dir.Down;
     private bool isBuilding = false;
-    private bool isPlacingExistingObject = false;
-    private PlacedObjectView existingPlacedObjectView;
     public PlacedObjectTypeSO PlacedObjectTypeSO => placedObjectTypeSO;
 
     public bool IsBuilding => isBuilding;
@@ -37,144 +35,25 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         dir = PlacedObjectTypeSO.GetNextDir(dir);
     }
 
+    // Checks locally for instant feedback, then asks the server, which checks again against its
+    // own grid and inventory and spawns the object for everyone.
     public bool TryPlaceBuildingObject(Vector3 interactPos)
     {
         if (placedObjectTypeSO == null) return false;
 
-        gridManager.GetXZ(new Vector3(Mathf.RoundToInt(interactPos.x),
+        Vector3 roundedPos = new Vector3(Mathf.RoundToInt(interactPos.x),
                                 Mathf.RoundToInt(interactPos.y),
-                                Mathf.RoundToInt(interactPos.z)), out int x, out int z);
+                                Mathf.RoundToInt(interactPos.z));
+        if (!gridManager.Grid.TryGetXZ(roundedPos, out int x, out int z))
+            return false;
 
         Vector2Int placedObjectOrigin = new Vector2Int(x, z);
-        placedObjectOrigin = gridManager.ValidateGridPosition(placedObjectOrigin);
-        
-        if (placedObjectOrigin == Vector2Int.zero && (interactPos.x < 0 || interactPos.z < 0))
-        {
+        if (!PlacementRules.CanPlace(gridManager.Grid, placedObjectTypeSO, placedObjectOrigin, dir, requireUnlockedCells: true))
             return false;
-        }
-        List<Vector2Int> gridPositionList = placedObjectTypeSO.GetGridPositionList(placedObjectOrigin, dir);
 
-        bool canBuild = true;
-
-        foreach (var gridPosition in gridPositionList)
-        {
-            var gridObject = gridManager.Grid.GetGridObject(gridPosition.x, gridPosition.y);
-            if (gridObject == null)
-            {
-                canBuild = false;
-                break;
-            }
-
-            // Tools must sit on an underlying counter: Pan/Pot on StoveCounter, etc.
-            if (placedObjectTypeSO.isTool)
-            {
-                bool hasRequiredCounter = false;
-                foreach (var placedObject in gridObject)
-                {
-                    if (placedObject == null) continue;
-                    var view = placedObject.GetPlacedObject();
-                    if (view == null) continue;
-                    if (placedObjectTypeSO.allowedUnderlyingCounters != null && placedObjectTypeSO.allowedUnderlyingCounters.Count > 0)
-                    {
-                        foreach (var allowed in placedObjectTypeSO.allowedUnderlyingCounters)
-                        {
-                            if (allowed != null && view.GetPlacedObjectTypeSOGuid() == allowed.Guid)
-                            {
-                                hasRequiredCounter = true;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Fallback: any counter is sufficient
-                        if (view.InventoryTabType == InventoryTabType.Counter)
-                            hasRequiredCounter = true;
-                    }
-                    if (hasRequiredCounter) break;
-                }
-                if (!hasRequiredCounter)
-                {
-                    canBuild = false;
-                    break;
-                }
-                // One tool per slot — stacking is not allowed
-                if (ToolSlotResolver.TryFindUnderlyingCounter(gridManager.Grid, placedObjectTypeSO, gridPosition, out PlacedObjectView slotCounterView) &&
-                    ToolSlotResolver.IsToolSlotOccupied(gridManager.Grid, slotCounterView, gridPosition))
-                {
-                    canBuild = false;
-                    break;
-                }
-                // Slot free — skip standard CanBuild blocking
-                continue;
-            }
-
-            foreach (var placedObject in gridObject)
-            {
-                if (placedObject == null || 
-                    !placedObject.CanBuild(placedObjectTypeSO.itemType.TabType, dir))
-                {
-                    canBuild = false;
-                    break;
-                }
-            }
-            if (!canBuild) break;
-        }
-
-        if (canBuild)
-        {
-            Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
-            Vector3 placedObjectWorldPosition = gridManager.GetWorldPosition(placedObjectOrigin.x, placedObjectOrigin.y) +
-                new Vector3(rotationOffset.x, 0, rotationOffset.y) * gridManager.GetCellSize();
-            if (placedObjectTypeSO.isTool &&
-                ToolSlotResolver.TryFindUnderlyingCounter(gridManager.Grid, placedObjectTypeSO, placedObjectOrigin, out PlacedObjectView toolCounterView) &&
-                ToolSlotResolver.TryGetToolSlotPosition(toolCounterView, placedObjectOrigin, out Vector3 toolSlotPos))
-            {
-                placedObjectWorldPosition = toolSlotPos;
-            }
-            KitchenGameManager.Instance.OnSpawnRequestCompleted -= HandlePlacedObjectSpawnCompleted;
-            KitchenGameManager.Instance.OnSpawnRequestCompleted += HandlePlacedObjectSpawnCompleted;
-
-            PlacedObjectFactory.Create(placedObjectWorldPosition, placedObjectOrigin, dir,
-                placedObjectTypeSO, NetworkManager.Singleton.LocalClientId,false);
-            
-            if (isPlacingExistingObject)
-            {
-                isPlacingExistingObject = false;
-               
-                existingPlacedObjectView = null;
-            }
-            else
-            {
-                GameManager.Instance.RemoveInventoryDataServerRpc(placedObjectTypeSO.Guid);
-            }
-
-            GridBuildingSystem.Instance.OnObjectPlacedEventServerRpc();
-            DeselectObjectType();
-            return true;
-
-        }
-        else
-        {
-               return false;
-        }
-    }
-
-    public void RemovePlacedObjectFromGrid(PlacedObjectView placedObjectView)
-    {
-        List<Vector2Int> gridPositionList = placedObjectView.GetGridPositionList();
-        foreach (Vector2Int gridPosition in gridPositionList)
-        {
-            var gridObjectList = gridManager.Grid.GetGridObject(gridPosition.x, gridPosition.y);
-            var placeObject = gridObjectList.Find(x => x.GetPlacedObject() == placedObjectView);
-            if(placeObject!= null)
-            {
-                gridObjectList.Remove(placeObject);
-                gameManager.GameData.GridData.RemoveGridObjectData(gridPosition.x, gridPosition.y, placeObject.GetPlacedObject().GetPlacedObjectTypeSOGuid());
-
-                gridManager.Grid.TriggerGridObjectChanged(gridPosition.x, gridPosition.y);
-            }
-        }
+        GridBuildingSystem.Instance.PlaceObjectServerRpc(placedObjectTypeSO.Guid, placedObjectOrigin, dir);
+        DeselectObjectType();
+        return true;
     }
 
     public void SetPlacedObjectTypeSO(PlacedObjectTypeSO placedObjectTypeSO, Vector3 objectPosition)
@@ -272,34 +151,30 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         GameManager.Instance.ShowPlayer();  
     }
 
+    // Moving an object: the server picks it up into the inventory, then it is placed like any
+    // inventory item (the pickup RPC reaches the server before the placement RPC).
     public void HandleExistingObjectInteraction(PlacedObjectView targetPlaceObjectView,Vector3 objectPosition)
     {
-        isPlacingExistingObject = true;
-        existingPlacedObjectView = targetPlaceObjectView;
+        // Read before the RPC: on the host the pickup despawns the object immediately.
+        PlacedObjectTypeSO pickedUpTypeSO = targetPlaceObjectView.PlacedObjectTypeSO;
         dir = targetPlaceObjectView.Dir;
-        RemovePlacedObjectFromGrid(existingPlacedObjectView);
-        KitchenGameManager.Instance.DestroyPlacedObject(existingPlacedObjectView.GetComponent<NetworkObject>());
-        SetPlacedObjectTypeSO(targetPlaceObjectView.PlacedObjectTypeSO, objectPosition);
+        GridBuildingSystem.Instance.PickUpPlacedObjectServerRpc(targetPlaceObjectView.NetworkObject);
+        SetPlacedObjectTypeSO(pickedUpTypeSO, objectPosition);
 
         uiPopupManager.HidePopup(UIPopupType.UIInventoryPopup,
             new UIInventoryPopup.Param { isPlacingObject = true });
     }
+    // Cancelling a placement: the item never left the inventory, so there is nothing to refund.
     public void ReturnObjectToInventory()
     {
         if (this.placedObjectTypeSO != null)
         {
-            if (isPlacingExistingObject)
-            {
-                GameManager.Instance.AddInventoryDataServerRpc(this.placedObjectTypeSO.Guid);
-
-            }
             OnReturnPlaceObjectToInventory?.Invoke(this, placedObjectTypeSO);
         }
     }
 
     private void DeselectObjectType()
     {
-        isPlacingExistingObject = false;
         placedObjectTypeSO = null;
         dir = Dir.Down;
         RefreshSelectedObjectType(-Vector3.one);
@@ -313,13 +188,6 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             placedObjectTypeSO = this.placedObjectTypeSO,
             position = targetPosition
         });
-    }
-
-    private void HandlePlacedObjectSpawnCompleted(NetworkObject spawnedObject)
-    {
-        KitchenGameManager.Instance.OnSpawnRequestCompleted -= HandlePlacedObjectSpawnCompleted;
-        Debug.Log("Event callback Guid: "+spawnedObject.GetComponent<PlacedObjectView>().GetPlacedObjectTypeSOGuid());
-        GridBuildingSystem.Instance.UpdateGridDataServerRpc(spawnedObject.GetComponent<NetworkObject>());
     }
 
     public void FireOnObjectPlacedEvent()

@@ -13,6 +13,16 @@ public partial class PlayerStateMachine
 
     public static PlayerStateMachine LocalInstance { get; private set; }
 
+    // Server: the avatar of a connected client, e.g. to send feedback for one of its RPCs.
+    public static PlayerStateMachine FindForClient(ulong clientId)
+    {
+        NetworkManager networkManager = NetworkManager.Singleton;
+        if (networkManager == null || !networkManager.IsServer ||
+            !networkManager.ConnectedClients.TryGetValue(clientId, out NetworkClient client) || client.PlayerObject == null)
+            return null;
+        return client.PlayerObject.GetComponent<PlayerStateMachine>();
+    }
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();

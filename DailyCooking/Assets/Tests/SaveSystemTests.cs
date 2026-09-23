@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 public class SaveSystemTests
 {
@@ -59,6 +61,7 @@ public class SaveSystemTests
         handler.Save(data);
 
         File.WriteAllText(Path.Combine(tempDir, FileName), "{\"RestaurantData\": {\"Coi");
+        LogAssert.Expect(LogType.Error, new Regex(@"\[SaveJson\] Error loading"));
         var loaded = handler.Load();
 
         Assert.IsNotNull(loaded);

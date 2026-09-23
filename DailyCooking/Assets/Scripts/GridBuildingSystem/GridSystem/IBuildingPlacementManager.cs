@@ -14,7 +14,6 @@ public interface IBuildingPlacementManager
 
     void RotateBuildingObject();
     bool TryPlaceBuildingObject(Vector3 interactPos);
-    void RemovePlacedObjectFromGrid(PlacedObjectView placedObjectView);
     void SetPlacedObjectTypeSO(PlacedObjectTypeSO placedObjectTypeSO, Vector3 objectPosition);
     Quaternion GetPlacedObjectRotation();
     Vector3 GetPlacedObjectRotationOffset(InventoryTabType type);
