@@ -5,7 +5,9 @@ using System.Linq;
 using UnityEditor;
 #endif
 using UnityEngine;
+#if UNITY_EDITOR
 using PrivateLT.CharacterCustomization;
+#endif
 
 [Serializable]
 public class CustomizationPart
@@ -107,7 +109,10 @@ public class Customization : MonoBehaviour
 {
     public Transform Rotatable;
     public Camera Camera;
+#if UNITY_EDITOR
+    // Editor tooling only: the pack's CharacterCustomizationPanel window drives this preview.
     public CharacterCustomizationPanel CustomizationPanel { set; get; }
+#endif
 
     public Customization_Data CustomizationData;
     [SerializeField] private GameObject _character;
@@ -117,6 +122,7 @@ public class Customization : MonoBehaviour
 
     private float rotationSpeed = 25f;
 
+#if UNITY_EDITOR
     public void Initialise(CharacterCustomizationPanel customizationPanel)
     {
         foreach (var part in _customizationParts)
@@ -128,6 +134,7 @@ public class Customization : MonoBehaviour
 
         Shuffle();
     }
+#endif
 
     public void Close()
     {
@@ -137,6 +144,7 @@ public class Customization : MonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
     static Customization()
     {
 
@@ -155,6 +163,7 @@ public class Customization : MonoBehaviour
             }
         }
     }
+#endif
 
     public void CustomUpdate()
     {

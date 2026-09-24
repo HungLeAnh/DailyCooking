@@ -53,6 +53,14 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
             MultiplayerManager.Instance.OnPlayerDataNetworkListChanged += Instance_OnPlayerDataNetworkListChanged;
     }
 
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        // Gem purchases wait for a hosted restaurant to credit; pick up any left pending.
+        if (IsServer && gameData != null && IAPManager.Instance != null)
+            IAPManager.Instance.RetryPendingPurchases();
+    }
+
     public override void OnDestroy()
     {
         if (MultiplayerManager.Instance != null)
