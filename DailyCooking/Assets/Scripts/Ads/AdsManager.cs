@@ -39,18 +39,25 @@ public class AdsManager : PersistentSingleton<AdsManager>
             Debug.Log("AdsManager: no ad units for this platform, ads disabled.");
             return;
         }
-        // Register OnInitFailed and OnInitSuccess listeners
+        // Privacy settings only apply if set before Init.
+        // TODO: GDPR consent is still granted for everyone; ask the player (a consent prompt or a
+        // certified CMP) before serving ads in regions that require it.
+        LevelPlayPrivacySettings.SetGDPRConsent(true);
+        LevelPlayPrivacySettings.SetCCPA(true);   // do not sell personal information
+        LevelPlayPrivacySettings.SetCOPPA(false); // general audience, not child-directed
+        //LevelPlay.SetMetaData("is_test_suite", "enable");
+
         LevelPlay.OnInitSuccess += SdkInitializationCompletedEvent;
         LevelPlay.OnInitFailed += SdkInitializationFailedEvent;
-        LevelPlay.OnImpressionDataReady += ImpressionDataReadyEvent;
-        // SDK init        
         LevelPlay.Init(APPKEY);
-        //LevelPlay.SetMetaData("is_test_suite", "enable");
-        LevelPlay.SetMetaData("do_not_sell", "true");
-        LevelPlay.SetConsent(true);
-        LevelPlay.SetMetaData("is_child_directed", "true");
-        
+    }
 
+    private void OnDestroy()
+    {
+        LevelPlay.OnInitSuccess -= SdkInitializationCompletedEvent;
+        LevelPlay.OnInitFailed -= SdkInitializationFailedEvent;
+        rewardedAd?.DestroyAd();
+        interstitialAd?.DestroyAd();
     }
     public bool IsRewardedAdsLoaded()
     {
@@ -99,22 +106,6 @@ public class AdsManager : PersistentSingleton<AdsManager>
         interstitialAd.OnAdInfoChanged += InterstitialOnAdInfoChangedEvent;
         interstitialAd.LoadAd();
 
-    }
-    private void ImpressionDataReadyEvent(LevelPlayImpressionData impressionData)
-    {
-        Debug.Log("unity-script: ImpressionDataReadyEvent impressionData = " + impressionData);
-        //if (impressionData != null)
-        //{
-        //    Firebase.Analytics.Parameter[] AdParameters = {
-        //    new Firebase.Analytics.Parameter("ad_platform", "ironSource"),
-        //    new Firebase.Analytics.Parameter("ad_source", impressionData.adNetwork),
-        //    new Firebase.Analytics.Parameter("ad_unit_name", impressionData.adUnit),
-        //    new Firebase.Analytics.Parameter("ad_format", impressionData.instanceName),
-        //    new Firebase.Analytics.Parameter("currency", "USD"),
-        //    new Firebase.Analytics.Parameter("value", impressionData.revenue.Value)
-        //};
-        //    Firebase.Analytics.FirebaseAnalytics.LogEvent("custom_ad_impression", AdParameters);
-        //}
     }
     private void SdkInitializationFailedEvent(LevelPlayInitError error)
     {
