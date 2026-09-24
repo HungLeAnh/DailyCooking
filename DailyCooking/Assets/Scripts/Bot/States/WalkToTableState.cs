@@ -15,7 +15,13 @@ public class WalkToTableState : BotState
         //Debug.Log("Bot is walking to the table.");
         table = stateMachine.GetBotController().TargetTable;
         seatIndex = stateMachine.GetBotController().TargetSeatIndex.Value;
-        seatTransform = table.GetSeatTransform(seatIndex);
+        seatTransform = table != null ? table.GetSeatTransform(seatIndex) : null;
+        if (seatTransform == null)
+        {
+            // The table was removed (or never resolved) before the bot started walking.
+            stateMachine.GetBotController().Leave();
+            return;
+        }
 
         var destination = NavMeshExtention.FindNearestPointSmart(seatTransform.position, 5f);
         NavMesh.CalculatePath(stateMachine.GetBotController().transform.position,
@@ -35,9 +41,13 @@ public class WalkToTableState : BotState
     }
     public override void Update()
     {
+        if (seatTransform == null)
+            return;
         if (path.status == NavMeshPathStatus.PathComplete)
         {
-            if (stateMachine.GetBotController().NavMeshAgent.remainingDistance <= stateMachine.GetBotController().NavMeshAgent.stoppingDistance)
+            var agent = stateMachine.GetBotController().NavMeshAgent;
+            // remainingDistance reads 0 until the path is computed.
+            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
             {
                 stateMachine.GetBotController().StopNavMesh();
                 stateMachine.GetBotController().transform.position = seatTransform.position;

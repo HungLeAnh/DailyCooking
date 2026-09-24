@@ -52,17 +52,17 @@ public partial class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         SetCharacterMesh();
     }
 
+    // Shows the look of the player who owns this avatar (every peer renders every avatar).
     private void SetCharacterMesh()
     {
-        Debug.Log("Setting character mesh");
         foreach (var part in customizationParts)
         {
             part.Initialise(ConfigManager.Instance.CustomizationData);
         }
 
-        if (GameManager.Instance?.GameData == null || SessionManager.Instance == null) return;
+        if (!IsSpawned || GameManager.Instance?.GameData == null) return;
 
-        var playerData = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        var playerData = GetOwnerStats();
         if (playerData == null) return;
         foreach (var item in playerData.CharacterCustomizationIds)
         {
@@ -92,16 +92,10 @@ public partial class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     private void Start()
     {
         GameInput.Instance.OnMouseClickPerformed += PlayerStateMachine_OnMouseClickPerformed;
-
-        if (GameManager.Instance?.GameData == null || SessionManager.Instance == null) return;
-        var stats = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
-        if (stats != null)
-            stats.OnResourceChange += OnResourceChanged;
     }
 
     private void OnResourceChanged()
     {
-        Debug.Log("Resource changed");
         SetCharacterMesh();
     }
 
@@ -159,8 +153,8 @@ public partial class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     }
     private void PlayerStateMachine_OnMouseClickPerformed(object sender, Vector2 e)
     {
-
-        if (Context.IsDisableInput)
+        // Every avatar hears the click; only the local player's own avatar acts on it.
+        if (!IsOwner || Context.IsDisableInput)
             return;
 
         float maxDistance = 999f;
@@ -277,10 +271,10 @@ public partial class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     }
     private void HandleMovement()
     {
-        if (GameManager.Instance?.GameData == null || SessionManager.Instance == null)
+        if (GameManager.Instance?.GameData == null)
             return;
 
-        var stats = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        var stats = GetOwnerStats();
         if (stats == null) return;
 
         Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();

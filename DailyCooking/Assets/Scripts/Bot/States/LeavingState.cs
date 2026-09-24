@@ -18,7 +18,9 @@ public class LeavingState : BotState
 
     public override void Update()
     {
-        if (stateMachine.GetBotController().NavMeshAgent.remainingDistance <= stateMachine.GetBotController().NavMeshAgent.stoppingDistance)
+        var agent = stateMachine.GetBotController().NavMeshAgent;
+        // remainingDistance reads 0 until the path is computed.
+        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
         {
             
             stateMachine.GetBotController().ResetBot();

@@ -23,18 +23,82 @@ public partial class PlayerStateMachine
         return client.PlayerObject.GetComponent<PlayerStateMachine>();
     }
 
+    private PlayerStats subscribedOwnerStats;
+    private GameData subscribedGameData;
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
         if (IsOwner)
             LocalInstance = this;
+        if (MultiplayerManager.Instance != null)
+            MultiplayerManager.Instance.OnPlayerDataNetworkListChanged += MultiplayerManager_OnPlayerDataNetworkListChanged;
+        SubscribeToOwnerStats();
+        SetCharacterMesh();
     }
 
     public override void OnNetworkDespawn()
     {
         if (LocalInstance == this)
             LocalInstance = null;
+        if (MultiplayerManager.Instance != null)
+            MultiplayerManager.Instance.OnPlayerDataNetworkListChanged -= MultiplayerManager_OnPlayerDataNetworkListChanged;
+        UnsubscribeFromOwnerStats();
         base.OnNetworkDespawn();
+    }
+
+    // The owner's stats (and its account id) can arrive after the avatar spawns; keep trying
+    // until they exist, then follow their changes to refresh the look.
+    private void SubscribeToOwnerStats()
+    {
+        if (subscribedOwnerStats != null)
+            return;
+        GameData gameData = GameManager.Instance != null ? GameManager.Instance.GameData : null;
+        if (gameData == null)
+            return;
+        PlayerStats stats = GetOwnerStats();
+        if (stats == null)
+        {
+            if (subscribedGameData != gameData)
+            {
+                UnsubscribeFromOwnerStats();
+                subscribedGameData = gameData;
+                gameData.OnPlayerStatsAdded += GameData_OnPlayerStatsAdded;
+            }
+            return;
+        }
+        UnsubscribeFromOwnerStats();
+        subscribedOwnerStats = stats;
+        stats.OnResourceChange += OnResourceChanged;
+    }
+
+    private void UnsubscribeFromOwnerStats()
+    {
+        if (subscribedOwnerStats != null)
+            subscribedOwnerStats.OnResourceChange -= OnResourceChanged;
+        subscribedOwnerStats = null;
+        if (subscribedGameData != null)
+            subscribedGameData.OnPlayerStatsAdded -= GameData_OnPlayerStatsAdded;
+        subscribedGameData = null;
+    }
+
+    private void GameData_OnPlayerStatsAdded(PlayerStats playerStats)
+    {
+        RetryOwnerStats();
+    }
+
+    private void MultiplayerManager_OnPlayerDataNetworkListChanged(object sender, System.EventArgs e)
+    {
+        RetryOwnerStats();
+    }
+
+    private void RetryOwnerStats()
+    {
+        if (subscribedOwnerStats != null)
+            return;
+        SubscribeToOwnerStats();
+        if (subscribedOwnerStats != null)
+            SetCharacterMesh();
     }
 
     // Account id of the player who owns this avatar (not necessarily the local player).

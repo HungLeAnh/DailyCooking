@@ -342,7 +342,8 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         roamPosZ.Value = roamPositionZ;
         isNavMeshStopped.Value = false;
         currentStateType.Value = BotStateType.WaitForTable;
-        tipPercentage.Value = GameDefine.TIP_PERCENTAGE + GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).TipIncrease;
+        PlayerStats hostStats = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        tipPercentage.Value = GameDefine.TIP_PERCENTAGE + (hostStats != null ? hostStats.TipIncrease : 0f);
         var spawnPos = UnityEngine.Random.Range(0, 2) == 0 ? roamPositionX : roamPositionZ;
         navMeshAgent.Warp(spawnPos);
         GetComponent<Unity.Netcode.Components.NetworkTransform>().Teleport(spawnPos, transform.rotation, transform.localScale);
@@ -433,8 +434,12 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         CurrentStateType.Value = botStateType;
     }
+    // The state machine (pathing, seats, orders) runs on the server only; clients get the bot's
+    // position, animation and bubbles from NetworkTransform/NetworkAnimator/NetworkVariables.
     private void SetStateMachineState(BotStateType botStateType)
     {
+        if (!IsServer)
+            return;
         switch (botStateType)
         {
             case BotStateType.Idle:

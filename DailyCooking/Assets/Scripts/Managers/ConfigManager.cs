@@ -12,6 +12,8 @@ public class ConfigManager : PersistentSingleton<ConfigManager>
 
     protected override void Awake()
     {
+        base.Awake();
+        if (Instance != this) return;
         ConfigFood.Initialize();
     }
 }

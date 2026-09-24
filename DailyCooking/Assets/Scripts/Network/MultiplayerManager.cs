@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Netcode;
@@ -17,6 +20,9 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     public event EventHandler OnDataSyncToNewClient;
 
     public const int MAX_PLAYER_AMOUNT = 4;
+    // Kept well under UnityTransport's Max Payload Size (6144 in MainMenuScene).
+    private const int SNAPSHOT_CHUNK_SIZE = 4000;
+    private const int MAX_PLAYER_NAME_LENGTH = 32;
     [SerializeField] private UnityTransport unityTransport;
     [SerializeField] private SinglePlayerTransport singlePlayerTransport;
     [SerializeField] private NetworkManager networkManager;
@@ -24,6 +30,9 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     private string playerName;
     private NetworkList<PlayerData> playerDataNetworkList;
     private bool isSinglePlayerMode = false;
+    private int nextSnapshotId;
+    private int receivingSnapshotId = -1;
+    private byte[][] receivingSnapshotChunks;
     public bool IsSinglePlayerMode => isSinglePlayerMode;
     public string GetPlayerName()
     {
@@ -46,11 +55,14 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     }
     private void NetworkManager_Server_OnClientConnectedCallback(ulong clientId)
     {
-        playerDataNetworkList.Add(new PlayerData
+        var playerData = new PlayerData { clientId = clientId };
+        // The host's own entry is filled in directly; remote clients send theirs (SetplayerIdServerRpc).
+        if (clientId == NetworkManager.Singleton.LocalClientId)
         {
-            clientId = clientId,
-        });
-        SetplayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+            playerData.playerId = AuthenticationService.Instance.PlayerId;
+            playerData.playerName = GetPlayerName();
+        }
+        playerDataNetworkList.Add(playerData);
     }
     private void NetworkManager_Server_OnClientDisconnectCallback(ulong clientId)
     {
@@ -84,42 +96,96 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     }
     private void NetworkManager_Client_OnClientConnectCallback(ulong clientId)
     {
+        // Only this local client's own connection starts the handshake.
+        if (clientId != NetworkManager.Singleton.LocalClientId) return;
         SetplayerNameServerRpc(GetPlayerName());
         SetplayerIdServerRpc(AuthenticationService.Instance.PlayerId);
-        SyncDataToNewClientServerRpc(clientId);
+        SyncDataToNewClientServerRpc();
     }
+
+    // The host's GameData is sent to the joining client as compressed chunks: a whole restaurant
+    // does not fit in one message (UnityTransport Max Payload Size).
     [Rpc(SendTo.Server)]
-    private void SyncDataToNewClientServerRpc(ulong clientId)
+    private void SyncDataToNewClientServerRpc(RpcParams rpcParams = default)
     {
         if (GameManager.Instance?.GameData == null || GameManager.Instance.DataHandler == null) return;
         string jsonData = GameManager.Instance.DataHandler.ConvertGameDataToJson(GameManager.Instance.GameData);
         if (string.IsNullOrEmpty(jsonData)) return;
 
-        LoadGameDataClientRpc(jsonData, RpcTarget.Single(clientId, RpcTargetUse.Temp));
+        byte[] compressed = Compress(Encoding.UTF8.GetBytes(jsonData));
+        int chunkCount = (compressed.Length + SNAPSHOT_CHUNK_SIZE - 1) / SNAPSHOT_CHUNK_SIZE;
+        int snapshotId = nextSnapshotId++;
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        Debug.Log($"Sending game data to client {clientId}: {jsonData.Length} chars, {compressed.Length} bytes compressed, {chunkCount} chunk(s).");
+
+        for (int i = 0; i < chunkCount; i++)
+        {
+            int length = Math.Min(SNAPSHOT_CHUNK_SIZE, compressed.Length - i * SNAPSHOT_CHUNK_SIZE);
+            byte[] chunk = new byte[length];
+            Buffer.BlockCopy(compressed, i * SNAPSHOT_CHUNK_SIZE, chunk, 0, length);
+            ReceiveGameDataChunkClientRpc(snapshotId, i, chunkCount, chunk, RpcTarget.Single(clientId, RpcTargetUse.Temp));
+        }
     }
     [Rpc(SendTo.SpecifiedInParams)]
-    private void LoadGameDataClientRpc(string jsonData, RpcParams rpcParams = default)
+    private void ReceiveGameDataChunkClientRpc(int snapshotId, int chunkIndex, int chunkCount, byte[] chunk, RpcParams rpcParams = default)
+    {
+        if (chunkCount <= 0 || chunkIndex < 0 || chunkIndex >= chunkCount) return;
+        if (snapshotId != receivingSnapshotId || receivingSnapshotChunks == null || receivingSnapshotChunks.Length != chunkCount)
+        {
+            receivingSnapshotId = snapshotId;
+            receivingSnapshotChunks = new byte[chunkCount][];
+        }
+        receivingSnapshotChunks[chunkIndex] = chunk;
+        foreach (byte[] received in receivingSnapshotChunks)
+        {
+            if (received == null) return;
+        }
+
+        byte[][] chunks = receivingSnapshotChunks;
+        receivingSnapshotChunks = null;
+        receivingSnapshotId = -1;
+        LoadGameDataFromHost(chunks);
+    }
+    private void LoadGameDataFromHost(byte[][] chunks)
     {
         if (GameManager.Instance == null) return;
-        if (string.IsNullOrEmpty(jsonData)) return;
         try
         {
-        var snapshotHandler = GameManager.Instance.DataHandler ?? new FileDataHandler(Application.persistentDataPath, "GameData_temp");
-        GameManager.Instance.ReplaceGameDataFromHost(snapshotHandler.LoadFromJson(jsonData));
-        if (GameManager.Instance.GameData == null) return;
-        OnDataSyncToNewClient?.Invoke(this, EventArgs.Empty);
+            using var joined = new MemoryStream();
+            foreach (byte[] chunk in chunks)
+                joined.Write(chunk, 0, chunk.Length);
+            string jsonData = Encoding.UTF8.GetString(Decompress(joined.ToArray()));
+
+            var snapshotHandler = GameManager.Instance.DataHandler ?? new FileDataHandler(Application.persistentDataPath, "GameData_temp");
+            GameManager.Instance.ReplaceGameDataFromHost(snapshotHandler.LoadFromJson(jsonData));
+            if (GameManager.Instance.GameData == null) return;
+            OnDataSyncToNewClient?.Invoke(this, EventArgs.Empty);
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
-            Debug.LogError($"LoadGameDataClientRpc failed: {e.Message}");
+            Debug.LogError($"Loading game data from host failed: {e.Message}");
         }
+    }
+    private static byte[] Compress(byte[] data)
+    {
+        using var output = new MemoryStream();
+        using (var gzip = new GZipStream(output, System.IO.Compression.CompressionLevel.Optimal))
+            gzip.Write(data, 0, data.Length);
+        return output.ToArray();
+    }
+    private static byte[] Decompress(byte[] data)
+    {
+        using var input = new GZipStream(new MemoryStream(data), CompressionMode.Decompress);
+        using var output = new MemoryStream();
+        input.CopyTo(output);
+        return output.ToArray();
     }
     [Rpc(SendTo.Server)]
     private void SetplayerNameServerRpc(string playerName, RpcParams serverRpcParams = default)
     {
         if (string.IsNullOrWhiteSpace(playerName)) return;
         string clean = playerName.Trim();
-        if (clean.Length > 32) clean = clean.Substring(0, 32);
+        if (clean.Length > MAX_PLAYER_NAME_LENGTH) clean = clean.Substring(0, MAX_PLAYER_NAME_LENGTH);
         int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
         if (playerDataIndex < 0 || playerDataIndex >= playerDataNetworkList.Count) return;
 
@@ -197,6 +263,9 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             }
 
             NetworkManager.Singleton.ConnectionApprovalCallback = NetworkManager_ConnectionApprovalCallback;
+            // Remove first: a failed or repeated attempt must not leave the handlers attached twice.
+            NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Server_OnClientConnectedCallback;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Server_OnClientDisconnectCallback;
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Server_OnClientConnectedCallback;
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Server_OnClientDisconnectCallback;
 
@@ -230,6 +299,8 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             // The host's snapshot replaces GameData; never keep a local save attached.
             GameManager.Instance.ClearActiveSave();
 
+            NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Client_OnClientConnectCallback;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Client_OnClientDisconnectCallback;
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Client_OnClientConnectCallback;
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Client_OnClientDisconnectCallback;
 

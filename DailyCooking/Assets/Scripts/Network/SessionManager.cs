@@ -30,13 +30,14 @@ public class SessionManager : PersistentSingleton<SessionManager>
     public Action OnGoogleLinkOrUnlink;
     public Action OnUnityLinkOrUnlink;
     const string playerNamePropertyKey = "PlayerName";
-    private string googlePlayGameToken;
 
-    public string GooglePlayGameToken => googlePlayGameToken;
     public string PlayerId => AuthenticationService.Instance.PlayerId;
     protected override async void Awake()
     {
         base.Awake();
+        // A second copy (from reloading MainMenuScene) is being destroyed; it must not
+        // initialize services or subscribe the sign-in events again.
+        if (Instance != this) return;
         try
         {
             await UnityServices.InitializeAsync();
@@ -97,57 +98,57 @@ public class SessionManager : PersistentSingleton<SessionManager>
     }
     #endregion
     #region Google Play Games
+    // Startup: silent Google Play Games sign-in, so the account is ready when the player taps
+    // "Sign in with Google". No server auth code is requested here: codes are single-use.
     public void LoginGooglePlayGames()
     {
 #if UNITY_ANDROID
-        PlayGamesPlatform.Instance.Authenticate((success) =>
+        PlayGamesPlatform.Instance.Authenticate(status =>
         {
-            if (success == SignInStatus.Success)
-            {
-                Debug.Log("Login with Google Play games successful.");
-
-                PlayGamesPlatform.Instance.RequestServerSideAccess(true, code =>
-                {
-                    googlePlayGameToken = code;
-                });
-            }
-            else
-            {
-                Debug.Log("Login Unsuccessful");
-            }
+            Debug.Log(status == SignInStatus.Success
+                ? "Login with Google Play games successful."
+                : "Login with Google Play games unsuccessful.");
         });
 #else
         Debug.Log("Google Play Games is only available on Android.");
 #endif
     }
-    public void StartSignInWithGooglePlayGames()
+    public async void StartSignInWithGooglePlayGames()
     {
 #if UNITY_ANDROID
-        if (!PlayGamesPlatform.Instance.IsAuthenticated()||!HasGooglePlayGamesID())
+        // A fresh code for every attempt: Unity Authentication rejects a code that was used before.
+        string authCode = await RequestGooglePlayGamesAuthCodeAsync();
+        if (string.IsNullOrEmpty(authCode))
         {
-            LoginGooglePlayGames();
-        }
-        SignInOrLinkWithGooglePlayGames();
-#else
-        Debug.Log("Google Play Games is only available on Android.");
-#endif
-    }
-    private async void SignInOrLinkWithGooglePlayGames()
-    {
-        if (string.IsNullOrEmpty(googlePlayGameToken))
-        {
-            Debug.LogError("Google Play Games token is null or empty. Cannot sign in or link.");
+            Debug.LogWarning("Google Play Games sign-in failed or was cancelled.");
             return;
         }
-        if(!AuthenticationService.Instance.IsSignedIn)
-        {
-            await SignInWithGooglePlayGamesAsync(googlePlayGameToken);
-        }
+        if (!AuthenticationService.Instance.IsSignedIn)
+            await SignInWithGooglePlayGamesAsync(authCode);
         else
-        {
-            await LinkWithGooglePlayGamesAsync(googlePlayGameToken);
-        }
+            await LinkWithGooglePlayGamesAsync(authCode);
+#else
+        Debug.Log("Google Play Games is only available on Android.");
+        await Task.CompletedTask;
+#endif
     }
+#if UNITY_ANDROID
+    // Signs in to Google Play Games if needed, then requests a server auth code (null on failure).
+    private static Task<string> RequestGooglePlayGamesAuthCodeAsync()
+    {
+        var result = new TaskCompletionSource<string>();
+        PlayGamesPlatform.Instance.Authenticate(status =>
+        {
+            if (status != SignInStatus.Success)
+            {
+                result.TrySetResult(null);
+                return;
+            }
+            PlayGamesPlatform.Instance.RequestServerSideAccess(true, code => result.TrySetResult(code));
+        });
+        return result.Task;
+    }
+#endif
     public async Task SignInWithGooglePlayGamesAsync(string authCode)
     {
         try

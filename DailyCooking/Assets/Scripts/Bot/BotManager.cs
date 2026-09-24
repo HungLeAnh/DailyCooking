@@ -16,6 +16,8 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     private List<IObjectPool<GameObject>> pools = new List<IObjectPool<GameObject>>();
     private List<GameObject> activeBots = new List<GameObject>();
+    private Coroutine spawnCoroutine;
+    private bool isSubscribedToGameState;
 
     protected override void Awake()
     {
@@ -81,6 +83,14 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
         if(!IsServer) return;
 
         GameManager.Instance.OnStateChanged += GameManager_OnStateChanged;
+        isSubscribedToGameState = true;
+    }
+
+    public override void OnDestroy()
+    {
+        if (isSubscribedToGameState && GameManager.Instance != null)
+            GameManager.Instance.OnStateChanged -= GameManager_OnStateChanged;
+        base.OnDestroy();
     }
 
     private void GameManager_OnStateChanged(object sender, EventArgs e)
@@ -99,8 +109,10 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     {
         if (!IsServer) return;
 
-        StartCoroutine(WaitForSecond(10, () => {
-            StartCoroutine(SpawnBotRoutine());
+        if (spawnCoroutine != null)
+            StopCoroutine(spawnCoroutine);
+        spawnCoroutine = StartCoroutine(WaitForSecond(10, () => {
+            spawnCoroutine = StartCoroutine(SpawnBotRoutine());
         }));
     }
 
@@ -108,7 +120,9 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     {
         if (!IsServer) return;
 
-        StopCoroutine(SpawnBotRoutine());
+        if (spawnCoroutine != null)
+            StopCoroutine(spawnCoroutine);
+        spawnCoroutine = null;
         var botsToReturn = new List<GameObject>(activeBots);
         foreach (var bot in botsToReturn)
         {

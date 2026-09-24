@@ -27,7 +27,8 @@ struct SerializableKeyValuePair<T1, T2>
         Value = value;
     }
 }
-public class UIHUDManager : PersistentSingleton<UIHUDManager>
+// Lives in GameScene only, so it must not survive scene loads (not a PersistentSingleton).
+public class UIHUDManager : SimpleSingleton<UIHUDManager>
 {
     [Header("HUD Elements")]
     [SerializeField] private List<SerializableKeyValuePair<UIHUDElements, GameObject>> uiHUDElementList = new List<SerializableKeyValuePair<UIHUDElements, GameObject>>();
@@ -37,6 +38,7 @@ public class UIHUDManager : PersistentSingleton<UIHUDManager>
 
     protected override void Awake()
     {
+        base.Awake();
         foreach (var item in uiHUDElementList)
         {
             uiHUDElementDictionary.TryAdd(item.Key, item.Value);

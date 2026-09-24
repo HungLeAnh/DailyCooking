@@ -167,7 +167,7 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
         // If we are a client, we CANNOT call Spawn(). We must ask the server.
         if (!IsServer)
         {
-            RequestSpawnPlayerServerRpc(NetworkManager.Singleton.LocalClientId);
+            RequestSpawnPlayerServerRpc();
             return;
         }
 
@@ -176,13 +176,16 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
     }
 
     [Rpc(SendTo.Server)]
-    private void RequestSpawnPlayerServerRpc(ulong clientId)
+    private void RequestSpawnPlayerServerRpc(RpcParams rpcParams = default)
     {
-        ExecutePlayerSpawn(clientId);
+        ExecutePlayerSpawn(rpcParams.Receive.SenderClientId);
     }
 
+    // One avatar per client: a repeated request (e.g. from a re-run initialization) is ignored.
     private void ExecutePlayerSpawn(ulong clientId)
     {
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out NetworkClient client) && client.PlayerObject != null)
+            return;
         playerGameObject = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
         playerGameObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
         OnPlayerSpawned?.Invoke(this, EventArgs.Empty);

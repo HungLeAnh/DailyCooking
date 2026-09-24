@@ -89,6 +89,11 @@ public class UIRestaurantPopup : UIPopup
 
     private void OnKickAll()
     {
+        if (!BotManager.Instance.IsServer)
+        {
+            UIManager.Instance.ShowAlertMessage("Only the restaurant owner can send customers away.");
+            return;
+        }
         BotManager.Instance.KickAllBots();
     }
 

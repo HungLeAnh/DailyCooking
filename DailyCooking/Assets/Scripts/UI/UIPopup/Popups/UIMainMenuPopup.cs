@@ -66,7 +66,7 @@ public class UIMainMenuPopup : UIPopup
                     bool success = await MultiplayerManager.Instance.StartClientSession(joinCode);
                     if (success)
                     {
-                        Loader.LoadNetwork(Loader.Scene.GameScene);
+                        // Clients follow the host's scene automatically; only the server loads scenes.
                         GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
                         UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
                     }
