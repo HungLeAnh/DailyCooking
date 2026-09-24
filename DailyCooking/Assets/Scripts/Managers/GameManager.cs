@@ -8,7 +8,9 @@ using UnityEngine;
 [DefaultExecutionOrder(-1)]
 public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
 {
-    private const string SavedDataFileName = "SavedData";
+    private const string SavedDataFileName = "SavedData";    
+    private const float SAVE_INTERVAL = 1f;
+
     public event EventHandler OnPlayerSpawned;
     public event EventHandler OnStateChanged;
 
@@ -32,7 +34,8 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
     public GameManagerBaseState State => currentState;
 
     public List<SavedData> SavedDataList { get => savedDataList; set => savedDataList = value; }
-
+    private float lastSaveTime;
+    private bool isSaveDirty;
     protected override void Awake()
     {
         base.Awake();
@@ -279,10 +282,6 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
         return !string.IsNullOrWhiteSpace(gameDataName) &&
             gameDataName.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) < 0;
     }
-
-    private const float SAVE_INTERVAL = 1f;
-    private float lastSaveTime;
-    private bool isSaveDirty;
 
     // Marks the save dirty; FlushPendingSave writes it at most once per SAVE_INTERVAL,
     // so bursts of data events cost one write and the last change is never dropped.
