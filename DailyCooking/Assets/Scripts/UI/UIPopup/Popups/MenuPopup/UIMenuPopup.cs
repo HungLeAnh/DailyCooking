@@ -144,7 +144,8 @@ public class UIMenuPopup : UIPopup
             if (canRemoved)
             {
                 GameManager.Instance.RemoveDishFromMenuServerRpc(dish.Guid);
-                foodItemList.Find(x => x.FoodSO == dish ).SetSelectedState(false);
+                // The dish's card is not in the list while another category is shown.
+                foodItemList.Find(x => x.FoodSO == dish)?.SetSelectedState(false);
                 Destroy(menuCategory);
                 totalDish.text = $"{GameManager.Instance.GameData.MenuData.menuDished.Count}";
             }

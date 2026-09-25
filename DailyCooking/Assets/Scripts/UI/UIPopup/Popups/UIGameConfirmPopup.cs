@@ -32,6 +32,8 @@ public class UIGameConfirmPopup : UIPopup
 
     private void Show()
     {
+        // Shown again before closing: drop the previous actions so one tap runs one action.
+        Hide();
         if(_openParam != null)
         {
             Param notificationParam = _openParam as Param;

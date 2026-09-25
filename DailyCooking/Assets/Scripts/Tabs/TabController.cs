@@ -20,19 +20,29 @@ public class TabController : MonoBehaviour
 
 
     private TabPair currentTab;
+    private bool areListenersAdded;
     public TabPair CurrentTab => currentTab;
 
     private void Start()
     {
-        if (tabs.Count == 0||tabs == null)
+        if (tabs == null || tabs.Count == 0)
             return;
-        for (int i = 0; i < tabs.Count; i++)
-        {
-            int index = i; 
-            tabs[i].tabButton.onClick.AddListener(() => SelectTab(index));
-        }
+        AddTabListeners();
 
         SelectTab(defaultTabIndex);
+    }
+
+    // Once only: Start and InitializeTabs both need the buttons wired.
+    private void AddTabListeners()
+    {
+        if (areListenersAdded)
+            return;
+        areListenersAdded = true;
+        for (int i = 0; i < tabs.Count; i++)
+        {
+            int index = i;
+            tabs[i].tabButton.onClick.AddListener(() => SelectTab(index));
+        }
     }
 
     private void SelectTab(int index)
@@ -54,8 +64,8 @@ public class TabController : MonoBehaviour
         {
             tabs[i].name = tabNames[i];
             tabs[i].InitTab(tabIcons[i]);
-            tabs[i].tabButton.onClick.AddListener(() => SelectTab(i));
         }
+        AddTabListeners();
         SelectTab(defaultTabIndex);
     }
 }

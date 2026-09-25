@@ -8,7 +8,7 @@ DailyCooking is a multiplayer cooking game built with Unity. It features a moder
 
 ## 2. Key Technologies & Architectural Patterns
 
-- **Engine:** Unity (2023.4.1f1)
+- **Engine:** Unity 6000.6.2f1 (Unity 6.6), Android target
 - **Rendering:** Universal Render Pipeline (URP)
 - **Multiplayer:** Unity Netcode for GameObjects (`com.unity.netcode.gameobjects`)
 - **Input:** Unity's new Input System (`com.unity.inputsystem`)
@@ -18,15 +18,14 @@ DailyCooking is a multiplayer cooking game built with Unity. It features a moder
     - **ScriptableObjects (SO):** Used for data-driven design (recipes, ingredients). See `Assets/Scripts/SO` for definitions and `Assets/SO` for data assets.
     - **Manager Classes:** Singleton managers for global systems. Located in `Assets/Scripts/Managers`.
     - **MVC (Model-View-Controller):** Used to structure game logic. See `Assets/Scripts/MVC`.
-- **External Libraries:**
-    - **RestSharp:** For making calls to external web APIs (e.g., leaderboards).
+- **Network authority:** the host decides, clients send intents. See `docs/dataflow.md`.
 
 ## 3. Getting Started & Workflow
 
 ### Initial Setup
 
-1.  **Open in Unity:** Add this project to Unity Hub and open it with **Unity Editor version 2023.4.1f1**. The first open will take time to import assets.
-2.  **Open Main Scene:** Load the `Assets/Scenes/MainMenu.unity` scene.
+1.  **Open in Unity:** Add the `DailyCooking/` folder to Unity Hub and open it with **Unity Editor 6000.6.2f1**. The first open will take time to import assets.
+2.  **Open Main Scene:** Load the `Assets/Scenes/MainMenuScene.unity` scene.
 3.  **Run:** Press "Play" in the editor to start the game.
 
 ### Development Workflow
@@ -47,8 +46,14 @@ DailyCooking is a multiplayer cooking game built with Unity. It features a moder
 
 ## 5. How to Build
 
-*To be defined. This section should include the command-line steps to build the project for different platforms (e.g., Windows, Android).*
+Android is the only target. Quick player-compile check (no full build): **Tools → Build Checks → Compile Android Player Scripts** (`Assets/Editor/BuildChecks.cs`). Full builds use File → Build Profiles → Android.
 
 ## 6. How to Run Tests
 
-*To be defined. This section should include the command-line steps to execute the project's test suite.*
+EditMode tests live in `Assets/Tests` (assembly `Tests`). Run them from Window → General → Test Runner, or headless with the Editor closed:
+
+```
+Unity.exe -batchmode -projectPath DailyCooking -runTests -testPlatform EditMode -testResults results.xml
+```
+
+Networked flows are checked manually with Multiplayer Play Mode (host + client + a late joiner).

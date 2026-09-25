@@ -34,6 +34,9 @@ public partial class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
 
     [SerializeField] private float radius = 2f;
     private float height = 2.0f;
+    private const int MAX_HIGHLIGHT_HITS = 32;
+    private readonly Collider[] highlightHitBuffer = new Collider[MAX_HIGHLIGHT_HITS];
+    private readonly List<IHighlightable> nearbyHighlightables = new List<IHighlightable>();
 
 
     private StateManager<EPlayerState> _stateManager;
@@ -234,32 +237,29 @@ public partial class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         Vector3 p1 = transform.position + Vector3.up * radius;
         Vector3 p2 = transform.position + Vector3.up * (height - radius);
 
-        Collider[] colliderHitArray = Physics.OverlapCapsule(p1, p2, radius, countersLayerMask);
-        foreach (IHighlightable highlightable in Context.Highlightable)
+        // Runs every frame: reuse buffers and only toggle what entered or left the range.
+        int hitCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, highlightHitBuffer, countersLayerMask);
+        nearbyHighlightables.Clear();
+        for (int i = 0; i < hitCount; i++)
         {
-            if(highlightable as UnityEngine.Object != null)
+            if (highlightHitBuffer[i].transform.TryGetComponent(out IHighlightable highlightable) &&
+                !nearbyHighlightables.Contains(highlightable))
+                nearbyHighlightables.Add(highlightable);
+        }
+
+        List<IHighlightable> current = Context.Highlightable;
+        foreach (IHighlightable highlightable in current)
+        {
+            if (highlightable as UnityEngine.Object != null && !nearbyHighlightables.Contains(highlightable))
                 highlightable.OnDeselected();
         }
-        if (colliderHitArray.Length > 0)
+        foreach (IHighlightable highlightable in nearbyHighlightables)
         {
-            List<IHighlightable> newHighlightables = new List<IHighlightable>();
-            foreach (Collider hit in colliderHitArray)
-            {
-                if (hit.transform.TryGetComponent(out IHighlightable highlightable))
-                {
-                    highlightable.OnSelected();
-                    newHighlightables.Add(highlightable);
-                }
-            }
-            Context.Highlightable.Clear();
-            Context.Highlightable = null;
-            Context.Highlightable = newHighlightables;
-
+            if (!current.Contains(highlightable))
+                highlightable.OnSelected();
         }
-        else
-        {
-            Context.Highlightable.Clear();
-        }
+        current.Clear();
+        current.AddRange(nearbyHighlightables);
 
 
     }

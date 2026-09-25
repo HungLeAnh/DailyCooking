@@ -36,6 +36,7 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     }
     public override void OnDestroy()
     {
+        highlight?.Release();
         base.OnDestroy();
         if (KitchenGameManager.Instance == null)
             return;
@@ -115,37 +116,16 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
 
     public void Show()
     {
-        if (visualGameObjectArray == null)
-            return;
-
-        foreach (var visualGameObject in visualGameObjectArray)
-        {
-            if (visualGameObject == null || visualGameObject.sharedMaterials == null || visualGameObject.sharedMaterials.Length == 0)
-                continue;
-
-            Material[] mats = visualGameObject.materials;
-            int index = mats.Length - 1;
-            if (mats[index] != null)
-                mats[index].SetFloat("_IsActive", 1f);
-        }
+        Highlight.SetActive(true);
     }
 
     public void Hide()
     {
-        if (visualGameObjectArray == null)
-            return;
-
-        foreach (var visualGameObject in visualGameObjectArray)
-        {
-            if (visualGameObject == null || visualGameObject.sharedMaterials == null || visualGameObject.sharedMaterials.Length == 0)
-                continue;
-
-            Material[] mats = visualGameObject.materials;
-            int index = mats.Length - 1;
-            if (mats[index] != null)
-                mats[index].SetFloat("_IsActive", 0f);
-        }
+        Highlight.SetActive(false);
     }
+
+    private HighlightMaterials highlight;
+    private HighlightMaterials Highlight => highlight ??= new HighlightMaterials(visualGameObjectArray);
 
     public void DestroySelf()
     {

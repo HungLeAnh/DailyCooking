@@ -57,8 +57,9 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>, IUIPopupManag
         if(uiPopupDictionary.TryGetValue(popupType, out var value))
         {
             value.ShowPopup(param);
-            if (!visiblePopupList.Contains(value))
-                visiblePopupList.Add(value);
+            // Keep the list in display order so GetTopShownUIPopup returns the front popup.
+            visiblePopupList.Remove(value);
+            visiblePopupList.Add(value);
             
         }
         else

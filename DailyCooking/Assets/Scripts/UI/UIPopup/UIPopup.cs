@@ -23,6 +23,8 @@ public class UIPopup : MonoBehaviour
     {
         //Debug.Log("ShowPopup");
         gameObject.SetActive(true);
+        // Popups are created once and reused: bring a re-shown popup in front of the others.
+        transform.SetAsLastSibling();
         _openParam = param;
     }
 }

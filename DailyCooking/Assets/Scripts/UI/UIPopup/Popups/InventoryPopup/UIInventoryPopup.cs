@@ -34,6 +34,10 @@ public class UIInventoryPopup : UIPopup
     private List<UIInventoryItem> listItem = new List<UIInventoryItem>();
     private bool isPlacingObject = false;
     private bool isShowItems = false;
+    // The popup outlives game sessions; the placement manager and inventory are recreated per
+    // session, so re-bind to the current ones whenever the popup is shown.
+    private IBuildingPlacementManager subscribedPlacementManager;
+    private InventoryData subscribedInventory;
 
     public UIInventoryTabs InventoryTabs => _tabsPanel;
     public List<UIInventoryItem> ItemList => listItem;
@@ -47,10 +51,6 @@ public class UIInventoryPopup : UIPopup
             CreateInventoryItem(prefabSO);
         }
         _tabsPanel.Setup(inventoryTabDatabase.TabTypesList);
-
-        GridBuildingSystem.Instance.BuildingPlacementManager.OnObjectPlaced += GridBuildingSystem_OnObjectPlaced;
-        GridBuildingSystem.Instance.BuildingPlacementManager.OnReturnPlaceObjectToInventory += GridBuildingSystem_OnReturnPlaceObjectToInventory;
-
 
         backButton.onClick.AddListener(() =>
         {
@@ -73,9 +73,9 @@ public class UIInventoryPopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
-        //Debug.Log(listItem.Count + " Object Subscribe ItemSelected");
-        //Debug.Log("Start building");
+        BindToCurrentSession();
 
+        _tabsPanel.TabChanged -= OnChangeTab;
         _tabsPanel.TabChanged += OnChangeTab;
         for (int i = 0; i < listItem.Count; i++)
         {
@@ -117,6 +117,55 @@ public class UIInventoryPopup : UIPopup
             GameManager.Instance.ShowJoyStick();
         }
 
+    }
+
+    private void BindToCurrentSession()
+    {
+        IBuildingPlacementManager placementManager = GridBuildingSystem.Instance.BuildingPlacementManager;
+        if (placementManager != subscribedPlacementManager)
+        {
+            if (subscribedPlacementManager != null)
+            {
+                subscribedPlacementManager.OnObjectPlaced -= GridBuildingSystem_OnObjectPlaced;
+                subscribedPlacementManager.OnReturnPlaceObjectToInventory -= GridBuildingSystem_OnReturnPlaceObjectToInventory;
+            }
+            subscribedPlacementManager = placementManager;
+            if (placementManager != null)
+            {
+                placementManager.OnObjectPlaced += GridBuildingSystem_OnObjectPlaced;
+                placementManager.OnReturnPlaceObjectToInventory += GridBuildingSystem_OnReturnPlaceObjectToInventory;
+            }
+        }
+
+        // Placing and picking up change the inventory on the server; refresh when it arrives.
+        InventoryData inventory = GameManager.Instance.GameData?.InventoryData;
+        if (inventory != subscribedInventory)
+        {
+            if (subscribedInventory != null)
+                subscribedInventory.OnInventoryDataChanged -= InventoryData_OnInventoryDataChanged;
+            subscribedInventory = inventory;
+            if (inventory != null)
+                inventory.OnInventoryDataChanged += InventoryData_OnInventoryDataChanged;
+        }
+        if (isShowItems && _selectedTab != null)
+            FillInventory(_selectedTab.TabType);
+    }
+
+    private void InventoryData_OnInventoryDataChanged()
+    {
+        if (isShowItems && _selectedTab != null)
+            FillInventory(_selectedTab.TabType);
+    }
+
+    private void OnDestroy()
+    {
+        if (subscribedPlacementManager != null)
+        {
+            subscribedPlacementManager.OnObjectPlaced -= GridBuildingSystem_OnObjectPlaced;
+            subscribedPlacementManager.OnReturnPlaceObjectToInventory -= GridBuildingSystem_OnReturnPlaceObjectToInventory;
+        }
+        if (subscribedInventory != null)
+            subscribedInventory.OnInventoryDataChanged -= InventoryData_OnInventoryDataChanged;
     }
 
     public void FillInventory(InventoryTabType _selectedTabType = InventoryTabType.Counter)
@@ -223,9 +272,11 @@ public class UIInventoryPopup : UIPopup
         }
 
 
+        if (itemToInspect == null)
+            return;
         Vector3 spawnPosDefault = ResolveSpawnPosition();
         GridBuildingSystem.Instance.BuildingPlacementManager
-            .SetPlacedObjectTypeSO(listItem[selectedItemId].PlacedObjectTypeSO, spawnPosDefault);
+            .SetPlacedObjectTypeSO(itemToInspect, spawnPosDefault);
         isPlacingObject = true;
         HidePopup(new Param { isPlacingObject = true });
     }

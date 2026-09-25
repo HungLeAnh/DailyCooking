@@ -1,8 +1,12 @@
 # DailyCooking — Content Build Phases
 
 This document records every phase of content building for the DailyCooking game.
-All menu items live under the `DailyCooking` menu in the Unity Editor and are
+All menu items live under the `DailyCooking` menu in the Unity Editor and were
 implemented in `Assets/Editor/DailyCookingContentBuilder.cs`.
+
+> **Note:** `DailyCookingContentBuilder.cs` is not in the repository (and the `DailyCooking`
+> menu does not exist). The assets it produced are committed; this document records what it
+> generated. Re-running a phase would require restoring that script.
 
 | Phase | Name | Menu Item |
 | --- | --- | --- |

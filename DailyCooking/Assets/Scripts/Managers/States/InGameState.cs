@@ -27,7 +27,7 @@ public class InGameState : GameManagerBaseState
         }
     }
 
-    public override async void Update()
+    public override void Update()
     {
         if(gameManager.GameData == null)
             return;
@@ -39,9 +39,10 @@ public class InGameState : GameManagerBaseState
             return;
         }
 
-        while (UIPopupManager.Instance.IsShowingPopup())
-            await Task.Yield(); 
-        
+        // Wait (re-checked next frame) until no popup is open.
+        if (UIPopupManager.Instance.IsShowingPopup())
+            return;
+
         interstitialCounter = interstitialInterval;
         //AdsManager.Instance.ShowInterstitialAds();
         

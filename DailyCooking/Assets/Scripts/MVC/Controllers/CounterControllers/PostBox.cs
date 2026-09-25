@@ -86,20 +86,21 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
 
     public void Show()
     {
-        foreach (var visualGameObject in visualGameObjectArray)
-        {
-            int index =visualGameObject.materials.Length - 1;
-            visualGameObject.materials[index].SetFloat("_IsActive", 1f);
-        }
+        Highlight.SetActive(true);
     }
 
     public void Hide()
     {
-        foreach (var visualGameObject in visualGameObjectArray)
-        {
-            int index =visualGameObject.materials.Length - 1;
-            visualGameObject.materials[index].SetFloat("_IsActive", 0f);
-        }
+        Highlight.SetActive(false);
+    }
+
+    private HighlightMaterials highlight;
+    private HighlightMaterials Highlight => highlight ??= new HighlightMaterials(visualGameObjectArray);
+
+    public override void OnDestroy()
+    {
+        highlight?.Release();
+        base.OnDestroy();
     }
 
     // Server: the actor picked a package; hand them a refill box for that ingredient.

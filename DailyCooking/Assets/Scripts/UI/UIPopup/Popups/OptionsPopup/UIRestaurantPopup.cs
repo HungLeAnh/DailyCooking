@@ -31,16 +31,42 @@ public class UIRestaurantPopup : UIPopup
         restaurantNameChangeButton.onClick.AddListener(OnChangeRestaurantName);
 
     }
+    // This popup outlives restaurants (UIPopupManager keeps it), so it follows the current game
+    // data only while shown: GameData is replaced when another restaurant loads or is joined.
+    private RestaurantData subscribedRestaurantData;
+    private PlayerStats subscribedPlayerStats;
+
     private void Start()
     {
         KitchenGameManager.Instance.OnStateChanged += Instance_OnStateChanged;
-        GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).OnResourceChange += Initialize;
-        GameManager.Instance.GameData.RestaurantData.OnResourceChange += Initialize;
     }
     private void OnDestroy()
     {
         if(KitchenGameManager.Instance != null)
             KitchenGameManager.Instance.OnStateChanged -= Instance_OnStateChanged;
+        UnsubscribeData();
+    }
+
+    private void SubscribeData()
+    {
+        UnsubscribeData();
+        GameData gameData = GameManager.Instance.GameData;
+        if (gameData == null) return;
+        subscribedRestaurantData = gameData.RestaurantData;
+        subscribedRestaurantData.OnResourceChange += Initialize;
+        subscribedPlayerStats = gameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        if (subscribedPlayerStats != null)
+            subscribedPlayerStats.OnResourceChange += Initialize;
+    }
+
+    private void UnsubscribeData()
+    {
+        if (subscribedRestaurantData != null)
+            subscribedRestaurantData.OnResourceChange -= Initialize;
+        if (subscribedPlayerStats != null)
+            subscribedPlayerStats.OnResourceChange -= Initialize;
+        subscribedRestaurantData = null;
+        subscribedPlayerStats = null;
     }
 
     private void Instance_OnStateChanged(object sender, EventArgs e)
@@ -100,21 +126,28 @@ public class UIRestaurantPopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
+        SubscribeData();
+        Instance_OnStateChanged(this, EventArgs.Empty);
         Initialize();
     }
 
     private void Initialize()
     {
-        restaurantNameText.text = GameManager.Instance.GameData.RestaurantData.RestaurantName;
-        moveSpeedText.text = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).MoveSpeed.ToString("F2");
-        cookingSpeedText.text = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).CookingSpeed.ToString("F2");
-        carryingCapacityText.text = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).CarryingCapacity.ToString();
-        tipIncreaseText.text = GameManager.Instance.GameData.GetPlayerStatsById(SessionManager.Instance.PlayerId).TipIncrease.ToString("F2") + "%";
+        GameData gameData = GameManager.Instance.GameData;
+        if (gameData == null) return;
+        restaurantNameText.text = gameData.RestaurantData.RestaurantName;
+        PlayerStats stats = gameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
+        if (stats == null) return;
+        moveSpeedText.text = stats.MoveSpeed.ToString("F2");
+        cookingSpeedText.text = stats.CookingSpeed.ToString("F2");
+        carryingCapacityText.text = stats.CarryingCapacity.ToString();
+        tipIncreaseText.text = stats.TipIncrease.ToString("F2") + "%";
     }
 
     public override void HidePopup(object param = null)
     {
         base.HidePopup(param);
+        UnsubscribeData();
     }
     public void OnCloseClick()
     {

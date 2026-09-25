@@ -74,7 +74,7 @@ public class UniversalUnityConverter : JsonConverter
             return new Vector3((float)obj["x"], (float)obj["y"], (float)obj["z"]);   
         
         if (objectType == typeof(Vector3Int))
-            return new Vector3((int)obj["x"], (int)obj["y"], (int)obj["z"]);
+            return new Vector3Int((int)obj["x"], (int)obj["y"], (int)obj["z"]);
 
         if (objectType == typeof(Vector2))
             return new Vector2((float)obj["x"], (float)obj["y"]);

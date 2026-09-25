@@ -33,6 +33,8 @@ public class UIOptionMenuPopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
+        // Opened again while still showing: start from an empty list.
+        ClearItems();
         var inputParam = _openParam as Param;
         if (inputParam != null)
         {
@@ -47,7 +49,7 @@ public class UIOptionMenuPopup : UIPopup
         }
         else
         {
-            Hide();
+            HidePopup();
         }
     }
     public override void HidePopup(object param = null)
@@ -118,7 +120,8 @@ public class UIOptionMenuPopup : UIPopup
     {
         if (_optionalCounter != null && PlayerStateMachine.LocalInstance != null)
             PlayerStateMachine.LocalInstance.RequestOption(_optionalCounter, index);
-        Hide();
+        // Through HidePopup so the manager drops it from the visible list too.
+        HidePopup();
     }
 
     private void Show()
@@ -130,14 +133,19 @@ public class UIOptionMenuPopup : UIPopup
     {
         gameObject.SetActive(false);
         _optionalCounter = null;
+        ClearItems();
+        //PlayerStateMachine.Instance.DisableInput(false);
+
+    }
+    private void ClearItems()
+    {
         foreach (var item in _menuItems.ToList())
         {
             item.OnSelectedOption -= MenuItem_OnSelectedOption;
+            item.OnSelectedOption -= MenuItem_OnSelectedFood;
             Destroy(item.gameObject);
         }
         _menuItems.Clear();
-        //PlayerStateMachine.Instance.DisableInput(false);
-
     }
     public void OnClickBackground()
     {

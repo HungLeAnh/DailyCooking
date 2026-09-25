@@ -31,6 +31,11 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     private List<FoodSO> waitingFood;
     private float clockTimerMax = GameDefine.EMOTION_DURATION;
     private NetworkVariable<float> clockTimer = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    // The patience timer counts on the server every frame but is only sent a few times a second;
+    // writing the NetworkVariable each frame would send an update per bot per tick.
+    private const float CLOCK_SYNC_INTERVAL = 0.25f;
+    private float serverClockTimer;
+    private float clockSyncCountdown;
     private NetworkVariable<float> tipPercentage = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> isActiveInGame = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> isBubbleFrameActive = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -111,6 +116,13 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     }
     private void HandleEmotionChanged(EmotionType oldVal, EmotionType newVal) => OnEmotionChanged?.Invoke(newVal);
     private void HandleClockChanged(float oldVal, float newVal) => OnClockTimerChanged?.Invoke((clockTimerMax - newVal) / clockTimerMax);
+    // Server only.
+    private void ResetClockTimer()
+    {
+        serverClockTimer = 0f;
+        clockSyncCountdown = CLOCK_SYNC_INTERVAL;
+        clockTimer.Value = 0f;
+    }
     private void HandleTargetTableChanged(ulong oldVal, ulong newVal)
     {
         if (NetworkManager.Singleton == null) return;
@@ -174,10 +186,16 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         stateMachine.Update();
         if(currentEmotion.Value != EmotionType.None)
         {
-            if (clockTimer.Value < clockTimerMax)
+            if (serverClockTimer < clockTimerMax)
             {
-                clockTimer.Value += Time.deltaTime;
-                if ((clockTimerMax - clockTimer.Value) / clockTimerMax <= 0)
+                serverClockTimer += Time.deltaTime;
+                clockSyncCountdown -= Time.deltaTime;
+                if (clockSyncCountdown <= 0f || serverClockTimer >= clockTimerMax)
+                {
+                    clockSyncCountdown = CLOCK_SYNC_INTERVAL;
+                    clockTimer.Value = serverClockTimer;
+                }
+                if ((clockTimerMax - serverClockTimer) / clockTimerMax <= 0)
                 {
                     SetNextEmotion();
                 }
@@ -239,7 +257,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
             return;
         }
 
-        clockTimer.Value = 0f;
+        ResetClockTimer();
         currentEmotion.Value = nextEmotion;
         UpdateTipPercentage(currentEmotion.Value);
     }
@@ -285,7 +303,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         isOrderBubbleActive.Value = false;
         isFoodBubbleActive.Value = true;
         currentEmotion.Value = EmotionType.Happy;
-        clockTimer.Value = 0f;
+        ResetClockTimer();
 
         return true;
     }
@@ -369,20 +387,20 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     }
     public void ShowHighlight()
     {
-        foreach (var visualGameObject in highlightGameObjectArray)
-        {
-            int index = visualGameObject.materials.Length - 1;
-            visualGameObject.materials[index].SetFloat("_IsActive", 1f);
-        }
-
+        Highlight.SetActive(true);
     }
     public void HideHighlight()
     {
-        foreach (var visualGameObject in highlightGameObjectArray)
-        {
-            int index = visualGameObject.materials.Length - 1;
-            visualGameObject.materials[index].SetFloat("_IsActive", 0f);
-        }
+        Highlight.SetActive(false);
+    }
+
+    private HighlightMaterials highlight;
+    private HighlightMaterials Highlight => highlight ??= new HighlightMaterials(highlightGameObjectArray);
+
+    public override void OnDestroy()
+    {
+        highlight?.Release();
+        base.OnDestroy();
     }
     public void SetVisualActive(bool active)
     {
