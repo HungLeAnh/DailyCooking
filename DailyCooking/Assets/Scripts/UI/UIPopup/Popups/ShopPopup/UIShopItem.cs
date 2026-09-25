@@ -14,11 +14,10 @@ public class UIShopItem : MonoBehaviour
     [SerializeField] private Button buttonBuy;
     private ConfigShopItem configShopItem;
     private ShopItemCategory itemCategory;
+    private GameData subscribedGameData;
 
     public Button ButtonBuy => buttonBuy;
     public ConfigShopItem ConfigShopItem => configShopItem;
-    private GameData subscribedGameData;
-
     private void OnDestroy()
     {
         Unsubscribe();

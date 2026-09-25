@@ -295,12 +295,12 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
 
         if (GameManager.Instance.GameData.InventoryData.Count(placedObjectTypeSOGuid) <= 0)
         {
-            PlayerStateMachine.FindForClient(senderClientId)?.ShowAlert("This item is not in the inventory.");
+            UIManager.Instance.ShowAlert(senderClientId, "This item is not in the inventory.");
             return;
         }
         if (!PlacementRules.CanPlace(gridManager.Grid, placedObjectTypeSO, origin, dir, requireUnlockedCells: true))
         {
-            PlayerStateMachine.FindForClient(senderClientId)?.ShowAlert("Can't build here!");
+            UIManager.Instance.ShowAlert(senderClientId, "Can't build here!");
             return;
         }
 
@@ -321,7 +321,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         IPlaceable placeable = placedObjectView.GetComponent<IPlaceable>();
         if (placeable != null && !placeable.CanRemove())
         {
-            PlayerStateMachine.FindForClient(rpcParams.Receive.SenderClientId)?.ShowAlert("Item is used, cannot remove.");
+            UIManager.Instance.ShowAlert(rpcParams.Receive.SenderClientId, "Item is used, cannot remove.");
             return;
         }
 

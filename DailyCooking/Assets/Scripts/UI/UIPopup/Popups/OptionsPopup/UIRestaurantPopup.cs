@@ -22,6 +22,12 @@ public class UIRestaurantPopup : UIPopup
     [SerializeField] private TextMeshProUGUI cookingSpeedText;
     [SerializeField] private TextMeshProUGUI carryingCapacityText;
     [SerializeField] private TextMeshProUGUI tipIncreaseText;
+
+    // This popup outlives restaurants (UIPopupManager keeps it), so it follows the current game
+    // data only while shown: GameData is replaced when another restaurant loads or is joined.
+    private RestaurantData subscribedRestaurantData;
+    private PlayerStats subscribedPlayerStats;
+
     private void Awake()
     {
         Instance_OnStateChanged(this,EventArgs.Empty);
@@ -31,11 +37,6 @@ public class UIRestaurantPopup : UIPopup
         restaurantNameChangeButton.onClick.AddListener(OnChangeRestaurantName);
 
     }
-    // This popup outlives restaurants (UIPopupManager keeps it), so it follows the current game
-    // data only while shown: GameData is replaced when another restaurant loads or is joined.
-    private RestaurantData subscribedRestaurantData;
-    private PlayerStats subscribedPlayerStats;
-
     private void Start()
     {
         KitchenGameManager.Instance.OnStateChanged += Instance_OnStateChanged;

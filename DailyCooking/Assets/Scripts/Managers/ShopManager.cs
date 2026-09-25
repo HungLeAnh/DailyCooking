@@ -12,7 +12,7 @@ public class CurrencyExchangeOffer
 
 // Client-side front for shop actions: checks the balance for instant feedback, then sends an
 // intent to the server, which looks the price up again and applies the purchase
-// (GameManager.Economy).
+// (GameManager economy RPCs).
 public class ShopManager : PersistentSingleton<ShopManager>
 {
     [Header("Free Currency")]

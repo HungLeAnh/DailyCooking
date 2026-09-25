@@ -1,5 +1,5 @@
 // Client-side front for upgrades: the server checks the level, price and ownership again,
-// charges the coins and applies the reward (GameManager.Economy.PurchaseUpgradeServerRpc).
+// charges the coins and applies the reward (GameManager.PurchaseUpgradeServerRpc).
 public class UpgradeManager : PersistentSingleton<UpgradeManager>
 {
     // Returns false when the purchase was refused locally; the UI updates from UpgradeData once

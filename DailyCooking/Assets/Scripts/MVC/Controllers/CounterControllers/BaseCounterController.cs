@@ -13,6 +13,7 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     [SerializeField] private List<Transform> topSlots = new List<Transform>();
 
     private KitchenObject _kitchenObject;
+    private HighlightMaterials highlight;
     public KitchenObject KitchenObject
     {
         get => _kitchenObject;
@@ -21,6 +22,7 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
             _kitchenObject = value;
         }
     }
+    private HighlightMaterials Highlight => highlight ??= new HighlightMaterials(visualGameObjectArray);
 
     public event Action OnDestroySelf;
 
@@ -123,9 +125,6 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
     {
         Highlight.SetActive(false);
     }
-
-    private HighlightMaterials highlight;
-    private HighlightMaterials Highlight => highlight ??= new HighlightMaterials(visualGameObjectArray);
 
     public void DestroySelf()
     {

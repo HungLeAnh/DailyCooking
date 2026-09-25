@@ -11,6 +11,10 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
     [SerializeField] private MeshRenderer[] visualGameObjectArray;
 
     private NetworkList<FixedString64Bytes> kitchenObjectSOGuidList = new NetworkList<FixedString64Bytes>();
+    private HighlightMaterials highlight;
+
+    private HighlightMaterials Highlight => highlight ??= new HighlightMaterials(visualGameObjectArray);
+
     public override void OnNetworkSpawn()
     {
         if (IsHost || IsServer || MultiplayerManager.Instance.IsSinglePlayerMode)
@@ -71,7 +75,7 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
             var options = kitchenObjectSOGuidList.AsNativeArray().ToList()
                 .Select(guid => KitchenGameManager.Instance.GetKitchenObjectSOByGuid(guid.ToString()))
                 .ToList();
-            playerStateMachine.ShowOptionMenu(this, options, "PostBox");
+            InteractionUI.Instance.ShowOptionMenu(playerStateMachine, this, options, "PostBox");
         }
     }
     public void OnSelected()
@@ -93,9 +97,6 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
     {
         Highlight.SetActive(false);
     }
-
-    private HighlightMaterials highlight;
-    private HighlightMaterials Highlight => highlight ??= new HighlightMaterials(visualGameObjectArray);
 
     public override void OnDestroy()
     {

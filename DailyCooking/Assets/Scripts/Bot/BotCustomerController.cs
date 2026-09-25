@@ -53,6 +53,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
 
     private Table targetTable = null;
     private int _poolIndex = -1;
+    private HighlightMaterials highlight;
     public Table TargetTable { get => targetTable; set => targetTable = value; }
     public NetworkVariable<ulong> TargetTableNetworkVariable { get => targetTableNetworkVariable; set => targetTableNetworkVariable.Value = value.Value;}
     public NetworkVariable<int> TargetSeatIndex { get => targetSeatIndex; set => targetSeatIndex = value;}
@@ -62,6 +63,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     public Vector3 RoamPosX { get => roamPosX.Value; set => roamPosX.Value = value; }
     public Vector3 RoamPosZ { get => roamPosZ.Value; set => roamPosZ.Value = value; }
     public int PoolIndex { get => _poolIndex; set => _poolIndex = value; }
+    private HighlightMaterials Highlight => highlight ??= new HighlightMaterials(highlightGameObjectArray);
 
     public override void OnNetworkSpawn()
     {
@@ -392,9 +394,6 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         Highlight.SetActive(false);
     }
-
-    private HighlightMaterials highlight;
-    private HighlightMaterials Highlight => highlight ??= new HighlightMaterials(highlightGameObjectArray);
 
     public override void OnDestroy()
     {

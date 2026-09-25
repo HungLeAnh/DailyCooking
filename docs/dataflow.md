@@ -36,9 +36,13 @@ NetworkVariables/NetworkLists, spawns, or `SendTo.NotServer` mirror RPCs.
 - A click on a counter, plate or customer is sent as `PlayerStateMachine.InteractServerRpc`.
   The server checks the sender owns that avatar and is in range, then runs the target's
   `InteractEvent(actor)` on the server.
-- Feedback goes to that player only: `actor.ShowAlert(...)` and `actor.ShowOptionMenu(...)`
-  (owner RPCs). A choice in the option menu comes back through `ChooseOptionServerRpc` and the
-  target's `IHasOptionalSO.ApplyOption(actor, index)` validates the index.
+- Feedback goes to that player only: `UIManager.Instance.ShowAlert(actor, ...)` and
+  `InteractionUI.Instance.ShowOptionMenu(actor, ...)`. Both are server-owned NetworkBehaviours
+  (UIManager on its own object, InteractionUI on the KitchenGameManager object) that target the
+  actor's client with `RpcTarget.Single`, so the player class holds no UI calls. A choice in the
+  option menu comes back through `InteractionUI.RequestOption`; the server takes the sender's
+  avatar as the actor, checks range, and the target's `IHasOptionalSO.ApplyOption(actor, index)`
+  validates the index.
 
 ## 4. Kitchen objects
 
@@ -68,7 +72,7 @@ NetworkVariables/NetworkLists, spawns, or `SendTo.NotServer` mirror RPCs.
 
 ## 6. Economy
 
-All in `GameManager.Economy.cs`. Clients call intent RPCs — `BuyShopItemServerRpc`,
+All in `GameManager.cs` (the economy section). Clients call intent RPCs — `BuyShopItemServerRpc`,
 `ExchangeCurrencyServerRpc`, `UnlockDishServerRpc`, `PurchaseUpgradeServerRpc`,
 `UnlockCosmeticServerRpc`, `ClaimDailyFreeServerRpc` — and the server checks level, price and
 balance, then debits and grants in one step. Customer payments are computed on the server when a

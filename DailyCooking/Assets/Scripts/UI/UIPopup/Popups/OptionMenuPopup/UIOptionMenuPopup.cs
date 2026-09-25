@@ -118,8 +118,8 @@ public class UIOptionMenuPopup : UIPopup
     // The server applies the choice for the local player.
     private void SendChoice(int index)
     {
-        if (_optionalCounter != null && PlayerStateMachine.LocalInstance != null)
-            PlayerStateMachine.LocalInstance.RequestOption(_optionalCounter, index);
+        if (_optionalCounter != null && InteractionUI.Instance != null)
+            InteractionUI.Instance.RequestOption(_optionalCounter, index);
         // Through HidePopup so the manager drops it from the visible list too.
         HidePopup();
     }

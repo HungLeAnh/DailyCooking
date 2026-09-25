@@ -83,14 +83,14 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
         {
             if (kitchenObjectSONetworkList == null || kitchenObjectSONetworkList.Count == 0)
             {
-                playerStateMachine.ShowAlert("This is empty!");
+                UIManager.Instance.ShowAlert(playerStateMachine, "This is empty!");
                 return;
             }
             // One entry per list slot so the picked index matches kitchenObjectSONetworkList.
             var options = new List<KitchenObjectSO>();
             foreach (var containerData in kitchenObjectSONetworkList)
                 options.Add(KitchenGameManager.Instance.GetKitchenObjectSOByGuid(containerData.KitchenObjectSOGuid.ToString()));
-            playerStateMachine.ShowOptionMenu(this, options, "Select ingredient to make: ");
+            InteractionUI.Instance.ShowOptionMenu(playerStateMachine, this, options, "Select ingredient to make: ");
         }
         else if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
         {

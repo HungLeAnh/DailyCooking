@@ -94,7 +94,7 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
         {
             if(string.IsNullOrEmpty(networkContainerData.Value.KitchenObjectSOGuid.ToString()) || networkContainerData.Value.FillAmount <= 0f)
             {
-                playerStateMachine.ShowAlert("This is empty!");
+                UIManager.Instance.ShowAlert(playerStateMachine, "This is empty!");
                 return;
             }
             KitchenObjectSO kitchenObjectSO = KitchenGameManager.Instance.GetKitchenObjectSOByGuid(networkContainerData.Value.KitchenObjectSOGuid.ToString());
@@ -106,7 +106,7 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
             if (refillerKitchenObject.RefillContainer(this))
                 refillerKitchenObject.DestroySelf();
             else
-                playerStateMachine.ShowAlert("Cannot refill container with different ingredient type ");
+                UIManager.Instance.ShowAlert(playerStateMachine, "Cannot refill container with different ingredient type ");
         }
     }
 
