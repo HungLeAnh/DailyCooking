@@ -90,7 +90,7 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             var options = new List<KitchenObjectSO>();
             foreach (var containerData in kitchenObjectSONetworkList)
                 options.Add(KitchenGameManager.Instance.GetKitchenObjectSOByGuid(containerData.KitchenObjectSOGuid.ToString()));
-            InteractionUI.Instance.ShowOptionMenu(playerStateMachine, this, options, "Select ingredient to make: ");
+            UIManager.Instance.ShowOptionMenu(playerStateMachine, this, options, "Select ingredient to make: ");
         }
         else if (playerStateMachine.GetKitchenObject() is RefillerKitchenObject refillerKitchenObject)
         {

@@ -348,7 +348,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     // ---- Networking ----
     // A click is sent to the server, which runs the counter/bot/plate logic with this player as
     // the actor. Feedback for that player goes through UIManager.ShowAlert and
-    // InteractionUI.ShowOptionMenu.
+    // UIManager.ShowOptionMenu.
     // Server: the avatar of a connected client, e.g. to send feedback for one of its RPCs.
     public static PlayerStateMachine FindForClient(ulong clientId)
     {

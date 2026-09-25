@@ -75,7 +75,7 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
             var options = kitchenObjectSOGuidList.AsNativeArray().ToList()
                 .Select(guid => KitchenGameManager.Instance.GetKitchenObjectSOByGuid(guid.ToString()))
                 .ToList();
-            InteractionUI.Instance.ShowOptionMenu(playerStateMachine, this, options, "PostBox");
+            UIManager.Instance.ShowOptionMenu(playerStateMachine, this, options, "PostBox");
         }
     }
     public void OnSelected()

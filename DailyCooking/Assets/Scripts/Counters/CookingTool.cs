@@ -429,7 +429,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         if (cookingToolConfig == null || !cookingToolConfig.supportsOptionMenu || !_resolver.Supports(CookingToolConfigSO.CookingToolType.Combine))
             return;
-        InteractionUI.Instance.ShowOptionMenu(actor, sender, _resolver.GetOptions(input), CookingPresenter.OptionTitle);
+        UIManager.Instance.ShowOptionMenu(actor, sender, _resolver.GetOptions(input), CookingPresenter.OptionTitle);
     }
 
     public List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)
