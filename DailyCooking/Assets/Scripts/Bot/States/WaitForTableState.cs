@@ -36,9 +36,9 @@ public class WaitForTableState : BotState
                 int seatIndex = availableTable.GetAvailableSeat();
                 if (seatIndex != -1)
                 {
-                    stateMachine.GetBotController().SetSeatServerRpc(availableTable, seatIndex);
+                    stateMachine.GetBotController().SetSeat(availableTable, seatIndex);
                     availableTable.OccupySeat(seatIndex);
-                    stateMachine.GetBotController().SetCurrentStateServerRpc(BotStateType.WalkToTable);
+                    stateMachine.GetBotController().SetCurrentState(BotStateType.WalkToTable);
                     return;
                 }
             }

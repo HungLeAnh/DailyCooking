@@ -53,7 +53,7 @@ public class WalkToTableState : BotState
                 stateMachine.GetBotController().transform.position = seatTransform.position;
                 Transform lookAtTransform = table.GetKitchenObjectFollowTransform(seatIndex);
                 stateMachine.GetBotController().transform.LookAt(lookAtTransform);
-                stateMachine.GetBotController().SetCurrentStateServerRpc(BotStateType.OrderFood);
+                stateMachine.GetBotController().SetCurrentState(BotStateType.OrderFood);
             }
 
         }

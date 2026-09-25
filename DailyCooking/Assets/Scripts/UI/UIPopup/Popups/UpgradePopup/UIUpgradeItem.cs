@@ -16,19 +16,40 @@ public class UIUpgradeItem : MonoBehaviour
     private UpgradeSO upgradeData;
     private bool isPurchased = false;
     private GameData subscribedGameData;
-    private void Start()
-    {
-        subscribedGameData = GameManager.Instance.GameData;
-        subscribedGameData.RestaurantData.OnLevelChange += PlayerStats_OnLevelChange;
-        subscribedGameData.UpgradeData.OnMenuDataChanged += UpgradeData_OnChanged;
-    }
 
     private void OnDestroy()
+    {
+        Unsubscribe();
+    }
+
+    // The popup is built once but GameData is replaced when another restaurant is loaded or
+    // joined: follow the current one and re-read its state (called when the popup is shown).
+    public void Refresh()
+    {
+        if (upgradeData == null)
+            return;
+        GameData gameData = GameManager.Instance.GameData;
+        if (gameData == null)
+            return;
+        if (gameData != subscribedGameData)
+        {
+            Unsubscribe();
+            subscribedGameData = gameData;
+            gameData.RestaurantData.OnLevelChange += PlayerStats_OnLevelChange;
+            gameData.UpgradeData.OnMenuDataChanged += UpgradeData_OnChanged;
+        }
+        isPurchased = gameData.IsUpgradePurchased(upgradeData);
+        dimGameObject.SetActive(gameData.RestaurantData.Level < upgradeData.LevelUnlocked);
+        SetPurchased(isPurchased);
+    }
+
+    private void Unsubscribe()
     {
         if (subscribedGameData == null)
             return;
         subscribedGameData.RestaurantData.OnLevelChange -= PlayerStats_OnLevelChange;
         subscribedGameData.UpgradeData.OnMenuDataChanged -= UpgradeData_OnChanged;
+        subscribedGameData = null;
     }
 
     // The purchase is confirmed by the server (GameManager.PurchaseUpgradeServerRpc).
@@ -58,13 +79,10 @@ public class UIUpgradeItem : MonoBehaviour
         itemIconImage.sprite = upgradeSO.UpgradeIcon;
         upgradeCostText.text = upgradeSO.UpgradeCosts.ToString();
 
-        var isLocked = GameManager.Instance.GameData.RestaurantData.Level < upgradeSO.LevelUnlocked;
-        dimGameObject.SetActive(isLocked);
         upgradeButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.AddListener(OnUpgradeButtonClick);
 
-        isPurchased = GameManager.Instance.GameData.IsUpgradePurchased(upgradeSO);
-        SetPurchased(isPurchased);
+        Refresh();
     }
     public void SetPurchased(bool isPurchased)
     {

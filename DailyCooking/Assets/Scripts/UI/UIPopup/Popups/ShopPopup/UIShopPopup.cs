@@ -52,6 +52,9 @@ public class UIShopPopup : UIPopup
         shopData.OnResourceChange -= RefreshDailyFreeItems;
         shopData.OnResourceChange += RefreshDailyFreeItems;
         RefreshDailyFreeItems();
+        // Items are built once; re-read the lock state for the current restaurant.
+        foreach (UIShopItem item in GetComponentsInChildren<UIShopItem>(true))
+            item.Refresh();
 
         if (_timer24HrsCoroutine != null)
             StopCoroutine(_timer24HrsCoroutine);

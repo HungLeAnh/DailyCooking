@@ -51,6 +51,9 @@ public class UIUpgradePopup : UIPopup
     public override void ShowPopup(object param = null)
     {
         base.ShowPopup(param);
+        // Items are built once; re-read the current restaurant's upgrades and level.
+        foreach (UIUpgradeItem item in GetComponentsInChildren<UIUpgradeItem>(true))
+            item.Refresh();
     }
     public void OnCloseClick()
     {

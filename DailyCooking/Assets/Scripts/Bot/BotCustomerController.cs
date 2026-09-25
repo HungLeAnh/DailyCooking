@@ -279,12 +279,13 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
                 break;
         }
     }
-    [Rpc(SendTo.Server)]
-    public void OrderFoodServerRpc(RpcParams rpcParams = default)
+    // Server only (bot states run on the server): take the order and wait for it.
+    public void OrderFoodAndWait()
     {
+        if (!IsServer) return;
         if (OrderFood())
         {
-            SetCurrentStateServerRpc(BotStateType.WaitingForFood);
+            SetCurrentState(BotStateType.WaitingForFood);
         }
     }
 
@@ -322,13 +323,10 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         }
         bubbleFoodUI.SetOrder(waitingFood);
     }
+    // Server only.
     public void ShowOrder()
     {
-        ShowOrderServerRpc();
-    }
-    [Rpc(SendTo.Server)]
-    private void ShowOrderServerRpc()
-    {
+        if (!IsServer) return;
         isBubbleFrameActive.Value = true;
         isOrderBubbleActive.Value = true;
         isEmotionBubbleActive.Value = true;
@@ -351,7 +349,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         targetTableNetworkVariable.Value = 0;
         targetSeatIndex.Value = -1;
         orderedFoodGuids.Clear();
-        StopBubbleServerRpc();
+        StopBubble();
         currentStateType.Value = BotStateType.Idle;
     }
     public void InitBot(Vector3 roamPositionX, Vector3 roamPositionZ)
@@ -367,9 +365,10 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
         GetComponent<Unity.Netcode.Components.NetworkTransform>().Teleport(spawnPos, transform.rotation, transform.localScale);
         IsActiveInGame.Value = true;
     }
-    [Rpc(SendTo.Server)]
-    public void StopBubbleServerRpc()
+    // Server only.
+    public void StopBubble()
     {
+        if (!IsServer) return;
         isFoodBubbleActive.Value = false;
         isOrderBubbleActive.Value = false;
         isEmotionBubbleActive.Value = false;
@@ -445,11 +444,12 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         ResetSeat();
         currentStateType.Value = BotStateType.Leaving;
-        StopBubbleServerRpc();
+        StopBubble();
     }
-    [Rpc(SendTo.Server)]
-    public void SetCurrentStateServerRpc(BotStateType botStateType)
+    // Server only: the state is replicated through currentStateType.
+    public void SetCurrentState(BotStateType botStateType)
     {
+        if (!IsServer) return;
         CurrentStateType.Value = botStateType;
     }
     // The state machine (pathing, seats, orders) runs on the server only; clients get the bot's
@@ -483,13 +483,11 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
                 break;
         }
     }
-    [Rpc(SendTo.Server)]
-    public void SetSeatServerRpc(NetworkBehaviourReference networkBehaviourReference, int seatIndex)
+    // Server only.
+    public void SetSeat(Table table, int seatIndex)
     {
-        if (networkBehaviourReference.TryGet(out Table table))
-        {
-            targetTableNetworkVariable.Value = table.NetworkObjectId;
-            targetSeatIndex.Value = seatIndex;
-        }           
+        if (!IsServer || table == null) return;
+        targetTableNetworkVariable.Value = table.NetworkObjectId;
+        targetSeatIndex.Value = seatIndex;
     }
 }

@@ -17,11 +17,37 @@ public class UIShopItem : MonoBehaviour
 
     public Button ButtonBuy => buttonBuy;
     public ConfigShopItem ConfigShopItem => configShopItem;
+    private GameData subscribedGameData;
+
     private void OnDestroy()
     {
-        if (GameManager.Instance == null || GameManager.Instance.GameData == null)
+        Unsubscribe();
+    }
+
+    // Items are reused across sessions while GameData is replaced on load/join:
+    // follow the current one and re-read the lock state (called when the popup is shown).
+    public void Refresh()
+    {
+        if (configShopItem == null)
             return;
-        GameManager.Instance.GameData.RestaurantData.OnLevelChange -= OnLevelChanged;
+        GameData gameData = GameManager.Instance.GameData;
+        if (gameData == null)
+            return;
+        if (gameData != subscribedGameData)
+        {
+            Unsubscribe();
+            subscribedGameData = gameData;
+            gameData.RestaurantData.OnLevelChange += OnLevelChanged;
+        }
+        OnLevelChanged();
+    }
+
+    private void Unsubscribe()
+    {
+        if (subscribedGameData == null)
+            return;
+        subscribedGameData.RestaurantData.OnLevelChange -= OnLevelChanged;
+        subscribedGameData = null;
     }
     public void SetItem(ConfigShopItem item,ShopItemCategory itemCategory)
     {
@@ -29,22 +55,12 @@ public class UIShopItem : MonoBehaviour
         this.configShopItem = item;
         this.itemCategory = itemCategory;
 
-        GameManager.Instance.GameData.RestaurantData.OnLevelChange -= OnLevelChanged;
-        GameManager.Instance.GameData.RestaurantData.OnLevelChange += OnLevelChanged;
-
         //imageIcon.sprite = item.Icon;
         textName.text = item.Name;
         textPrice.text = MathUtil.NumberFormat(item.Price);
         ButtonBuy.onClick.RemoveListener(OnClickButtonBuy);
         ButtonBuy.onClick.AddListener(OnClickButtonBuy);
-        if(item.UnlockLevel > GameManager.Instance.GameData.RestaurantData.Level)
-        {
-            lockTransform.gameObject.SetActive(true);
-        }
-        else
-        {
-            lockTransform.gameObject.SetActive(false);
-        }
+        Refresh();
 
         GetReward(item.Rewards);
 
@@ -52,6 +68,8 @@ public class UIShopItem : MonoBehaviour
 
     private void OnLevelChanged()
     {
+        if (configShopItem == null || GameManager.Instance.GameData == null)
+            return;
         if (configShopItem.UnlockLevel > GameManager.Instance.GameData.RestaurantData.Level)
         {
             lockTransform.gameObject.SetActive(true);
