@@ -59,7 +59,7 @@ NetworkVariables/NetworkLists, spawns, or `SendTo.NotServer` mirror RPCs.
 ## 5. Grid building
 
 - Placement preview (`BuildingGhost`) is a local, non-networked copy of the prefab.
-- Placing: the client checks `PlacementRules.CanPlace` for instant feedback, then sends
+- Placing: the client checks `GridBuildingSystem.CanPlace` for instant feedback, then sends
   `GridBuildingSystem.PlaceObjectServerRpc`. The server checks again (every covered cell,
   unlocked cells, tool slots) and that the item is in the inventory, removes it from the
   inventory and spawns the object (server-owned, so it survives its builder leaving).
