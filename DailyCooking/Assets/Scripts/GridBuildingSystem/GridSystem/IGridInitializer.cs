@@ -5,5 +5,4 @@ public interface IGridInitializer
 {
     void InitRoad();
     void InitFloor();
-    void InitDefaultCounters();
 }

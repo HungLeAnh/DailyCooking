@@ -67,13 +67,13 @@ public class GridPlacementTests
     [Test] public void CanPlace_OnEmptyUnlockedCells()
     {
         var grid = CreateGrid(5);
-        Assert.IsTrue(PlacementRules.CanPlace(grid, CreateCounterSO(2, 1), new Vector2Int(1, 1), Dir.Down, requireUnlockedCells: true));
+        Assert.IsTrue(GridBuildingSystem.CanPlace(grid, CreateCounterSO(2, 1), new Vector2Int(1, 1), Dir.Down, requireUnlockedCells: true));
     }
 
     [Test] public void CanPlace_RejectsFootprintOutsideTheGrid()
     {
         var grid = CreateGrid(5);
-        Assert.IsFalse(PlacementRules.CanPlace(grid, CreateCounterSO(2, 1), new Vector2Int(4, 0), Dir.Down, requireUnlockedCells: false));
+        Assert.IsFalse(GridBuildingSystem.CanPlace(grid, CreateCounterSO(2, 1), new Vector2Int(4, 0), Dir.Down, requireUnlockedCells: false));
     }
 
     [Test] public void CanPlace_RejectsLockedCellsOnlyForPlayers()
@@ -82,12 +82,12 @@ public class GridPlacementTests
         grid.SetSize(5, 5, 10, 10);
         var counter = CreateCounterSO(1, 1);
 
-        Assert.IsFalse(PlacementRules.CanPlace(grid, counter, new Vector2Int(7, 7), Dir.Down, requireUnlockedCells: true));
-        Assert.IsTrue(PlacementRules.CanPlace(grid, counter, new Vector2Int(7, 7), Dir.Down, requireUnlockedCells: false));
+        Assert.IsFalse(GridBuildingSystem.CanPlace(grid, counter, new Vector2Int(7, 7), Dir.Down, requireUnlockedCells: true));
+        Assert.IsTrue(GridBuildingSystem.CanPlace(grid, counter, new Vector2Int(7, 7), Dir.Down, requireUnlockedCells: false));
     }
 
     [Test] public void CanPlace_RejectsNullType()
     {
-        Assert.IsFalse(PlacementRules.CanPlace(CreateGrid(5), null, Vector2Int.zero, Dir.Down, requireUnlockedCells: true));
+        Assert.IsFalse(GridBuildingSystem.CanPlace(CreateGrid(5), null, Vector2Int.zero, Dir.Down, requireUnlockedCells: true));
     }
 }

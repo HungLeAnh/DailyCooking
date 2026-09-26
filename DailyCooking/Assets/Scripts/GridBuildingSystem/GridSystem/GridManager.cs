@@ -66,11 +66,6 @@ public class GridManager : IGridManager
         grid.Expand();
     }
 
-    public void AddGridObjectData(List<GridObjectData>[,] gridObjectDataList)
-    {
-        GridObjectSpawner.SpawnObjectsFromData(grid, gridObjectDataList);
-    }
-
     public int2 WorldPositionToGridPos(float x, float y)
     {
         if(grid.ValidateGridPosition(new Vector2Int(Mathf.RoundToInt(x), Mathf.RoundToInt(y))) != null)

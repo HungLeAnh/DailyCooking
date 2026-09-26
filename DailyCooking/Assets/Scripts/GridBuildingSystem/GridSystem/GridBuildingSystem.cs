@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.AI.Navigation;
 using Unity.Netcode;
 using UnityEngine;
+using Newtonsoft.Json;
 
 public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
 {
@@ -123,7 +124,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
 
         if (IsHost || IsServer || MultiplayerManager.Instance.IsSinglePlayerMode)
         {
-            GridObjectSpawner.SpawnObjectsFromData(gridManager.Grid, GameManager.Instance.GameData.GridData.GridArrayData);
+            SpawnSavedObjects(gridManager.Grid, GameManager.Instance.GameData.GridData.GridArrayData);
 
             GameObject postBoxInstance = Instantiate(postBoxPrefab, new Vector3(1, 0, -1), Quaternion.identity);
             postBoxInstance.GetComponent<NetworkObject>().Spawn();
@@ -132,7 +133,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
 
         gridInitializer = new GridInitializer(gridManager, this.gameManager,
             roadContainer, roadPrefab, roadCornerPrefab,
-            floorContainer, floorPrefab,DefaultGridConfigSO);
+            floorContainer, floorPrefab);
 
         gridInitializer.InitRoad();
         gridInitializer.InitFloor();
@@ -218,7 +219,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         OnGridSizeChangedOnServer();
         if (!GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime)
         {
-            gridInitializer.InitDefaultCounters();
+            SpawnSavedObjects(gridManager.Grid, DefaultGridDataFromConfig());
         }
     }
     // Server only: called by the server-validated expansion upgrade purchase.
@@ -267,6 +268,50 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
         }
     }
 
+    // Single source for "can this object go here" and "where does it sit", shared by the
+    // client preview, the server's placement check and loading saved grids.
+    // requireUnlockedCells: false when respawning saved/default objects, true for players.
+    public static bool CanPlace(GridXZ<GridObject> grid, PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir, bool requireUnlockedCells)
+    {
+        if (grid == null || placedObjectTypeSO == null)
+            return false;
+
+        foreach (Vector2Int cell in placedObjectTypeSO.GetGridPositionList(origin, dir))
+        {
+            List<GridObject> cellObjects = grid.GetGridObject(cell.x, cell.y);
+            if (cellObjects == null)
+                return false;
+            if (requireUnlockedCells && !grid.IsCellUnlocked(cell.x, cell.y))
+                return false;
+            if (placedObjectTypeSO.isTool)
+            {
+                // Tools sit in a free top slot of an allowed counter (Pan/Pot on StoveCounter, etc.).
+                if (!ToolSlotResolver.TryFindUnderlyingCounter(grid, placedObjectTypeSO, cell, out PlacedObjectView counterView))
+                    return false;
+                if (ToolSlotResolver.IsToolSlotOccupied(grid, counterView, cell))
+                    return false;
+                continue;
+            }
+            if (cellObjects.Exists(o => o == null || !o.CanBuild(placedObjectTypeSO.itemType.TabType, dir)))
+                return false;
+        }
+        return true;
+    }
+
+    public static Vector3 GetWorldPosition(GridXZ<GridObject> grid, PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir)
+    {
+        Vector2Int rotationOffset = placedObjectTypeSO.GetRotationOffset(dir);
+        Vector3 worldPosition = grid.GetWorldPosition(origin) +
+            new Vector3(rotationOffset.x, 0, rotationOffset.y) * grid.GetCellSize();
+        if (!placedObjectTypeSO.isTool)
+            return worldPosition;
+        if (!ToolSlotResolver.TryFindUnderlyingCounter(grid, placedObjectTypeSO, origin, out PlacedObjectView counterView))
+            return worldPosition;
+        if (ToolSlotResolver.TryGetToolSlotPosition(counterView, origin, out Vector3 slotPosition))
+            return slotPosition;
+        return worldPosition;
+    }
+
     // Server only. Placed objects stay server-owned so they survive their builder leaving.
     public NetworkObject SpawnPlacedObject(PlacedObjectTypeSO placedObjectTypeSO, Vector2Int origin, Dir dir)
     {
@@ -276,13 +321,43 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             Debug.LogError($"GridBuildingSystem: Missing prefab for PlacedObjectTypeSO '{placedObjectTypeSO.name}' Guid={placedObjectTypeSO.Guid}", placedObjectTypeSO);
             return null;
         }
-        Vector3 worldPosition = PlacementRules.GetWorldPosition(gridManager.Grid, placedObjectTypeSO, origin, dir);
+        Vector3 worldPosition = GetWorldPosition(gridManager.Grid, placedObjectTypeSO, origin, dir);
         Transform placedObjectTransform = Instantiate(placedObjectTypeSO.prefab, worldPosition,
             Quaternion.Euler(0, placedObjectTypeSO.GetRotationAngle(dir), 0), counterContainer).transform;
         placedObjectTransform.GetComponent<PlacedObjectView>().Intialize(placedObjectTypeSO.Guid, origin, dir);
         NetworkObject networkObject = placedObjectTransform.GetComponent<NetworkObject>();
         networkObject.Spawn();
         return networkObject;
+    }
+
+    // Server only: the restaurant layout for a brand-new save, parsed from the default grid config.
+    private List<GridObjectData>[,] DefaultGridDataFromConfig()
+    {
+        string json = DefaultGridConfigSO != null ? DefaultGridConfigSO.gridArrayJson : null;
+        if (string.IsNullOrEmpty(json)) return null;
+        return JsonConvert.DeserializeObject<List<GridObjectData>[,]>(json, SaveJson.CreateSettings());
+    }
+
+    // Server only: respawns saved (or default) grid objects.
+    // Multi-cell objects are saved once per covered cell; after the first copy spawns, the
+    // placement check rejects the others because their cells are already taken.
+    private void SpawnSavedObjects(GridXZ<GridObject> grid, List<GridObjectData>[,] gridObjectDataList)
+    {
+        if (gridObjectDataList == null) return;
+        for (int x = 0; x < gridObjectDataList.GetLength(0); x++)
+        {
+            for (int z = 0; z < gridObjectDataList.GetLength(1); z++)
+            {
+                if (gridObjectDataList[x, z] == null) continue;
+                foreach (var objectData in gridObjectDataList[x, z])
+                {
+                    PlacedObjectTypeSO placedObjectTypeSO = GetPlacedObjectTypeSOByGuid(objectData.PlacedObjectTypeSOGuid);
+                    if (!CanPlace(grid, placedObjectTypeSO, objectData.Origin, objectData.Dir, requireUnlockedCells: false))
+                        continue;
+                    SpawnPlacedObject(placedObjectTypeSO, objectData.Origin, objectData.Dir);
+                }
+            }
+        }
     }
 
     // A player places an item from the restaurant inventory.
@@ -298,7 +373,7 @@ public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
             UIManager.Instance.ShowAlert(senderClientId, "This item is not in the inventory.");
             return;
         }
-        if (!PlacementRules.CanPlace(gridManager.Grid, placedObjectTypeSO, origin, dir, requireUnlockedCells: true))
+        if (!CanPlace(gridManager.Grid, placedObjectTypeSO, origin, dir, requireUnlockedCells: true))
         {
             UIManager.Instance.ShowAlert(senderClientId, "Can't build here!");
             return;

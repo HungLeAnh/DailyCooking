@@ -48,7 +48,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
             return false;
 
         Vector2Int placedObjectOrigin = new Vector2Int(x, z);
-        if (!PlacementRules.CanPlace(gridManager.Grid, placedObjectTypeSO, placedObjectOrigin, dir, requireUnlockedCells: true))
+        if (!GridBuildingSystem.CanPlace(gridManager.Grid, placedObjectTypeSO, placedObjectOrigin, dir, requireUnlockedCells: true))
             return false;
 
         GridBuildingSystem.Instance.PlaceObjectServerRpc(placedObjectTypeSO.Guid, placedObjectOrigin, dir);
