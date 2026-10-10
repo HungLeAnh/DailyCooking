@@ -1,74 +1,30 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
-public class OptionalContainerCounterController : BaseCounterController, IHasOptionalSO, IContainerCounter
+// Multi-slot container: interacts open a pick menu over every stocked ingredient.
+public class OptionalContainerCounterController : BaseContainerCounterController, IHasOptionalSO
 {
     private NetworkList<ContainerDataSerializable> kitchenObjectSONetworkList = new NetworkList<ContainerDataSerializable>();
 
-    public override void OnNetworkSpawn()
+    protected override void LoadContainerData(ContainerData containerData)
     {
-        GridBuildingSystem.Instance.OnObjectSpawned += GridBuildingSystem_OnObjectSpawned;
-    }
-
-    public override void OnNetworkDespawn()
-    {
-        if (GridBuildingSystem.Instance != null)
+        var savedList = containerData.ContainerDataSerializableList;
+        if (savedList == null)
         {
-            GridBuildingSystem.Instance.OnObjectSpawned -= GridBuildingSystem_OnObjectSpawned;
-        }
-    }
-
-    private void GridBuildingSystem_OnObjectSpawned()
-    {
-        if (!IsServer)
-            return;
-        PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
-        if (placedObjectView == null)
-        {
-            Debug.LogError("ContainerCounterController: PlacedObjectView is null!");
+            Debug.LogError("OptionalContainerCounterController: ContainerData list is null!");
             return;
         }
-        var position = placedObjectView.GetGridPositionList();
-        string placedObjectTypeSOGuid = placedObjectView.GetPlacedObjectTypeSOGuid();
-        var gridObjectDatas = GameManager.Instance.GameData.GridData.GetGridObjectDatas(position[0].x, position[0].y);
-        if (gridObjectDatas == null)
-        {
-            Debug.LogError("ContainerCounterController: GridObjectDatas is null!");
-            return;
-        }
-        foreach (var gridObjectData in gridObjectDatas)
-        {
-            //Debug.Log("ContainerCounterController: Checking grid object data with placed object type SO guid: " + gridObjectData.ToString());
-            if (gridObjectData.PlacedObjectTypeSOGuid == placedObjectTypeSOGuid)
-            {
-                if (gridObjectData is ContainerData containerData)
-                {
-                    //Debug.Log("ContainerCounterController: Found matching grid object data! ContainerData: " + containerData.ContainerDataSerializableList[0].KitchenObjectSOGuid);
-                    if (containerData != null)
-                    {
-                        containerData.ContainerDataSerializableList.ForEach(containerDataSerializable =>
-                        {
-                            kitchenObjectSONetworkList.Add(containerDataSerializable);
-                        });
-                        break;
-                    }
-                    else
-                    {
-                        Debug.LogError("ContainerCounterController: ContainerData is null!"); break;
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("is not containerData");
-                }
-
-            }
-        }
+        savedList.ForEach(kitchenObjectSONetworkList.Add);
     }
+
+    protected override List<ContainerDataSerializable> CollectContainerData()
+    {
+        return kitchenObjectSONetworkList.AsNativeArray().ToList();
+    }
+
     // Runs on the server (see PlayerStateMachine.InteractServerRpc).
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
@@ -108,7 +64,7 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
             TakeOneFromContainer(index);
     }
 
-    public List<KitchenObjectSO> GetContainerKitchenObjectType()
+    public override List<KitchenObjectSO> GetContainerKitchenObjectType()
     {
         return kitchenObjectSONetworkList.AsNativeArray().ToList()
             .Select(container => KitchenGameManager.Instance.GetKitchenObjectSOByGuid(container.KitchenObjectSOGuid.ToString()))
@@ -117,7 +73,7 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
     }
 
     // Server only.
-    public bool Refill(float fillAmount, string kitchenObjectSOGuid)
+    public override bool Refill(float fillAmount, string kitchenObjectSOGuid)
     {
         if (!IsServer) return false;
         kitchenObjectSONetworkList.Add(new ContainerDataSerializable(kitchenObjectSOGuid, fillAmount));
@@ -141,22 +97,10 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
         SaveContainerData();
     }
 
-    // Server only: the host's GridData is the save; clients read the NetworkList.
-    private void SaveContainerData()
-    {
-        PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
-        string guid = placedObjectView.GetPlacedObjectTypeSOGuid();
-        placedObjectView.GetGridPositionList().ForEach(gridPosition =>
-        {
-            GameManager.Instance.GameData.GridData.ChangeGridObjectData(gridPosition.x, gridPosition.y,
-                new ContainerData( kitchenObjectSONetworkList.AsNativeArray().ToList(), guid, gridPosition, placedObjectView.Dir, placedObjectView.InventoryTabType),
-                placedObjectView.GetPlacedObjectTypeSOGuid());
-        });
-    }
     public override bool CanRemove()
     {
         var canRemove = base.CanRemove();
-        if(kitchenObjectSONetworkList != null)
+        if (kitchenObjectSONetworkList != null)
             return canRemove && kitchenObjectSONetworkList.Count == 0;
         return canRemove;
     }
