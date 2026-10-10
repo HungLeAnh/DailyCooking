@@ -8,53 +8,56 @@ DailyCooking uses a **ScriptableObject-driven data architecture** for all gamepl
 
 - **Tier 1 (Quick Wins):** Deleted dead `CookingRecipeSO`, removed unused recipe lists, fixed "Chesse"/"Tomatoe" typos, renamed `BurnedRecipeSO`→`BurningRecipeSO`, moved misplaced assets, removed dangling `upgradeDataList` prefab override, added `OnValidate`/`ContextMenu` editor validation
 - **Tier 2 (Data Integrity):** Created `RecipeDatabaseSO` centralizing all recipes, replaced index-based RPCs with GUID-based, replaced popup string lookup with dictionary, replaced shop reward string with structured `ShopReward` type
-- **Tier 3 (Performance & Scale):** Added `KitchenObjectPool` for pooled kitchen object instantiation, extracted `PrefabSpawnService` from `KitchenGameManager` for placed object spawning, fixed bot pool routing to use pool index instead of name-based lookup
+- **Tier 3 (Performance & Scale):** Fixed bot pool routing to use `poolIndex` instead of name-based lookup. Kitchen-object pooling and the `PrefabSpawnService` extraction were tried and **reverted** — pooling conflicted with `NetworkObject` lifetimes (see §4.6).
 
 ---
 
 ## 1. Data Construction (ScriptableObjects)
 
-### 1.1 SO Classes (19 classes, 74 assets)
+### 1.1 SO Classes
 
-| Class | File | Assets | Key Fields |
-|---|---|---|---|
-| `KitchenObjectSO` | `Assets/Scripts/SO/KitchenObjectSO/` | 24 | `Transform prefab`, `Sprite`, `string objectName`, `KitchenObjectOptionalProcessSO processSO` |
-| `RefillerKitchenObjectSO` | same dir | 1 | + `float refillingAmount` |
-| `KitchenObjectOptionalProcessSO` | `Assets/SO/OptionalProcessSO/` | 1 | `KitchenObjectSO input`, `List<KitchenObjectSO> processListOutput` |
-| `CookingRecipeSO` | `Assets/Scripts/SO/RecipeSO/` | **0 (dead)** | `input`, `output`, `float cookingTimerMax` — never used |
-| `CuttingRecipeSO` | same dir | 7 | `input`, `output`, `int cuttingProgressMax` |
-| `FryingRecipeSO` | same dir | 2 | `input`, `output`, `float fryingTimerMax` |
-| `BurningRecipeSO` | `Assets/SO/BurnedRecipeSO/` | 3 | `input`, `output`, `float burningTimerMax` |
-| `CombineRecipeSO` | `Assets/Scripts/Counters/` | 1 | `List<KitchenObjectSO> input`, `output`, `float combineTimerMax` |
-| `UpgradeSO` | `Assets/Scripts/SO/UpgradeSO/` | 8 | `upgradeName`, `upgradeDescription`, `upgradeIcon`, `upgradeCosts`, `levelUnlocked`, `UpgradeType`, `UpgradeTarget`, `upgradeValue` |
-| `ConfigUpgrade` | same dir | 1 | `List<UpgradeSO> upgrades`, `GetUpgradeOfType()` |
-| `AudioClipRefsSO` | `Assets/SO/SoundClips.asset` | 1 | arrays for chop, delivery, footstep, etc. |
-| `FoodSO` | `Assets/Scripts/KitchenObject/` | 6 | `List<KitchenObjectSO> kitchenObjectSOList`, `Sprite`, `string recipeName`, `long price`, `int exp`, `FoodType`, `int unlockLevel`, `int unlockPrice` |
-| `PlacedObjectTypeSO` | `Assets/Scripts/GridBuildingSystem/` | 14 | `id`, `nameString`, `prefab`, `visual`, `icon`, `width`, `height`, `ItemType` |
-| `PopupDatabase` | `Assets/Scripts/Databases/` | 1 | `List<PopupData>` (popupName, popupPrefab) |
-| `PlacedObjectDatabase` | `Assets/Scripts/Databases/` | 1 | `List<PlacedObjectTypeSO> placeObjects` |
-| `InventoryTabDatabase` | `Assets/Scripts/UI/.../InventoryTabDatabase.cs` | 1 | `List<InventoryTab>` (sprite + type) |
-| `ConfigFood` | `Assets/Scripts/Configs/` | 1 | `List<FoodSO> foodItems`, GUID dictionary |
-| `ConfigShop` | `Assets/Scripts/Configs/` | 1 | `List<ConfigShopItem>` (id, name, type, price, reward, category, unlockLevel) |
-| `SerializableScriptableObject` | base class | — | `_guid` stamped in `OnValidate` via `AssetDatabase` |
+| Class | File (under `Assets/Scripts/`) | Key Fields |
+|---|---|---|
+| `KitchenObjectSO` | `SO/KitchenObjectSO/` | `Transform prefab`, `Sprite`, `string objectName`, `KitchenObjectOptionalProcessSO processSO` |
+| `RefillerKitchenObjectSO` | `SO/KitchenObjectSO/` | + `float refillingAmount` |
+| `KitchenObjectOptionalProcessSO` | `SO/KitchenObjectSO/` | `KitchenObjectSO input`, `List<KitchenObjectSO> processListOutput` |
+| `CuttingRecipeSO` | `SO/RecipeSO/` | `input`, `output`, `int cuttingProgressMax` |
+| `FryingRecipeSO` | `SO/RecipeSO/` | `input`, `output`, `float fryingTimerMax` |
+| `BurningRecipeSO` | `SO/RecipeSO/` | `input`, `output`, `float burningTimerMax` |
+| `BakingRecipeSO` | `SO/RecipeSO/` | `input`, `output`, bake time |
+| `DeepFryRecipeSO` | `SO/RecipeSO/` | `input`, `output`, deep-fry time |
+| `DrinkRecipeSO` | `SO/RecipeSO/` | `List<KitchenObjectSO> input`, `output` |
+| `CombineRecipeSO` | `Counters/` | `List<KitchenObjectSO> input`, `output`, `float combineTimerMax` |
+| `RecipeDatabaseSO` | `SO/RecipeDatabase/` | the recipe lists above; dictionary caches built in `Initialize()` |
+| `CookingToolConfigSO` | `SO/` | `List<CookingToolType> toolTypes`, `supportsOptionMenu`, `Supports()` |
+| `UpgradeSO` | `SO/UpgradeSO/` | `upgradeName`, `upgradeDescription`, `upgradeIcon`, `upgradeCosts`, `levelUnlocked`, `UpgradeType`, `UpgradeTarget`, `upgradeValue` |
+| `ConfigUpgrade` | `SO/UpgradeSO/` | `List<UpgradeSO> upgrades`, `GetUpgradeOfType()` |
+| `AudioClipRefsSO` | `SO/` | arrays for chop, delivery, footstep, etc. |
+| `FoodSO` | `KitchenObject/` | `List<KitchenObjectSO> kitchenObjectSOList`, `Sprite`, `string recipeName`, `long price`, `int exp`, `FoodType`, `int unlockLevel`, `int unlockPrice` |
+| `PlacedObjectTypeSO` | `GridBuildingSystem/PlacedObjectMVC/` | `id`, `nameString`, `prefab`, `visual`, `icon`, `width`, `height`, `ItemType` |
+| `PopupDatabase` | `Databases/` | `List<PopupData>`, keyed by `UIPopupType` |
+| `PlacedObjectDatabase` | `Databases/` | `List<PlacedObjectTypeSO> placeObjects` |
+| `InventoryTabDatabase` | `UI/UIPopup/Popups/InventoryPopup/` | `List<InventoryTab>` (sprite + type) |
+| `ConfigFood` | `Configs/` | `List<FoodSO> foodItems`, GUID dictionary |
+| `ConfigShop` | `Configs/` | `List<ConfigShopItem>` (id, name, type, price, rewards, category, unlockLevel) |
+| `SerializableScriptableObject` | `UI/UIPopup/Popups/InventoryPopup/` | base class; `_guid` stamped in `OnValidate` via `AssetDatabase` |
 
-### 1.2 Asset Locations (conventions and issues)
+### 1.2 Asset Locations
 
-- Most SO assets live under `Assets/SO/<ClassName>/` — consistent.
-- **Misplaced**: `AudioClipRefsSO` sits in `Assets/SO/` root; `InventoryTabDatabase` is in `Assets/SO/PopupDatabase/` (wrong folder); `ConfigFood`/`ConfigShop`/`ConfigUpgrade` are in `Assets/Configs/` (separate from SOs).
-- **Folder/class mismatch**: `Assets/SO/BurnedRecipeSO/` folder contains `BurningRecipeSO` assets.
-- **Empty folder**: `Assets/SO/InventorySO/TabSO/` — no assets, leftover from abandoned `TabSO` idea.
+- SO assets live under `Assets/SO/<ClassName>/`, one folder per class (e.g. `Assets/SO/CuttingRecipeSO/`).
+- Config assets are the one deliberate exception: `Assets/Configs/` holds `ConfigFood`, `ConfigShop`, `ConfigUpgrade` and `PlacedObject/`.
+- The misplacements and mismatches that used to live here (`SoundClips.asset` in the SO root, `InventoryTabDatabase` under `PopupDatabase/`, the `BurnedRecipeSO` folder name, the empty `InventorySO/TabSO/` folder) are fixed — see Tier 1 in §5.
 
 ### 1.3 Data Flow
 
 All SO assets are wired via **serialized fields in scenes/prefabs**. No `Resources.Load` or `FindObjectOfType` for SOs at runtime.
 
-1. **KitchenObjectSO**: `KitchenGameManager.Awake()` builds `kitchenObjectSODic[guid]` from scene list and pre-warms `KitchenObjectPool`. `SpawnKitchenObjectServerRpc` passes only the GUID string over the network; lookup resolves the SO; `KitchenObjectPool.GetKitchenObject(guid)` retrieves a pooled instance (or `Instantiate` as fallback); `NetworkObject.Spawn(true)` makes it visible.
-2. **Recipes**: linear scan `foreach (recipe in array) if (recipe.input == inputSO)` in counter controllers. Recipe arrays are baked into counter prefabs (`CuttingCounter.prefab`, `PanCookingTool.prefab`, `PotCookingTool.prefab`).
-3. **PlacedObjectTypeSO**: `GridBuildingSystem` builds a GUID→SO dictionary; `PlacedObjectView` re-resolves by GUID string after network spawn.
-4. **FoodSO/Shop/Upgrades**: `ConfigManager` holds the config SOs; saves persist only GUID strings.
-5. **PopupDatabase**: `UIPopupManager.CreatePopup` → `popupDatabase.GetPopup(popupType.ToString())` (string-keyed by enum name).
-6. **Shop rewards**: `ConfigShopItem.reward` is a raw string like `"{guid}_{count}"` parsed ad hoc in `UIShopItem`.
+1. **KitchenObjectSO**: `KitchenGameManager.Awake()` builds `kitchenObjectSODic[guid]` from the scene list and calls `RecipeDatabase.Initialize()`. `SpawnKitchenObject` is server-only; it sets the parent before `NetworkObject.Spawn()` so clients never see an unparented item. There is **no** kitchen-object pooling — it conflicted with `NetworkObject` lifetimes (see `docs/dataflow.md` §4).
+2. **Recipes**: `RecipeDatabaseSO` owns every recipe list and pre-builds `Dictionary<KitchenObjectSO, T>` caches in `Initialize()`. Cooking tools reach it through `KitchenGameManager.Instance.RecipeDatabase` via `RecipeResolver`; `CookingToolConfigSO` declares which recipe categories a given tool supports (`Frying`, `Baking`, `DeepFry`, `Beverage`, `Combine`, `Cutting`).
+3. **PlacedObjectTypeSO**: `GridBuildingSystem` builds a GUID→SO dictionary. `PlacedObjectView` carries the GUID as a server-written `NetworkVariable<FixedString64Bytes>` and re-resolves it in `OnNetworkSpawn` and on change.
+4. **FoodSO/Shop/Upgrades**: `ConfigManager` holds the config SOs; saves persist only GUID strings, and the menu/upgrade RPCs take `string foodGuid` / `string upgradeGuid`.
+5. **PopupDatabase**: `UIPopupManager` looks the popup up with `popupDatabase.GetPopup(popupType)` — keyed by the `UIPopupType` enum, not by its name.
+6. **Shop rewards**: `ConfigShopItem` exposes a typed `List<ShopReward>`; `GameManager.Economy.cs` walks it when a purchase lands. The old `"{guid}_{count}"` string contract is gone.
 
 ---
 
@@ -63,7 +66,7 @@ All SO assets are wired via **serialized fields in scenes/prefabs**. No `Resourc
 ### 2.1 Inventory
 
 - **Location**: `Assets/Prefab/` (singular folder)
-- **~110 prefabs** across 11 subfolders: `Bot/`, `Buildings/`, `CookingTool/`, `Counters/`, `Foods/`, `KitchenObjects/`, `Player/`, `PostBox/`, `Tables/`, `UI/`
+- **~130 prefabs** across 10 subfolders: `Bot/`, `Buildings/`, `CookingTool/`, `Counters/`, `Foods/`, `KitchenObjects/`, `Player/`, `PostBox/`, `Tables/`, `UI/`
 - **Naming**: PascalCase for concrete prefabs, `_`-prefix for base templates (`_BaseCounter`, `_BaseTable`, `_BaseCookingTool`, `_BaseTablewareCounter`)
 - **Composition**: concrete prefabs embed base prefabs as **nested PrefabInstances** — no true prefab variants (`m_PrefabParentObject`).
 
@@ -71,14 +74,13 @@ All SO assets are wired via **serialized fields in scenes/prefabs**. No `Resourc
 
 | File:Line | What | Prefab Source |
 |---|---|---|
-| `KitchenGameManager.cs:156` | Kitchen object | `kitchenObjectSO.prefab` (SO field) |
-| `KitchenGameManager.cs:172` | Placed counter/building | `placedObjectTypeSO.prefab` (SO field) |
-| `GameManager.cs:90` | Player | serialized `playerPrefab` field |
-| `BotManager.cs:27` | Bot customer | serialized `botPrefabs[]` array |
-| `GridBuildingSystem.cs:117` | PostBox | serialized `postBoxPrefab` |
-| `GridInitializer.cs:32,36,41,57` | Roads/floors | constructor-injected from serialized fields |
-| `TablewareCounterController.cs:68` | Tableware visual | serialized `_tablewareVisualPrefab` |
-| `UIPopupManager.cs:73` | UI popups | `popupData.popupPrefab` from `PopupDatabase` SO |
+| `KitchenGameManager.cs:156` | Kitchen object | `kitchenObjectSO.prefab` (SO field), resolved by GUID |
+| `GridBuildingSystem.cs:316` | Placed counter/building | `placedObjectTypeSO.prefab` (SO field), server-owned |
+| `GameManager.cs:119` | Player | serialized `playerPrefab` field |
+| `BotManager.cs:29,143,180` | Bot customer | serialized `botPrefabs[]`, served by `ObjectPool<GameObject>` |
+| `GridBuildingSystem.cs:129` | PostBox | serialized `postBoxPrefab` |
+| `GridInitializer.cs:30,34,39,59` | Roads/floors | constructor-injected from serialized fields |
+| `UIPopupManager.cs:60` | UI popups | `popupData.popupPrefab` from `PopupDatabase` SO |
 | Various UI scripts | UI items | serialized `_itemPrefab`, `tabPrefab`, etc. |
 
 **Key points**: Runtime gameplay spawning uses only two mechanisms — SO-held prefab references and serialized MonoBehaviour fields. No `Resources.Load` paths in game code, no Addressables.
@@ -102,8 +104,8 @@ Spawned objects read their data from the **SO field baked into the prefab** (`Ki
 
 - All networked objects inherit `NetworkBehaviour`.
 - Only server/host authorizes state changes; clients request via `ServerRpc`.
-- **Network protocol uses GUID strings** for SO references (correct pattern).
-- **Exception**: `RemoveDishFromMenuServerRpc(int dishIndex)` and `PurchaseUpgradeServerRpc(int upgradeIndex)` use **list index** instead of GUID — fragile to reordering.
+- **Network protocol uses GUID strings** for SO references (correct pattern). `RemoveDishFromMenuServerRpc` and `PurchaseUpgradeServerRpc` both take a `string` GUID now, so list reordering no longer breaks the wire protocol.
+- Placed objects carry their GUID in a `NetworkVariable<FixedString64Bytes>` on `PlacedObjectView` rather than re-sending it per RPC.
 - `DefaultNetworkPrefabs.asset` registers ~50 prefabs for Netcode-for-GameObjects.
 
 ---
@@ -112,19 +114,17 @@ Spawned objects read their data from the **SO field baked into the prefab** (`Ki
 
 ### 4.1 Dead / Unused Code
 
-| Issue | Location | Impact |
-|---|---|---|
-| `CookingRecipeSO` class — 0 assets, 0 runtime references | `Assets/Scripts/SO/RecipeSO/` | Dead code, misleading |
-| `KitchenGameManager.cuttingRecipeSOList` / `.fryingRecipeSOList` — never read | `KitchenGameManager.cs:30-31` | Duplicated with per-prefab arrays |
-| Empty `Assets/SO/InventorySO/TabSO/` folder | — | Leftover, confusing |
+All three items that used to be listed here are gone: the `CookingRecipeSO` class, the
+`cuttingRecipeSOList` / `fryingRecipeSOList` scene fields on `KitchenGameManager`, and the empty
+`Assets/SO/InventorySO/TabSO/` folder (Tier 1, §5).
 
 ### 4.2 Duplication
 
-| Issue | Locations |
-|---|---|
-| Recipe data exists in both scene-level lists AND per-prefab arrays | `KitchenGameManager` scene fields vs. `CuttingCounter.prefab` / `PanCookingTool.prefab` / `PotCookingTool.prefab` |
-| Shop GUIDs duplicated across `ConfigShop`, `PlacedObjectDatabase`, `KitchenObjectSODic` | `ConfigShop.cs`, `PlacedObjectDatabase.cs`, `KitchenGameManager.cs` |
-| Linear lookup in `UIShopItem.GetReward` duplicates `GridBuildingSystem.GetPlacedObjectTypeSOByGuid` | `UIShopItem.cs`, `GridBuildingSystem.cs` |
+| Issue | Locations | Status |
+|---|---|---|
+| Recipe data duplicated between scene lists and per-prefab arrays | — | ✅ Resolved: `RecipeDatabaseSO` is the single source |
+| Shop GUIDs duplicated across three separate lookups | `ConfigShop`, `PlacedObjectDatabase`, `KitchenObjectSODic` | ⏳ Open — three dictionaries over the same GUID space |
+| `UIShopItem.GetReward` does a linear `Find` on `PlacedObjectDatabase` | `UIShopItem.cs:107` | ⏳ Open, but only runs once per purchase, so not a perf problem |
 
 ### 4.3 Fragile Couplings
 
@@ -150,12 +150,16 @@ Spawned objects read their data from the **SO field baked into the prefab** (`Ki
 
 ### 4.5 Dangling Reference
 
-- `DoubleTable.prefab` and `SingleTable.prefab` contain a prefab-modification `propertyPath: upgradeDataList` whose `objectReference` points to a **deleted SO asset** (`{fileID: 11400000, guid: b387cc8f...}`). The field no longer exists on `Table.cs`.
+Resolved — the `propertyPath: upgradeDataList` prefab modification is no longer present on
+`SingleTable.prefab` / `DoubleTable.prefab`, and `Table.cs` never had that field (Tier 1, §5).
 
-### 4.6 Missing Pooling (Resolved)
+### 4.6 Pooling
 
-- Kitchen objects (ingredients, plates, stews) now use `ObjectPool<GameObject>` via `KitchenObjectPool` singleton (pool size 10 per KitchenObjectSO type).
-- Bots already used `ObjectPool<GameObject>` (pool size 10). Bot pool routing now uses `poolIndex` stored on `BotCustomerController` instead of name-based lookup.
+- Kitchen objects are **not** pooled. `KitchenObjectPool` and the `Services/PrefabSpawnService`
+  extraction were removed: pooling fought `NetworkObject` lifetimes and late-join state. Spawn and
+  despawn go straight through `KitchenGameManager` on the server (see `docs/dataflow.md` §4).
+- Bots are still pooled (`BotManager`, `ObjectPool<GameObject>`), routed by the `poolIndex` stored on
+  `BotCustomerController` rather than by stripping `"(Clone)"` from the instance name.
 
 ### 4.7 Mixed Counter Data Pattern
 
@@ -190,7 +194,7 @@ Adding a new food/counter requires touching **4 places**:
 | 9 | Remove dangling `upgradeDataList` prefab override from `SingleTable`/`DoubleTable` | Broken reference | ✅ Done |
 | 10 | Add `OnValidate` editor check + ContextMenu validation in `SerializableScriptableObject` | Prevent future desync | ✅ Done |
 
-### Tier 2 — Data Integrity (medium effort) ✅ ALL COMPLETED
+### Tier 2 — Data Integrity (4 of 6 done)
 
 | # | Action | Rationale | Status |
 |---|---|---|---|
@@ -201,14 +205,15 @@ Adding a new food/counter requires touching **4 places**:
 | 5 | Replace popup string lookup with `Dictionary<UIPopupType, PopupData>` | No magic string coupling | ✅ Done |
 | 6 | Replace `"{guid}_{count}"` shop reward string with structured `ShopReward` | Type-safe reward data | ✅ Done |
 
-### Tier 3 — Performance & Scale ✅ ALL COMPLETED
+### Tier 3 — Performance & Scale
 
 | # | Action | Rationale | Status |
 |---|---|---|---|
-| 1 | Add `ObjectPool<GameObject>` for kitchen objects | Reduce GC + NetworkObject spawn/despawn churn | ✅ Done |
-| 2 | Extract `PrefabSpawnService` from `KitchenGameManager` | Single responsibility | ✅ Done |
+| 1 | Add `ObjectPool<GameObject>` for kitchen objects | Reduce GC + NetworkObject spawn/despawn churn | ❌ Reverted — pooling fought `NetworkObject` lifetimes; kitchen objects spawn/despawn directly again |
+| 2 | Extract `PrefabSpawnService` from `KitchenGameManager` | Single responsibility | ❌ Reverted with the pooling change |
 | 3 | Consider Addressables for content streaming | Enables DLC, reduces build size | ⏳ Future consideration |
-| 4 | Add a `PlacedObjectDatabase`-style lookup to `UIShopItem` instead of linear `Find` | Performance + consistency | ✅ Already in place
+| 4 | Add a `PlacedObjectDatabase`-style lookup to `UIShopItem` instead of linear `Find` | Performance + consistency | ⏳ Open — `UIShopItem.cs:107` still does a `Find`, once per purchase |
+| 5 | Bot pool routing by `poolIndex` instead of name-based lookup | Survives prefab renames | ✅ Done |
 
 ---
 
@@ -219,10 +224,11 @@ Adding a new food/counter requires touching **4 places**:
 | SO base class | `Assets/Scripts/UI/UIPopup/Popups/InventoryPopup/SerializableScriptableObject.cs` |
 | KitchenObjectSO | `Assets/Scripts/SO/KitchenObjectSO/KitchenObjectSO.cs` |
 | KitchenObject (spawned object) | `Assets/Scripts/KitchenObject/KitchenObject.cs` |
-| KitchenObjectPool (object pooling) | `Assets/Scripts/KitchenObject/KitchenObjectPool.cs` |
-| PrefabSpawnService (placed object spawning) | `Assets/Scripts/Services/PrefabSpawnService.cs` |
-| KitchenGameManager (spawner) | `Assets/Scripts/Counters/KitchenGameManager.cs` |
-| GridBuildingSystem (GUID dict) | `Assets/Scripts/GridBuildingSystem/` |
+| RecipeDatabaseSO (recipe source of truth) | `Assets/Scripts/SO/RecipeDatabase/RecipeDatabaseSO.cs` |
+| RecipeResolver (per-slot recipe state) | `Assets/Scripts/Counters/RecipeResolver.cs` |
+| CookingToolConfigSO (which categories a tool handles) | `Assets/Scripts/SO/CookingToolConfigSO.cs` |
+| KitchenGameManager (spawner, GUID dictionary) | `Assets/Scripts/Counters/KitchenGameManager.cs` |
+| GridBuildingSystem (GUID dictionary) | `Assets/Scripts/GridBuildingSystem/GridSystem/GridBuildingSystem.cs` |
 | PlacedObjectTypeSO | `Assets/Scripts/GridBuildingSystem/PlacedObjectMVC/PlacedObjectTypeSO.cs` |
 | BotManager (pooling example) | `Assets/Scripts/Bot/BotManager.cs` |
 | UIPopupManager (popup spawning) | `Assets/Scripts/UI/UIPopup/UIPopupManager.cs` |
