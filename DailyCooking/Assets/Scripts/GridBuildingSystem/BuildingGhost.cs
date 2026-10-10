@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
-public class BuildingGhost : NetworkSimpleSingleton<BuildingGhost> 
+public class BuildingGhost : NetworkSingleton<BuildingGhost>
 {
     public Action<Vector3> OnBUildingDrag;
     [SerializeField] private GameObject buildingCanvas;

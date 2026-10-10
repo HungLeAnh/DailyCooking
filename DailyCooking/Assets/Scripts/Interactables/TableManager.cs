@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TableManager : SimpleSingleton<TableManager>
+public class TableManager : Singleton<TableManager>
 {
     private List<Table> tables = new List<Table>();
 

@@ -27,8 +27,8 @@ struct SerializableKeyValuePair<T1, T2>
         Value = value;
     }
 }
-// Lives in GameScene only, so it must not survive scene loads (not a PersistentSingleton).
-public class UIHUDManager : SimpleSingleton<UIHUDManager>
+// Lives in GameScene only, so it must not survive scene loads (Singleton, not PersistentSingleton).
+public class UIHUDManager : Singleton<UIHUDManager>
 {
     [Header("HUD Elements")]
     [SerializeField] private List<SerializableKeyValuePair<UIHUDElements, GameObject>> uiHUDElementList = new List<SerializableKeyValuePair<UIHUDElements, GameObject>>();

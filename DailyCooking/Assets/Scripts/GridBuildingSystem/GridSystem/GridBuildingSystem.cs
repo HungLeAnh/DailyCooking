@@ -7,7 +7,7 @@ using Unity.Netcode;
 using UnityEngine;
 using Newtonsoft.Json;
 
-public class GridBuildingSystem : NetworkSimpleSingleton<GridBuildingSystem>
+public class GridBuildingSystem : NetworkSingleton<GridBuildingSystem>
 {
     public Action OnObjectSpawned;
     public class OnSelectedChangedArgs : EventArgs
