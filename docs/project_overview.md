@@ -8,6 +8,8 @@ The project adheres to several key architectural patterns to ensure scalability 
 
 1.  **Manager-Based Singleton Pattern:**
     Centralized game systems are managed via `MonoBehaviour` singletons located in `Assets/Scripts/Managers/`. These manage specific game states (e.g., `GameManager`, `KitchenGameManager`), multiplayer sessions, and economic systems (e.g., `ShopManager`, `UpgradeManager`).
+    The base classes live in `Assets/Scripts/Common/`: `Singleton<T>` / `NetworkSingleton<T>` are the implementations, and `PersistentSingleton<T>` / `NetworkPersistentSingleton<T>` are thin subclasses that only flip `PersistAcrossScenes`.
+    `GameManager` is a partial class split across `GameManager.cs` (core), `GameManager.Save.cs`, `GameManager.Economy.cs` and `GameManager.Data.cs`.
 2.  **State Machine (FSM):**
     Two distinct Finite State Machine layers manage game flow and player actions:
     *   **Game-Level:** Handles transitions between major game states like `MainMenu` and `InGame`.
@@ -15,7 +17,7 @@ The project adheres to several key architectural patterns to ensure scalability 
 3.  **Data-Driven Design (ScriptableObjects):**
     Game content (recipes, kitchen objects, upgrades) is decoupled from logic using ScriptableObjects (`Assets/Scripts/SO/`). This allows for balancing and content expansion without altering core code.
 4.  **MVC (Model-View-Controller):**
-    Kitchen interactions (counters, cooking tools) are structured using an MVC pattern to separate interaction logic (Controllers) from data and visual feedback.
+    Kitchen interactions (counters, cooking tools) are structured using an MVC pattern to separate interaction logic (Controllers) from data and visual feedback. The container counters (`ContainerCounterController`, `OptionalContainerCounterController`) share their network spawn/despawn hooks, grid spawn bookkeeping and save plumbing through the abstract `BaseContainerCounterController`.
 5.  **Multiplayer Networking:**
     The project utilizes **Netcode for GameObjects**. It follows a Host-authoritative model: clients send intents (`ServerRpc`), the host validates them against its own state and config, and shared state reaches clients through NetworkVariables/NetworkLists, spawns and mirror RPCs. See `docs/dataflow.md` for each system (interactions, kitchen objects, grid building, economy, join sync, saves).
 

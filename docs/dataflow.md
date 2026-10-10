@@ -71,7 +71,8 @@ NetworkVariables/NetworkLists, spawns, or `SendTo.NotServer` mirror RPCs.
 
 ## 6. Economy
 
-All in `GameManager.cs` (the economy section). Clients call intent RPCs — `BuyShopItemServerRpc`,
+All in `GameManager.Economy.cs` (a partial of `GameManager`, split from `GameManager.Save.cs`,
+`GameManager.Data.cs`). Clients call intent RPCs — `BuyShopItemServerRpc`,
 `ExchangeCurrencyServerRpc`, `UnlockDishServerRpc`, `PurchaseUpgradeServerRpc`,
 `UnlockCosmeticServerRpc`, `ClaimDailyFreeServerRpc` — and the server checks level, price and
 balance, then debits and grants in one step. Customer payments are computed on the server when a
@@ -92,4 +93,6 @@ the player who bought them. Gem packs (IAP) can only be bought by the host.
 - Rewarded-ad completion is reported by the client and cannot be verified by the host.
 - Daily reward resets use the host's clock.
 - Receipt validation needs the generated `GooglePlayTangle` (IAP Receipt Validation Obfuscator).
-- Ads consent is granted for everyone until a consent prompt is added (see `AdsManager`).
+- Ads consent is deny-by-default (`AdsManager`: no personalised ads, CCPA opt-out on) and only
+  changes through `SetGdprConsent` / `SetCcpaOptOut`; a consent dialog or certified CMP still
+  needs to call them.
