@@ -139,9 +139,11 @@ public class CameraController : MonoBehaviour
         if (Vector2.Distance(newTouchPos, lastTouchPosition) < minimumDistance)
             return;
 
+        // Project through _camera using its own near plane (not Camera.main's, and no tag lookup).
+        float nearClip = _camera.nearClipPlane;
         var newTouchWorldPos = _camera.ScreenToWorldPoint(
-            new Vector3(newTouchPos.x, newTouchPos.y, Camera.main.nearClipPlane));
-        var lastTouchWorldPos = _camera.ScreenToWorldPoint(new Vector3(lastTouchPosition.x, lastTouchPosition.y, Camera.main.nearClipPlane));
+            new Vector3(newTouchPos.x, newTouchPos.y, nearClip));
+        var lastTouchWorldPos = _camera.ScreenToWorldPoint(new Vector3(lastTouchPosition.x, lastTouchPosition.y, nearClip));
         Vector3 delta = newTouchWorldPos - lastTouchWorldPos;
         delta.y = 0;
         _cinemachineCamera.transform.position -= new Vector3(delta.normalized.x, 0, delta.normalized.z) * panSpeed;

@@ -178,7 +178,7 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
     {
         if (!IsServer) return;
         networkAnimator.Animator.StopPlayback();
-        networkAnimator.Animator.Play(animationState.ToString());
+        networkAnimator.Animator.Play(BotAnimation.StateHash(animationState));
     }
 
     private void Update()

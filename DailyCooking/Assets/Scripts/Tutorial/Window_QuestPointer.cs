@@ -26,6 +26,11 @@ public class Window_QuestPointer : MonoBehaviour {
 
     private Vector3 targetPosition;
     private Transform targetTransform;
+    private Camera _mainCamera;
+
+    // Camera.main re-searches by tag on every read; this runs every frame.
+    private Camera MainCamera => _mainCamera != null ? _mainCamera : _mainCamera = Camera.main;
+
     private void Awake() 
     {
         Hide();
@@ -36,7 +41,7 @@ public class Window_QuestPointer : MonoBehaviour {
         this.targetPosition = targetTransform.position;
 
         float borderSize = 100f;
-        Vector3 targetPositionScreenPoint = Camera.main.WorldToScreenPoint(targetPosition);
+        Vector3 targetPositionScreenPoint = MainCamera.WorldToScreenPoint(targetPosition);
         bool isOffScreen = targetPositionScreenPoint.x <= borderSize || targetPositionScreenPoint.x >= Screen.width - borderSize || targetPositionScreenPoint.y <= borderSize || targetPositionScreenPoint.y >= Screen.height - borderSize;
 
         if (isOffScreen)
@@ -65,7 +70,7 @@ public class Window_QuestPointer : MonoBehaviour {
     private void RotatePointerTowardsTargetPosition() 
     {
         Vector3 toPosition = targetPosition;
-        Vector3 fromPosition = Camera.main.transform.position;
+        Vector3 fromPosition = MainCamera.transform.position;
         fromPosition.z = 0f;
         Vector3 dir = (toPosition - fromPosition).normalized;
         float angle = UtilsClass.GetAngleFromVectorFloat(dir);
