@@ -122,4 +122,41 @@ public class SaveSystemTests
 
         Assert.AreSame(array, gridData.GridArrayData);
     }
+
+    [Test] public void PasswordHasher_HashIsVersionedAndNotThePassword()
+    {
+        string hashed = PasswordHasher.Hash("secret123");
+
+        Assert.IsTrue(PasswordHasher.IsHashed(hashed));
+        Assert.AreNotEqual("secret123", hashed);
+        StringAssert.StartsWith("v1$", hashed);
+    }
+
+    [Test] public void PasswordHasher_VerifyAcceptsCorrectPassword()
+    {
+        string hashed = PasswordHasher.Hash("secret123");
+
+        Assert.IsTrue(PasswordHasher.Verify("secret123", hashed));
+        Assert.IsFalse(PasswordHasher.Verify("wrong", hashed));
+        Assert.IsFalse(PasswordHasher.Verify("", hashed));
+    }
+
+    [Test] public void PasswordHasher_HashUsesFreshSaltEachTime()
+    {
+        Assert.AreNotEqual(PasswordHasher.Hash("secret123"), PasswordHasher.Hash("secret123"));
+    }
+
+    [Test] public void PasswordHasher_VerifyStillAcceptsLegacyPlaintext()
+    {
+        Assert.IsFalse(PasswordHasher.IsHashed("secret123"));
+        Assert.IsTrue(PasswordHasher.Verify("secret123", "secret123"));
+        Assert.IsFalse(PasswordHasher.Verify("other", "secret123"));
+    }
+
+    [Test] public void PasswordHasher_VerifyRejectsMissingOrMalformedStoredValue()
+    {
+        Assert.IsFalse(PasswordHasher.Verify("secret123", null));
+        Assert.IsFalse(PasswordHasher.Verify("secret123", "v1$zz"));
+        Assert.IsFalse(PasswordHasher.Verify("secret123", "v1$nothex$nothex"));
+    }
 }

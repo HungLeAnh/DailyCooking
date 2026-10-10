@@ -227,7 +227,7 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
             Application.persistentDataPath,
             fileName + "_" + gameDataName
         );
-        SavedDataList.Add(new SavedData(gameDataName, password));
+        SavedDataList.Add(new SavedData(gameDataName, PasswordHasher.Hash(password)));
         savedDataHandler.Save(SavedDataList);
         SubscribeSaveEvents();
         SaveGameImmediate();
@@ -236,12 +236,18 @@ public class GameManager : NetworkPersistentSingleton<GameManager>, IGameManager
 
     public bool LoadGame(string gameDataName, string password)
     {
-        var savedData = SavedDataList.FirstOrDefault(s => s.GameDataName == gameDataName && s.Password == password);
-        if (savedData == null)
+        var savedData = SavedDataList.FirstOrDefault(s => s.GameDataName == gameDataName);
+        if (savedData == null || !PasswordHasher.Verify(password, savedData.Password))
         {
             Debug.LogError("Invalid game data name or password.");
             UIManager.Instance.ShowAlertMessage("Invalid restaurant name or password.");
             return false;
+        }
+        if (!PasswordHasher.IsHashed(savedData.Password))
+        {
+            // Older saves stored the password in plain text; re-save it hashed now that it matched.
+            savedData.Password = PasswordHasher.Hash(password);
+            savedDataHandler.Save(SavedDataList);
         }
         ClearActiveSave();
         var handler = new FileDataHandler(

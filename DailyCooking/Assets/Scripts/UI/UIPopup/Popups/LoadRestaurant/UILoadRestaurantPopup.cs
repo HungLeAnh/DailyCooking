@@ -83,8 +83,15 @@ public class UILoadRestaurantPopup : UIPopup
         if (selectedIndex >= 0 && selectedIndex < GameManager.Instance.SavedDataList.Count)
         {
             var selectedData = GameManager.Instance.SavedDataList[selectedIndex];
-            callback?.Invoke(selectedData.GameDataName, selectedData.Password);
+            string dataName = selectedData.GameDataName;
             Hide();
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIInputNamePopup, new UIInputNamePopup.Param
+            {
+                Title = "Enter Password",
+                Placeholder = "Password",
+                isPassword = true,
+                onValue = password => callback?.Invoke(dataName, password)
+            });
         }
         else
         {
