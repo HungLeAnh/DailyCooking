@@ -143,7 +143,7 @@ public class UICharacterPopup : UIPopup
                     continue;
                 Destroy(child.gameObject);
             }
-            if(unfittables != null|| unfittables.Count > 0)
+            if(unfittables != null && unfittables.Count > 0)
             {
                 //Debug.Log("unfit count: " + unfittables.Count);
                 foreach(var unfit in unfittables)

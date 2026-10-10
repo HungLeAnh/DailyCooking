@@ -32,6 +32,37 @@ public class AdsManager : PersistentSingleton<AdsManager>
     private LevelPlayInterstitialAd interstitialAd;
     private Action callBackAction;
 
+    // Consent is deny-by-default: no personalized ads until the player explicitly opts in.
+    // Hook a consent dialog or a certified CMP to SetGdprConsent / SetCcpaOptOut.
+    private const string GdprConsentKey = "Ads_GdprConsent"; // 0 = not granted (default), 1 = granted
+    private const string CcpaOptOutKey = "Ads_CcpaOptOut";   // 1 = do not sell (default), 0 = allow
+
+    public static bool IsGdprConsentGranted => PlayerPrefs.GetInt(GdprConsentKey, 0) == 1;
+    public static bool IsCcpaOptOut => PlayerPrefs.GetInt(CcpaOptOutKey, 1) == 1;
+
+    public static void SetGdprConsent(bool granted)
+    {
+        PlayerPrefs.SetInt(GdprConsentKey, granted ? 1 : 0);
+        PlayerPrefs.Save();
+        ApplyPrivacySettings();
+    }
+
+    public static void SetCcpaOptOut(bool optOut)
+    {
+        PlayerPrefs.SetInt(CcpaOptOutKey, optOut ? 1 : 0);
+        PlayerPrefs.Save();
+        ApplyPrivacySettings();
+    }
+
+    // LevelPlay only honours these before Init; calling them again after init keeps an
+    // already-running session in sync when the player changes their choice.
+    private static void ApplyPrivacySettings()
+    {
+        LevelPlayPrivacySettings.SetGDPRConsent(IsGdprConsentGranted);
+        LevelPlayPrivacySettings.SetCCPA(IsCcpaOptOut);      // do not sell personal information
+        LevelPlayPrivacySettings.SetCOPPA(false);            // general audience, not child-directed
+    }
+
     public void Start()
     {
         if (string.IsNullOrEmpty(RewardedAdUnitId) || string.IsNullOrEmpty(InterstitialAdUnitId))
@@ -39,12 +70,7 @@ public class AdsManager : PersistentSingleton<AdsManager>
             Debug.Log("AdsManager: no ad units for this platform, ads disabled.");
             return;
         }
-        // Privacy settings only apply if set before Init.
-        // TODO: GDPR consent is still granted for everyone; ask the player (a consent prompt or a
-        // certified CMP) before serving ads in regions that require it.
-        LevelPlayPrivacySettings.SetGDPRConsent(true);
-        LevelPlayPrivacySettings.SetCCPA(true);   // do not sell personal information
-        LevelPlayPrivacySettings.SetCOPPA(false); // general audience, not child-directed
+        ApplyPrivacySettings();
         //LevelPlay.SetMetaData("is_test_suite", "enable");
 
         LevelPlay.OnInitSuccess += SdkInitializationCompletedEvent;

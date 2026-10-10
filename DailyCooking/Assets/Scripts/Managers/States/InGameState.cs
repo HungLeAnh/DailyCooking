@@ -44,8 +44,8 @@ public class InGameState : GameManagerBaseState
             return;
 
         interstitialCounter = interstitialInterval;
-        //AdsManager.Instance.ShowInterstitialAds();
-        
+        if (AdsManager.Instance != null)
+            AdsManager.Instance.ShowInterstitialAds("Break_Time");
     }
     public override void Exit()
     {

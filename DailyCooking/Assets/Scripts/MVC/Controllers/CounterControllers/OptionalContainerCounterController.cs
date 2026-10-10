@@ -12,7 +12,6 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
     public override void OnNetworkSpawn()
     {
         GridBuildingSystem.Instance.OnObjectSpawned += GridBuildingSystem_OnObjectSpawned;
-        kitchenObjectSONetworkList.OnListChanged += KitchenObjectSONetworkList_OnListChanged;
     }
 
     public override void OnNetworkDespawn()
@@ -21,17 +20,11 @@ public class OptionalContainerCounterController : BaseCounterController, IHasOpt
         {
             GridBuildingSystem.Instance.OnObjectSpawned -= GridBuildingSystem_OnObjectSpawned;
         }
-        kitchenObjectSONetworkList.OnListChanged -= KitchenObjectSONetworkList_OnListChanged;
-    }
-
-    private void KitchenObjectSONetworkList_OnListChanged(NetworkListEvent<ContainerDataSerializable> changeEvent)
-    {
-
     }
 
     private void GridBuildingSystem_OnObjectSpawned()
     {
-        if (!IsHost || !IsServer)
+        if (!IsServer)
             return;
         PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
         if (placedObjectView == null)

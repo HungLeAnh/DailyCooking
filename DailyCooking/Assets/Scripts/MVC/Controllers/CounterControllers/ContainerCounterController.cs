@@ -43,7 +43,7 @@ public class ContainerCounterController : BaseCounterController, IContainerCount
 
     private void GridBuildingSystem_OnObjectSpawned()
     {
-        if (!IsHost || !IsServer)
+        if (!IsServer)
             return;
         PlacedObjectView placedObjectView = GetComponent<PlacedObjectView>();
         if (placedObjectView == null)
