@@ -39,7 +39,7 @@ DailyCooking is a multiplayer cooking game built with Unity. It features a moder
 ## 4. Important Locations
 
 - **Core Logic:** `Assets/Scripts/`
-- **Reusable GameObjects:** `Assets/Prefabs/`
+- **Reusable GameObjects:** `Assets/Prefab/`
 - **Data Assets:** `Assets/SO/`
 - **Player Controls:** `Assets/Scripts/PlayerAction.inputactions`
 - **Multiplayer Scripts:** Look for files inheriting from `NetworkBehaviour`.
