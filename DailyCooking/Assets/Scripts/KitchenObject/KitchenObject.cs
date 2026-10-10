@@ -164,16 +164,8 @@ public class KitchenObject : NetworkBehaviour
 
     public bool TryGetTableware(out TablewareKitchenObject tablewareKitchenObject)
     {
-        if (this is TablewareKitchenObject)
-        {
-            tablewareKitchenObject = this as TablewareKitchenObject;
-            return true;
-        }
-        else
-        {
-            tablewareKitchenObject = null;
-            return false;
-        }
+        tablewareKitchenObject = this as TablewareKitchenObject;
+        return tablewareKitchenObject != null;
     }
 
     public static KitchenObject SpawnKitchenObject(KitchenObjectSO kitchenObjectSO, IKitchenObjectParent kitchenObjectParent)

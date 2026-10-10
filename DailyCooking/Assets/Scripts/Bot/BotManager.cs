@@ -95,8 +95,10 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
 
     private void GameManager_OnStateChanged(object sender, EventArgs e)
     {
-        foreach (var bot in activeBots.ToList())
+        // ReturnBotToPool removes the entry, so walk the live list backwards instead of copying it.
+        for (int i = activeBots.Count - 1; i >= 0; i--)
         {
+            var bot = activeBots[i];
             if (bot != null)
             {
                 bot.GetComponent<BotCustomerController>().ResetBot();
@@ -123,10 +125,9 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
         if (spawnCoroutine != null)
             StopCoroutine(spawnCoroutine);
         spawnCoroutine = null;
-        var botsToReturn = new List<GameObject>(activeBots);
-        foreach (var bot in botsToReturn)
+        for (int i = activeBots.Count - 1; i >= 0; i--)
         {
-            ReturnBotToPool(bot);
+            ReturnBotToPool(activeBots[i]);
         }
     }
 
@@ -215,9 +216,9 @@ public class BotManager : NetworkPersistentSingleton<BotManager>
     {
         if (!IsServer) return;
 
-        var botsToReturn = new List<GameObject>(activeBots);
-        foreach(var bot in botsToReturn)
+        for (int i = activeBots.Count - 1; i >= 0; i--)
         {
+            var bot = activeBots[i];
             var botController = bot.GetComponent<BotCustomerController>();
             botController.ResetSeat();
             botController.ResetBot();

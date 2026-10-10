@@ -24,7 +24,7 @@ public class StateManager<T> where T : Enum
     public void Update()
     {
         T nextStateKey = _currentState.GetNextState();
-        if (!IsTransitioningState && nextStateKey.Equals(_currentState.StateKey))
+        if (!IsTransitioningState && EqualityComparer<T>.Default.Equals(nextStateKey, _currentState.StateKey))
         {
             _currentState.UpdateState();
         }

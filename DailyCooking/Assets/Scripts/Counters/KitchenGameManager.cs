@@ -112,10 +112,6 @@ public class KitchenGameManager : NetworkPersistentSingleton<KitchenGameManager>
         GameManager.Instance.ServerAddExp(exp);
     }
 
-    private void Update()
-    {
-
-    }
     public bool IsOpening()
     {
         return state.Value == State.Open;

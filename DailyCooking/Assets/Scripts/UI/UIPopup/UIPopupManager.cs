@@ -18,54 +18,35 @@ public class UIPopupManager : PersistentSingleton<UIPopupManager>, IUIPopupManag
     }
     public void HidePopup(UIPopupType popupType,object param = null)
     {
-        if (!uiPopupDictionary.ContainsKey(popupType))
+        if (!uiPopupDictionary.TryGetValue(popupType, out var popup))
         {
             Debug.LogWarning($"Popup '{popupType}' not found in the dictionary.");
             return;
         }
-        HideUIPopup(popupType,param);
+        popup.HidePopup(param);
     }
 
-    private void HideUIPopup(UIPopupType popupType, object param)
-    {
-        if(uiPopupDictionary.TryGetValue(popupType, out var value))
-        {
-            value.HidePopup(param);
-        }
-        else
-        {
-            Debug.LogWarning($"Popup '{popupType}' not found in the dictionary.");
-        }
-    }
     public void RemoveFromeVisibleList(UIPopup value)
     {
-        if (visiblePopupList.Contains(value))
-            visiblePopupList.Remove(value);
+        visiblePopupList.Remove(value);
     }
+
     public void ShowPopup(UIPopupType popupType,object param = null)
     {
-        if (!uiPopupDictionary.ContainsKey(popupType))
+        if (!uiPopupDictionary.TryGetValue(popupType, out var popup))
         {
             CreatePopup(popupType);
+            uiPopupDictionary.TryGetValue(popupType, out popup);
         }
-
-        ShowUIPopup(popupType,param);
-    }
-
-    private void ShowUIPopup(UIPopupType popupType, object param)
-    {
-        if(uiPopupDictionary.TryGetValue(popupType, out var value))
-        {
-            value.ShowPopup(param);
-            // Keep the list in display order so GetTopShownUIPopup returns the front popup.
-            visiblePopupList.Remove(value);
-            visiblePopupList.Add(value);
-            
-        }
-        else
+        if (popup == null)
         {
             Debug.LogWarning($"Popup '{popupType}' not found in the dictionary.");
+            return;
         }
+        popup.ShowPopup(param);
+        // Keep the list in display order so GetTopShownUIPopup returns the front popup.
+        visiblePopupList.Remove(popup);
+        visiblePopupList.Add(popup);
     }
 
     public void CreatePopup(UIPopupType popupType)
