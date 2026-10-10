@@ -31,18 +31,6 @@ public class GridObject
         return placedObject;
     }
 
-    public bool CanBuild()
-    {
-        if(placedObject != null)
-        {
-            if (placedObject.InventoryTabType == InventoryTabType.Counter||
-                placedObject.InventoryTabType == InventoryTabType.Table)
-                return false;
-            if (placedObject.InventoryTabType == InventoryTabType.Wall)
-                return true;
-        }
-        return true;
-    }
     public bool CanBuild(InventoryTabType type,Dir dir)
     {
         if (placedObject != null)

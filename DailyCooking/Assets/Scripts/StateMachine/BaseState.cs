@@ -4,7 +4,6 @@ using UnityEngine;
 
 public abstract class BaseState<T> : IState<T>, IDisposable where T : Enum 
 {
-    protected SubStateMachine<T> _subStateMachine = new SubStateMachine<T>();
     protected bool _isInited = false;
 
     public BaseState(T key)
@@ -25,6 +24,5 @@ public abstract class BaseState<T> : IState<T>, IDisposable where T : Enum
 
     public virtual void Dispose()
     {
-        _subStateMachine.Dispose();
     }
 }

@@ -32,32 +32,10 @@ public class BaseCounterController : NetworkBehaviour, IKitchenObjectParent, IIn
             visualGameObjectArray = GetComponentsInChildren<MeshRenderer>(true);
     }
 
-    protected virtual void Start()
-    {
-        //KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
-    }
     public override void OnDestroy()
     {
         highlight?.Release();
         base.OnDestroy();
-        if (KitchenGameManager.Instance == null)
-            return;
-        //KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
-    }
-    private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
-    {
-        if (KitchenGameManager.Instance.IsEditing())
-        {
-            Hide();
-            OnRestartGame(this);
-        }
-    }
-    protected virtual void OnRestartGame(object sender)
-    {
-        if (KitchenObject != null)
-            KitchenObject.DestroySelf();
-
-        ClearKitchenObject();
     }
 
     public KitchenObject GetKitchenObject(int index = 0)

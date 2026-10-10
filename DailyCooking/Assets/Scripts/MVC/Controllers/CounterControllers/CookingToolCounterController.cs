@@ -87,18 +87,6 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         return base.CanRemove();
     }
 
-    protected override void OnRestartGame(object sender)
-    {
-        base.OnRestartGame(sender);
-
-        TryResolveTool();
-        if (_cookingTool != null && _cookingTool.HasKitchenObject())
-            _cookingTool.GetKitchenObject().DestroySelf();
-
-        if (_cookingTool != null)
-            _cookingTool.ClearKitchenObject();
-    }
-
     public override void InteractEvent(PlayerStateMachine playerStateMachine)
     {
         // Tools are grid-placed (stacked on the counter cell) or scene-parented; resolve either way.

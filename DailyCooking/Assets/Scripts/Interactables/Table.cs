@@ -30,20 +30,10 @@ public class Table : NetworkBehaviour,IKitchenObjectParent, IDestroyable, IPlace
                 isSeatOccupied.Add(false);
         }
     }
-    private void KitchenGameManager_OnStateChanged(object sender, EventArgs e)
-    {
-        if (KitchenGameManager.Instance.IsEditing())
-        {
-            ResetTable();
-        }
-    }
-
     public override void OnDestroy()
     {
         if(TableManager.Instance != null)
             TableManager.Instance.UnregisterTable(this);
-        //if(KitchenGameManager.Instance != null)
-        //    KitchenGameManager.Instance.OnStateChanged -= KitchenGameManager_OnStateChanged;
         base.OnDestroy();
     }
 

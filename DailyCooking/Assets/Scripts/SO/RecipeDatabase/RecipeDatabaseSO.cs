@@ -135,24 +135,4 @@ public class RecipeDatabaseSO : ScriptableObject
             return list[0];
         return null;
     }
-
-    public DrinkRecipeSO GetDrinkRecipe(List<KitchenObjectSO> inputs)
-    {
-        if (inputs == null || inputs.Count == 0) return null;
-        foreach (var recipe in _drinkCache)
-        {
-            if (recipe.input.Count != inputs.Count) continue;
-            bool allMatch = true;
-            foreach (var need in recipe.input)
-            {
-                if (!inputs.Contains(need))
-                {
-                    allMatch = false;
-                    break;
-                }
-            }
-            if (allMatch) return recipe;
-        }
-        return null;
-    }
 }
