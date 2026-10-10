@@ -100,8 +100,15 @@ public class GameData
     }
     public PlayerStats GetPlayerStatsById(string id)
     {
-        //Debug.Log($"Getting player stats for player {id}");
-        return PlayersStats.Find(player => player.PlayerId == id);
+        // Linear scan without a closure: this runs every frame from PlayerStateMachine.HandleMovement.
+        List<PlayerStats> stats = PlayersStats;
+        for (int i = 0; i < stats.Count; i++)
+        {
+            PlayerStats player = stats[i];
+            if (player != null && player.PlayerId == id)
+                return player;
+        }
+        return null;
     }
     public void TryAddPlayerStats(string playerId)
     {
