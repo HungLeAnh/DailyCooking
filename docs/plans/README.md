@@ -9,7 +9,11 @@ xem ghi chú ở từng file.
 
 ---
 
-## A. Mạng / tối ưu — đã hoãn vì rủi ro cao
+## A. Mạng / tối ưu — đề xuất hoãn vì rủi ro cao (CHƯA được xác nhận)
+
+> **Nguồn:** nhóm này là **đề xuất của agent**, không phải quyết định của chủ dự án — không có
+> record nào trong repo xác nhận. Chi tiết ở `docs/optimization_plan.md` §3.
+> Bất kỳ mục nào trong nhóm này cũng có thể được đưa vào làm lại bất cứ lúc nào.
 
 | # | File | Đã điều tra | Rủi ro | Nên làm? |
 |---|---|---|---|---|
@@ -114,8 +118,8 @@ xem ghi chú ở từng file.
    `07` → `12 (LogError)` → `08` → `09` → `10 (guard)`
 3. **Gói 2 — làm khi rảnh, vẫn an toàn:** `05` → `12 (đổi dict)`
 4. **Gói 3 — chỉ khi profiler chứng minh:** `04` (bước 1 `UIMenuPopup`)
-5. **Gói 4 — không làm trừ khi vào giai đoạn đổi protocol / Addressables:**
-   `01`, `02`, `03`, `06`, `11`
+5. **Gói 4 — đề xuất không làm trừ khi vào giai đoạn đổi protocol / Addressables** *(đề xuất của
+   agent, chờ bạn xác nhận — chưa phải quyết định)*: `01`, `02`, `03`, `06`, `11`
 
 
 ## Điều kiện kiểm chứng chung cho mọi mục

@@ -3,7 +3,7 @@
 Status of every performance / networking issue found in the codebase.
 
 - **✅ Fixed** — done, verified with a clean console and a green EditMode run.
-- **⏸ Deferred** — agreed to keep, but needs a design decision before touching (see §3).
+- **⏸ Deferred** — **the agent's proposal, not yet confirmed by the owner**; needs a design decision before touching (see §3).
 - **➖ Stale / not applicable** — the original report no longer matches the code; do not re-do these.
 
 ---
@@ -59,9 +59,20 @@ These were in the original report but do not describe the current code:
 
 ---
 
-## 3. ⏸ Deferred — needs a design decision first
+## 3. ⏸ Deferred — agent proposal, not confirmed by the owner
 
-Agreed to keep on the list; not started because each one changes on-the-wire or save behaviour and needs a plan plus a multiplayer test pass.
+**Provenance.** This grouping is the **agent's own recommendation**, written in commit `92a5da3cc`.
+No owner sign-off is recorded anywhere in this repo, and no date or quote backs it. Read "Deferred"
+here as *"the agent suggests not starting these"* — **not** as a decision that has been made.
+
+Nothing in this list has been dropped or silently deprioritised. Each item still has a full plan file
+under `docs/plans/` (`01`–`06`) documenting current state with `file:line`, the proposed change, its
+blast radius and how to verify it. The owner can pull any of them back into the work order at any
+time; the only reason they sit last in the order is the recommendation below, which is still waiting
+on numbers from `docs/plans/13-profiler-baseline.md`.
+
+**Stated reason (technical, not a priority call).** Each one changes on-the-wire or save behaviour,
+so it needs a plan plus a multiplayer test pass before it is safe to start.
 
 1. **Redundant `ServerRpc` → `ClientRpc` chains.** `ContainerCounterController`, `Table` and `KitchenObject` forward a `ServerRpc` that does nothing server-side and immediately mirrors to clients, even though the value is already a `NetworkVariable`. Removing them halves RPC traffic, but every consumer that currently reacts to the RPC has to be re-wired to `OnValueChanged` — this is where visual desync would show up.
 2. **JSON game-state sync.** `MultiplayerManager` serialises the whole `GameData` to JSON, gzips it and ships it in 4 KB chunks on join (`ReceiveGameDataChunkClientRpc`, see `docs/dataflow.md` §2). Replacing it with structured `NetworkVariable` sync or binary writing removes the CPU cost and the chunking, but the join path and the save snapshot share the same serialiser, so both must move together.
@@ -79,4 +90,9 @@ Every change above was checked with:
 1. `refresh` + force recompile, then the editor console must be clean of errors and warnings.
 2. EditMode test run (40 tests: save system incl. `PasswordHasher`, grid placement, economy, data classes).
 
-Profiling with the Unity Profiler has **not** been run — none of these changes have been measured, only reasoned about. If frame time or GC is still a concern, profile first and revisit §3 from the numbers.
+Profiling was **not** run for the §1 fixes — those changes are reasoned about, not measured.
+
+A baseline captured on 2026-10-12 (Unity Editor Play Mode, single client on a real Relay host) is
+recorded in `docs/plans/13-profiler-baseline.md`: across scenarios S1/S2/S5/S6/S10 the main thread
+never exceeded **4.59 ms**. Still unmeasured: GC bytes per second, and scenarios S3/S4/S7/S8/S9,
+which need a hand-driven run. Those gaps are the reason §3 is still open rather than closed.
