@@ -133,8 +133,13 @@ S2 là mốc so sánh (đứng yên, không popup, không thao tác).
 
 ### Kết luận theo mục
 
-- **05 `Camera.main`** — S10 (2 lookup tag mỗi frame) **không tạo khác biệt đo được** so với S2.
-  → Đổi từ "nhóm an toàn nhất nên làm trước" sang **KHÔNG LÀM** theo profiler.
+- **05 `Camera.main`** — **ƯU TIÊN THẤP, CHƯA ĐỦ BẰNG CHỨNG.** S10 (2 lookup tag mỗi frame ở
+  `UtilsClass.cs:603`) không tạo khác biệt đo được so với S2, **nhưng đó không phải bằng chứng để
+  bỏ**: (a) tôi đo **S10** chứ không phải **S4** — hai đường code khác nhau (`HandleDraging` còn có
+  raycast + 2 `Lerp` transform); (b) overhead của Editor che mất một chi phí 10–50 µs; (c) **GC vẫn
+  chưa đo được** (`FindGameObjectsWithTag` trả `GameObject[]` mới mỗi lần gọi). Ưu tiên thấp vì
+  `BuildingGhost.HandleDraging():130` return sớm khi `isDragging == false` → chi phí chỉ phát sinh
+  **trong lúc người chơi giữ chuột kéo**, nhưng vẫn nên làm vì ~15 phút, rủi ro gần 0.
 - **04 UI pooling** — mở Shop/Menu popup chỉ cộng **0.4–1.0 ms** main thread so với đứng yên.
   → Cần số GC trước khi quyết; nếu GC cũng thấp → **KHÔNG LÀM**.
 - **12 linear `Find`** — mở shop +0.4–0.7 ms. → **Bỏ phần perf**, giữ **phần `LogError`**

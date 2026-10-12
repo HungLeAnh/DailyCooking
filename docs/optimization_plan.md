@@ -88,7 +88,7 @@ so it needs a plan plus a multiplayer test pass before it is safe to start.
 Every change above was checked with:
 
 1. `refresh` + force recompile, then the editor console must be clean of errors and warnings.
-2. EditMode test run (40 tests: save system incl. `PasswordHasher`, grid placement, economy, data classes).
+2. EditMode test run (**49/49**: save system incl. `PasswordHasher`, grid placement, economy, data classes, `GameData` lookup, `BotAnimation` state hashes).
 
 Profiling was **not** run for the §1 fixes — those changes are reasoned about, not measured.
 
