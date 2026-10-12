@@ -150,6 +150,30 @@ Chạy trong play mode + **Relay host thật** (probe `Tools/Profiling/Enter Gam
 | `Tools/Verify/Hide tutorial + show Stew tile` | Tắt `TutorialPanel` + `Window_QuestPointer` — cửa sổ focus của tutorial che đúng ô cần xem **và nuốt cả click chuột** |
 | `Tools/Verify/Cooked vs burned stew in option menu` | Mở `UIOptionMenuPopup` đúng cách — `ShowPopup(null)` sẽ tự `HidePopup()`, bắt buộc truyền `Param` kèm sender `IHasOptionalSO` |
 | `Tools/Verify/Open Shop popup once` | Mở shop popup 1 lần để bấm tay 3 tab |
+| `Tools/Verify/Input diagnostics (hold input while it runs)` | Log 8 mẫu / ~3 s: `Keyboard.current.wKey`, `Pointer.current.position/press`, `GetMovementVectorNormalized()`, toạ độ player, `GetOwnerStats()` — **probe chẩn đoán input** |
+| `Tools/Profiling/S4 - Start placement (ghost)` | `BuildingPlacementManager.SetPlacedObjectTypeSO` với object lấy từ `PlacedObjectDatabase`, toạ độ = raycast tâm Game view → dựng ghost mà không cần mua từ shop |
+| `Tools/Profiling/S4 - Cancel placement` | `SetPlacedObjectTypeSO(null, …)` → nhả selection |
+| `Tools/Verify/S4 state (ghost / drag / mouse)` | Đọc `BuildingGhost.IsDragging` / `StopMoving` / `IsMouseOverUI()` / toạ độ ghost ra console |
+
+## Thử tự động hoá S3/S4 bằng computer-control — THẤT BẠI (2026-10-13)
+
+Dùng computer-control MCP để lái chuột/phím thay vì chờ người chơi tay. **Không làm được**,
+chi tiết đầy đủ (số probe, wiring joystick, cách loại nguyên nhân) nằm trong
+[13-profiler-baseline.md](13-profiler-baseline.md) § "2026-10-13".
+
+Tóm tắt bằng bằng chứng:
+
+| Điều | Kết quả |
+|---|---|
+| Mapping toạ độ screen→game | ✅ **Khớp 0.5 px** — bấm screen `(1070,340)` → probe đọc `(1019.92, 569.29)`, dự kiến `(1019.9, 569.8)` |
+| Chuột vào Input System | ✅ `Pointer.current.position` cập nhật, `press=True` bắt được |
+| Bàn phím vào Input System | ❌ `w=False` dưới **cả 3** cách (`key_down`/`key_up`/`press_keys`), có/không `activate_window` |
+| Player di chuyển | ❌ `Player(Clone)` đứng yên `(-3,0,-3)`; `Moving` luôn `(0,0)` |
+| Đã loại: `GetOwnerStats()` null | ❌ Không phải — probe đọc `ownerStats=ok moveSpeed=5` |
+| Đã loại: `IsDisableInput` | ❌ Không phải — mọi lời gọi `DisableInput(...)` đều bị comment |
+| Joystick on-screen | ⚠️ Tay cầm = `OnScreenStick` → `<Gamepad>/leftStick`, `raycastTarget=1`; bấm **đúng tâm** `(250.32, 231.10)` `press=True` nhưng **tay cầm không nhúc nhích** |
+| Vào placement cho S4 | ✅ Làm được từ code — log `Selected Changed: BowlTablewareCounter` |
+| Xác nhận `isDragging == true` | ❌ Không đọc được → **số đo S4-thử không gán được cho `HandleDraging`** |
 
 > **Vẫn cần bạn chơi tay:** kịch bản S3/S4/S7/S8/S9 ở [13-profiler-baseline.md](13-profiler-baseline.md),
 > bước phục vụ Stew cho khách bot rồi thu tiền/XP (mục 07), và bước nấu Stew đến lúc cháy (mục 08).

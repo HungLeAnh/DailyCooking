@@ -120,6 +120,60 @@ Sau đó cập nhật `docs/optimization_plan.md` §3: mỗi mục thêm cột *
 
 S2 là mốc so sánh (đứng yên, không popup, không thao tác).
 
+### 2026-10-13 — thử tự động hoá S3/S4 bằng computer-control (mouse/keyboard injection)
+
+Mục tiêu: dùng computer-control MCP để **lá tay** thay vì chờ người thao tác. Kết quả: **không
+làm được**, và có số đo mới nhưng **không hợp lệ cho S3/S4** (xem cột Ghi chú).
+
+| Kịch bản (thử) | CPU frame (ms) | CPU main thread (ms) | Ghi chú |
+|---|---|---|---|
+| **S3-thử** — giữ joystick kéo 3 đợt, 24 mẫu | p50 8.87 / p95 9.82 | p50 **2.87** / p95 **3.11** / max 3.56 | ❌ **Không phải S3.** Player không di chuyển → về bản chất là thêm một mẫu **đứng yên** (≈ S2) |
+| **S4-thử** — đã vào placement, kéo chuột 21 mẫu | p50 8.57 / p95 9.64 / max 13.52 | p50 **2.90** / p95 **3.43** / max 5.54 | ⚠️ **Không xác nhận được `isDragging == true`** → không được ghi nhận cho `HandleDraging` |
+
+**Kết luận: S3 và S4 vẫn CHƯA đo được.** Hai con số trên chỉ có giá trị như dữ kiện "mọi thứ
+đều dưới 16 ms ở trạng thái tĩnh".
+
+#### Tại sao không lái được (đo bằng probe, không phải suy đoán)
+
+Thêm `Tools/Verify/Input diagnostics (hold input while it runs)` — log mỗi 350 ms:
+`Keyboard.current.wKey.isPressed`, `Pointer.current.position/press`,
+`GameInput.GetMovementVectorNormalized()`, toạ độ `Player(Clone)`, `GetOwnerStats()`.
+
+- ✅ **Chuột vào được game**: `Pointer.current.position` cập nhật đúng. Bấm screen `(1070, 340)`
+  → probe đọc `(1019.92, 569.29)`, tôi tính trước là `(1019.9, 569.8)` — **khớ 0.5 px**.
+  `press=True` bắt được khi giữ chuột.
+- ❌ **Bàn phím không vào bao giờ**: `w=False` dưới cả 3 cách (`key_down`, `key_up`,
+  `press_keys`), có/không `activate_window` trước.
+- ❌ **Player không nhúc nhích**: `Player(Clone)` đứng yên tại `(-3, 0, -3)` qua mọi thử;
+  `GetMovementVectorNormalized()` luôn `(0, 0)`.
+- ❌ **Đã loại hai nguyên nhân dễ đổ oan**: `ownerStats=ok moveSpeed=5` (không phải
+  `GetOwnerStats()` null) và `Context.IsDisableInput=false` (mọi lời gọi `DisableInput(...)`
+  trong dự án đều **bị comment**, `BuildingPlacementManager.cs:139,150`,
+  `UIOptionMenuPopup.cs:130,137`).
+- ❌ **Bấm vào khách hàng / nút ▶ của tutorial không đổi trạng thái** (text "Click on customer"
+  không đổi sau nhiều lần bấm).
+
+#### Wiring joystick on-screen — tìm ra nhưng vẫn không chạy
+
+Toàn bộ nằm ở `MainMenuScene.unity` (persistent), không phải `GameScene`:
+
+| Object | Component |
+|---|---|
+| `Canvas_Joystick` | Canvas, CanvasScaler, GraphicRaycaster, `UIJoyStick` |
+| `JoyStick` (base, 300×300) | RectTransform + CanvasRenderer + **Image** — *không có script* |
+| `Image` (tay cầm, 100×100) | Image (`m_RaycastTarget: 1`) + **`OnScreenStick`** |
+
+`OnScreenStick` (package `com.unity.inputsystem`): `m_MovementRange: 100`,
+`m_ControlPath: <Gamepad>/leftStick` → đẩy vào action `Player.Moving`, vốn chỉ có
+`2DVector` composite **W/A/S/D** + `<Gamepad>/leftStick` (không có binding trỏ chuột).
+
+Toạ độ tâm tay cầm tính được là canvas `(250, 230)`; probe bắt được
+`pointerPos=(250.32, 231.10) press=True` — **đúng tâm**, `raycastTarget=1`, script enabled —
+nhưng tay cầm **không nhúc nhích** và `Moving` vẫn `(0,0)`. ⇒ Sự kiện không tới được
+`EventSystem`/`OnScreenStick`, dù thiết bị `Pointer` thì có.
+
+`UIJoyStick.cs` là **class singleton rỗng** (8 dòng) — nó không xử lý gì.
+
 ### So với ngưỡng ở Bước 4
 
 | Ngưỡng đã chốt trước khi đo (§ Bước 4) | Kết quả | Kết luận |
@@ -169,9 +223,18 @@ S2 là mốc so sánh (đứng yên, không popup, không thao tác).
 
 - **GC KB/s** — `get_counters` không dùng được từ cầu nối MCP (xem cạm bẫy #2). Muốn đo GC phải
   mở Profiler UI và đọc tay, hoặc đọc file `.raw`.
-- **S3, S4, S7, S8, S9** — cần thao tác tay (đi lại, kéo ghost, chạy bếp, 4 player, late join).
-  S4 đặc biệt: `BuildingGhost.HandleDraging()` (`:130`) `return` khi `isDragging == false` →
-  **`Camera.main` chỉ được gọi trong lúc đang giữ chuột kéo**, script không giả lập được.
+- **S3, S4, S7, S8, S9** — vẫn cần thao tác tay.
+  - **Đã thử tự động hoá S3/S4 bằng computer-control (2026-10-13) và thất bại** — chi tiết ở
+    mục "2026-10-13" phía trên. Tóm tắt: chuột vào được Input System nhưng **bàn phím không**,
+    và sự kiện không tới được `EventSystem`, nên lái được player.
+  - S3 cần **đi lại thật**: `HandleMovement` chỉ đọc `GetMovementVectorNormalized()`, mà
+    `Moving` không có binding trỏ chuột → chỉ còn WASD/gamepad, computer-control không với tới.
+  - S4 cần **`isDragging == true`**: `BuildingGhost.HandleDraging()` (`:130`) `return` khi
+    `isDragging == false`. Vào placement **làm được** từ code
+    (`BuildingPlacementManager.SetPlacedObjectTypeSO` → log `Selected Changed: BowlTablewareCounter`),
+    nhưng `OnPanStarted` còn phải qua `GameInput.IsMouseOverUI()` + raycast
+    `buildingGhostLayer` → **không xác nhận được** `isDragging` đã bật, nên số đo S4-thử
+    không được gán cho `HandleDraging`.
 
 ### Cạm bẫy đã gặp và cách tránh
 
@@ -195,13 +258,38 @@ S2 là mốc so sánh (đứng yên, không popup, không thao tác).
    tạo được `GameData` nếu chưa có nhà hàng. → Cần **người chơi tay** các kịch bản này, hoặc
    viết script vào game riêng (rủi ro cao, không nên gộp vào mục đo).
 
+5. **Unity hoãn recompile trong lúc đang Play.** Với `Script Changes While Playing =
+   Recompile After Finished Playing`, `refresh_unity(force)` báo `compile_requested: true`
+   nhưng **menu item mới vẫn "không tồn tại"** cho tới khi thoát Play. Gây mất một chu trình
+   vì tưởng code hỏng. → **Phải `stop` trước rồi mới `refresh_unity`.**
+
+6. **`find_gameobjects` với `by_name` / `by_path` trả rỗng** cho mọi tên tôi thử
+   (`Tutorial`, `Ghost`, `TutorialCanvas`, `Hand`…); chỉ **`by_component`** trả kết quả
+   (`BuildingGhost` → `56749`). Nhưng resource
+   `mcpforunity://scene/gameobject/{id}/components` lại **throw** với chính object đó
+   (`Exception has been thrown by the target of an invocation`) → không đọc được
+   `IsDragging` từ ngoài. Tài nguyên cũng **không với tới được `DontDestroyOnLoad`**
+   (tutorial nằm ở đó — thuộc `MainMenuScene`, không phải `GameScene`).
+
+7. **Đừng tin "bấm vào game là ăn" chỉ vì toạ độ khớp.** Mapping toạ độ đúng tới 0.5 px
+   (`pointerPos` xác nhận), nhưng **tutorial không tiến, joystick không nhúc nhích**.
+   Phải kiểm bằng một tín hiệu **có quan sát được** (text đổi, transform đổi, log mới),
+   không được suy ra từ việc click "có vẻ đã tới nơi".
+
 ### Việc còn lại
 
 - **Cần người thao tác tay:** S3 (đi lại + click counter), S4 (kéo ghost), S7 (chạy bếp 3 phút),
   S8 (4 player), S9 (late join).
+  **Đường tự động bằng computer-control đã thử và đóng lại** (2026-10-13): chuột vào được
+  Input System, bàn phím không vào, sự kiện không tới `EventSystem` → không lái được player.
+  Muốn mở lại đường này thì phải xử lý trước việc inject input, **không** thuộc phạm vi mục 13.
 - **Chưa đo được GC KB/s** — cần mở Profiler UI tay.
 - Sau khi có đủ số → ghi `docs/profiler_baseline.md` và dán nhãn **LÀM / KHÔNG LÀM** cho từng mục
   trong `optimization_plan.md` §3.
+- **Tài sản để lại:** `Assets/Editor/PerfScenarios.cs` có 4 probe mới —
+  `Tools/Profiling/S4 - Start placement (ghost)` (vào placement từ code, đã chạy thành công),
+  `Tools/Profiling/S4 - Cancel placement`, `Tools/Verify/Input diagnostics (…)`,
+  `Tools/Verify/S4 state (ghost / drag / mouse)` (chưa dùng tới vì bị hoãn compile).
 
 
 ## Ảnh hưởng

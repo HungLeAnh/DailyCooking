@@ -152,6 +152,105 @@ public static class PerfScenarios
         });
     }
 
+    // S4 needs a selected object before BuildingGhost.OnPanStarted will raycast: it early-returns
+    // when placedObjectTypeSO is null, which is why an editor script alone cannot drive the drag.
+    // Selecting here and then dragging with a real mouse gives HandleDraging its Camera.main calls.
+    [MenuItem("Tools/Profiling/S4 - Start placement (ghost)")]
+    public static void S4_StartPlacement()
+    {
+        RunInRestaurant(() =>
+        {
+            var database = GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects;
+            if (database == null || database.Count == 0)
+            {
+                Debug.LogError("[Perf] S4: PlacedObjectDatabase is empty.");
+                return;
+            }
+
+            // Park the ghost under the middle of the game view so the mouse can reach it.
+            var cam = Camera.main;
+            Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.45f));
+            if (!Physics.Raycast(ray, out RaycastHit hit, 999f))
+            {
+                Debug.LogError("[Perf] S4: nothing hit under the screen centre.");
+                return;
+            }
+
+            var so = database[0];
+            GridBuildingSystem.Instance.BuildingPlacementManager.SetPlacedObjectTypeSO(so, hit.point);
+            Debug.Log($"[Perf] S4: placement started with '{so.name}' at {hit.point}.");
+        });
+    }
+
+    // Read back what S4 actually needs: BuildingGhost early-returns in HandleDraging unless
+    // isDragging is true, and OnPanStarted refuses to set it while the cursor is over UI.
+    // Call it while the mouse is held on the ghost to see which guard stopped the drag.
+    [MenuItem("Tools/Verify/S4 state (ghost / drag / mouse)")]
+    public static void S4State()
+    {
+        RunInRestaurant(() =>
+        {
+            var ghost = BuildingGhost.Instance;
+            var selected = GridBuildingSystem.Instance.BuildingPlacementManager.PlacedObjectTypeSO;
+            var ptr = UnityEngine.InputSystem.Pointer.current;
+            var cam = Camera.main;
+
+            string ghostWhere = "no-ghost";
+            if (ghost != null)
+            {
+                Vector3 world = ghost.transform.position;
+                Vector3 screen = cam.WorldToScreenPoint(world);
+                bool onScreen = screen.z > 0f && screen.x >= 0f && screen.x <= Screen.width && screen.y >= 0f && screen.y <= Screen.height;
+                ghostWhere = $"world={world} screen={screen} onScreen={onScreen}";
+            }
+
+            Debug.Log(
+                $"[Perf] S4state isDragging={(ghost != null ? ghost.IsDragging.ToString() : "no-ghost")} " +
+                $"selected={(selected != null ? selected.name : "null")} " +
+                $"stopMoving={(ghost != null ? ghost.StopMoving.ToString() : "-")} " +
+                $"mouseOverUI={GameInput.Instance.IsMouseOverUI()} " +
+                $"pointerPos={(ptr != null ? ptr.position.ReadValue().ToString() : "null")} " +
+                $"ghost {ghostWhere}");
+        });
+    }
+
+    [MenuItem("Tools/Profiling/S4 - Cancel placement")]
+    public static void S4_CancelPlacement()
+    {
+        RunInRestaurant(() =>
+        {
+            GridBuildingSystem.Instance.BuildingPlacementManager.SetPlacedObjectTypeSO(null, Vector3.zero);
+            Debug.Log("[Perf] S4: placement cancelled.");
+        });
+    }
+
+    // Hold W (or any key / the mouse) while this runs: it reports whether the Input System
+    // actually sees the input, whether the movement action reads it, and whether the owner has
+    // stats — HandleMovement returns early on any of those three.
+    [MenuItem("Tools/Verify/Input diagnostics (hold input while it runs)")]
+    public static void InputDiagnostics()
+    {
+        RunInRestaurant(async () =>
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                var ptr = UnityEngine.InputSystem.Pointer.current;
+                var player = UnityEngine.Object.FindFirstObjectByType<PlayerStateMachine>();
+                var stats = player != null ? player.GetOwnerStats() : null;
+                Debug.Log(
+                    $"[Perf] input #{i} " +
+                    $"w={(kb != null ? kb.wKey.isPressed.ToString() : "no-kb")} " +
+                    $"pointerPos={(ptr != null ? ptr.position.ReadValue().ToString() : "no-pointer")} " +
+                    $"press={(ptr != null ? ptr.press.isPressed.ToString() : "-")} " +
+                    $"move={GameInput.Instance.GetMovementVectorNormalized()} " +
+                    $"playerPos={(player != null ? player.transform.position.ToString() : "none")} " +
+                    $"ownerStats={(stats != null ? $"ok moveSpeed={stats.MoveSpeed}" : "NULL")}");
+                await Task.Delay(350);
+            }
+        });
+    }
+
     [MenuItem("Tools/Profiling/S10 - ShakeCamera 10s")]
     public static void S10_Shake()
     {
