@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.3 |
-| **Trạng thái** | ✅ **Đã làm Bước 1** (ghim số tường minh + comment, giá trị giữ nguyên → không đổi asset nào). Compile Android + 49/49, console 0/0. **Bước 2 (`[InspectorName]`) và Bước 3 (guard lúc build) chưa làm.** |
+| **Trạng thái** | ✅ **Đã làm** — ghim số tường minh + `None` dời `8` → **`9999`**, migrate 3 dòng trong `ConfigShopSO.asset`. Compile Android + 49/49, console 0/0. **Bước 2 (`[InspectorName]`) và Bước 3 (guard lúc build) chưa làm.** |
 | **Rủi ro** | Thấp (1 file enum), nhưng **lỗi khi xảy ra thì âm thầm** |
 | **Ưu tiên** | Cao — chống đúng loại bug project đã từng dính |
 
@@ -96,13 +96,21 @@ public enum ShopItemCategory
     Dairy = 5,
     Patties = 6,
     Meats = 7,
-    None = 8,
+    // Category mới: append tại đây, giữ số nhỏ hơn None
+    None = 9999,
 }
 ```
 
-Giá trị **giống hệt hiện tại** → **không đổi asset nào**. Chỉ chặn lỗi tương lai.
-
-Kèm comment cảnh báo y hệt `ShopItemType.cs`.
+> **Đã làm, khác đề xuất ban đầu.** Ngoài ghim số tường minh, `None` còn được dời `8` → **`9999`**,
+> và `ConfigShopSO.asset` migrate cùng lúc (3 dòng `category: 8` → `category: 9999`).
+>
+> Lý do: với `None = 8`, thêm category mới sẽ đẩy `None` xuống giữa dãy. `9999` giữ `None` luôn
+> cuối cả về **khai báo lẫn số**.
+>
+> Không đụng gì khác: `ConfigShop.csv` lưu **tên** (`None`, `Counters`) chứ không lưu số, và
+> `ShopItemCategory` **không đi qua RPC**. Nếu regenerate SO bằng
+> `Tools/ConfigShop/Create ConfigShopSO` thì vẫn ra đúng số mới — nhưng cách đã làm là sửa tay
+> 3 dòng để không mất chỉnh tay trong Inspector chưa có trong CSV.
 
 ### Bước 2 (tùy chọn) — làm nổi trong Inspector
 
@@ -126,11 +134,10 @@ Viết custom drawer serialize enum thành chuỗi — đổi format file, đụ
 | Gameplay / UI | Không đổi. |
 | Mạng | Không đổi — wire vẫn là int, nhưng giờ được "chốt". |
 | Rủi ro | Gần 0. Đây là pure hardening. |
-| Thêm giá trị enum mới | Bắt buộc **append cuối** (xem lưu ý bên dưới). |
+| Thêm giá trị enum mới | Append sau `Meats`, số nhỏ hơn `None = 9999` (xem lưu ý bên dưới). |
 
-> Lưu ý: `None = 8` đang ở cuối. Muốn thêm category mới, cách an toàn là thêm
-> `Drinks = 9` **sau** `None`, hoặc đổi `None` sang số lớn (ví dụ `None = 99`) rồi thêm mới
-> trước đó. Chọn 1 cách và dán comment để người sau biết.
+> Lưu ý: `None = 9999` được đặt ở cuối **cả khai báo lẫn số**, nên thêm category mới không bao giờ
+> đẩy `None` khỏi cuối. Cách làm: thêm `Drinks = 8` ngay sau `Meats = 7`. Cấm dùng số ≥ 9999.
 
 ## Kiểm chứng
 
