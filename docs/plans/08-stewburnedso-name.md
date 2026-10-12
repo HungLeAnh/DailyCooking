@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.4 |
-| **Trạng thái** | Chưa làm — đã xác minh |
+| **Trạng thái** | ✅ **Đã làm** — `objectName: Stew` → `Stew Burned`. Compile Android + 49/49 test, console 0/0. **Chưa kiểm tra bằng mắt khi chơi.** |
 | **Rủi ro** | **Rất thấp** (chỉ hiển thị) |
 | **Ưu tiên** | Cao — sửa 1 dòng, hết ngay |
 

@@ -9,6 +9,14 @@ xem ghi chú ở từng file.
 
 ---
 
+## Mục phát sinh thêm (ngoài 13 mục trên)
+
+| # | Việc | Vị trí | Vì sao thêm |
+|---|---|---|---|
+| 14 | **Runtime ghi thẳng vào material asset** | `GridBuildingSystem.cs:26` (`[SerializeField] Material gridGuideMaterial`) → `GridVisualizer.cs:24-28` `SetFloat(...)` | Chạy play mode 1 lần là `GridShaderMaterial.mat` bị commit đè vĩnh viễn (đã thấy `5/5.01` → `0/0.01`). Giá trị đó vô nghĩa vì runtime vẫn set lại, nhưng **working tree bẩn sau mỗi lần chạy** và designer có thể vô tình commit. Sửa: `new Material(sharedMaterial)` rồi dispose, hoặc `MaterialPropertyBlock`. |
+
+---
+
 ## A. Mạng / tối ưu — đề xuất hoãn vì rủi ro cao (CHƯA được xác nhận)
 
 > **Nguồn:** nhóm này là **đề xuất của agent**, không phải quyết định của chủ dự án — không có

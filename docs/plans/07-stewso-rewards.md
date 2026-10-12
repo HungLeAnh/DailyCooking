@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.4 |
-| **Trạng thái** | Chưa làm — đã xác minh trong asset |
+| **Trạng thái** | ✅ **Đã làm** — `price: 0→35`, `exp: 0→40` (phương án A). Compile Android + 49/49 test, console 0/0. **Chưa kiểm tra bằng mắt khi chơi.** |
 | **Rủi ro** | Thấp về kỹ thuật, **cần bạn quyết con số** |
 | **Ưu tiên** | Cao — đây là bug gameplay thật (món cao cấp cho 0 tiền) |
 

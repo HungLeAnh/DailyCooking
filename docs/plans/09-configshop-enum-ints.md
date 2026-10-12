@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.3 |
-| **Trạng thái** | Chưa làm — đã xác minh |
+| **Trạng thái** | ✅ **Đã làm Bước 1** (ghim số tường minh + comment, giá trị giữ nguyên → không đổi asset nào). Compile Android + 49/49, console 0/0. **Bước 2 (`[InspectorName]`) và Bước 3 (guard lúc build) chưa làm.** |
 | **Rủi ro** | Thấp (1 file enum), nhưng **lỗi khi xảy ra thì âm thầm** |
 | **Ưu tiên** | Cao — chống đúng loại bug project đã từng dính |
 

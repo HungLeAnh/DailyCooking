@@ -107,6 +107,9 @@ public class UIShopItem : MonoBehaviour
                     .Find(x => x.Guid == reward.Guid);
                 if (placedObject == null)
                 {
+                    // Was silent: the shop cell just disappeared, which reads as "content missing"
+                    // rather than "guid broken". Surface it with the guid so it can be traced.
+                    Debug.LogError($"UIShopItem: no PlacedObjectTypeSO for shop reward guid '{reward.Guid}' ({configShopItem?.Name} / {itemCategory})");
                     gameObject.SetActive(false);
                     break;
                 }
@@ -122,6 +125,7 @@ public class UIShopItem : MonoBehaviour
                 var item = KitchenGameManager.Instance.KitchenObjectSODic.GetValueOrDefault(reward.Guid);
                 if (item == null)
                 {
+                    Debug.LogError($"UIShopItem: no KitchenObjectSO for shop reward guid '{reward.Guid}' ({configShopItem?.Name} / {itemCategory})");
                     gameObject.SetActive(false);
                     break;
                 }
