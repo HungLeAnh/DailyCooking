@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | C. Kiến trúc cần chốt |
 | **Nguồn** | `docs/datamanagement.md` §4.2 |
-| **Trạng thái** | ✅ **Đã làm Bước 2 (LogError)** — 2 chỗ fail im lặng ở `UIShopItem.GetReward` giờ log guid + tên item + category. Compile Android + 49/49, console 0/0. **Bước 1 (đổi linear → dictionary) thuộc Gói 2, chưa làm** — linear `Find` còn nguyên. |
+| **Trạng thái** | ✅ **Đã làm Bước 2 (LogError)** — 2 chỗ fail im lặng ở `UIShopItem.GetReward` giờ log guid + tên item + category. Compile Android + 49/49, console 0/0. Play mode: mở shop popup, bấm cả 3 tab (Resource / Restaurant / Ingredients) → **0 `LogError`**, mọi ô hiện đủ tên + giá + icon. **Bước 1 (đổi linear → dictionary) thuộc Gói 2, chưa làm** — linear `Find` còn nguyên. |
 | **Rủi ro** | Thấp |
 | **Ưu tiên** | Trung bình (perf thấp, **robustness mới là cái đáng làm**) |
 

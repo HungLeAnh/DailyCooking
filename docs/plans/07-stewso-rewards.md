@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.4 |
-| **Trạng thái** | ✅ **Đã làm** — `price: 0→35`, `exp: 0→40` (phương án A). Compile Android + 49/49 test, console 0/0. **Chưa kiểm tra bằng mắt khi chơi.** |
+| **Trạng thái** | ✅ **Đã làm + kiểm bằng mắt khi chơi** — `price: 0→35`, `exp: 0→40` (phương án A). Compile Android + 49/49 test, console 0/0. Menu popup hiện **`Stew — $35 / 40 XP`**. **Chưa kiểm: phục vụ Stew cho khách bot rồi thu tiền/XP.** |
 | **Rủi ro** | Thấp về kỹ thuật, **cần bạn quyết con số** |
 | **Ưu tiên** | Cao — đây là bug gameplay thật (món cao cấp cho 0 tiền) |
 
@@ -103,10 +103,14 @@ unlockLevel cao hơn.
 
 ## Kiểm chứng
 
-1. Compile Android + 49/49 test.
-2. Play mode: mở khoá Stew (60 coins) → vào menu → kiểm tra `UIFoodItem` hiện `$35` / `40 XP`.
-3. Gọi Stew cho khách bot → ăn xong → đĩa hiện `$35 + tip` / `40 XP`.
-4. Thu thập → `RestaurantData.Coins` và `Exp` tăng đúng.
+1. ✅ Compile Android + 49/49 test.
+2. ✅ **Đã làm (2026-10-12, play mode + Relay host thật)** — mở menu popup thấy tile
+   **`Stew — $35 / 40 XP`**. Dùng 2 probe editor trong `Assets/Editor/PerfScenarios.cs`:
+   `Tools/Verify/Unlock all dishes + open Menu popup` rồi `Tools/Verify/Hide tutorial + show Stew tile`
+   (unlock thẳng `MenuData.AddUnlockedDish` để khỏi phải farm 60 coins). Console runtime cũng log
+   `[Perf] stew price=$35 exp=40 unlockLevel=6`.
+3. ⬜ Gọi Stew cho khách bot → ăn xong → đĩa hiện `$35 + tip` / `40 XP`. **Cần bạn chơi tay.**
+4. ⬜ Thu thập → `RestaurantData.Coins` và `Exp` tăng đúng. **Cần bạn chơi tay.**
 
 ## Rủi ro / rollback
 

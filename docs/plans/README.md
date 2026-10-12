@@ -130,6 +130,32 @@ xem ghi chú ở từng file.
    agent, chờ bạn xác nhận — chưa phải quyết định)*: `01`, `02`, `03`, `06`, `11`
 
 
+## Kiểm bằng mắt — Gói 1 (2026-10-12)
+
+Chạy trong play mode + **Relay host thật** (probe `Tools/Profiling/Enter Game (new host)`).
+Ảnh chụp ra `Assets/Screenshots/` rồi **dời khỏi project** — không commit PNG vào repo.
+
+| # | Kiểm | Kết quả |
+|---|---|---|
+| 07 | Menu popup → tile Stew | ✅ **`$35` / `40 XP`** |
+| 08 | Option menu → `OptionMenuItemUI` | ✅ **`Stew Cooked`** / **`Stew Burned`** |
+| 12 | Shop popup → tab Resource / Restaurant / Ingredients | ✅ **0 `LogError`**, mọi ô hiện đủ tên + giá + icon |
+| 09 | Shop tab Restaurant → nhóm `None` | ✅ Nhóm `None` vẫn hiện. `UIShopItem.GetReward` `default:` là no-op → đổi `8`→`9999` **không đổi hành vi**, chỉ đổi nhãn nhóm từ `8` sang `None` |
+
+### Công cụ kiểm bằng mắt (editor-only, `Assets/Editor/PerfScenarios.cs`)
+
+| Menu | Dùng để |
+|---|---|
+| `Tools/Verify/Unlock all dishes + open Menu popup` | `RestaurantData.Level = 99` + `MenuData.AddUnlockedDish` mọi món → thấy giá thật thay vì overlay khóa |
+| `Tools/Verify/Hide tutorial + show Stew tile` | Tắt `TutorialPanel` + `Window_QuestPointer` — cửa sổ focus của tutorial che đúng ô cần xem **và nuốt cả click chuột** |
+| `Tools/Verify/Cooked vs burned stew in option menu` | Mở `UIOptionMenuPopup` đúng cách — `ShowPopup(null)` sẽ tự `HidePopup()`, bắt buộc truyền `Param` kèm sender `IHasOptionalSO` |
+| `Tools/Verify/Open Shop popup once` | Mở shop popup 1 lần để bấm tay 3 tab |
+
+> **Vẫn cần bạn chơi tay:** kịch bản S3/S4/S7/S8/S9 ở [13-profiler-baseline.md](13-profiler-baseline.md),
+> bước phục vụ Stew cho khách bot rồi thu tiền/XP (mục 07), và bước nấu Stew đến lúc cháy (mục 08).
+
+---
+
 ## Điều kiện kiểm chứng chung cho mọi mục
 
 ```

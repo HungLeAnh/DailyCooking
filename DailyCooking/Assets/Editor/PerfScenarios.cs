@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEditor;
@@ -45,6 +46,109 @@ public static class PerfScenarios
                 categoryItem.CategoryButton.onClick.Invoke();
 
             Debug.Log($"[Perf] S6: {MenuOpenCycles} menu opens + {categoryItems.Length} category clicks.");
+        });
+    }
+
+    [MenuItem("Tools/Verify/Open Menu popup once")]
+    public static void Verify_OpenMenu()
+    {
+        RunInRestaurant(() =>
+        {
+            // UIMenuPopup.ShowMenuOfType lists every ConfigFood.FoodItems entry regardless of
+            // unlock state, so Stew's price/exp are readable here even on a fresh save.
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIMenuPopup);
+            Debug.Log("[Perf] menu popup opened once.");
+        });
+    }
+
+    [MenuItem("Tools/Verify/Open Shop popup once")]
+    public static void Verify_OpenShop()
+    {
+        RunInRestaurant(() =>
+        {
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIShopPopup);
+            Debug.Log("[Perf] shop popup opened once.");
+        });
+    }
+
+    [MenuItem("Tools/Verify/Unlock all dishes + open Menu popup")]
+    public static void Verify_UnlockAllDishes()
+    {
+        RunInRestaurant(() =>
+        {
+            var gameData = GameManager.Instance.GameData;
+            gameData.RestaurantData.Level = 99;
+            foreach (var food in ConfigManager.Instance.ConfigFood.FoodItems)
+                gameData.MenuData.AddUnlockedDish(food);
+
+            // UIFoodItem.SetMenuFoodItem writes foodPriceText unconditionally, but a locked item
+            // covers it with lockedOverlayImage and swaps foodStatusText for the lock message —
+            // so "$35" only becomes visible once the dish is unlocked.
+            var stew = ConfigManager.Instance.ConfigFood.FoodItems.Find(x => x.recipeName == "Stew");
+            if (stew != null)
+                Debug.Log($"[Perf] stew price=${stew.price} exp={stew.exp} unlockLevel={stew.unlockLevel}");
+
+            UIPopupManager.Instance.HidePopup(UIPopupType.UIMenuPopup);
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIMenuPopup);
+        });
+    }
+
+    [MenuItem("Tools/Verify/Cooked vs burned stew in option menu")]
+    public static void Verify_BurnedStewName()
+    {
+        RunInRestaurant(() =>
+        {
+            // UIOptionMenuPopup.ShowPopup(null) calls HidePopup(): it needs a Param carrying a
+            // live IHasOptionalSO sender, otherwise BaseCounter_OnShowOptionalMenu returns before
+            // it instantiates any item, so a bare ShowPopup shows nothing.
+            var cooked = AssetDatabase.LoadAssetAtPath<KitchenObjectSO>("Assets/SO/KitchenObjectSO/StewCookedSO.asset");
+            var burned = AssetDatabase.LoadAssetAtPath<KitchenObjectSO>("Assets/SO/KitchenObjectSO/StewBurnedSO.asset");
+
+            IHasOptionalSO sender = UnityEngine.Object.FindFirstObjectByType<OptionalContainerCounterController>();
+            if (sender == null) sender = UnityEngine.Object.FindFirstObjectByType<CookingToolCounterController>();
+            if (sender == null) sender = UnityEngine.Object.FindFirstObjectByType<PostBox>();
+
+            if (sender == null || cooked == null || burned == null)
+            {
+                Debug.LogError($"[Perf] verify 08 unavailable: sender={sender} cooked={cooked} burned={burned}");
+                return;
+            }
+
+            UIPopupManager.Instance.HidePopup(UIPopupType.UIMenuPopup);
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIOptionMenuPopup, new UIOptionMenuPopup.Param
+            {
+                sender = sender,
+                optionalList = new List<KitchenObjectSO> { cooked, burned },
+                Title = "Pick output"
+            });
+            Debug.Log($"[Perf] cooked='{cooked.objectName}' burned='{burned.objectName}'");
+        });
+    }
+
+    [MenuItem("Tools/Verify/Hide tutorial + show Stew tile")]
+    public static void Verify_HideTutorialShowStew()
+    {
+        RunInRestaurant(() =>
+        {
+            // The tutorial draws Window_QuestPointer's focus window straight over the menu popup,
+            // which hides exactly the tile being verified and also swallows screen clicks.
+            int hidden = 0;
+            foreach (var panel in UnityEngine.Object.FindObjectsByType<TutorialPanel>(
+                         FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                panel.gameObject.SetActive(false);
+                hidden++;
+            }
+            foreach (var pointer in UnityEngine.Object.FindObjectsByType<Window_QuestPointer>(
+                         FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                pointer.gameObject.SetActive(false);
+                hidden++;
+            }
+
+            UIPopupManager.Instance.HidePopup(UIPopupType.UIMenuPopup);
+            UIPopupManager.Instance.ShowPopup(UIPopupType.UIMenuPopup);
+            Debug.Log($"[Perf] hid {hidden} tutorial objects; menu popup reopened.");
         });
     }
 

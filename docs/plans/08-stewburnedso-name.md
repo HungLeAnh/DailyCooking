@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.4 |
-| **Trạng thái** | ✅ **Đã làm** — `objectName: Stew` → `Stew Burned`. Compile Android + 49/49 test, console 0/0. **Chưa kiểm tra bằng mắt khi chơi.** |
+| **Trạng thái** | ✅ **Đã làm + kiểm bằng mắt khi chơi** — `objectName: Stew` → `Stew Burned`. Compile Android + 49/49 test, console 0/0. Option menu hiện **`Stew Cooked` / `Stew Burned`**. **Chưa kiểm: tự nấu Stew đến lúc cháy.** |
 | **Rủi ro** | **Rất thấp** (chỉ hiển thị) |
 | **Ưu tiên** | Cao — sửa 1 dòng, hết ngay |
 
@@ -69,9 +69,15 @@ Tìm toàn bộ project, đúng 2 chỗ, đều gán vào Text:
 
 ## Kiểm chứng
 
-1. Compile Android + 49/49 test (đảm bảo không gõ nhầm YAML).
-2. Chạy game → nấu Stew cháy → cầm/hiển thị → tên hiện `Stew Burned`.
-3. Vào option menu có món cháy → nhãn đúng.
+1. ✅ Compile Android + 49/49 test (đảm bảo không gõ nhầm YAML).
+2. ✅ **Đã làm (2026-10-12, play mode)** — mở `UIOptionMenuPopup` với
+   `Param.optionalList = [StewCookedSO, StewBurnedSO]` → hiện đúng **`Stew Cooked`** và **`Stew Burned`**.
+   Dùng probe `Tools/Verify/Cooked vs burned stew in option menu` trong `Assets/Editor/PerfScenarios.cs`
+   (`UIOptionMenuPopup.ShowPopup(null)` sẽ tự `HidePopup()` nên bắt buộc phải truyền `Param` kèm
+   sender `IHasOptionalSO`). Đây chính đường code `OptionMenuItemUI.Setup(index, KitchenObjectSO)`.
+3. ⬜ Nấu Stew thật đến lúc cháy rồi cầm/hiển thị. **Cần bạn chơi tay** — chuỗi nấu→cháy dài,
+   không giả lập được bằng editor script. (Giá trị SO cũng được xác nhận thêm bằng log
+   `[Perf] cooked='Stew Cooked' burned='Stew Burned'`.)
 
 ## Rủi ro / rollback
 
