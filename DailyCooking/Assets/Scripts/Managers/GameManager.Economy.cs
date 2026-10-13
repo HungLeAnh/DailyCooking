@@ -85,7 +85,8 @@ public partial class GameManager
     {
         ulong sender = rpcParams.Receive.SenderClientId;
         if (GameData == null || ConfigManager.Instance == null) return;
-        ConfigShopItem item = ConfigManager.Instance.ConfigShop.ShopItems.Find(x => x.Id == shopItemId);
+        // List.Find -> O(1) dictionary lookup (ConfigShop.GetById caches by id).
+        ConfigShopItem item = ConfigManager.Instance.ConfigShop.GetById(shopItemId);
         if (item == null || (item.Type != ShopItemType.Item && item.Type != ShopItemType.Ingredient)) return;
         if (item.UnlockLevel > GameData.RestaurantData.Level)
         {

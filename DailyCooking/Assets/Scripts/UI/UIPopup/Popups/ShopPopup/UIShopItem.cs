@@ -103,8 +103,10 @@ public class UIShopItem : MonoBehaviour
             case ShopItemCategory.Tables:
             case ShopItemCategory.Walls:
 
-                var placedObject = GridBuildingSystem.Instance.PlacedObjectDatabase.PlacedObjects
-                    .Find(x => x.Guid == reward.Guid);
+                // PlacedObjectTypeSODictionary is built from PlacedObjectDatabase.PlacedObjects
+                // (GridBuildingSystem.cs:86-88), so use it instead of scanning the list again.
+                var placedObject = GridBuildingSystem.Instance.PlacedObjectTypeSODictionary
+                    .GetValueOrDefault(reward.Guid);
                 if (placedObject == null)
                 {
                     // Was silent: the shop cell just disappeared, which reads as "content missing"
