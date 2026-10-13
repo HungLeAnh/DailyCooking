@@ -50,6 +50,18 @@ public class IconGenEditorTool : EditorWindow
     private Camera m_sceneCamera;
     private GameObject m_instance;
 
+    // Deterministic light rig so every icon is rendered with identical lighting.
+    // Without these the render only receives ambient light, producing dark/muddy icons.
+    private GameObject m_lightKeyObject;
+    private GameObject m_lightFillObject;
+    private GameObject m_lightBounceObject;
+    private const float KeyIntensity = 1.1f;
+    private const float FillIntensity = 0.4f;
+    private const float BounceIntensity = 0.35f;
+    private static readonly Vector3 KeyRotation = new Vector3(50f, -30f, 0f);
+    private static readonly Vector3 FillRotation = new Vector3(35f, 145f, 0f);
+    private static readonly Vector3 BounceRotation = new Vector3(-60f, 0f, 0f);
+
 
     private float Timer = 0f;
     private const float SaveTimeThreshold = 3f; // Save every 3 seconds
@@ -128,6 +140,21 @@ public class IconGenEditorTool : EditorWindow
         {
             DestroyImmediate(m_instance);
         }
+        if (m_lightKeyObject != null)
+        {
+            DestroyImmediate(m_lightKeyObject);
+            m_lightKeyObject = null;
+        }
+        if (m_lightFillObject != null)
+        {
+            DestroyImmediate(m_lightFillObject);
+            m_lightFillObject = null;
+        }
+        if (m_lightBounceObject != null)
+        {
+            DestroyImmediate(m_lightBounceObject);
+            m_lightBounceObject = null;
+        }
         SaveData();
     }
     private void OnBackgroundColorChanged(ChangeEvent<Color> evt)
@@ -178,6 +205,7 @@ public class IconGenEditorTool : EditorWindow
 
             m_cameraPositionField.value = m_cameraObject.transform.position;
             m_cameraRotationField.value = m_cameraObject.transform.eulerAngles;
+            EnsureLights();
         }
         m_sceneCamera.depthTextureMode = DepthTextureMode.Depth;
         m_sceneCamera.backgroundColor = new Color(0, 0, 0, 0);
@@ -326,6 +354,7 @@ public class IconGenEditorTool : EditorWindow
 
             m_cameraPositionField.value = m_cameraObject.transform.position;
             m_cameraRotationField.value = m_cameraObject.transform.eulerAngles;
+            EnsureLights();
         }
         
         // Clear previous objects in the preview scene
@@ -353,6 +382,53 @@ public class IconGenEditorTool : EditorWindow
 
         m_instance.transform.eulerAngles = data.objectRotation;
     }
+    private void EnsureLights()
+    {
+        if (!m_previewScene.IsValid())
+        {
+            return;
+        }
+
+        // NOTE: Unity forbids making a preview scene active, so RenderSettings.ambient
+        // cannot be set for it. Ambient fill is therefore simulated with a third,
+        // low-intensity bounce light instead of relying on the scene's ambient probe.
+        if (m_lightKeyObject == null)
+        {
+            m_lightKeyObject = new GameObject("IconLight_Key");
+            SceneManager.MoveGameObjectToScene(m_lightKeyObject, m_previewScene);
+            Light key = m_lightKeyObject.AddComponent<Light>();
+            key.type = LightType.Directional;
+            key.intensity = KeyIntensity;
+            key.color = Color.white;
+            key.shadows = LightShadows.None;
+            m_lightKeyObject.transform.rotation = Quaternion.Euler(KeyRotation);
+        }
+
+        if (m_lightFillObject == null)
+        {
+            m_lightFillObject = new GameObject("IconLight_Fill");
+            SceneManager.MoveGameObjectToScene(m_lightFillObject, m_previewScene);
+            Light fill = m_lightFillObject.AddComponent<Light>();
+            fill.type = LightType.Directional;
+            fill.intensity = FillIntensity;
+            fill.color = Color.white;
+            fill.shadows = LightShadows.None;
+            m_lightFillObject.transform.rotation = Quaternion.Euler(FillRotation);
+        }
+
+        if (m_lightBounceObject == null)
+        {
+            m_lightBounceObject = new GameObject("IconLight_Bounce");
+            SceneManager.MoveGameObjectToScene(m_lightBounceObject, m_previewScene);
+            Light bounce = m_lightBounceObject.AddComponent<Light>();
+            bounce.type = LightType.Directional;
+            bounce.intensity = BounceIntensity;
+            bounce.color = Color.white;
+            bounce.shadows = LightShadows.None;
+            m_lightBounceObject.transform.rotation = Quaternion.Euler(BounceRotation);
+        }
+    }
+
     private void UpdateCamera()
     {
         if (m_selectedData == null || m_selectedData.prefab == null)
