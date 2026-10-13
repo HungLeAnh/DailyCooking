@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Netcode;
+using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
 
@@ -259,6 +260,109 @@ public static class PerfScenarios
             CodeMonkey.Utils.UtilsClass.ShakeCamera(0.5f, 10f);
             Debug.Log("[Perf] S10: camera shake running for 10s.");
         });
+    }
+
+    // S7 = "chạy bếp 3 phút", nhưng người chơi lái bằng tay nên probe này là sampler THỤ ĐỘNG:
+    // không inject input, chỉ đo Time.unscaledDeltaTime mỗi frame + ProfilerRecorder
+    // "GC Allocated In Frame". Hai con số này chính là ngưỡng chốt của mục 13 (p95 > 33 ms,
+    // GC > 1 MB/s), lấy được mà không cần mở Profiler window — thứ computer-control không mở nổi.
+    [MenuItem("Tools/Profiling/S7 - Sample 180s (run kitchen by hand)")]
+    public static void S7_SampleKitchen()
+    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogError("[Perf] Enter Play Mode first.");
+            return;
+        }
+
+        const float durationSeconds = 180f;
+        var frames = new List<float>(40000);
+
+        var gcAlloc = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame", 1);
+        var gcCount = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocation In Frame Count", 1);
+        var objects = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Objects Count", 1);
+
+        long gcBytes = 0;
+        long gcObjects = 0;
+        int lastFrame = -1;
+        int objectStart = -1;
+        int objectMax = -1;
+        float elapsed = 0f;
+
+        EditorApplication.CallbackFunction tick = null;
+        tick = () =>
+        {
+            // Đúng 1 mẫu mỗi frame: EditorApplication.update có thể tick nhiều hơn hoặc ít hơn
+            // số frame game render, đọc theo Time.frameCount thì phân vị mới không bị lệch.
+            if (Time.frameCount == lastFrame)
+            {
+                return;
+            }
+            lastFrame = Time.frameCount;
+
+            frames.Add(Time.unscaledDeltaTime);
+            elapsed += Time.unscaledDeltaTime;
+            if (gcAlloc.Valid) gcBytes += gcAlloc.LastValue;
+            if (gcCount.Valid) gcObjects += gcCount.LastValue;
+            if (objects.Valid)
+            {
+                int count = (int)objects.LastValue;
+                if (objectStart < 0) objectStart = count;
+                if (count > objectMax) objectMax = count;
+            }
+
+            if (elapsed < durationSeconds)
+            {
+                return;
+            }
+
+            EditorApplication.update -= tick;
+            gcAlloc.Dispose();
+            gcCount.Dispose();
+            objects.Dispose();
+
+            if (frames.Count < 2)
+            {
+                Debug.LogError("[Perf] S7: sampler collected almost no frames.");
+                return;
+            }
+
+            var sorted = frames.ToArray();
+            Array.Sort(sorted);
+            float p50 = Percentile(sorted, 0.5f);
+            float p95 = Percentile(sorted, 0.95f);
+            float maxMs = sorted[sorted.Length - 1] * 1000f;
+            float gcKbPerSecond = gcBytes / elapsed / 1024f;
+
+            // So với ngưỡng chốt ở mục 13 "Bước 4", chốt trước khi đo để khỏi tự convince.
+            string verdict;
+            if (p95 > 0.033f) verdict = "p95 > 33ms -> prioritise items 05 + 04";
+            else if (p95 < 0.016f && gcKbPerSecond < 100f) verdict = "p95 < 16ms AND GC < 100KB/s -> items 01-06 NOT justified";
+            else verdict = "between the thresholds -> decide by the markers, not the headline number";
+
+            Debug.Log(
+                $"[Perf] S7 done: frames={sorted.Length} seconds={elapsed:0.0} " +
+                $"p50={p50 * 1000f:0.00}ms p95={p95 * 1000f:0.00}ms max={maxMs:0.00}ms " +
+                $"GC={gcKbPerSecond:0.0}KB/s across {gcObjects} allocations " +
+                $"objects {objectStart} -> {objectMax}");
+            Debug.Log($"[Perf] S7 verdict: {verdict}");
+            Debug.Log("[Perf] NOTE: Editor Play Mode on desktop. A real Android device is slower, but the ranking holds.");
+        };
+
+        EditorApplication.update += tick;
+        Debug.Log($"[Perf] S7 sampler started ({durationSeconds:0}s) — run the kitchen by hand now.");
+    }
+
+    static float Percentile(float[] sortedAscending, float p)
+    {
+        if (sortedAscending.Length == 1)
+        {
+            return sortedAscending[0];
+        }
+        float rank = p * (sortedAscending.Length - 1);
+        int lo = (int)rank;
+        int hi = Math.Min(lo + 1, sortedAscending.Length - 1);
+        return sortedAscending[lo] + (sortedAscending[hi] - sortedAscending[lo]) * (rank - lo);
     }
 
     [MenuItem("Tools/Profiling/Delete PerfTest save")]
