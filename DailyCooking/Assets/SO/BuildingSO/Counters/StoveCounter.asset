@@ -17,7 +17,7 @@ MonoBehaviour:
   nameString: Stove Counter
   prefab: {fileID: 1747125932965544244, guid: fb2f9af9fbb8cf143b58eb5ec3eec0c4, type: 3}
   visual: {fileID: 0}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 32a20692518ed6649b5b466854f96764, type: 3}
   width: 1
   height: 1
   itemType:
@@ -25,3 +25,4 @@ MonoBehaviour:
     _tabType: 0
   cookingToolConfigSO: {fileID: 0}
   isTool: 0
+  allowedUnderlyingCounters: []
