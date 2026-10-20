@@ -153,4 +153,41 @@ nhau, gộp sẽ phải kiểm tra kiểu khi lấy và mất an toàn type.
 | Bước 2 — `LogError` khi resolve fail | ✅ `572f37092`; đã chơi: mở shop, bấm 3 tab → 0 `LogError`, đủ tên/giá/icon |
 | Bước 4 — `ConfigShop.GetById` | ✅ `217875b19`; `GameManager.Economy.cs:88-89` dùng `GetById` thay `List.Find` |
 | Bước 3 — hàm resolve chung | ❌ chưa làm (tùy chọn, không có lỗi nào đang chờ nó) |
-| **Test neg** (guid rác → thấy `LogError`) | ⏳ **chưa chạy**. Cần vào GameScene (shop chỉ có trong HUD của game), sửa 1 `reward.Guid` **trong bộ nhớ** rồi mở lại shop. Không sửa asset trên đĩa. |
+| **Test neg** (guid rác → thấy `LogError`) | ✅ **đã chạy 2026-10-20**, play mode GameScene, **không sửa asset trên đĩa**. Xem mục "Test neg" bên dưới. |
+
+### Test neg — kết quả
+
+Vào game (NewGame + host + `GameScene`), mở shop từ HUD, chọn tab **Restaurant**, rồi gọi thẳng
+`UIShopItem.GetReward(rewards)` với `rewards = [ShopReward("deadbeef…", 1)]` trên ô **Fridge**
+(không sửa `ConfigShopSO.asset`):
+
+```
+[Error] UIShopItem: no PlacedObjectTypeSO for shop reward guid
+        'deadbeefdeadbeefdeadbeefdeadbeef' (Fridge / Counters)
+```
+
+ô đó `activeSelf = false`. Làm tương tự trên ô **Peach** ở tab **Ingredients** với
+`cafebabecafebabecafebabecafebabe`:
+
+```
+[Error] UIShopItem: no KitchenObjectSO for shop reward guid
+        'cafebabecafebabecafebabecafebabe' (Peach / Vegetables)
+```
+
+ô đó cũng `activeSelf = false`. Đóng/mở lại shop: **0 error**, các ô còn lại vẫn active và đủ
+tên/giá. `git status` sau khi thoát Play: không có thay đổi nào dưới `Assets/SO` hay `Assets/Configs`
+— đúng như cam kết "chỉ sửa trong bộ nhớ".
+
+### Ghi nhận: ô bị ẩn thì "dính" trong cùng một session
+
+`UIShopPopup.ShowPopup` chỉ gọi `item.Refresh()` cho từng ô, **không** gọi lại `SetItem`
+(comment trong code: *"Items are built once"*). Nên ô bị `SetActive(false)` vì guid sai **không tự
+hiện lại** khi đóng/mở shop — chỉ hiện lại khi popup được dựng lại (đổi scene / khởi động lại).
+
+Số đo: popup giữ **44** ô cho mọi tab (pool); sau khi ẩn `Fridge` + `Peach` rồi đóng/mở shop,
+`Fridge` và `Peach` vẫn `activeSelf = false`, tab Restaurant chỉ còn **12** ô thay vì 13
+(`FindObjectsByType` chỉ trả object đang active).
+
+**Không sửa** vì đây đúng với thiết kế "build once", và trường hợp thật (guid sai → sửa asset)
+luôn kèm restart. Nếu sau này cần sửa config lúc đang chạy thì phải gọi `GetReward` lại trong
+`Refresh()`.
