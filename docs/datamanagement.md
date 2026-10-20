@@ -163,9 +163,58 @@ Resolved — the `propertyPath: upgradeDataList` prefab modification is no longe
 
 ### 4.7 Mixed Counter Data Pattern
 
-- **Tableware counters** (`BowlTablewareCounter`, `PlateTablewareCounter`): SO baked directly on the prefab (`_tablewareKitchenObjectSO`).
-- **Container counters** (`ContainerCounter`, `OptionalContainerCounter`): resolve SO by GUID at runtime via `KitchenGameManager.GetKitchenObjectSOByGuid()`.
-- New counters must pick the "right" pattern by convention only — no enforced standard.
+Counter biết "mình chứa gì" theo **một trong hai** cách. Đây là **quy ước có chủ đích**, không phải
+nợ kỹ thuật — đã điều tra đầy đủ ở `docs/plans/10-counter-data-pattern.md`.
+
+**A. Resolve theo GUID** — `PlacedObjectView.GetPlacedObjectTypeSOGuid()` → tra
+`KitchenGameManager.KitchenObjectSODic` / `ContainerDataSerializable`, state đi qua
+`NetworkVariable`/`NetworkList`.
+
+**B. SO baked trên prefab** — `[SerializeField] private KitchenObjectSO` (ví dụ
+`_tablewareKitchenObjectSO`, `postBoxKitchenSO`), không có state mạng.
+
+| Controller | Nội dung | Cách biết SO |
+|---|---|---|
+| `ClearCounterController` | 1 món cầm tay | **B** (qua `KitchenObject.GetKitchenObjectSO()`) |
+| `TrashCounterController` | xoá món | không cần |
+| `ContainerCounterController` | 1 slot nguyên liệu | **A** |
+| `OptionalContainerCounterController` | N slot | **A** |
+| `TablewareCounterController` | không giới hạn, luôn rót bát/dĩa | **B** |
+| `CookingToolCounterController` | chấp nhận loại công cụ | enum list baked |
+| `PostBox` | 1 kiện hàng | **A** cho nội dung, **B** cho `postBoxKitchenSO` |
+
+#### Quy tắc chọn pattern
+
+> **Nội dung thay đổi lúc chạy** (cùng một prefab nhưng tuỳ nhà hàng có thể chứa rau khác nhau,
+> hoặc bị người chơi lấy/đặt) → **A**.
+> **Nội dung cố định** (luôn ra bát/dĩa, không có gì để resolve) → **B** + guard null.
+
+Vì sao không chuẩn hoá tất cả về A: `TablewareCounterController` chuyển sang A sẽ thêm
+`NetworkVariable`, thêm đường sync host→client, thêm bề mặt lỗi — mà **không thêm giá trị nào**,
+vì nó không có state để đồng bộ. Ngược lại, container mà dùng B thì không thể biết tủ lạnh đang
+chứa gì.
+
+#### Bắt buộc khi dùng B
+
+Field baked phải được kiểm null và **log lỗi to**, vì `KitchenGameManager.SpawnKitchenObject`
+trả `null` im lặng khi SO thiếu:
+
+```csharp
+// TablewareCounterController.InteractEvent
+if (_tablewareKitchenObjectSO == null)
+{
+    Debug.LogError("TablewareCounterController: _tablewareKitchenObjectSO is not assigned!", this);
+    return;
+}
+```
+
+#### Bắt buộc khi thêm counter mới
+
+1. Nội dung có đổi lúc chạy không? Có → A, không → B.
+2. Dùng B → thêm guard null + `LogError` như trên; ghi 1 dòng comment trong class nói rõ
+   "fixed-content, baked on purpose" để người sau không tưởng là thiếu sót.
+3. Dùng A → nhớ rằng GUID là **Unity asset GUID** (`PlacedObjectTypeSO.Guid`), không phải id số;
+   xem §4.2 về ba nguồn dữ liệu và mục 12 trong `docs/plans/`.
 
 ### 4.8 Content Registration Burden
 

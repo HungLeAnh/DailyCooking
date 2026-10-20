@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | C. Kiến trúc cần chốt |
 | **Nguồn** | `docs/datamanagement.md` Tier 2 #4 + §4.7 |
-| **Trạng thái** | ✅ **Đã làm 2 việc nhỏ** (guard null + comment quy ước). **Không chuẩn hoá pattern** — hai pattern giữ nguyên. Compile Android + 49/49, console 0/0. Quy ước chưa dán vào `docs/datamanagement.md` §4.7. |
+| **Trạng thái** | ✅ **Xong** — đã guard null + comment quy ước; **không chuẩn hoá pattern** (hai pattern giữ nguyên). Quy ước đã dán vào `docs/datamanagement.md` §4.7 (2026-10-20). Compile Android + 49/49, console 0/0. |
 | **Rủi ro** | Trung bình nếu làm; **0 nếu không làm** |
 | **Ưu tiên** | Thấp |
 
