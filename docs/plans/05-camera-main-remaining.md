@@ -185,16 +185,30 @@ Sau khi sửa, `grep Camera.main` chỉ còn: getter trong `UtilsClass` và 2 ca
 ### Chưa kiểm / lưu ý trung thực
 
 - **`ShakeCamera` không dùng trong gameplay**: chỉ có `Tools/Profiling/S10 - ShakeCamera 10s`
-  gọi nó. Thử gọi `ShakeCamera(0.05f, 0.4f)` hai lần trong GameScene: vị trí camera **không đổi**
-  (`(5.000, 15.700, -3.000)` trước và sau), vì `CameraController` ghi đè vị trí camera mỗi frame.
-  Vì vậy **không kết luận được** gì về "rung không lệch dần" từ test này — thay đổi ở đó chỉ là
-  gộp 2 lần đọc thành 1.
+  gọi nó. Gọi trong GameScene khi vẫn bật `CinemachineBrain`: vị trí camera **không đổi**
+  (`(5.000, 15.700, -3.000)`), vì `CinemachineBrain` (không phải `CameraController` như ghi ở bản
+  trước) ghi đè transform mỗi frame.
+- **`ShakeCamera` đã kiểm được trong điều kiện tách rời** (2026-10-20): tắt `CinemachineBrain` trên
+  `MainCamera` + `CameraController`, gọi `ShakeCamera(0.5f, 60f)`, lấy 30 mẫu liên tiếp (mỗi 0.05 s):
+  **30/30 vị trí khác nhau**, biên độ `x ≈ 0.993`, `y ≈ 0.997`, `z = 0` — đúng intensity 0.5
+  (random ±0.5) và không lệch dần theo một hướng. Đây là kiểm **hàm tiện ích**, không phải "rung
+  đã hoạt động trong gameplay": trong game thật `CinemachineBrain` vẫn ghi đè, và không có code
+  gameplay nào gọi `ShakeCamera`.
+  Lưu ý khi đo: nếu dùng timer ngắn (2 s) và bấm tool MCP liên tục thì timer hết sau 1–2 frame vì
+  mỗi lần `execute_code` chặn main thread → `unscaledDeltaTime` phình to. Phải dùng timer dài
+  (60 s) rồi để game chạy tự do, đọc mẫu từ log trong game.
 - **Đây không phải tối ưu có số đo**: baseline profiler (`13-profiler-baseline.md`) cho p95 trong
   ngưỡng, nên mục này là **vệ sinh code** (bỏ lookup theo tag) chứ không phải thắng hiệu năng đã
   chứng minh. Không có so sánh frame-time trước/sau và không nên ghi là "đã tối ưu".
-- Kéo ghost bằng chuột thật vẫn chưa kiểm được (xem cạm bẫy #7/#9: pointer Input System không bám
-  con trỏ), nên đường `BuildingPlacementManager.GetMouseWorldSnappedPosition()` chỉ được kiểm
-  gián tiếp qua raycast tương đương.
+- **Kéo ghost bằng chuột: đã kiểm được** (2026-10-20), chi tiết + cách dựng lại ở
+  `docs/plans/16-input-automation-and-ghost-drag.md`. Tóm tắt: click đúng vào collider của ghost
+  (layer `BuildingGhost`) → `BuildingGhost.IsDragging = true`; rê pointer tới ô (2,2) thì `visual`
+  dừng đúng `(4.00, 1.00, 4.00)`, tới ô (0,0) thì `(0.00, 1.00, 0.00)`; thả chuột →
+  `IsDragging = false`; bấm nút Confirm (qua EventSystem thật) → `ClearCounter(Clone)` spawn ở
+  `(0,0,0)`. Đường `BuildingPlacementManager.GetMouseWorldSnappedPosition()` vì vậy đã được kiểm
+  trực tiếp, không còn chỉ "raycast tương đương".
+  Lưu ý: hàm này **clamp theo vùng ô đã mở khoá** — kéo ra ngoài vùng mở khoá thì ghost dừng ở
+  biên, trông như "không bám chuột" nhưng là đúng luật chơi.
 - Ghi nhận thêm (ngoài phạm vi mục này): `GameInput.OnMouseClickPerformed` có **3 subscriber**, và
   trong lượt đo cắt trước đó một lần phát click cho ra 3 nhát cắt — hành vi này không do thay đổi
   ở đây gây ra, nhưng đáng điều tra riêng.

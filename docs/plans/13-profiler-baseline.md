@@ -306,13 +306,30 @@ nhưng tay cầm **không nhúc nhích** và `Moving` vẫn `(0,0)`. ⇒ Sự ki
 13. **Menu item có `/` trong nhãn bị chuẩn hoá khoảng trắng** khi đi qua cầu nối MCP → đừng dùng
     chuỗi menu làm khoá chính xác để `execute_menu_item`.
 
+14. **InputAction không actuate khi editor mất focus.** `Application.isFocused == false` →
+    `InputManager.defaultUpdateType` trả `Editor`, event inject bị xử lý theo nhánh editor và
+    action không bao giờ chạy (device state vẫn đổi — dễ kết luận sai là "inject hỏng"). Phải bật
+    `backgroundBehavior=IgnoreFocus` + `editorInputBehaviorInPlayMode=AllDeviceInputAlwaysGoesToGameView`
+    + `InputManager.runPlayerUpdatesInEditMode=true`, và inject bằng
+    `InputState.Change` + `InputSystem.Update()` trong `MonoBehaviour` có
+    `[DefaultExecutionOrder(-1000)]`. Công thức đầy đủ + kết quả kéo ghost:
+    [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md).
+
+15. **Đọc `Pointer.current.position` từ `execute_code` giữa 2 frame có thể thấy giá trị native cũ**,
+    không phải giá trị vừa inject. Chỉ tin số đọc bên trong `Update()` của game (hoặc log trong
+    frame). Vì vậy test kéo ghost phải log `ptr/pan/visual` từ probe, không đọc lẻ từng lệnh.
+
 ### Việc còn lại
 
-- **Cần người thao tác tay:** S3 (đi lại + click counter), S4 (kéo ghost), S7 (chạy bếp 3 phút),
-  S8 (4 player), S9 (late join).
-  **Đường tự động bằng computer-control đã thử và đóng lại** (2026-10-13): chuột vào được
-  Input System, bàn phím không vào, sự kiện không tới `EventSystem` → không lái được player.
-  Muốn mở lại đường này thì phải xử lý trước việc inject input, **không** thuộc phạm vi mục 13.
+- **Cần người thao tác tay:** S3 (đi lại + click counter), S7 (chạy bếp 3 phút), S8 (4 player),
+  S9 (late join).
+  **S4 (kéo ghost) đã kiểm được ngày 2026-10-20** bằng inject pointer qua Input System
+  (cạm bẫy #14) — xem [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md).
+  Đường computer-control lái chuột OS vẫn đóng (2026-10-13): bàn phím không vào
+  `Keyboard.current`, sự kiện OS không tới `EventSystem`.
+- **S8/S9 (2 client, late join) vẫn chưa kiểm**: cần process Unity thứ hai (MPPM virtual player
+  hoặc build standalone + host Relay). Không có thay đổi nào trong nhánh chạm vào network code,
+  nhưng **không** vì thế mà coi là đã kiểm.
 - **Chưa đo được GC KB/s** — cần mở Profiler UI tay.
 - Sau khi có đủ số → ghi `docs/profiler_baseline.md` và dán nhãn **LÀM / KHÔNG LÀM** cho từng mục
   trong `optimization_plan.md` §3.

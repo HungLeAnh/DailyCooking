@@ -179,6 +179,21 @@ Tóm tắt bằng bằng chứng:
 > **Vẫn cần bạn chơi tay:** kịch bản S3/S4/S7/S8/S9 ở [13-profiler-baseline.md](13-profiler-baseline.md),
 > bước phục vụ Stew cho khách bot rồi thu tiền/XP (mục 07), và bước nấu Stew đến lúc cháy (mục 08).
 
+### Cập nhật 2026-10-20 — kéo ghost **đã kiểm được**
+
+Cách cũ (computer-control lái chuột OS) vẫn không dùng được, nhưng inject **pointer qua Input
+System** thì được, sau khi phát hiện nguyên nhân: editor mất focus → `Application.isFocused=false`
+→ `InputManager` chạy ở `Editor` update type → InputAction không actuate dù device state đã đổi.
+
+Bật `backgroundBehavior=IgnoreFocus`, `editorInputBehaviorInPlayMode=AllDeviceInputAlwaysGoesToGameView`
+và `InputManager.runPlayerUpdatesInEditMode=true`, rồi inject `MouseState` + `InputSystem.Update()`
+trong một `MonoBehaviour` có `[DefaultExecutionOrder(-1000)]`. Kết quả: click vào collider ghost →
+`IsDragging=true`; rê pointer tới ô (2,2) / (0,0) → ghost đứng đúng `(4,1,4)` / `(0,1,0)`; thả →
+`IsDragging=false`; bấm nút Confirm qua `EventSystem` → counter spawn thật.
+
+Chi tiết + giới hạn (chỉ host đơn, không phải tay người, chưa kiểm touch):
+[16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md).
+
 ---
 
 ## Điều kiện kiểm chứng chung cho mọi mục
@@ -190,5 +205,10 @@ unityMCP_read_console   {types: ["error","warning"]}   # phải 0/0
 unityMCP_run_tests      {mode: EditMode}               # baseline 49/49 pass
 Tools → Build Checks → Compile Android Player Scripts # DLL ở Temp/BuildChecks/AndroidPlayerScripts/
 ```
+
+Kết quả chạy lại đầy đủ ngày **2026-10-20**: 0 error / 0 warning, **49/49 pass**,
+**110 assemblies**. Build APK thật thì **chưa kiểm được** (thiếu mật khẩu keystore + máy thiếu
+Android SDK platform 35), 2 client/late join cũng chưa kiểm — chi tiết và lý do ở
+[17-build-and-2client-status.md](17-build-and-2client-status.md).
 
 Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked).
