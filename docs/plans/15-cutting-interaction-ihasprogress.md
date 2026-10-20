@@ -118,9 +118,28 @@ Sau khi sửa:
 
 - `refresh_unity(force)` → `read_console(types=[error,warning])` = **0**.
 - `run_tests(EditMode)` = 49/49 pass.
-- `Tools/Build Checks/Compile Android Player Scripts` = OK.
-- **Chưa** chơi lại bằng tay từ đầu (mua counter → đặt → lấy tomato → cắt) sau khi sửa;
-  lần chơi lại cần làm để xác nhận 2 click liên tiếp trên thớt là cắt được.
+- `Tools/Build Checks/Compile Android Player Scripts` = OK (110 assemblies).
+- **Chưa** kiểm được bằng click thật sau khi sửa. Đã thử dựng lại cảnh chơi nhưng bị chặn bởi
+  chính môi trường test, không phải bởi thay đổi này:
+  1. `GameManager.NewGame()` tạo nhà hàng mới với `widthMin = heightMin = 0` →
+     `GridXZ.IsCellUnlocked()` (`Grid/GridXZ.cs:145-150`) trả `false` cho **mọi** ô →
+     `CanPlace(..., requireUnlockedCells: true)` (`GridSystem/GridBuildingSystem.cs:284`)
+     từ chối mọi lượt đặt. Bản chơi thật mở khoá ô qua tutorial
+     (`TutorialManager.cs:112` → `GridBuildingSystem.UnlockGrid()`), còn đường tắt vào game
+     thì bỏ qua tutorial. Đã gọi tay `UnlockGrid()` để đặt được counter.
+  2. Sau khi đặt, `BuildingGhost` vẫn để lại một bản preview trong scene
+     (`BuildingGhostPreview`) nằm **đúng chỗ** counter vừa đặt và có đủ component của prefab
+     (kể cả `CookingToolCounterController`). Raycast từ toạ độ màn hình trúng preview
+     (`hit=BuildingGhostPreview`) chứ không tới counter thật. Nguy hiểm hơn:
+     `FindFirstObjectByType<CookingToolCounterController>()` trả về **controller của preview**,
+     nên mọi phép đo đọc trên nó (layer, `_slot`, `GetProgress`) không phải của counter thật —
+     một lần đo trước đó đã cho "counter ở layer 7" và suýt bị ghi thành lỗi prefab.
+     Layer 7 đúng là `BuildingGhost` trong `TagManager.asset`, tức đúng là preview.
+
+Vì vậy kết luận hiện tại dựa trên: (a) probe gọi thẳng `InteractAlternateEvent` **trước** khi
+sửa cho thấy `Cut()` chạy đúng; (b) nhánh quyết định `PlayerStateMachine.cs:200-216` cộng với
+`GetProgress()` mới: có `IHasProgress`, thớt có đồ + `IsCuttingActive` → trả `[0,1)` → nhánh
+alternate. **Cần một lượt chơi tay** (mua counter → đặt → lấy tomato → 2 click) để xác nhận.
 
 ## Rủi ro
 
