@@ -154,6 +154,7 @@ nhau, gộp sẽ phải kiểm tra kiểu khi lấy và mất an toàn type.
 | Bước 4 — `ConfigShop.GetById` | ✅ `217875b19`; `GameManager.Economy.cs:88-89` dùng `GetById` thay `List.Find` |
 | Bước 3 — hàm resolve chung | ❌ chưa làm (tùy chọn, không có lỗi nào đang chờ nó) |
 | **Test neg** (guid rác → thấy `LogError`) | ✅ **đã chạy 2026-10-20**, play mode GameScene, **không sửa asset trên đĩa**. Xem mục "Test neg" bên dưới. |
+| **Ô ẩn "dính" session** | ✅ **đã sửa 2026-10-21** — `Refresh()` resolve lại reward; kiểm: ẩn bằng guid rác → mở lại shop → ô hiện lại. Xem mục cuối file. |
 
 ### Test neg — kết quả
 
@@ -188,6 +189,19 @@ Số đo: popup giữ **44** ô cho mọi tab (pool); sau khi ẩn `Fridge` + `P
 `Fridge` và `Peach` vẫn `activeSelf = false`, tab Restaurant chỉ còn **12** ô thay vì 13
 (`FindObjectsByType` chỉ trả object đang active).
 
-**Không sửa** vì đây đúng với thiết kế "build once", và trường hợp thật (guid sai → sửa asset)
-luôn kèm restart. Nếu sau này cần sửa config lúc đang chạy thì phải gọi `GetReward` lại trong
-`Refresh()`.
+**Đã sửa 2026-10-21.** `UIShopItem.Refresh()` giờ `SetActive(true)` rồi resolve lại reward của
+chính nó (`GetReward(configShopItem.Rewards)`). `SetItem()` chỉ gọi `Refresh()` một lần nên không
+resolve trùng. Ô nào thật sự có guid hỏng vẫn bị ẩn lại + `LogError` như cũ, nhưng ô bị ẩn do một
+lần resolve sai (test, config sửa lúc chạy) sẽ hiện lại ở lần mở shop kế tiếp.
+
+Kiểm lại trong play mode (host đơn):
+
+| Bước | Kết quả |
+|---|---|
+| Mở shop, chọn ô `Clear Counter` | active |
+| Gọi `GetReward([ShopReward("deadbeef…", 1)])` trên chính ô đó | `activeSelf = **false**` + **1** `LogError` |
+| Đóng + mở lại shop | `activeSelf = **true**`, **0** error mới (guid thật resolve được) |
+| Tổng ô / ô active của popup | 44 ô, 35 active — 9 ô inactive còn lại là **template** (`configShopItem == null`, `Refresh` return sớm), không phải ô bị ẩn vì guid |
+
+`git status` sau khi thoát Play: không có thay đổi dưới `Assets/SO` / `Assets/Configs`
+— test chỉ sửa trong bộ nhớ.

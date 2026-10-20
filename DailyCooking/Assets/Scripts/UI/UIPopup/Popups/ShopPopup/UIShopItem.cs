@@ -25,6 +25,8 @@ public class UIShopItem : MonoBehaviour
 
     // Items are reused across sessions while GameData is replaced on load/join:
     // follow the current one and re-read the lock state (called when the popup is shown).
+    // Also re-resolve the reward: the cell may have been hidden by a failed guid lookup
+    // earlier in the same session, and must not stay hidden after the data is fixed.
     public void Refresh()
     {
         if (configShopItem == null)
@@ -39,6 +41,8 @@ public class UIShopItem : MonoBehaviour
             gameData.RestaurantData.OnLevelChange += OnLevelChanged;
         }
         OnLevelChanged();
+        gameObject.SetActive(true);
+        GetReward(configShopItem.Rewards);
     }
 
     private void Unsubscribe()
@@ -59,10 +63,8 @@ public class UIShopItem : MonoBehaviour
         textPrice.text = MathUtil.NumberFormat(item.Price);
         ButtonBuy.onClick.RemoveListener(OnClickButtonBuy);
         ButtonBuy.onClick.AddListener(OnClickButtonBuy);
+        // Refresh() re-resolves the reward as well, so don't resolve it twice here.
         Refresh();
-
-        GetReward(item.Rewards);
-
     }
 
     private void OnLevelChanged()
