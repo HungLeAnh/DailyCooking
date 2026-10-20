@@ -331,8 +331,13 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
 
         Context.IsWalking = moveDir != Vector3.zero;
 
-        float rotateSpeed = 10f;
-        transform.forward = Vector3.Slerp(transform.forward, moveDir, rotateSpeed * Time.deltaTime);
+        // Idle frames pass Vector3.zero into Slerp, whose LookRotation normalises a zero
+        // vector and logs "Look rotation viewing vector is zero" every frame.
+        if (Context.IsWalking)
+        {
+            float rotateSpeed = 10f;
+            transform.forward = Vector3.Slerp(transform.forward, moveDir, rotateSpeed * Time.deltaTime);
+        }
     }
     private void SetInteractableObject(IInteractable interactable,Transform transform)
     {
