@@ -15,6 +15,11 @@ xem ghi chú ở từng file.
 |---|---|---|---|
 | 14 | **Runtime ghi thẳng vào material asset** — ✅ đã sửa | [14-grid-guide-material-mutation.md](14-grid-guide-material-mutation.md) · `GridBuildingSystem.cs:26` (`[SerializeField] Material gridGuideMaterial`) → `GridVisualizer.cs:24-28` `SetFloat(...)` | Chạy play mode 1 lần là `GridShaderMaterial.mat` bị commit đè vĩnh viễn (đã thấy `5/5.01` → `0/0.01`). Giá trị đó vô nghĩa vì runtime vẫn set lại, nhưng **working tree bẩn sau mỗi lần chạy** và designer có thể vô tình commit. Đã sửa bằng `new Material(sharedMaterial)` + `Dispose`; kiểm bằng `EditorUtility.IsDirty` và SHA256 của `.mat`. |
 | 15 | **Cắt trên thớt không bấm được** — ✅ đã sửa, đã chơi kiểm | [15-cutting-interaction-ihasprogress.md](15-cutting-interaction-ihasprogress.md) · `CookingToolCounterController.cs:5` thiếu `IHasProgress` → `PlayerStateMachine.cs:200` luôn thấy `null` → `InteractAlternateEvent` không bao giờ chạy → `CookingTool.Cut()` không bao giờ được gọi | Phát hiện khi chơi thật để đo S7: đặt tomato lên thớt rồi click thì **nhấc tomato trả lại tay** thay vì cắt. Hồi quy từ `git show 9e3c5fe4e` (class cũ `CuttingCounterController`/`StoveCounterController` đều có `IHasProgress`). Chặn toàn bộ vòng lặp: không có slices → không nấu được → không phục vụ được → **không lên Level 2**. |
+| 16 | **Tự động hoá input bằng Input System** — ✅ đã kiểm | [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md) | Tìm ra nguyên nhân các lần inject trước thất bại: editor mất focus → `Application.isFocused == false` → `InputManager` chạy `Editor` update type → InputAction không actuate. Công thức: `IgnoreFocus` + `AllDeviceInputAlwaysGoesToGameView` + `runPlayerUpdatesInEditMode`, inject state trong `[DefaultExecutionOrder(-1000)]`. Kéo ghost bằng chuột: **PASS**. |
+| 17 | **Build APK + 2 client** — ⛔ chưa kiểm được | [17-build-and-2client-status.md](17-build-and-2client-status.md) | Chặn bởi môi trường: thiếu mật khẩu keystore (`MyRestaurant.keystore`, alias `dev`) và máy thiếu Android SDK platform 35; 2 client cần process Unity thứ hai (MPPM tạo virtual player qua UI). |
+| 18 | **Warning `Look rotation viewing vector is zero`** — ✅ đã sửa | [18-look-rotation-warning.md](18-look-rotation-warning.md) · `PlayerStateMachine.HandleMovement()` | Khi idle `moveDir == zero`, `Vector3.Slerp(a, zero, t)` trả đúng `zero` lúc `t >= 1` (frame ≥ 100 ms) → `transform.forward = zero` → `LookRotation` log warning. Bọc trong `if (Context.IsWalking)`. |
+| 19 | **3 subscriber `OnMouseClickPerformed` / "1 click ra 3 nhát cắt"** — ✅ đã điều tra, không sửa | [19-click-subscribers-audit.md](19-click-subscribers-audit.md) | 3 subscriber có việc khác nhau; chỉ `PlayerStateMachine` cắt. Đo: mỗi lần nhấn = **1** event; 3 nhát cắt = **3 click** (`CookingTimer` 0→1→2→3). Không có bug. |
+| 20 | **Kéo ghost bằng touch** — ✅ đã kiểm | [20-touch-drag-verification.md](20-touch-drag-verification.md) | Inject `TouchState` (`Began`/`Moved`/`Ended`) vào `Touchscreen`: `Pointer.current = FastTouchscreen`, `IsDragging=true`, ghost bám ô (2,2) → (4,1), thả → `false`. |
 
 ---
 
@@ -29,7 +34,7 @@ xem ghi chú ở từng file.
 | 01 | [01-rpc-chain-removal.md](01-rpc-chain-removal.md) | ⚠️ Mô tả gốc **sai** — 3 class được nêu không còn RPC. Chuỗi RPC thật nằm ở `GameManager.Data.cs` và **bắt buộc** (GameData không phải NetworkVariable) | Cao | Chỉ bước 1 (gom RPC), bước 2 giao mục 02 |
 | 02 | [02-json-join-sync.md](02-json-join-sync.md) | ✅ Hoạt động đúng, chunk 4000 B, chạy **1 lần mỗi lần join** | **Cao nhất** | Chưa — xem 13 trước |
 | 03 | [03-guid-to-int.md](03-guid-to-int.md) | ✅ `.Guid` = Unity asset GUID 32 hex; 6 RPC chở GUID | TB–cao | Không (tiết kiệm ~28 B/RPC) |
-| 04 | [04-ui-object-pooling.md](04-ui-object-pooling.md) | ⚠️ Popup root **đã cache sẵn**; `UICharacterItem` **đã pool**. Còn lại `UIMenuPopup` rebuild mỗi lần mở | TB | Bước 1 (`UIMenuPopup`) nếu profiler báo |
+| 04 | [04-ui-object-pooling.md](04-ui-object-pooling.md) | ⚠️ Popup root **đã cache sẵn**; `UICharacterItem` **đã pool**. Còn lại `UIMenuPopup` rebuild mỗi lần mở | TB | ✅ **Bước 1 đã làm (2026-10-21)** — `UIMenuPopup` create-once + pool; 10 lần mở vẫn 5 category / 20 food item |
 | 05 | [05-camera-main-remaining.md](05-camera-main-remaining.md) | ✅ 17 lần gọi thật; **chỉ 1 đường per-frame** (`BuildingGhost` kéo ghost) | **Thấp** | ✅ **Đã làm** — vệ sinh code, không phải thắng perf có số đo |
 | 06 | [06-playerstats-cache.md](06-playerstats-cache.md) | ⚠️ Allocation **đã xong**; `Update()` đã `!IsOwner` → chỉ 1 lần/frame, list ≤4 | Thấp | Không |
 
@@ -47,7 +52,7 @@ xem ghi chú ở từng file.
 |---|---|---|---|
 | 10 | [10-counter-data-pattern.md](10-counter-data-pattern.md) | **2 pattern là đúng** (GUID = nội dung động, baked = nội dung cố định) | Không chuẩn hoá; thêm guard null + ghi quy ước |
 | 11 | [11-kitchenobject-prefab-baked-so.md](11-kitchenobject-prefab-baked-so.md) | `PlacedObjectView` **đã sạch**; chỉ còn 1 vòng `KitchenObjectSO`↔prefab, và nó **bắt buộc** | Hoãn tới khi làm Addressables |
-| 12 | [12-shop-guid-dictionaries.md](12-shop-guid-dictionaries.md) | Bước 1 + 2 + 4 **đã xong** (`217875b19`, `572f37092`); 1 chỗ linear `Find` không còn | **Xong** — test neg đã chạy: guid rác → `LogError` có guid + tên + category, ô ẩn |
+| 12 | [12-shop-guid-dictionaries.md](12-shop-guid-dictionaries.md) | Bước 1 + 2 + 4 **đã xong** (`217875b19`, `572f37092`); 1 chỗ linear `Find` không còn | **Xong** — test neg đã chạy: guid rác → `LogError` có guid + tên + category, ô ẩn. Ô ẩn "dính" session **đã sửa 2026-10-21** (`Refresh()` resolve lại reward) |
 
 ## D. Chưa làm vì thiếu dữ liệu
 
@@ -210,5 +215,21 @@ Kết quả chạy lại đầy đủ ngày **2026-10-20**: 0 error / 0 warning,
 **110 assemblies**. Build APK thật thì **chưa kiểm được** (thiếu mật khẩu keystore + máy thiếu
 Android SDK platform 35), 2 client/late join cũng chưa kiểm — chi tiết và lý do ở
 [17-build-and-2client-status.md](17-build-and-2client-status.md).
+
+### Kiểm lại 2026-10-21 (sau nhóm 2)
+
+Sau khi sửa warning quay + `UIShopItem.Refresh` + pool `UIMenuPopup`: refresh `force/all` →
+**0 error / 0 warning**, `run_tests(EditMode)` **49/49 pass**, `Compile Android Player Scripts`
+**110 assemblies**. Play mode (host đơn, Relay thật) dùng probe inject input rồi **xoá probe**:
+
+- warning quay: đứng yên 8 s → không còn warning; gọi lại biểu thức cũ với `t = 1` → warning bắn
+  đúng như mô tả (doc 18).
+- click/cắt: mỗi lần nhấn = 1 event; 3 nhát cắt = 3 click (doc 19).
+- touch: kéo ghost bằng `TouchState` → `IsDragging` bật/tắt đúng, ghost bám ô (doc 20).
+- menu popup: 10 lần mở vẫn 5 category / 20 food item; thêm/xoá/thêm lại món đúng (doc 04).
+- shop: ô bị ẩn bằng guid rác hiện lại sau khi mở lại shop (doc 12).
+
+Không có PNG nào được commit; `git status` sau lượt chơi không có thay đổi asset ngoài 5 file code
++ tài liệu.
 
 Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked).
