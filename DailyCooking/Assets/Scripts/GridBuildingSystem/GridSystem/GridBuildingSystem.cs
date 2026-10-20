@@ -188,7 +188,7 @@ public class GridBuildingSystem : NetworkSingleton<GridBuildingSystem>
             BuildingPlacementManager.PlacedObjectTypeSO != null)
             return; 
         float maxDistance = 999f;
-        Ray ray = Camera.main.ScreenPointToRay(e);
+        Ray ray = UtilsClass.MainCamera.ScreenPointToRay(e);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance, counterLayerMask))
         {
             // Tools (e.g. pan mesh) live on child transforms: walk up to the owning placed object.

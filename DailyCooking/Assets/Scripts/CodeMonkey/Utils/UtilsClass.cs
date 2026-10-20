@@ -24,6 +24,16 @@ namespace CodeMonkey.Utils {
         }
 
 
+        // Camera.main searches the scene by tag on every read, and it is read per frame
+        // (grid ghost, screen shake, quest pointer) plus on every click. Cache the reference.
+        private static Camera cachedMainCamera;
+        public static Camera MainCamera {
+            get {
+                if (cachedMainCamera == null) cachedMainCamera = Camera.main;
+                return cachedMainCamera;
+            }
+        }
+
         // Get Main Canvas Transform
         private static Transform cachedCanvasTransform;
         public static Transform GetCanvasTransform() {
@@ -223,7 +233,7 @@ namespace CodeMonkey.Utils {
         // Get Mouse Position in World with Z = 0f
         public static Vector3 GetMouseWorldPosition3D()
         {
-            Ray ray = Camera.main.ScreenPointToRay(GetScreenMousePosition());
+            Ray ray = MainCamera.ScreenPointToRay(GetScreenMousePosition());
             if(Physics.Raycast(ray,out RaycastHit raycastHit,999f))
             {
                 return raycastHit.point;
@@ -237,7 +247,7 @@ namespace CodeMonkey.Utils {
             if (touch == -Vector3.one) 
                 return -Vector3.one;
 
-            Ray ray = Camera.main.ScreenPointToRay(touch);
+            Ray ray = MainCamera.ScreenPointToRay(touch);
             if(Physics.Raycast(ray,out RaycastHit raycastHit,999f))
             {
                 return raycastHit.point;
@@ -246,13 +256,13 @@ namespace CodeMonkey.Utils {
                 return -Vector3.one;
         }
         public static Vector3 GetMouseWorldPosition() {
-            Vector3 vec = GetMouseWorldPositionWithZ(GetScreenMousePosition(), Camera.main);
+            Vector3 vec = GetMouseWorldPositionWithZ(GetScreenMousePosition(), MainCamera);
             vec.z = 0f;
             return vec;
         }
 
         public static Vector3 GetMouseWorldPositionWithZ() {
-            return GetMouseWorldPositionWithZ(GetScreenMousePosition(), Camera.main);
+            return GetMouseWorldPositionWithZ(GetScreenMousePosition(), MainCamera);
         }
 
         public static Vector3 GetMouseWorldPositionWithZ(Camera worldCamera) {
@@ -558,14 +568,14 @@ namespace CodeMonkey.Utils {
         }
 
         public static Vector3 GetWorldPositionFromUIZeroZ() {
-            Vector3 vec = GetWorldPositionFromUI(GetScreenMousePosition(), Camera.main);
+            Vector3 vec = GetWorldPositionFromUI(GetScreenMousePosition(), MainCamera);
             vec.z = 0f;
             return vec;
         }
 
         // Get World Position from UI Position
         public static Vector3 GetWorldPositionFromUI() {
-            return GetWorldPositionFromUI(GetScreenMousePosition(), Camera.main);
+            return GetWorldPositionFromUI(GetScreenMousePosition(), MainCamera);
         }
 
         public static Vector3 GetWorldPositionFromUI(Camera worldCamera) {
@@ -578,7 +588,7 @@ namespace CodeMonkey.Utils {
         }
     
         public static Vector3 GetWorldPositionFromUI_Perspective() {
-            return GetWorldPositionFromUI_Perspective(GetScreenMousePosition(), Camera.main);
+            return GetWorldPositionFromUI_Perspective(GetScreenMousePosition(), MainCamera);
         }
 
         public static Vector3 GetWorldPositionFromUI_Perspective(Camera worldCamera) {
@@ -596,11 +606,14 @@ namespace CodeMonkey.Utils {
 
         // Screen Shake
         public static void ShakeCamera(float intensity, float timer) {
+            Camera cam = MainCamera;
+            if (cam == null)
+                return;
             Vector3 lastCameraMovement = Vector3.zero;
             FunctionUpdater.Create(delegate () {
                 timer -= Time.unscaledDeltaTime;
                 Vector3 randomMovement = new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized * intensity;
-                Camera.main.transform.position = Camera.main.transform.position - lastCameraMovement + randomMovement;
+                cam.transform.position = cam.transform.position - lastCameraMovement + randomMovement;
                 lastCameraMovement = randomMovement;
                 return timer <= 0f;
             }, "CAMERA_SHAKE");
@@ -1573,7 +1586,7 @@ namespace CodeMonkey.Utils {
         public static Vector2 GetScreenMousePosition()
         {
             Vector2 mousePosition =  Mouse.current.position.ReadValue();
-            return new Vector3(mousePosition.x,mousePosition.y,Camera.main.nearClipPlane);
+            return new Vector3(mousePosition.x,mousePosition.y,MainCamera.nearClipPlane);
         }        
         public static Vector3 GetScreenTouchPosition()
         {
@@ -1582,7 +1595,7 @@ namespace CodeMonkey.Utils {
                 return -Vector3.one;
             }
             Vector2 touchPosition = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[0].screenPosition;
-            return new Vector3(touchPosition.x, touchPosition.y, Camera.main.nearClipPlane);
+            return new Vector3(touchPosition.x, touchPosition.y, MainCamera.nearClipPlane);
         }
     }
 

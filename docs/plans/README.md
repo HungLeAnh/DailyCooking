@@ -30,7 +30,7 @@ xem ghi chú ở từng file.
 | 02 | [02-json-join-sync.md](02-json-join-sync.md) | ✅ Hoạt động đúng, chunk 4000 B, chạy **1 lần mỗi lần join** | **Cao nhất** | Chưa — xem 13 trước |
 | 03 | [03-guid-to-int.md](03-guid-to-int.md) | ✅ `.Guid` = Unity asset GUID 32 hex; 6 RPC chở GUID | TB–cao | Không (tiết kiệm ~28 B/RPC) |
 | 04 | [04-ui-object-pooling.md](04-ui-object-pooling.md) | ⚠️ Popup root **đã cache sẵn**; `UICharacterItem` **đã pool**. Còn lại `UIMenuPopup` rebuild mỗi lần mở | TB | Bước 1 (`UIMenuPopup`) nếu profiler báo |
-| 05 | [05-camera-main-remaining.md](05-camera-main-remaining.md) | ✅ 16 chỗ thật; **chỉ 1 đường per-frame** (`BuildingGhost` kéo ghost) | **Thấp** | **Có** — nhóm an toàn nhất |
+| 05 | [05-camera-main-remaining.md](05-camera-main-remaining.md) | ✅ 17 lần gọi thật; **chỉ 1 đường per-frame** (`BuildingGhost` kéo ghost) | **Thấp** | ✅ **Đã làm** — vệ sinh code, không phải thắng perf có số đo |
 | 06 | [06-playerstats-cache.md](06-playerstats-cache.md) | ⚠️ Allocation **đã xong**; `Update()` đã `!IsOwner` → chỉ 1 lần/frame, list ≤4 | Thấp | Không |
 
 ## B. Data cần bạn quyết (con số / tên)

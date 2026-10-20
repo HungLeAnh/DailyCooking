@@ -152,7 +152,7 @@ namespace CodeMonkey.Utils {
 
 
         void Awake() {
-            if (GetWorldCamera == null) SetGetWorldCamera(() => Camera.main); // Set default World Camera
+            if (GetWorldCamera == null) SetGetWorldCamera(() => UtilsClass.MainCamera); // Set default World Camera
             posExit = transform.localPosition;
             posEnter = transform.localPosition + (Vector3)hoverBehaviour_Move_Amount;
             SetupHoverBehaviour();

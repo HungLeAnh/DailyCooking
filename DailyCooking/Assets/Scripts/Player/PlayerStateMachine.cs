@@ -1,3 +1,4 @@
+using CodeMonkey.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -167,7 +168,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
             return;
 
         float maxDistance = 999f;
-        Ray ray = Camera.main.ScreenPointToRay(e);
+        Ray ray = UtilsClass.MainCamera.ScreenPointToRay(e);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance))
         {
             // Interactables and tool meshes can live on child transforms: walk up the hierarchy.

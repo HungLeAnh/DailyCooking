@@ -1,3 +1,4 @@
+using CodeMonkey.Utils;
 using DG.Tweening;
 using System.Net;
 using UnityEngine;
@@ -90,7 +91,7 @@ public class DOTweenHandClick : MonoBehaviour
     }
     private Vector2 GetCanvasPos(Vector3 worldPos)
     {
-        Vector2 screenPoint = Camera.main.WorldToScreenPoint(worldPos);
+        Vector2 screenPoint = UtilsClass.MainCamera.WorldToScreenPoint(worldPos);
         return screenPoint;
     }
 }

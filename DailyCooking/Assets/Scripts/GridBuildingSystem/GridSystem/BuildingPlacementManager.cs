@@ -104,7 +104,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
 
     public Vector3 GetMouseWorldSnappedPosition()
     {
-        Ray ray = Camera.main.ScreenPointToRay(GameInput.Instance.GetClickPosition());
+        Ray ray = UtilsClass.MainCamera.ScreenPointToRay(GameInput.Instance.GetClickPosition());
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f))
         {     
             gridManager.GetXZ(new Vector3(Mathf.RoundToInt(raycastHit.point.x),

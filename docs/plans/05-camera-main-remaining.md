@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | A. Mạng / tối ưu (đã hoãn) |
 | **Nguồn** | `docs/optimization_plan.md` §3.5 |
-| **Trạng thái** | Chưa làm (mục 1-2 chỗ đầu đã làm trong commit `bcb3d4b6f`) |
+| **Trạng thái** | ✅ **Đã làm** (mục 1-2 chỗ đầu đã làm trong commit `bcb3d4b6f`) |
 | **Rủi ro** | **Thấp** — nhóm an toàn nhất trong 13 mục |
 | **Ưu tiên** | Cao, nếu phải chọn một việc trong nhóm A để làm |
 
@@ -133,3 +133,68 @@ gọi từ chỗ đổi camera. Chưa cần thiết lúc này.
 
 - Gần như zero. Nếu có lỗi chỉ là chỗ bị thay sai biến.
 - Rollback: một commit duy nhất, revert là về nguyên trạng.
+
+---
+
+## Kết quả (đã làm)
+
+Grep lại ngay trước khi sửa: **17 lần gọi `Camera.main` trên 16 dòng** (kế hoạch ghi 16 — lệch 1
+do một dòng `ShakeCamera` có 2 lần gọi; `GridBuildingSystem` lúc này ở dòng 191 chứ không phải 188).
+
+### Đã thay
+
+1. Thêm cache vào `UtilsClass` (giữ đúng pattern `LookAtCamera` / `Window_QuestPointer`):
+
+   ```csharp
+   private static Camera cachedMainCamera;
+   public static Camera MainCamera {
+       get {
+           if (cachedMainCamera == null) cachedMainCamera = Camera.main;
+           return cachedMainCamera;
+       }
+   }
+   ```
+
+2. 11 lần trong `UtilsClass.cs` → `MainCamera` (method nội bộ):
+   `GetMouseWorldPosition3D`, `GetTouchWorldPosition3D`, `GetMouseWorldPosition`,
+   `GetMouseWorldPositionWithZ`, `GetWorldPositionFromUIZeroZ`, `GetWorldPositionFromUI`,
+   `GetWorldPositionFromUI_Perspective`, `GetScreenMousePosition`, `GetScreenTouchPosition`.
+3. `BuildingPlacementManager.cs:107`, `GridBuildingSystem.cs:191`,
+   `PlayerStateMachine.cs:170`, `GameInput.cs:188`, `DOTweenHandClick.cs:93`,
+   `Button_Sprite.cs:155` → `UtilsClass.MainCamera` (3 file phải thêm `using CodeMonkey.Utils;`).
+4. `ShakeCamera` gộp 2 lần đọc thành 1 biến `cam` + guard `cam == null`.
+
+Sau khi sửa, `grep Camera.main` chỉ còn: getter trong `UtilsClass` và 2 cache riêng đã có từ trước
+(`LookAtCamera`, `Window_QuestPointer`).
+
+### Kiểm chứng
+
+- `refresh_unity(force)` → console **0 error / 0 warning**.
+- `run_tests(EditMode)` → **49/49 pass**.
+- `Tools/Build Checks/Compile Android Player Scripts` → **110 assemblies**.
+- Play mode, MainMenuScene **và** GameScene: `UtilsClass.MainCamera == Camera.main` (`same=True`);
+  sau khi chuyển scene vẫn trỏ đúng `MainCamera`, `nearClipPlane = 0.01`.
+- Raycast từ hai camera tại cùng một điểm màn hình: cùng trúng `ClearCounter(Clone)`,
+  `sameHit=True` — tức việc thay tham chiếu không đổi tia.
+- Click thật qua `GameInput.OnMouseClickPerformed` (có 3 subscriber: `GameInput`,
+  `GridBuildingSystem`, `PlayerStateMachine`) với 1 tomato trong tay:
+  trước `playerHas=True, counterHas=False` → sau click `playerHas=False, counterHas=True
+  (TomatoSO)`. Đây là đường có dùng `UtilsClass.MainCamera.ScreenPointToRay` ở
+  `PlayerStateMachine.cs:171`, nên click vẫn tới đúng counter.
+
+### Chưa kiểm / lưu ý trung thực
+
+- **`ShakeCamera` không dùng trong gameplay**: chỉ có `Tools/Profiling/S10 - ShakeCamera 10s`
+  gọi nó. Thử gọi `ShakeCamera(0.05f, 0.4f)` hai lần trong GameScene: vị trí camera **không đổi**
+  (`(5.000, 15.700, -3.000)` trước và sau), vì `CameraController` ghi đè vị trí camera mỗi frame.
+  Vì vậy **không kết luận được** gì về "rung không lệch dần" từ test này — thay đổi ở đó chỉ là
+  gộp 2 lần đọc thành 1.
+- **Đây không phải tối ưu có số đo**: baseline profiler (`13-profiler-baseline.md`) cho p95 trong
+  ngưỡng, nên mục này là **vệ sinh code** (bỏ lookup theo tag) chứ không phải thắng hiệu năng đã
+  chứng minh. Không có so sánh frame-time trước/sau và không nên ghi là "đã tối ưu".
+- Kéo ghost bằng chuột thật vẫn chưa kiểm được (xem cạm bẫy #7/#9: pointer Input System không bám
+  con trỏ), nên đường `BuildingPlacementManager.GetMouseWorldSnappedPosition()` chỉ được kiểm
+  gián tiếp qua raycast tương đương.
+- Ghi nhận thêm (ngoài phạm vi mục này): `GameInput.OnMouseClickPerformed` có **3 subscriber**, và
+  trong lượt đo cắt trước đó một lần phát click cho ra 3 nhát cắt — hành vi này không do thay đổi
+  ở đây gây ra, nhưng đáng điều tra riêng.

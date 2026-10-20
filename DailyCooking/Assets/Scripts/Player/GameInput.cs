@@ -1,3 +1,4 @@
+using CodeMonkey.Utils;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -185,7 +186,7 @@ public class GameInput : PersistentSingleton<GameInput>
     public bool CheckTouchOverBuildingGhost(Vector2 position)
     {
         float interactDistance = buildingGhostRayDistance;
-        Ray ray = Camera.main.ScreenPointToRay(position);
+        Ray ray = UtilsClass.MainCamera.ScreenPointToRay(position);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, interactDistance, buildingGhostLayerMask))
         {
             //Debug.Log("Touch Position: " + raycastHit.transform.position);
