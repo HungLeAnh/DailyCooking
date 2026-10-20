@@ -14,6 +14,7 @@ xem ghi chú ở từng file.
 | # | Việc | Vị trí | Vì sao thêm |
 |---|---|---|---|
 | 14 | **Runtime ghi thẳng vào material asset** | `GridBuildingSystem.cs:26` (`[SerializeField] Material gridGuideMaterial`) → `GridVisualizer.cs:24-28` `SetFloat(...)` | Chạy play mode 1 lần là `GridShaderMaterial.mat` bị commit đè vĩnh viễn (đã thấy `5/5.01` → `0/0.01`). Giá trị đó vô nghĩa vì runtime vẫn set lại, nhưng **working tree bẩn sau mỗi lần chạy** và designer có thể vô tình commit. Sửa: `new Material(sharedMaterial)` rồi dispose, hoặc `MaterialPropertyBlock`. |
+| 15 | **Cắt trên thớt không bấm được** | [15-cutting-interaction-ihasprogress.md](15-cutting-interaction-ihasprogress.md) · `CookingToolCounterController.cs:5` thiếu `IHasProgress` → `PlayerStateMachine.cs:200` luôn thấy `null` → `InteractAlternateEvent` không bao giờ chạy → `CookingTool.Cut()` không bao giờ được gọi | Phát hiện khi chơi thật để đo S7: đặt tomato lên thớt rồi click thì **nhấc tomato trả lại tay** thay vì cắt. Hồi quy từ `git show 9e3c5fe4e` (class cũ `CuttingCounterController`/`StoveCounterController` đều có `IHasProgress`). Chặn toàn bộ vòng lặp: không có slices → không nấu được → không phục vụ được → **không lên Level 2**. |
 
 ---
 

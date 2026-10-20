@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class CookingToolCounterController : ClearCounterController, IHasOptionalSO
+public class CookingToolCounterController : ClearCounterController, IHasOptionalSO, IHasProgress
 {
     [SerializeField] private List<CookingToolConfigSO.CookingToolType> acceptedToolTypes = new List<CookingToolConfigSO.CookingToolType>();
 
@@ -160,9 +160,14 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         _cookingTool.Cut(playerStateMachine);
     }
 
+    // PlayerStateMachine treats -1 as "no alternate action on this interactable".
+    // Only a cutting tool with food offers the alternate action (one cut per click).
+    // Everything else (place / take back / plate transfer / frying) must stay on the normal interact path.
     public float GetProgress()
     {
-        return TryResolveTool() ? _cookingTool.GetProgress() : 0f;
+        if (!TryResolveTool() || !_cookingTool.HasKitchenObject() || !_cookingTool.IsCuttingActive)
+            return -1f;
+        return _cookingTool.GetProgress();
     }
 
     public bool IsDone()
