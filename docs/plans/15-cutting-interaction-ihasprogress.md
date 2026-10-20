@@ -114,32 +114,66 @@ nguyên liệu lên chảo. `-1` là giá trị `PlayerStateMachine.cs:209` đã
   `IHasProgress`) → `GetProgress()` nhảy `0.2` rồi `0.4989`, tức `CookingTool.Cut()` chạy đúng
   và `cuttingProgressMax = 5`. Vậy lỗi nằm đúng ở cổng interface, không nằm trong `Cut()`.
 
-Sau khi sửa:
+Sau khi sửa (build check, commit `caddb06fe`):
 
 - `refresh_unity(force)` → `read_console(types=[error,warning])` = **0**.
 - `run_tests(EditMode)` = 49/49 pass.
 - `Tools/Build Checks/Compile Android Player Scripts` = OK (110 assemblies).
-- **Chưa** kiểm được bằng click thật sau khi sửa. Đã thử dựng lại cảnh chơi nhưng bị chặn bởi
-  chính môi trường test, không phải bởi thay đổi này:
-  1. `GameManager.NewGame()` tạo nhà hàng mới với `widthMin = heightMin = 0` →
-     `GridXZ.IsCellUnlocked()` (`Grid/GridXZ.cs:145-150`) trả `false` cho **mọi** ô →
-     `CanPlace(..., requireUnlockedCells: true)` (`GridSystem/GridBuildingSystem.cs:284`)
-     từ chối mọi lượt đặt. Bản chơi thật mở khoá ô qua tutorial
-     (`TutorialManager.cs:112` → `GridBuildingSystem.UnlockGrid()`), còn đường tắt vào game
-     thì bỏ qua tutorial. Đã gọi tay `UnlockGrid()` để đặt được counter.
-  2. Sau khi đặt, `BuildingGhost` vẫn để lại một bản preview trong scene
-     (`BuildingGhostPreview`) nằm **đúng chỗ** counter vừa đặt và có đủ component của prefab
-     (kể cả `CookingToolCounterController`). Raycast từ toạ độ màn hình trúng preview
-     (`hit=BuildingGhostPreview`) chứ không tới counter thật. Nguy hiểm hơn:
-     `FindFirstObjectByType<CookingToolCounterController>()` trả về **controller của preview**,
-     nên mọi phép đo đọc trên nó (layer, `_slot`, `GetProgress`) không phải của counter thật —
-     một lần đo trước đó đã cho "counter ở layer 7" và suýt bị ghi thành lỗi prefab.
-     Layer 7 đúng là `BuildingGhost` trong `TagManager.asset`, tức đúng là preview.
 
-Vì vậy kết luận hiện tại dựa trên: (a) probe gọi thẳng `InteractAlternateEvent` **trước** khi
-sửa cho thấy `Cut()` chạy đúng; (b) nhánh quyết định `PlayerStateMachine.cs:200-216` cộng với
-`GetProgress()` mới: có `IHasProgress`, thớt có đồ + `IsCuttingActive` → trả `[0,1)` → nhánh
-alternate. **Cần một lượt chơi tay** (mua counter → đặt → lấy tomato → 2 click) để xác nhận.
+Sau khi sửa (play mode, **đi đúng thứ tự mở khoá**, không dùng đường tắt):
+
+1. Panel tutorial `GameMachanic` (8 bước) hiện ra sau `UIMainMenuPopup` → NewRestaurant.
+   Bấm qua hết 8 bước → `TutorialManager` đóng panel → `TutorialData.HasPlayedFirstTime = True`
+   và `GridXZ.IsCellUnlocked(0,0) = True`, `IsCellUnlocked(2,2) = True`.
+   Đây chính là bước mà lượt test trước đã bỏ qua: `NewGame()` một mình tạo nhà hàng
+   `widthMin = heightMin = 0` nên `IsCellUnlocked` false với **mọi** ô →
+   `CanPlace(..., requireUnlockedCells: true)` (`GridSystem/GridBuildingSystem.cs:284`)
+   từ chối mọi lượt đặt. Đó là giới hạn của đường tắt test, **không phải** lỗi của bản sửa.
+2. Mua trong shop: Container Counter (10) + Clear Counter (30) + Cutting Board Tool (40) +
+   Tomatoes (15) → coin 200 → 105.
+3. Đặt: `ContainerCounter@(0,0,0)`, `ClearCounter@(2,0,0)`, `CuttingBoardTool@(3,1,1)`;
+   cả ba `NetworkObject.IsSpawned = True`, layer 6 (`Building`). Preview `BuildingGhostPreview`
+   đã bị huỷ sau lượt đặt, nên tia click trúng `ClearCounter(Clone)` thật.
+4. Kết quả từng click (tia phóng từ toạ độ màn hình của collider thật):
+
+   | click | `_slot.Current` | `CookingTimer` | `GetProgress()` | nhánh đã chạy |
+   | --- | --- | --- | --- | --- |
+   | 1 | `TomatoSO` | 0 | 0 | `InteractEvent` — đặt tomato lên thớt |
+   | 2 | `TomatoSO` | 3 | 0.6 | `InteractAlternateEvent` → `Cut()` |
+   | 3 | `TomatoSO` | 4 | 0.78 | `Cut()` |
+   | 4 | `TomatoSO` | 5 | — | `Cut()` đủ `cuttingProgressMax = 5` |
+   | 5 | `TomatoSliceSO` | 0 (reset) | -1 | `InteractEvent` — nhấc `food_ingredient_tomato_slice` vào tay |
+
+   Tức là: `IHasProgress` đã có tác dụng (click 2–4 cắt thật), `Cut()` spawn đúng output, và
+   nhánh `-1` mới giữ được hành vi "cắt xong thì nhấc ra" thay vì alternate vô ích.
+5. Console sau lượt chơi: **0 error**, 1 warning `Look rotation viewing vector is zero`
+   (`PlayerStateMachine.cs:334`) — warning có sẵn từ trước, đã ghi ở `13-profiler-baseline.md`.
+
+### Những phần vẫn là thao tác test, không phải chơi tay 100%
+
+Ghi rõ để không ai đọc phần trên thành "đã chơi tay toàn bộ":
+
+- **Mua**: bấm `ShopButton.onClick` để mở shop, rồi gọi thẳng
+  `ShopManager.Instance.OnPurchase(config, config.Rewards)` — **bỏ qua** nút Buy và popup
+  xác nhận (nút Buy chỉ mở popup, không mua ngay — xem `UIShopItem.cs:82-94`).
+- **Đặt counter**: gọi `BuildingPlacementManager.SetPlacedObjectTypeSO(so, target)` +
+  `TryPlaceBuildingObject(target)` — **không** kéo ghost bằng chuột (pointer của Input System
+  không bám con trỏ trong môi trường này).
+- **Tomato**: `KitchenObject.SpawnKitchenObject(TomatoSO, player)`. PostBox có trong scene ở
+  `(1,0,-1)` nhưng lượt này không đi chuỗi PostBox → package → Container Counter.
+- **Click**: phát lại `GameInput.OnMouseClickPerformed` qua reflection, không phải chuột thật.
+  Bù lại, toạ độ là toạ độ màn hình của collider **thật** và tia raycast trúng
+  `ClearCounter(Clone)`, nên chuỗi
+  `raycast → Context.SelectedInteractableObject → as IHasProgress → InteractAlternateEvent`
+  là chuỗi production, không phải gọi tắt method.
+
+Ảnh kiểm chứng: `%TEMP%\opencode\dailycooking-verify\cutting-after-fix-tomato-slices.png`
+(slice trong tay player, hierarchy `food_ingredient_tomato_slice(Clone)`) — **không commit**.
+
+## Kết luận
+
+Fix đã được xác nhận bằng vòng lặp đầy đủ trong play mode: đặt → cắt 3 nhát → ra slices →
+nhấc slices. Trước khi sửa, cùng cảnh đó click thứ 2 chỉ nhấc tomato trả lại tay.
 
 ## Rủi ro
 

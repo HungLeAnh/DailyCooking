@@ -276,6 +276,36 @@ nhưng tay cầm **không nhúc nhích** và `Moving` vẫn `(0,0)`. ⇒ Sự ki
    Phải kiểm bằng một tín hiệu **có quan sát được** (text đổi, transform đổi, log mới),
    không được suy ra từ việc click "có vẻ đã tới nơi".
 
+8. **Chưa xong tutorial thì mọi lượt đặt đều bị từ chối.** `GameManager.NewGame()` tạo nhà hàng
+   với `widthMin = heightMin = 0` → `GridXZ.IsCellUnlocked()` false với **toàn bộ** ô →
+   `CanPlace(..., requireUnlockedCells: true)` từ chối sạch. Ô chỉ mở ở
+   `TutorialManager.cs:112` → `GridBuildingSystem.UnlockGrid()`, tức **phải đóng panel tutorial**
+   (panel `GameMachanic`, 8 bước). Đường tắt `NewGame` + `LoadNetwork` **bỏ qua** bước này —
+   gọi tay `UnlockGrid()` thì đặt được nhưng kết quả không còn là "chơi thật".
+
+9. **`EditorApplication.update` không tick trong play mode** → mọi "driver" dựa vào nó để bơm
+   input giả đều im lặng. Bơm gamepad phải gọi tay `InputSystem.Update()` ngay sau
+   `QueueStateEvent`. Kể cả vậy gamepad vẫn chập chờn → di chuyển player bằng
+   `transform.position = target` + `Physics.SyncTransforms()`, và **nói rõ** trong doc là đã
+   teleport chứ không đi bộ. `Gamepad.current` có thể `null` → `InputSystem.AddDevice<Gamepad>()`.
+
+10. **Race với auto sign-in lúc boot.** Gọi `StartHostSessionAsync()` quá sớm → fail
+    `Failed to start host with Relay` rồi `Failed to start single player session!`.
+    `SignInAnonymouslyAsync` **nuốt exception** (`SessionManager.cs:82-93`) nên lần gọi thứ hai
+    lại thành công — đừng kết luận là lỗi Netcode.
+
+11. **`FindFirstObjectByType<CookingToolCounterController>()` có thể trả controller của
+    `BuildingGhostPreview`, không phải counter thật.** Preview nằm đúng chỗ counter vừa đặt và
+    mang đủ component của prefab (component bị `enabled = false` nhưng `GetComponent` vẫn thấy),
+    layer 7 = `BuildingGhost`. Số đo đọc trên nó là số giả ("counter ở layer 7"). → Luôn lọc
+    `NetworkObject.IsSpawned`, và kiểm `hit.collider` trước khi kết luận "click trúng counter".
+
+12. **Khách (Bot) đứng giữa đường tia** → raycast trúng collider khách, không trúng counter.
+    Log tên collider trúng rồi mới kết luận click hỏng.
+
+13. **Menu item có `/` trong nhãn bị chuẩn hoá khoảng trắng** khi đi qua cầu nối MCP → đừng dùng
+    chuỗi menu làm khoá chính xác để `execute_menu_item`.
+
 ### Việc còn lại
 
 - **Cần người thao tác tay:** S3 (đi lại + click counter), S4 (kéo ghost), S7 (chạy bếp 3 phút),
