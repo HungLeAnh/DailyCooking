@@ -76,6 +76,9 @@ public class GridBuildingSystem : NetworkSingleton<GridBuildingSystem>
             GameInput.Instance.OnMouseClickPerformed -= GameInput_OnMouseClickPerformed;
         if (MultiplayerManager.Instance != null)
             MultiplayerManager.Instance.OnDataSyncToNewClient -= MultiplayerManager_OnDataSyncToNewClient;
+        if (gridVisualizer is IDisposable disposableGridVisualizer)
+            disposableGridVisualizer.Dispose();
+        gridVisualizer = null;
         base.OnDestroy();
     }
     protected override void Awake()
