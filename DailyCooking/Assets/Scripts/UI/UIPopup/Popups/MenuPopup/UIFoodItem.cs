@@ -36,6 +36,14 @@ public class UIFoodItem : MonoBehaviour
     public void SetMenuFoodItem(FoodSO item, bool isSelected)
     {
         this.foodSO = item;
+
+        // The popup now pools food items and re-binds them, so drop the listeners and the
+        // pending "dish unlocked" handler from the previous dish before wiring the new one.
+        infoButton.onClick.RemoveAllListeners();
+        foodButton.onClick.RemoveAllListeners();
+        if (GameManager.Instance != null && GameManager.Instance.GameData != null)
+            GameManager.Instance.GameData.MenuData.OnMenuDataChanged -= MenuData_OnMenuDataChanged;
+
         foodImage.sprite = item.Sprite;
         foodNameText.text = item.recipeName;
         foodPriceText.text = $"${item.price}";

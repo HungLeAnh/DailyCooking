@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | A. Mạng / tối ưu (đã hoãn) |
 | **Nguồn** | `docs/optimization_plan.md` §3.4 |
-| **Trạng thái** | Chưa làm — **một nửa việc đã được làm sẵn** |
+| **Trạng thái** | ✅ **Bước 1 xong (2026-10-21)** — `UIMenuPopup` create-once + pool. Bước 2–4 vẫn bỏ ngỏ |
 | **Rủi ro** | Trung bình (UI regress: item mất listener, hiện sai, item "ma") |
 | **Ưu tiên** | Trung bình — chỉ tốn khi **người dùng bấm mở popup**, không per-frame |
 
@@ -110,3 +110,58 @@ Sửa 1 dòng, không rủi ro.
 - Dễ nhất là listener dính: `Instantiate` mới mà `onClick` vẫn còn handler cũ → bấm 1 cái chạy 2 lần.
   Fix: `RemoveAllListeners()` trước khi `AddListener`, hoặc `UnityEvent` gán thay vì cộng dồn.
 - Rollback: một commit riêng cho `UIMenuPopup`, revert nếu checklist fail.
+
+---
+
+## Đã làm — Bước 1 (`UIMenuPopup`), 2026-10-21
+
+### Thay đổi
+
+`UIMenuPopup.cs`:
+
+- `Initialize()` = `BuildCategoriesIfNeeded()` + `RefreshMenuList()` + chọn lại tab `All`.
+  - Category dựng **một lần** từ `FoodType` enum, giữ `List<UIMenuCategoryItem>`.
+  - Menu card pool theo `List<UIMenuItem>`: đủ thì bind lại, thiếu thì `Instantiate`, thừa thì
+    `SetActive(false)`.
+  - `Start()` không gọi lại `Initialize()` nếu `ShowPopup()` đã gọi (trước đây popup mới bị build
+    2 lần trong cùng frame).
+- `ShowMenuOfType()` pool `List<UIFoodItem>` theo cùng cách; bỏ `Destroy` + `Instantiate`.
+- Bỏ LINQ `.Where().ToList()` mỗi lần đổi category: cache `Dictionary<FoodType, List<FoodSO>>`
+  (dựng lười ở lần đầu).
+- `GetFirstUnlockedFoodItem()` chỉ trả item `activeSelf` (nếu không sẽ trả item cũ đang bị ẩn).
+- Thêm/xoá món: `AddMenuItemCard()` tái dùng card ẩn trước khi tạo mới; `OnRemoveDishClicked()`
+  `SetActive(false)` thay `Destroy`.
+
+Listener (rủi ro chính của pool):
+
+- `UIFoodItem.SetMenuFoodItem()`: `RemoveAllListeners()` trên `infoButton` + `foodButton`, và
+  `-=` handler "dish unlocked" còn treo từ món trước.
+- `UIMenuItem.SetMenuFoodItem()`: `RemoveAllListeners()` trên `buttonRemove`; thêm property
+  `FoodSO` để popup tìm card của món.
+- Popup gắn lại listener **sau** khi bind (vì bind đã clear).
+
+### Kiểm chứng (play mode, host đơn, 2026-10-21)
+
+| Kiểm | Kết quả |
+|---|---|
+| Mở popup **1 lần** | 5 category, 20 food item (All) |
+| `ShowPopup` **10 lần** liên tiếp | vẫn **5 / 20 / 0** (trước đây 1 frame 10 lần sinh 55 category item) |
+| Bấm từng category | All **20/20**, Appetizer **3/3**, MainDish **13/13**, Dessert **1/1**, Drink **3/3** item; **0** item sai `foodType` |
+| Thêm 1 món (Cheese Hamburger) | `menuDished 0→1`, **1** card, đúng tên |
+| Bấm thêm lần 2 cùng món | vẫn `1` món, `1` card (không nhân đôi) |
+| Xoá món qua nút trên card | `dishes 1→0`, card ẩn, `totalDish` cập nhật |
+| Mở lại popup sau khi xoá | 0 card active, pool giữ **1** card (không tạo mới) |
+| Thêm lại món + mở lại popup | 1 card, đúng món, không trùng |
+| Console | 0 error / 0 warning sau lượt chơi |
+| `run_tests(EditMode)` | **49/49 pass** |
+| Android player scripts | **110 assemblies** |
+
+### Chưa kiểm / giới hạn
+
+- Chưa đo **GC Alloc** trước/sau bằng Profiler (chưa mở Profiler UI trong lượt này) → **không có
+  số đo**, chỉ có số object/card như bảng trên.
+- Chỉ kiểm **host đơn**; chưa kiểm client thấy card mới sau `AddDishToMenuServerRpc` (card được
+  thêm ngay như code cũ, nhưng count chỉ đúng khi server đã áp dụng — giữ nguyên hành vi cũ).
+- Tutorial trỏ vào food item đầu tiên (`GetFirstUnlockedFoodItem`) chỉ kiểm gián tiếp qua việc
+  item active/locked đúng; chưa chạy lại toàn bộ tutorial bằng tay.
+- Bước 2 (`UICharacterPopup` badge) và Bước 4 (`UIUpgradePopup` cache mảng) **chưa làm**.
