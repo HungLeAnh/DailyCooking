@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | C. Kiến trúc cần chốt |
 | **Nguồn** | `docs/datamanagement.md` §4.2 |
-| **Trạng thái** | ✅ **Đã làm Bước 2 (LogError)** — 2 chỗ fail im lặng ở `UIShopItem.GetReward` giờ log guid + tên item + category. Compile Android + 49/49, console 0/0. Play mode: mở shop popup, bấm cả 3 tab (Resource / Restaurant / Ingredients) → **0 `LogError`**, mọi ô hiện đủ tên + giá + icon. **Bước 1 (đổi linear → dictionary) thuộc Gói 2, chưa làm** — linear `Find` còn nguyên. |
+| **Trạng thái** | ✅ **Xong** — Bước 1 (dictionary) ở `217875b19`, Bước 2 (LogError) ở `572f37092`, Bước 4 (cache `GetById`) cũng ở `217875b19`. Chỉ **Bước 3 (hàm resolve chung)** là chưa làm và nó là tùy chọn. Bước 1 kiểm lại hôm nay: `UIShopItem.cs:108-109` đã dùng `PlacedObjectTypeSODictionary.GetValueOrDefault`, không còn `Find` tuyến tính nào trong `Assets/Scripts`. |
 | **Rủi ro** | Thấp |
 | **Ưu tiên** | Trung bình (perf thấp, **robustness mới là cái đáng làm**) |
 
@@ -142,3 +142,15 @@ nhau, gộp sẽ phải kiểm tra kiểu khi lấy và mất an toàn type.
 - Gần 0. Nếu `PlacedObjectTypeSODictionary` chưa được dựng (script order) → `GetValueOrDefault`
   trả null → giờ sẽ log lỗi, **dễ phát hiện hơn hiện tại**.
 - Rollback: 1 commit.
+
+---
+
+## Trạng thái kiểm chứng (cập nhật)
+
+| Hạng mục | Trạng thái |
+|---|---|
+| Bước 1 — dictionary thay `Find` | ✅ `217875b19`; kiểm lại 2026-10-20: `UIShopItem.cs:108-109`, không còn `PlacedObjects.Find` trong `Assets/Scripts` |
+| Bước 2 — `LogError` khi resolve fail | ✅ `572f37092`; đã chơi: mở shop, bấm 3 tab → 0 `LogError`, đủ tên/giá/icon |
+| Bước 4 — `ConfigShop.GetById` | ✅ `217875b19`; `GameManager.Economy.cs:88-89` dùng `GetById` thay `List.Find` |
+| Bước 3 — hàm resolve chung | ❌ chưa làm (tùy chọn, không có lỗi nào đang chờ nó) |
+| **Test neg** (guid rác → thấy `LogError`) | ⏳ **chưa chạy**. Cần vào GameScene (shop chỉ có trong HUD của game), sửa 1 `reward.Guid` **trong bộ nhớ** rồi mở lại shop. Không sửa asset trên đĩa. |

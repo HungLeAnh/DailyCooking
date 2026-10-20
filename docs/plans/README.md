@@ -47,7 +47,7 @@ xem ghi chú ở từng file.
 |---|---|---|---|
 | 10 | [10-counter-data-pattern.md](10-counter-data-pattern.md) | **2 pattern là đúng** (GUID = nội dung động, baked = nội dung cố định) | Không chuẩn hoá; thêm guard null + ghi quy ước |
 | 11 | [11-kitchenobject-prefab-baked-so.md](11-kitchenobject-prefab-baked-so.md) | `PlacedObjectView` **đã sạch**; chỉ còn 1 vòng `KitchenObjectSO`↔prefab, và nó **bắt buộc** | Hoãn tới khi làm Addressables |
-| 12 | [12-shop-guid-dictionaries.md](12-shop-guid-dictionaries.md) | 1 chỗ linear `Find` + **fail im lặng làm ô shop biến mất** | Làm phần log lỗi; phần perf không cần |
+| 12 | [12-shop-guid-dictionaries.md](12-shop-guid-dictionaries.md) | Bước 1 + 2 + 4 **đã xong** (`217875b19`, `572f37092`); 1 chỗ linear `Find` không còn | Chỉ còn test neg (guid rác → `LogError`) chưa chạy |
 
 ## D. Chưa làm vì thiếu dữ liệu
 
