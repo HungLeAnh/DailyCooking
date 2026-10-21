@@ -20,6 +20,7 @@ xem ghi chú ở từng file.
 | 18 | **Warning `Look rotation viewing vector is zero`** — ✅ đã sửa | [18-look-rotation-warning.md](18-look-rotation-warning.md) · `PlayerStateMachine.HandleMovement()` | Khi idle `moveDir == zero`, `Vector3.Slerp(a, zero, t)` trả đúng `zero` lúc `t >= 1` (frame ≥ 100 ms) → `transform.forward = zero` → `LookRotation` log warning. Bọc trong `if (Context.IsWalking)`. |
 | 19 | **3 subscriber `OnMouseClickPerformed` / "1 click ra 3 nhát cắt"** — ✅ đã điều tra, không sửa | [19-click-subscribers-audit.md](19-click-subscribers-audit.md) | 3 subscriber có việc khác nhau; chỉ `PlayerStateMachine` cắt. Đo: mỗi lần nhấn = **1** event; 3 nhát cắt = **3 click** (`CookingTimer` 0→1→2→3). Không có bug. |
 | 20 | **Kéo ghost bằng touch** — ✅ đã kiểm | [20-touch-drag-verification.md](20-touch-drag-verification.md) | Inject `TouchState` (`Began`/`Moved`/`Ended`) vào `Touchscreen`: `Pointer.current = FastTouchscreen`, `IsDragging=true`, ghost bám ô (2,2) → (4,1), thả → `false`. |
+| 21 | **`StewSO.kitchenObjectSOList` trỏ sai** — ✅ đã sửa | `Assets/SO/FoodSO/StewSO.asset` · `BotCustomerController.cs:211-222` | FoodSO liệt kê `Potato Chopped + Carrot Slices`, trong khi `bowl.prefab` chỉ nhận `StewCookedSO` và `plate.prefab` không nhận nguyên liệu sống → **không thể phục vụ Stew**. Đổi list thành `[StewCookedSO]`; giữ `price=35`, `exp=40`, `_guid`. Serve + collect lại sau reimport: **54 coins / 40 XP**. |
 
 ---
 
@@ -42,7 +43,7 @@ xem ghi chú ở từng file.
 
 | # | File | Chốt | Rủi ro |
 |---|---|---|---|
-| 07 | [07-stewso-rewards.md](07-stewso-rewards.md) | **Giữ nguyên `35 / 40`** (asset đang đúng, không sửa thêm) | Kỹ thuật thấp |
+| 07 | [07-stewso-rewards.md](07-stewso-rewards.md) | **Giữ nguyên `35 / 40`**; đã phục vụ bot thu **54 coins + 40 XP** (2026-10-21); sửa thêm `kitchenObjectSOList` → `[Stew Cooked]` | Kỹ thuật thấp |
 | 08 | [08-stewburnedso-name.md](08-stewburnedso-name.md) | **Giữ nguyên `Stew Burned`** (asset đang đúng) | Rất thấp |
 | 09 | [09-configshop-enum-ints.md](09-configshop-enum-ints.md) | Cách ghim số + quy tắc thêm giá trị enum mới, `None = 9999` đã áp dụng | Thấp |
 
@@ -58,7 +59,7 @@ xem ghi chú ở từng file.
 
 | # | File | Ưu tiên |
 |---|---|---|
-| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — làm trước nhóm A, nó quyết định 6 mục kia có đáng làm |
+| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — đã đo S3/S7-rút gọn (2026-10-21, Editor + probe); S7 đầy đủ, S8/S9 và GC trên Player build vẫn chờ |
 
 ---
 
@@ -181,8 +182,11 @@ Tóm tắt bằng bằng chứng:
 | Vào placement cho S4 | ✅ Làm được từ code — log `Selected Changed: BowlTablewareCounter` |
 | Xác nhận `isDragging == true` | ❌ Không đọc được → **số đo S4-thử không gán được cho `HandleDraging`** |
 
-> **Vẫn cần bạn chơi tay:** kịch bản S3/S4/S7/S8/S9 ở [13-profiler-baseline.md](13-profiler-baseline.md),
-> bước phục vụ Stew cho khách bot rồi thu tiền/XP (mục 07), và bước nấu Stew đến lúc cháy (mục 08).
+> **Cập nhật:** S3, S4, S7-rút gọn và bước phục vụ/nấu Stew **đã kiểm** (S4 ngày 2026-10-20;
+> S3/S7-rút gọn + Stew ngày 2026-10-21). Còn **S7 đầy đủ** (nấu/cắt/phục vụ trong cửa sổ đo),
+> **S8/S9** (2 client / late join) và **GC trên Player build** — xem
+> [13-profiler-baseline.md](13-profiler-baseline.md) và
+> [17-build-and-2client-status.md](17-build-and-2client-status.md).
 
 ### Cập nhật 2026-10-20 — kéo ghost **đã kiểm được**
 
@@ -233,3 +237,19 @@ Không có PNG nào được commit; `git status` sau lượt chơi không có t
 + tài liệu.
 
 Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked).
+
+### Kiểm thêm 2026-10-21 — S3, S7-rút gọn, Stew
+
+- **S3:** inject `W` → player `(-3,0,-3)` → `(-3,0,7.91)`; click `(690,538)` chọn
+  `PlateTablewareCounter(Clone)` và spawn `plate(Clone)` vào tay. Click tổng hợp cần rebind
+  `Click` sang `<Mouse>/leftButton`; probe đã xoá.
+- **S7-rút gọn:** 60.0 s / 7689 frames, p50 **7.50 ms**, p95 **8.45 ms**, p99 10.73 ms,
+  max 1582.11 ms (một stall đơn lẻ), GC **3722.4 KB/s** (Editor + probe — **chưa phải số Player
+  build**), 5 bot active. **Không phải S7 đầy đủ**: cửa sổ này không chứa nấu/cắt/phục vụ.
+- **Stew:** nấu `Potato Chopped` → `Stew Cooked` → `Stew Burned` (`stew_bowlBurned(Clone)`,
+  burn timer 5.00). Phục vụ trong **bát**: bot order → `Eating` → `eaten=True`,
+  `pendingCash=54` / `pendingExp=40`; collect → `Coins 200→254`, `Exp 0→40`.
+  Đã sửa `StewSO.kitchenObjectSOList` → `[StewCookedSO]` và chạy lại sau reimport.
+- **Chưa kiểm:** S7 đầy đủ (nấu/cắt/phục vụ trong cửa sổ đo), S8/S9 (2 client / late join) và
+  GC trên Development Build.
+- Không commit PNG; probe tạm `Assets/Scripts/TmpInputProbe.cs` đã xoá kèm `.meta`.

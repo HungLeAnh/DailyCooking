@@ -114,3 +114,27 @@ Bước 6 là click UI thật (pointer → `InputSystemUIInputModule` → `Butto
   được chạy).
 - Script probe `Assets/Scripts/TmpPointerProbe.cs` chỉ tồn tại trong lúc kiểm và **đã xoá**
   (kèm `.meta`) trước khi commit — repo không có file tạm nào.
+
+## 5. Click chuột tổng hợp — caveat bổ sung (2026-10-21)
+
+Khi kiểm S3 (click counter), inject `MouseState`/`Pointer` cập nhật được device nhưng **action
+`Click` không tự actuate** — tương tự lý do focus ở §1. Cách chạy được:
+
+1. Rebind runtime action `Click` sang `<Mouse>/leftButton`
+   (`InputActionRebindingExtensions.ApplyBindingOverride`).
+2. Inject `MouseState` (buttons = 1) + gọi `InputSystem.Update()` trong probe
+   `[DefaultExecutionOrder(-1000)]`.
+
+Kết quả: click `(690,538)` → `GameInput.LastClickPosition=(690,538)`,
+`PlateTablewareCounter(Clone)` được chọn, `plate(Clone)` spawn vào tay player.
+
+Cạm bẫy:
+
+- **`Pointer.press` một mình không đủ** trong môi trường Editor mất focus; phải rebind action
+  như trên. Đây là workaround automation, không phải sửa code game.
+- **Action có thể kẹt phase `Performed`/`Waiting` sau lần inject đầu**; các click sau không bắn
+  event dù device state đổi. Phải release + `InputSystem.Update()` (hoặc reset action) trước lần
+  click kế tiếp.
+- **Không suy ra "đã click" từ `LastClickPosition`**: pan camera cũng cập nhật vị trí này. Phải
+  kiểm bằng object được chọn / item được spawn / log event.
+- Probe `Assets/Scripts/TmpInputProbe.cs` chỉ tồn tại trong lúc đo S3/S7 và **đã xoá** kèm `.meta`.

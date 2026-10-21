@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.4 |
-| **Trạng thái** | ✅ **Đã làm + kiểm bằng mắt khi chơi** — `price: 0→35`, `exp: 0→40` (phương án A). **Chủ dự án đã chốt "giữ nguyên" 2 con số này ngày 2026-10-21**, không cần sửa lại asset. Compile Android + 49/49 test, console 0/0. Menu popup hiện **`Stew — $35 / 40 XP`**. **Chưa kiểm: phục vụ Stew cho khách bot rồi thu tiền/XP.** |
+| **Trạng thái** | ✅ **Đã làm + đã kiểm phục vụ/thu tiền (2026-10-21)** — `price: 0→35`, `exp: 0→40` (phương án A). **Chủ dự án đã chốt "giữ nguyên" 2 con số này ngày 2026-10-21**, không cần sửa lại asset. Compile Android + 49/49 test, console 0/0. Menu popup hiện **`Stew — $35 / 40 XP`**. Đã phục vụ Stew cho bot bằng **bát** (`bowl`), thu **54 coins** (35 + tip 19; tip 0.56 sau 1 bậc Sad) và **40 XP**; `Coins 200→254`, `Exp 0→40`. Phát hiện + sửa thêm `StewSO.kitchenObjectSOList`: `[Potato Chopped, Carrot Slices]` → `[Stew Cooked]` (bát chỉ nhận `StewCookedSO`, đĩa không nhận nguyên liệu sống). |
 | **Rủi ro** | Thấp về kỹ thuật, **cần bạn quyết con số** |
 | **Ưu tiên** | Cao — đây là bug gameplay thật (món cao cấp cho 0 tiền) |
 
@@ -94,6 +94,20 @@ unlockLevel cao hơn.
 2. Hoặc sửa trực tiếp YAML: đổi `price: 0` → `price: 35`, `exp: 0` → `exp: 40`.
 3. **Không đổi** `_guid` — mọi nơi (grid, save, RPC) tham chiếu theo guid này.
 
+### Sửa thêm (phát hiện khi kiểm phục vụ, 2026-10-21)
+
+`StewSO.kitchenObjectSOList` đang là `[PotatoChoppedSO, CarrotSlicesSO]` — **không khớp** với
+tableware thực tế:
+
+- `bowl.prefab` có `validKitchenObjectSOList = [StewCookedSO]`.
+- `plate.prefab` **không** nhận `Potato Chopped`, `Carrot Slices` hay `Stew Cooked`.
+
+Vì `BotCustomerController.IsServerCorrectFood()` so **đúng số lượng + từng SO** với
+`waitingFood.kitchenObjectSOList`, bot order Stew sẽ **không thể được phục vụ** với dữ liệu cũ.
+Đã đổi list thành `[StewCookedSO]`; giữ nguyên `price = 35`, `exp = 40`, `_guid`.
+Sau khi reimport asset, đã chạy lại một phiên play mode mới: order → serve → collect vẫn đúng
+(`54 coins`, `40 XP`).
+
 ## Ảnh hưởng
 
 | Hạng mục | Ảnh hưởng |
@@ -112,8 +126,23 @@ unlockLevel cao hơn.
    `Tools/Verify/Unlock all dishes + open Menu popup` rồi `Tools/Verify/Hide tutorial + show Stew tile`
    (unlock thẳng `MenuData.AddUnlockedDish` để khỏi phải farm 60 coins). Console runtime cũng log
    `[Perf] stew price=$35 exp=40 unlockLevel=6`.
-3. ⬜ Gọi Stew cho khách bot → ăn xong → đĩa hiện `$35 + tip` / `40 XP`. **Cần bạn chơi tay.**
-4. ⬜ Thu thập → `RestaurantData.Coins` và `Exp` tăng đúng. **Cần bạn chơi tay.**
+3. ✅ **2026-10-21 — phục vụ Stew cho bot (Editor play mode, host Relay thật):**
+   bot order `Stew` → `waitingFood` có 1 món, `kitchenObjectSOList = [Stew Cooked]`.
+   Player cầm `bowl(Clone)` chứa `Stew Cooked`, tương tác bot → bot sang `Eating`, bát
+   `served=True`. Sau 5 s: bát `eaten=True`, `pendingCash=54`, `pendingExp=40`.
+4. ✅ **2026-10-21 — thu tiền:** tương tác bát đã ăn → `RestaurantData.Coins 200→254`,
+   `Exp 0→40`.
+
+**Điều kiện / giới hạn của lần kiểm:**
+
+- Bot được đặt thẳng vào ghế + set state `OrderFood` để tránh timeout 15 s/bậc cảm xúc; các bước
+  order/serve/collect gọi đúng `InteractEvent` của game, **không phải click chuột**. Mục này kiểm
+  **logic phục vụ + reward**, không kiểm đường click/raycast (S3 kiểm riêng 1 click thật).
+- Stew phải phục vụ trong **bát**, không phải đĩa.
+- `54 coins` = `35` giá món + `19` tip. Tip gốc `0.7`; bot bị 1 bậc Sad trong lúc chờ nên còn
+  `0.56` → `(int)(35 × 0.56) = 19`.
+- Đã chạy lại sau khi sửa `StewSO.kitchenObjectSOList` và reimport asset (phiên mới), kết quả
+  `pendingCash=54`, `pendingExp=40`, `Coins 200→254`, `Exp 0→40`.
 
 ## Rủi ro / rollback
 

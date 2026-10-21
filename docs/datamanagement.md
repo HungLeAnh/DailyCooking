@@ -145,8 +145,9 @@ All three items that used to be listed here are gone: the `CookingRecipeSO` clas
 | `Assets/SO/BurnedRecipeSO/` folder name ≠ class name `BurningRecipeSO` | ✅ Fixed |
 | `InventoryTabDatabase.asset` in `PopupDatabase/` folder | ✅ Fixed |
 | `SoundClips.asset` in `Assets/SO/` root (not in subfolder) | ✅ Fixed |
-| `StewBurnedSO.objectName = "Stew"` duplicates FoodSO `Stew` recipe name | ⏳ Pending |
-| `StewSO.price=0, exp=0` — likely unfinished | ⏳ Pending |
+| `StewBurnedSO.objectName = "Stew"` duplicates FoodSO `Stew` recipe name | ✅ Fixed (`Stew Burned`) |
+| `StewSO.price=0, exp=0` — likely unfinished | ✅ Fixed (`35 / 40`) |
+| `StewSO.kitchenObjectSOList` trỏ nguyên liệu sống, không khớp bát/đĩa → không phục vụ được | ✅ Fixed (`[StewCookedSO]`) |
 
 ### 4.5 Dangling Reference
 

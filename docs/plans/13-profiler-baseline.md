@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | D. Chưa làm vì thiếu dữ liệu |
 | **Nguồn** | `docs/optimization_plan.md` §4 ("chưa chạy profiler") |
-| **Trạng thái** | Chưa làm |
+| **Trạng thái** | 🟡 **Đã đo S3 + S7-rút gọn (2026-10-21)** trên Editor; S7 đầy đủ, S8/S9 và GC trên Player build vẫn chưa. |
 | **Rủi ro** | **0** — chỉ đo, không sửa code |
 | **Ưu tiên** | **Cao nhất** — làm trước nhóm A, vì nó quyết định nhóm A có đáng làm không |
 
@@ -174,11 +174,53 @@ nhưng tay cầm **không nhúc nhích** và `Moving` vẫn `(0,0)`. ⇒ Sự ki
 
 `UIJoyStick.cs` là **class singleton rỗng** (8 dòng) — nó không xử lý gì.
 
+### 2026-10-21 — S3 (đi lại + click) và S7-rút gọn (60 s, 5 bot)
+
+**Điều kiện đo:** Unity 6000.6.2f1, Editor Play Mode, host Relay thật (1 client), GameScene.
+Dùng probe tạm `Assets/Scripts/TmpInputProbe.cs` để inject input + lấy frame/GC
+(`ProfilerRecorder` cho `GC Allocated In Frame` / `GC Allocation In Frame Count`). Probe đã xoá
+kèm `.meta` sau khi đo; repo không còn file tạm. **Đây là số Editor, không phải Player build.**
+
+#### S3 — đi lại + click
+
+| Thao tác | Kết quả đo |
+|---|---|
+| Giữ `W` (inject `KeyboardState`) ~2 s | Player `(-3.00, 0.00, -3.00)` → `(-3.00, 0.00, 7.91)` — đi **10.91 m**, đúng hướng |
+| Click `(690, 538)` | `PlateTablewareCounter(Clone)` được chọn; player nhận `plate(Clone)`; `GameInput.LastClickPosition=(690,538)` |
+
+Click đi qua đúng chuỗi `MouseState → InputAction Click → GameInput.OnMouseClickPerformed →
+raycast → InteractEvent`. Để action `Click` actuate với chuột tổng hợp, phải **rebind runtime**
+`Click` sang `<Mouse>/leftButton`; `Pointer.press` một mình không cập nhật action trong môi trường
+Editor mất focus. Đây là **workaround automation**, không sửa code game. Các lần click thử sau đó
+không bắn event (action bị kẹt phase sau lần inject trước); không dùng `LastClickPosition` để suy
+ra click. Chi tiết ở [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md) §5.
+
+#### S7-rút gọn — 60 s đi lại + 5 bot
+
+Kịch bản: player đi theo plan inject (tiến/lùi/ngang, 2 s mỗi bước) + `StartSpawnBot()`; 5 bot
+active roaming trong lúc đo. **Đây không phải S7 đầy đủ**: định nghĩa S7 ở Bước 2 yêu cầu
+nấu, cắt, phục vụ khách trong 3 phút; cửa sổ này **không chứa** các bước đó. Vòng
+cook→burn→serve→collect đã kiểm riêng trước đó (doc 07/08), nhưng **không nằm trong 60 s đo**.
+Vì vậy các số dưới đây chỉ gán cho **S7-rút gọn**, không gán cho S7 đầy đủ.
+
+| Thời lượng | Frames | p50 | p95 | p99 | max | GC | Tổng alloc |
+|---|---|---|---|---|---|---|---|
+| 60.0 s | 7689 | **7.50 ms** | **8.45 ms** | 10.73 ms | **1582.11 ms** | **3722.4 KB/s** | 3,457,753 |
+
+- `p95 = 8.45 ms` < 16 ms → **không có bằng chứng frame-time** để làm mục 01–06.
+- `max = 1582 ms` là **một stall đơn lẻ** (p99 vẫn 10.73 ms); không đủ để kết luận frame pacing.
+- `GC = 3722.4 KB/s` **vượt xa ngưỡng 100 KB/s**, nhưng đây là số **Editor + probe**:
+  `GC Allocated In Frame` trong Editor gồm cả allocation của Editor, và probe tạo
+  `KeyboardState`/`List<Key>` mỗi frame. **Không dùng số này để kết luận mục 05/04**; cần
+  Development Build + Profiler trên Player mới có số sạch.
+- 5 bot active + player di chuyển nên đây là mẫu **có hoạt động**, không phải đứng yên.
+
 ### So với ngưỡng ở Bước 4
 
 | Ngưỡng đã chốt trước khi đo (§ Bước 4) | Kết quả | Kết luận |
 |---|---|---|
 | p95 < **16 ms** → **không làm 01–06** | Main thread **tối đa 4.59 ms**; CPU frame **tối đa 14.85 ms** | ✅ **Đạt** → 01–06 không được profiler chứng minh |
+| S7-rút gọn p95 < 16 ms (2026-10-21) | p95 **8.45 ms** (Editor + probe) | ✅ Đạt về frame time; GC chưa kết luận |
 | `FindGameObjectsWithTag` hiện ở S4 (làm 05) | S10 rung camera (2 lookup/frame) — **không khác gì S2** | ❌ Không đủ lý do |
 | S6 GC > 1 MB/s (làm 04) | Chưa đo được GC KB/s (xem "Chưa đo được") | ⏸ Treo |
 | S5 `List<T>.Find` < 0.1 ms (bỏ phần perf của 12) | Mở shop chỉ +0.4–0.7 ms main thread so S2 | ✅ **Bỏ phần perf**, giữ phần `LogError` |
@@ -221,20 +263,25 @@ nhưng tay cầm **không nhúc nhích** và `Moving` vẫn `(0,0)`. ⇒ Sự ki
 
 ### Chưa đo được
 
-- **GC KB/s** — `get_counters` không dùng được từ cầu nối MCP (xem cạm bẫy #2). Muốn đo GC phải
-  mở Profiler UI và đọc tay, hoặc đọc file `.raw`.
-- **S3, S4, S7, S8, S9** — vẫn cần thao tác tay.
-  - **Đã thử tự động hoá S3/S4 bằng computer-control (2026-10-13) và thất bại** — chi tiết ở
-    mục "2026-10-13" phía trên. Tóm tắt: chuột vào được Input System nhưng **bàn phím không**,
-    và sự kiện không tới được `EventSystem`, nên lái được player.
-  - S3 cần **đi lại thật**: `HandleMovement` chỉ đọc `GetMovementVectorNormalized()`, mà
-    `Moving` không có binding trỏ chuột → chỉ còn WASD/gamepad, computer-control không với tới.
-  - S4 cần **`isDragging == true`**: `BuildingGhost.HandleDraging()` (`:130`) `return` khi
-    `isDragging == false`. Vào placement **làm được** từ code
-    (`BuildingPlacementManager.SetPlacedObjectTypeSO` → log `Selected Changed: BowlTablewareCounter`),
-    nhưng `OnPanStarted` còn phải qua `GameInput.IsMouseOverUI()` + raycast
-    `buildingGhostLayer` → **không xác nhận được** `isDragging` đã bật, nên số đo S4-thử
-    không được gán cho `HandleDraging`.
+- **GC KB/s trên Player build** — S7 đã đo được `3722.4 KB/s` bằng `ProfilerRecorder` trong
+  Editor (2026-10-21), nhưng số này gồm Editor + probe, **chưa dùng để kết luận**. `get_counters`
+  vẫn không dùng được từ cầu nối MCP (xem cạm bẫy #2); muốn số sạch phải mở Profiler UI trên
+  Development Build / đọc file `.raw`.
+- **S7 đầy đủ** — cửa sổ 60 s ngày 2026-10-21 chỉ có đi lại + 5 bot, **không có nấu/cắt/phục vụ**
+  (xem mục "S7-rút gọn" ở trên).
+- **S8, S9** — vẫn cần 2 client / late join (process Unity thứ hai hoặc MPPM).
+
+### Đã đo (2026-10-20/21)
+
+- **S3 + S7-rút gọn** — ngày 2026-10-21 (mục ở trên).
+- **S4** — ngày 2026-10-20
+  ([16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md)).
+- Lịch sử: **đã thử tự động hoá S3/S4 bằng computer-control (2026-10-13) và thất bại** —
+  chi tiết ở mục "2026-10-13" phía trên. Tóm tắt: chuột vào được Input System nhưng **bàn
+  phím không**, và sự kiện không tới được `EventSystem`, nên không lái được player.
+- Cách đã dùng để S3 chạy được (2026-10-21): inject `KeyboardState` trong probe
+  `[DefaultExecutionOrder(-1000)]` + `InputSystem.Update()`; click cần rebind `Click` sang
+  `<Mouse>/leftButton` (xem doc 16 §5).
 
 ### Cạm bẫy đã gặp và cách tránh
 
@@ -321,16 +368,17 @@ nhưng tay cầm **không nhúc nhích** và `Moving` vẫn `(0,0)`. ⇒ Sự ki
 
 ### Việc còn lại
 
-- **Cần người thao tác tay:** S3 (đi lại + click counter), S7 (chạy bếp 3 phút), S8 (4 player),
-  S9 (late join).
-  **S4 (kéo ghost) đã kiểm được ngày 2026-10-20** bằng inject pointer qua Input System
-  (cạm bẫy #14) — xem [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md).
+- **S3 + S7-rút gọn đã đo ngày 2026-10-21** (Editor + probe, 1 client, Relay host): S3 đi lại +
+  1 click counter; S7-rút gọn 60 s, 5 bot active, **chưa có nấu/cắt/phục vụ trong cửa sổ đo**.
+  S4 đã kiểm ngày 2026-10-20 bằng inject pointer qua Input
+  System — xem [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md).
   Đường computer-control lái chuột OS vẫn đóng (2026-10-13): bàn phím không vào
   `Keyboard.current`, sự kiện OS không tới `EventSystem`.
 - **S8/S9 (2 client, late join) vẫn chưa kiểm**: cần process Unity thứ hai (MPPM virtual player
   hoặc build standalone + host Relay). Không có thay đổi nào trong nhánh chạm vào network code,
   nhưng **không** vì thế mà coi là đã kiểm.
-- **Chưa đo được GC KB/s** — cần mở Profiler UI tay.
+- **GC KB/s trên Player build vẫn chưa đo** — S7 chỉ có số Editor + probe; cần Development
+  Build + Profiler UI (hoặc đọc `.raw`).
 - Sau khi có đủ số → ghi `docs/profiler_baseline.md` và dán nhãn **LÀM / KHÔNG LÀM** cho từng mục
   trong `optimization_plan.md` §3.
 - **Tài sản để lại:** `Assets/Editor/PerfScenarios.cs` có 4 probe mới —

@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.4 |
-| **Trạng thái** | ✅ **Đã làm + kiểm bằng mắt khi chơi** — `objectName: Stew` → `Stew Burned`. **Chủ dự án đã chốt "giữ nguyên" tên này ngày 2026-10-21**, không cần sửa lại asset. Compile Android + 49/49 test, console 0/0. Option menu hiện **`Stew Cooked` / `Stew Burned`**. **Chưa kiểm: tự nấu Stew đến lúc cháy.** |
+| **Trạng thái** | ✅ **Đã làm + đã kiểm nấu đến cháy (2026-10-21)** — `objectName: Stew` → `Stew Burned`. **Chủ dự án đã chốt "giữ nguyên" tên này ngày 2026-10-21**, không cần sửa lại asset. Compile Android + 49/49 test, console 0/0. Option menu hiện **`Stew Cooked` / `Stew Burned`**. Đã nấu thật trong nồi: `Cooking` → `Cooked` (`Stew Cooked`) → `Burned` (`Stew Burned`, `stew_bowlBurned(Clone)`, burn timer `5.00`). |
 | **Rủi ro** | **Rất thấp** (chỉ hiển thị) |
 | **Ưu tiên** | Cao — sửa 1 dòng, hết ngay |
 
@@ -75,8 +75,12 @@ Tìm toàn bộ project, đúng 2 chỗ, đều gán vào Text:
    Dùng probe `Tools/Verify/Cooked vs burned stew in option menu` trong `Assets/Editor/PerfScenarios.cs`
    (`UIOptionMenuPopup.ShowPopup(null)` sẽ tự `HidePopup()` nên bắt buộc phải truyền `Param` kèm
    sender `IHasOptionalSO`). Đây chính đường code `OptionMenuItemUI.Setup(index, KitchenObjectSO)`.
-3. ⬜ Nấu Stew thật đến lúc cháy rồi cầm/hiển thị. **Cần bạn chơi tay** — chuỗi nấu→cháy dài,
-   không giả lập được bằng editor script. (Giá trị SO cũng được xác nhận thêm bằng log
+3. ✅ **2026-10-21 — nấu thật đến lúc cháy (Editor play mode, host Relay thật):**
+   cho `Potato Chopped` vào nồi → chọn option `Stew Cooked` → state `Cooking` (`cookMax = 5`).
+   Sau ~5 s: state `Cooked`, food SO `Stew Cooked`. Sau thêm ~5 s: state `Burned`, food SO
+   `Stew Burned`, GameObject `stew_bowlBurned(Clone)`, burn timer `5.00`.
+   Đây là chuỗi thật của `CookingTool`; setup chỉ đưa nguyên liệu vào nồi bằng API spawn/interact,
+   không set state tay. (Giá trị SO cũng được xác nhận thêm bằng log
    `[Perf] cooked='Stew Cooked' burned='Stew Burned'`.)
 
 ## Rủi ro / rollback
