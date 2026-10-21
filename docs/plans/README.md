@@ -38,13 +38,13 @@ xem ghi chú ở từng file.
 | 05 | [05-camera-main-remaining.md](05-camera-main-remaining.md) | ✅ 17 lần gọi thật; **chỉ 1 đường per-frame** (`BuildingGhost` kéo ghost) | **Thấp** | ✅ **Đã làm** — vệ sinh code, không phải thắng perf có số đo |
 | 06 | [06-playerstats-cache.md](06-playerstats-cache.md) | ⚠️ Allocation **đã xong**; `Update()` đã `!IsOwner` → chỉ 1 lần/frame, list ≤4 | Thấp | Không |
 
-## B. Data cần bạn quyết (con số / tên)
+## B. Data cần bạn quyết (con số / tên) — ✅ đã chốt 2026-10-21
 
-| # | File | Cần bạn chốt | Rủi ro |
+| # | File | Chốt | Rủi ro |
 |---|---|---|---|
-| 07 | [07-stewso-rewards.md](07-stewso-rewards.md) | `price` / `exp` cho Stew — đề xuất **35 / 40** | Kỹ thuật thấp |
-| 08 | [08-stewburnedso-name.md](08-stewburnedso-name.md) | Tên món cháy — đề xuất **`Stew Burned`** | Rất thấp |
-| 09 | [09-configshop-enum-ints.md](09-configshop-enum-ints.md) | Cách ghim số + quy tắc thêm giá trị enum mới | Thấp |
+| 07 | [07-stewso-rewards.md](07-stewso-rewards.md) | **Giữ nguyên `35 / 40`** (asset đang đúng, không sửa thêm) | Kỹ thuật thấp |
+| 08 | [08-stewburnedso-name.md](08-stewburnedso-name.md) | **Giữ nguyên `Stew Burned`** (asset đang đúng) | Rất thấp |
+| 09 | [09-configshop-enum-ints.md](09-configshop-enum-ints.md) | Cách ghim số + quy tắc thêm giá trị enum mới, `None = 9999` đã áp dụng | Thấp |
 
 ## C. Kiến trúc cần chốt
 

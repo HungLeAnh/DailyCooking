@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.4 |
-| **Trạng thái** | ✅ **Đã làm + kiểm bằng mắt khi chơi** — `objectName: Stew` → `Stew Burned`. Compile Android + 49/49 test, console 0/0. Option menu hiện **`Stew Cooked` / `Stew Burned`**. **Chưa kiểm: tự nấu Stew đến lúc cháy.** |
+| **Trạng thái** | ✅ **Đã làm + kiểm bằng mắt khi chơi** — `objectName: Stew` → `Stew Burned`. **Chủ dự án đã chốt "giữ nguyên" tên này ngày 2026-10-21**, không cần sửa lại asset. Compile Android + 49/49 test, console 0/0. Option menu hiện **`Stew Cooked` / `Stew Burned`**. **Chưa kiểm: tự nấu Stew đến lúc cháy.** |
 | **Rủi ro** | **Rất thấp** (chỉ hiển thị) |
 | **Ưu tiên** | Cao — sửa 1 dòng, hết ngay |
 

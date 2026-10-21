@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | B. Data cần người dùng quyết |
 | **Nguồn** | `docs/datamanagement.md` §4.4 |
-| **Trạng thái** | ✅ **Đã làm + kiểm bằng mắt khi chơi** — `price: 0→35`, `exp: 0→40` (phương án A). Compile Android + 49/49 test, console 0/0. Menu popup hiện **`Stew — $35 / 40 XP`**. **Chưa kiểm: phục vụ Stew cho khách bot rồi thu tiền/XP.** |
+| **Trạng thái** | ✅ **Đã làm + kiểm bằng mắt khi chơi** — `price: 0→35`, `exp: 0→40` (phương án A). **Chủ dự án đã chốt "giữ nguyên" 2 con số này ngày 2026-10-21**, không cần sửa lại asset. Compile Android + 49/49 test, console 0/0. Menu popup hiện **`Stew — $35 / 40 XP`**. **Chưa kiểm: phục vụ Stew cho khách bot rồi thu tiền/XP.** |
 | **Rủi ro** | Thấp về kỹ thuật, **cần bạn quyết con số** |
 | **Ưu tiên** | Cao — đây là bug gameplay thật (món cao cấp cho 0 tiền) |
 
@@ -72,7 +72,10 @@ Các chỗ hiển thị cũng nói dối người chơi:
 
 **Chỉ sửa 2 field trong `StewSO.asset`.** Không sửa code.
 
-### Con số đề xuất (bạn chốt)
+### Con số đề xuất (đã chốt)
+
+**2026-10-21: chủ dự án xác nhận "giữ nguyên"** → dùng **phương án A: `price = 35`, `exp = 40`**
+(asset hiện đang đúng 2 giá trị này, không phải sửa gì thêm).
 
 Mục tiêu: Stew phải là món **hơn mặt bằng chung ở level 5-6**, vì unlockPrice cao hơn 20% và
 unlockLevel cao hơn.
