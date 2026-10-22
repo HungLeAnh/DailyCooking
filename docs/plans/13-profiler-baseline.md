@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | D. Chưa làm vì thiếu dữ liệu |
 | **Nguồn** | `docs/optimization_plan.md` §4 ("chưa chạy profiler") |
-| **Trạng thái** | 🟡 **Đã đo S3 + S7-rút gọn (2026-10-21)** trên Editor; S7 đầy đủ, S8/S9 và GC trên Player build vẫn chưa. |
+| **Trạng thái** | 🟡 **Đã đo S3, S7-rút gọn (2026-10-21) và S7 đầy đủ 60 s (2026-10-22)** trên Editor; S8/S9 và GC trên Player build vẫn chưa. |
 | **Rủi ro** | **0** — chỉ đo, không sửa code |
 | **Ưu tiên** | **Cao nhất** — làm trước nhóm A, vì nó quyết định nhóm A có đáng làm không |
 
@@ -215,12 +215,50 @@ Vì vậy các số dưới đây chỉ gán cho **S7-rút gọn**, không gán 
   Development Build + Profiler trên Player mới có số sạch.
 - 5 bot active + player di chuyển nên đây là mẫu **có hoạt động**, không phải đứng yên.
 
+### 2026-10-22 — S7 đầy đủ (60 s, 5 vòng nấu + cắt + phục vụ)
+
+**Điều kiện đo:** Unity 6000.6.2f1, Editor Play Mode, host Relay thật (1 client), GameScene,
+5 bot active. Pot và thớt được spawn bằng code trong scene (không đặt qua UI), rồi cửa sổ đo
+được điều khiển bằng **coroutine trong probe tạm** — không có lệnh MCP nào chen vào giữa 60 s.
+Probe `Assets/Scripts/TmpS7Probe.cs` đã xoá kèm `.meta`; repo không còn file tạm.
+
+Kịch bản thực sự nằm trong cửa sổ đo (log `[TmpS7]`):
+
+| Thời điểm | Hoạt động |
+|---|---|
+| `t=0.0` | 5 bot active; bắt đầu cửa sổ đo |
+| `t=0.1 → 4.9` | nấu: `Potato Chopped` → `Stew Cooked` (5.0 s) |
+| `t=4.9` | cắt: 5 nhát tomato → `Tomato Slice` (timer về 0) |
+| `t=4.9` | phục vụ: lấy đúng stew từ nồi cho vào bát → bot `Eating`, `served=True` |
+| `t=10.3` | ăn xong: `eaten=True`, thu tiền; lặp lại vòng 2–5 |
+| `t=52.6` | vòng 5 xong; 5 bot tiếp tục chạy tới `t=60.0` |
+
+Cả **5/5 vòng** đều `usedPot=True`, `correct=True`, `eaten=True`, collect thành công
+(coins `259 → 318 → 577 → 621 → 665`; exp `40 → 80 → 0 → 40 → 80`, có lần lên level nên exp reset).
+Đây là **S7 đầy đủ** theo nghĩa cửa sổ đo có nấu, cắt hoàn tất và phục vụ/ăn/thu tiền; vẫn là
+**60 s**, không phải 3 phút như bảng kịch bản gốc, và thao tác do code automation chứ không phải
+tay người chơi.
+
+| Thời lượng | Frames | p50 | p95 | p99 | max | GC | Tổng alloc |
+|---|---|---|---|---|---|---|---|
+| 60.0 s | 6223 | **9.48 ms** | **11.70 ms** | 14.51 ms | **78.35 ms** | **3090.1 KB/s** | 2,832,077 |
+
+- `p95 = 11.70 ms` < 16 ms → **không có bằng chứng frame-time** để làm mục 01–06.
+- `max = 78.35 ms` là một hitch đơn lẻ (p99 vẫn 14.51 ms), **không phải stall do gọi tool** vì
+  không có lệnh MCP nào trong cửa sổ đo.
+- `GC = 3090.1 KB/s` vẫn là **Editor + probe**, không phải Player build. So với S7-rút gọn
+  (`3722.4 KB/s`) thấp hơn, nhưng **không dùng để kết luận** vì khác kịch bản và vẫn có allocation
+  của Editor.
+- S7-rút gọn (chỉ đi lại + 5 bot) có p50/p95 thấp hơn (7.50/8.45 ms), phù hợp với việc ít
+  `KitchenObject`/bot state hơn; đây là **hai kịch bản khác nhau**, không phải regression.
+
 ### So với ngưỡng ở Bước 4
 
 | Ngưỡng đã chốt trước khi đo (§ Bước 4) | Kết quả | Kết luận |
 |---|---|---|
 | p95 < **16 ms** → **không làm 01–06** | Main thread **tối đa 4.59 ms**; CPU frame **tối đa 14.85 ms** | ✅ **Đạt** → 01–06 không được profiler chứng minh |
 | S7-rút gọn p95 < 16 ms (2026-10-21) | p95 **8.45 ms** (Editor + probe) | ✅ Đạt về frame time; GC chưa kết luận |
+| S7 đầy đủ p95 < 16 ms (2026-10-22) | p95 **11.70 ms** (Editor + probe, 5 vòng nấu/cắt/phục vụ) | ✅ Đạt về frame time; GC vẫn chưa kết luận |
 | `FindGameObjectsWithTag` hiện ở S4 (làm 05) | S10 rung camera (2 lookup/frame) — **không khác gì S2** | ❌ Không đủ lý do |
 | S6 GC > 1 MB/s (làm 04) | Chưa đo được GC KB/s (xem "Chưa đo được") | ⏸ Treo |
 | S5 `List<T>.Find` < 0.1 ms (bỏ phần perf của 12) | Mở shop chỉ +0.4–0.7 ms main thread so S2 | ✅ **Bỏ phần perf**, giữ phần `LogError` |
@@ -267,13 +305,12 @@ Vì vậy các số dưới đây chỉ gán cho **S7-rút gọn**, không gán 
   Editor (2026-10-21), nhưng số này gồm Editor + probe, **chưa dùng để kết luận**. `get_counters`
   vẫn không dùng được từ cầu nối MCP (xem cạm bẫy #2); muốn số sạch phải mở Profiler UI trên
   Development Build / đọc file `.raw`.
-- **S7 đầy đủ** — cửa sổ 60 s ngày 2026-10-21 chỉ có đi lại + 5 bot, **không có nấu/cắt/phục vụ**
-  (xem mục "S7-rút gọn" ở trên).
 - **S8, S9** — vẫn cần 2 client / late join (process Unity thứ hai hoặc MPPM).
 
-### Đã đo (2026-10-20/21)
+### Đã đo (2026-10-20/21/22)
 
 - **S3 + S7-rút gọn** — ngày 2026-10-21 (mục ở trên).
+- **S7 đầy đủ** — ngày 2026-10-22: 60 s, 5/5 vòng nấu/cắt/phục vụ (mục ở trên).
 - **S4** — ngày 2026-10-20
   ([16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md)).
 - Lịch sử: **đã thử tự động hoá S3/S4 bằng computer-control (2026-10-13) và thất bại** —
@@ -369,7 +406,10 @@ Vì vậy các số dưới đây chỉ gán cho **S7-rút gọn**, không gán 
 ### Việc còn lại
 
 - **S3 + S7-rút gọn đã đo ngày 2026-10-21** (Editor + probe, 1 client, Relay host): S3 đi lại +
-  1 click counter; S7-rút gọn 60 s, 5 bot active, **chưa có nấu/cắt/phục vụ trong cửa sổ đo**.
+  1 click counter; S7-rút gọn 60 s, 5 bot active, chưa có nấu/cắt/phục vụ trong cửa sổ đo.
+- **S7 đầy đủ đã đo ngày 2026-10-22** (Editor + probe, 1 client, Relay host): 60 s, 5/5 vòng
+  nấu `Potato Chopped → Stew Cooked`, cắt 5 nhát `Tomato → Tomato Slice`, phục vụ trong bát →
+  `Eating → eaten=True → collect`; 5 bot active. Số p50/p95/GC ở mục "S7 đầy đủ" phía trên.
   S4 đã kiểm ngày 2026-10-20 bằng inject pointer qua Input
   System — xem [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md).
   Đường computer-control lái chuột OS vẫn đóng (2026-10-13): bàn phím không vào

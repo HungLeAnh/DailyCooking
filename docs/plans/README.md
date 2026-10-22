@@ -59,7 +59,7 @@ xem ghi chú ở từng file.
 
 | # | File | Ưu tiên |
 |---|---|---|
-| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — đã đo S3/S7-rút gọn (2026-10-21, Editor + probe); S7 đầy đủ, S8/S9 và GC trên Player build vẫn chờ |
+| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — đã đo S3/S7-rút gọn (2026-10-21) và S7 đầy đủ 60 s (2026-10-22) trên Editor + probe; S8/S9 và GC trên Player build vẫn chờ |
 
 ---
 
@@ -182,8 +182,8 @@ Tóm tắt bằng bằng chứng:
 | Vào placement cho S4 | ✅ Làm được từ code — log `Selected Changed: BowlTablewareCounter` |
 | Xác nhận `isDragging == true` | ❌ Không đọc được → **số đo S4-thử không gán được cho `HandleDraging`** |
 
-> **Cập nhật:** S3, S4, S7-rút gọn và bước phục vụ/nấu Stew **đã kiểm** (S4 ngày 2026-10-20;
-> S3/S7-rút gọn + Stew ngày 2026-10-21). Còn **S7 đầy đủ** (nấu/cắt/phục vụ trong cửa sổ đo),
+> **Cập nhật:** S3, S4, S7-rút gọn, S7 đầy đủ và bước phục vụ/nấu Stew **đã kiểm** (S4 ngày
+> 2026-10-20; S3/S7-rút gọn + Stew ngày 2026-10-21; S7 đầy đủ 60 s ngày 2026-10-22). Còn
 > **S8/S9** (2 client / late join) và **GC trên Player build** — xem
 > [13-profiler-baseline.md](13-profiler-baseline.md) và
 > [17-build-and-2client-status.md](17-build-and-2client-status.md).
@@ -250,6 +250,18 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
   burn timer 5.00). Phục vụ trong **bát**: bot order → `Eating` → `eaten=True`,
   `pendingCash=54` / `pendingExp=40`; collect → `Coins 200→254`, `Exp 0→40`.
   Đã sửa `StewSO.kitchenObjectSOList` → `[StewCookedSO]` và chạy lại sau reimport.
-- **Chưa kiểm:** S7 đầy đủ (nấu/cắt/phục vụ trong cửa sổ đo), S8/S9 (2 client / late join) và
-  GC trên Development Build.
+- **Chưa kiểm:** S8/S9 (2 client / late join) và GC trên Development Build.
 - Không commit PNG; probe tạm `Assets/Scripts/TmpInputProbe.cs` đã xoá kèm `.meta`.
+
+### Kiểm thêm 2026-10-22 — S7 đầy đủ 60 s
+
+- **S7 đầy đủ:** 60.0 s / 6223 frames, p50 **9.48 ms**, p95 **11.70 ms**, p99 14.51 ms,
+  max 78.35 ms, GC **3090.1 KB/s** (Editor + probe — **chưa phải số Player build**), 5 bot active.
+- Cửa sổ đo thực sự chứa **5/5 vòng**: `Potato Chopped → Stew Cooked` (5.0 s), cắt 5 nhát
+  `Tomato → Tomato Slice`, lấy stew từ nồi cho vào bát → bot `Eating` → `eaten=True` → collect
+  (coins `259 → 318 → 577 → 621 → 665`; exp `40 → 80 → 0 → 40 → 80`, có lần lên level nên reset).
+- Probe tự động chạy bằng coroutine, **không có lệnh MCP nào chen vào giữa 60 s**; probe
+  `Assets/Scripts/TmpS7Probe.cs` đã xoá kèm `.meta`. Đây vẫn là **60 s**, không phải 3 phút như
+  bảng kịch bản gốc, và thao tác do code chứ không phải tay người.
+- Chi tiết + so sánh với S7-rút gọn: [13-profiler-baseline.md](13-profiler-baseline.md)
+  § "2026-10-22 — S7 đầy đủ".
