@@ -1,7 +1,7 @@
 # 17 — Kiểm lại các mục "chưa chạy": build APK và 2 client
 
-Ngày: 2026-10-20. Không có thay đổi runtime nào trong file này — chỉ ghi **kết quả kiểm** và
-**những gì chưa kiểm được**, kèm lý do cụ thể.
+Ngày: 2026-10-20; §3 cập nhật 2026-10-22. Không có thay đổi runtime nào trong file này — chỉ ghi
+**kết quả kiểm** và **những gì chưa kiểm được**, kèm lý do cụ thể.
 
 ## 1. Chạy lại bộ kiểm tiêu chuẩn (sau khi dọn file tạm)
 
@@ -63,17 +63,28 @@ Tất cả đã được **revert/xoá** (`git checkout --`, xoá file untracked
 còn đúng: `StoveCounter.png` (thay đổi sẵn có của bạn), thư mục untracked
 `GooglePlayGames/.../current-build/`, và các file doc.
 
-## 3. 2 client / late join — **CHƯA KIỂM**
+## 3. 2 client / late join — **ĐÃ KIỂM MỘT PHẦN** (2 player, 2026-10-22)
 
-Không chạy được trong phiên này:
+Đã chạy được **host + 1 MPPM virtual Editor đúng tên `Player 2`** (project
+`Library/VP/mppm159b293e`), không dùng build standalone:
 
-- Cần **process thứ hai**: Multiplayer Play Mode (`com.unity.multiplayer.playmode` 3.0.0) có cài,
-  nhưng virtual player phải tạo trong cửa sổ MPPM (không có API công khai để tự động hoá), và
-  trong môi trường này **click OS không tới được UI của Unity**.
-- Hoặc build standalone rồi chạy 2 instance + join Relay — nhưng build standalone cần đổi build
-  target (reimport toàn bộ asset) và vẫn cần thao tác UI để nhập join code.
-- Build Android không thể chạy trên máy (không có thiết bị/emulator trong phiên).
+| Hạng mục | Kết quả |
+|---|---|
+| Host | scene `GameScene`, `IsServer=True`, `clients=2`, `players=2` |
+| `Player 2` | scene `GameScene`, `connected=True`, `players=2` |
+| Late join | gọi `Join` → `Status=joined`: **5.45 s** |
+| Join snapshot | **909 chars, 484 bytes compressed, 1 chunk** (`SNAPSHOT_CHUNK_SIZE=4000`) |
 
-Điều **có thể** nói: các commit trong nhánh không đổi wire format / chữ ký RPC (review trước đã
-kiểm `git diff`), nhưng **không** vì thế mà coi late join là "đã kiểm". Vẫn cần một lượt chơi
-2 client thật.
+- **5.45 s là toàn bộ join**, gồm anonymous sign-in + Relay + load scene + poll 250 ms; **không
+  phải** thời gian riêng của snapshot. Không gán con số này cho ngưỡng “snapshot > 1 s”.
+- `chunkCount=1` < ngưỡng `> 5`: lần này **không** kiểm được nhánh ghép nhiều chunk.
+- **Chưa đo:** S8 4-player, băng thông bytes/s + packet count, và thời gian snapshot tách riêng
+  khỏi sign-in.
+- Console `Player 2` có lỗi MPPM (`Asset Database is set to Read Only...`,
+  `MissingReferenceException ... Shader has been destroyed`, `ArgumentNullException: shader`).
+  Đây là lỗi **MPPM/Editor clone** (read-only asset DB, shader bị destroy sau domain reload),
+  không phải lỗi network/gameplay. Bản clone tạo tay `S8Test318cc0d4` (cửa sổ “Unknown Player”)
+  đã bị đóng/xoá; log `Unknown Player with VP ID S8Test...` và
+  `NullReferenceException` trong `MainPlayerSystems.Listen` là log cũ từ clone đó, **không phải
+  player trong game**.
+- Số cũ **7.85 s / 449–463 bytes** thuộc clone tạo tay `S8Test`, **không dùng** cho `Player 2`.
