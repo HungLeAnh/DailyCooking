@@ -270,16 +270,18 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
 
 ### Kiểm thêm 2026-10-22 — S8/S9 2 player + late join (MPPM)
 
-- Host + **một MPPM virtual Editor đúng tên `Player 2`** (`Library/VP/mppm159b293e`), không dùng
-  build standalone. Host `clients=2`, `players=2`; `Player 2` ở `GameScene`, `connected=True`,
-  `players=2`.
+- Host + **một MPPM virtual Editor đúng tên `Player 2`** trên clone cũ
+  `Library/VP/mppm159b293e` (đã xoá khi reset `Library`), không dùng build standalone.
+  Host `clients=2`, `players=2`; `Player 2` ở `GameScene`, `connected=True`, `players=2`.
 - **Late join:** gọi `Join` → `Status=joined` **5.45 s** — gồm anonymous sign-in + Relay + load
   scene + poll 250 ms, **không phải** thời gian snapshot riêng.
 - **Join snapshot:** host log **909 chars, 484 bytes compressed, 1 chunk** (`SNAPSHOT_CHUNK_SIZE=4000`);
   `chunkCount=1` < ngưỡng `> 5`, nên chưa kiểm nhánh nhiều chunk.
 - **Chưa đo:** S8 4-player, băng thông bytes/s + packet count, snapshot time tách riêng.
-- Console `Player 2` có lỗi MPPM (`Asset Database is set to Read Only...`, shader destroyed);
-  đây là lỗi Editor clone, không phải network/gameplay. Clone tạo tay `S8Test` (“Unknown Player”)
-  đã đóng/xoá; log `Unknown Player with VP ID S8Test...` là log cũ, không phải player trong game.
+- **MPPM console (đã xử lý 2026-10-22):** reset `Library` theo hướng dẫn Unity Support +
+  null guard trong `GameInput.IsMouseOverUI`; clone mới `mppm4214af7c` có console
+  **0 error / 0 warning** khi vào play `MainMenuScene`. Các số 2-player ở trên đo trước reset;
+  **chưa rerun S8/S9 trên clone mới**. Clone tạo tay `S8Test` (“Unknown Player”) đã đóng/xoá;
+  log `Unknown Player with VP ID S8Test...` là log cũ, không phải player trong game.
 - Chi tiết + caveat: [13-profiler-baseline.md](13-profiler-baseline.md) § "S8/S9" và
   [17-build-and-2client-status.md](17-build-and-2client-status.md) §3.

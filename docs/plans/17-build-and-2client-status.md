@@ -65,8 +65,8 @@ còn đúng: `StoveCounter.png` (thay đổi sẵn có của bạn), thư mục 
 
 ## 3. 2 client / late join — **ĐÃ KIỂM MỘT PHẦN** (2 player, 2026-10-22)
 
-Đã chạy được **host + 1 MPPM virtual Editor đúng tên `Player 2`** (project
-`Library/VP/mppm159b293e`), không dùng build standalone:
+Đã chạy được **host + 1 MPPM virtual Editor đúng tên `Player 2`** trên clone cũ
+`Library/VP/mppm159b293e` (clone này đã bị xoá khi reset `Library`), không dùng build standalone:
 
 | Hạng mục | Kết quả |
 |---|---|
@@ -80,11 +80,14 @@ còn đúng: `StoveCounter.png` (thay đổi sẵn có của bạn), thư mục 
 - `chunkCount=1` < ngưỡng `> 5`: lần này **không** kiểm được nhánh ghép nhiều chunk.
 - **Chưa đo:** S8 4-player, băng thông bytes/s + packet count, và thời gian snapshot tách riêng
   khỏi sign-in.
-- Console `Player 2` có lỗi MPPM (`Asset Database is set to Read Only...`,
-  `MissingReferenceException ... Shader has been destroyed`, `ArgumentNullException: shader`).
-  Đây là lỗi **MPPM/Editor clone** (read-only asset DB, shader bị destroy sau domain reload),
-  không phải lỗi network/gameplay. Bản clone tạo tay `S8Test318cc0d4` (cửa sổ “Unknown Player”)
-  đã bị đóng/xoá; log `Unknown Player with VP ID S8Test...` và
-  `NullReferenceException` trong `MainPlayerSystems.Listen` là log cũ từ clone đó, **không phải
-  player trong game**.
+- **MPPM console (đã xử lý 2026-10-22):** các lỗi `Asset Database is set to Read Only...`,
+  `MissingReferenceException ... Shader has been destroyed`, `ArgumentNullException: shader`
+  do cache `Library` của MPPM bị lệch. Theo hướng dẫn Unity Support, đóng project → xoá
+  `Library` → mở lại → tạo lại `Player 2`; clone mới `mppm4214af7c` có console
+  **0 error / 0 warning** khi vào play `MainMenuScene`. Sau reset còn một NRE thật trong
+  `GameInput.IsMouseOverUI` (`Touchscreen.current == null`), đã thêm null guard.
+  Bản clone tạo tay `S8Test318cc0d4` (cửa sổ “Unknown Player”) đã bị xoá; log
+  `Unknown Player with VP ID S8Test...` và `NullReferenceException` trong
+  `MainPlayerSystems.Listen` là log cũ từ clone đó, **không phải player trong game**.
+  Các số trong bảng đo trên clone cũ trước reset; **chưa rerun S8/S9 trên clone mới**.
 - Số cũ **7.85 s / 449–463 bytes** thuộc clone tạo tay `S8Test`, **không dùng** cho `Player 2`.

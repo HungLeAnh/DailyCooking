@@ -272,15 +272,18 @@ client join sau. Tổng cộng **2 player** (host + 1 client), Relay thật, kh�
   phần ghép nhiều chunk. Vẫn cần một snapshot lớn hơn nếu muốn kiểm nhánh đó.
 - **Chưa đo:** S8 4-player, băng thông `NetworkTransport` (bytes/s, packet count) và join time
   tách riêng khỏi sign-in.
-- **Cảnh báo MPPM:** console `Player 2` có các lỗi
+- **MPPM console (đã xử lý 2026-10-22):** các lỗi
   `Asset Database is set to Read Only...`, `MissingReferenceException ... Shader has been destroyed`
-  và `ArgumentNullException: shader`. Đây là lỗi của **MPPM/Editor clone** (read-only asset DB,
-  shader bị destroy sau domain reload), không phải lỗi network/gameplay. Bản clone tạo tay
-  `S8Test318cc0d4` (cửa sổ “Unknown Player”) đã bị đóng và xoá; các dòng
-  `Unknown Player with VP ID S8Test...` + `NullReferenceException` trong
+  và `ArgumentNullException: shader` đến từ cache `Library` của MPPM bị lệch. Theo hướng dẫn
+  Unity Support, đóng project → xoá `Library` → mở lại → tạo lại `Player 2` thì console clone
+  **0 error / 0 warning** khi vào play `MainMenuScene`. Sau reset còn một NRE thật trong
+  `GameInput.IsMouseOverUI` (`Touchscreen.current == null`), đã thêm null guard; đây là lỗi
+  game code, không phải MPPM. Bản clone tạo tay `S8Test318cc0d4` (cửa sổ “Unknown Player”)
+  đã bị xoá; các dòng `Unknown Player with VP ID S8Test...` + `NullReferenceException` trong
   `MainPlayerSystems.Listen` của host là log cũ từ clone đó, **không phải player trong game**.
   Số 7.85 s / 449–463 bytes của lần chạy trước thuộc clone tạo tay này và **không dùng** cho
-  `Player 2`.
+  `Player 2`. **Chưa rerun S8/S9 trên clone mới sau reset**; số 5.45 s / 909 chars ở trên là
+  đo trước reset.
 
 ### So với ngưỡng ở Bước 4
 
