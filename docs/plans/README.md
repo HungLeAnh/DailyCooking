@@ -59,7 +59,7 @@ xem ghi chú ở từng file.
 
 | # | File | Ưu tiên |
 |---|---|---|
-| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — đã đo S3/S7-rút gọn (2026-10-21), S7 đầy đủ 60 s và S8/S9 2-player + late join (2026-10-23, sau reset `Library`) trên Editor/MPPM; S8 4-player, băng thông và GC trên Player build vẫn chờ |
+| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — đã đo S3/S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join và S8 4-player + băng thông nhẹ (2026-10-23, sau reset `Library`) trên Editor/MPPM; băng thông lúc gameplay nặng và GC trên Player build vẫn chờ |
 
 ---
 
@@ -182,11 +182,12 @@ Tóm tắt bằng bằng chứng:
 | Vào placement cho S4 | ✅ Làm được từ code — log `Selected Changed: BowlTablewareCounter` |
 | Xác nhận `isDragging == true` | ❌ Không đọc được → **số đo S4-thử không gán được cho `HandleDraging`** |
 
-> **Cập nhật:** S3, S4, S7-rút gọn, S7 đầy đủ, bước phục vụ/nấu Stew và **S8/S9 2-player +
-> late join** **đã kiểm một phần** (S4 ngày 2026-10-20; S3/S7-rút gọn + Stew ngày 2026-10-21;
-> S7 đầy đủ 60 s + S8/S9 ngày 2026-10-23, sau reset `Library`). Còn **S8 4-player**,
-> **băng thông** và **GC trên Player build** — xem [13-profiler-baseline.md](13-profiler-baseline.md)
-> và [17-build-and-2client-status.md](17-build-and-2client-status.md).
+> **Cập nhật:** S3, S4, S7-rút gọn, S7 đầy đủ, bước phục vụ/nấu Stew, **S8/S9 2-player +
+> late join** và **S8 4-player + băng thông nhẹ** **đã kiểm một phần** (S4 ngày 2026-10-20;
+> S3/S7-rút gọn + Stew ngày 2026-10-21; S7 đầy đủ 60 s + S8/S9 + S8 4-player ngày
+> 2026-10-23, sau reset `Library`). Còn **băng thông lúc gameplay nặng** và **GC trên
+> Player build** — xem [13-profiler-baseline.md](13-profiler-baseline.md) và
+> [17-build-and-2client-status.md](17-build-and-2client-status.md).
 
 ### Cập nhật 2026-10-20 — kéo ghost **đã kiểm được**
 
@@ -251,8 +252,9 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
   burn timer 5.00). Phục vụ trong **bát**: bot order → `Eating` → `eaten=True`,
   `pendingCash=54` / `pendingExp=40`; collect → `Coins 200→254`, `Exp 0→40`.
   Đã sửa `StewSO.kitchenObjectSOList` → `[StewCookedSO]` và chạy lại sau reimport.
-- **Chưa kiểm:** S8 4-player, băng thông bytes/s, thời gian snapshot tách riêng khỏi sign-in và
-  GC trên Development Build. (S8/S9 2-player + late join đã kiểm lại ngày 2026-10-23 — xem dưới.)
+- **Chưa kiểm:** băng thông lúc gameplay nặng, thời gian snapshot tách riêng khỏi sign-in và
+  GC trên Development Build. (S8/S9 2-player, S8 4-player và bandwidth nhẹ đã kiểm ngày
+  2026-10-23 — xem dưới.)
 - Không commit PNG; probe tạm `Assets/Scripts/TmpInputProbe.cs` đã xoá kèm `.meta`.
 
 ### Kiểm thêm 2026-10-22 — S7 đầy đủ 60 s
@@ -268,9 +270,9 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
 - Chi tiết + so sánh với S7-rút gọn: [13-profiler-baseline.md](13-profiler-baseline.md)
   § "2026-10-22 — S7 đầy đủ".
 
-### Kiểm thêm 2026-10-23 — S8/S9 2 player + late join (MPPM, sau reset `Library`)
+### Kiểm thêm 2026-10-23 — S8/S9 2 + 4 player, bandwidth nhẹ (MPPM, sau reset `Library`)
 
-- Host + **một MPPM virtual Editor đúng tên `Player 2`** trên clone mới
+- **2 player:** host + **một MPPM virtual Editor `Player 2`** trên clone mới
   `Library/VP/mppm4214af7c`, save test `S8PostReset`, không dùng build standalone.
   Host `clients=2`, `players=2`; `Player 2` ở `GameScene`, `connected=True`, `players=2`.
 - **Late join:** **3.77 s** (sign-in cached **0.37 s** + join **3.40 s**) — đo đến khi client
@@ -278,12 +280,19 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
 - **Join snapshot:** host log **760 chars, 449 bytes compressed, 1 chunk** (`SNAPSHOT_CHUNK_SIZE=4000`);
   `chunkCount=1` < ngưỡng `> 5`, nên chưa kiểm nhánh nhiều chunk. Snapshot nhỏ hơn 909/484 cũ
   vì save test mới.
-- **Chưa đo:** S8 4-player, băng thông bytes/s + packet count, snapshot time tách riêng.
-- **MPPM console:** clone `Player 2` **0 error / 0 warning**. Lỗi read-only/shader trước đó do
-  cache `Library` lệch, đã xử lý bằng reset `Library`; NRE `GameInput.IsMouseOverUI` đã fix.
-  Host có 2 NRE nội bộ MPPM (`MainPlayerSystems.Listen`) khi clone được launch qua API nội bộ;
-  không phải game code, console đã clear.
+- **S8 4-player:** host + `Player 2`/`Player 3`/`Player 4` (`mppm4214af7c`, `mppm5d14303d`,
+  `mppmd382a7e5`), save `S8Four`; host `clients=4`/`players=4`, cả 4 `PlayerObject != null`;
+  3 client `connected=True`/`GameScene`/`players=4`; snapshot 760/449/1 mỗi client.
+- **Bandwidth nhẹ (UTP, ~36.6 s, không thao tác):** host Tx/Rx **1.12/0.81 KB/s**, **8.50/7.16 pps**;
+  client cao nhất **1.07/0.81 KB/s**, **8.14/7.12 pps**; thấp hơn nhiều ngưỡng 100 KB/s/client,
+  nhưng chưa đo lúc gameplay nặng.
+- **Chưa đo:** băng thông lúc gameplay nặng, snapshot time tách riêng, GC trên Player build.
+- **MPPM console:** `Player 2`/`Player 4` **0 error / 0 warning** sau clear; `Player 3` có 2 lỗi
+  auth `already signing in` do harness gọi trùng, đã clear và không tái phát. Lỗi read-only/shader
+  trước đó do cache `Library` lệch, đã xử lý bằng reset `Library`; NRE `GameInput.IsMouseOverUI`
+  đã fix. Host có NRE nội bộ MPPM lặp lại trong `MainPlayerSystems.Listen`
+  (`UpdateCloneLogCountsMessage`), không phải game code.
 - Số cũ **5.45 s / 909 chars / 484 bytes** đo trước reset, chỉ tham chiếu. Số **7.85 s /
   449–463 bytes** thuộc clone tạo tay `S8Test`, **không dùng**.
 - Chi tiết + caveat: [13-profiler-baseline.md](13-profiler-baseline.md) § "S8/S9" và
-  [17-build-and-2client-status.md](17-build-and-2client-status.md) §3.
+  [17-build-and-2client-status.md](17-build-and-2client-status.md) §3–4.

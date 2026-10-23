@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | D. Chưa làm vì thiếu dữ liệu |
 | **Nguồn** | `docs/optimization_plan.md` §4 ("chưa chạy profiler") |
-| **Trạng thái** | 🟡 **Đã đo S3, S7-rút gọn (2026-10-21), S7 đầy đủ 60 s và S8/S9 2-player + late join (2026-10-22)** trên Editor/MPPM; S8 4-player, băng thông và GC trên Player build vẫn chưa. |
+| **Trạng thái** | 🟡 **Đã đo S3, S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join và S8 4-player + băng thông nhẹ (2026-10-23)** trên Editor/MPPM; băng thông lúc gameplay nặng, snapshot time tách riêng và GC trên Player build vẫn chưa. |
 | **Rủi ro** | **0** — chỉ đo, không sửa code |
 | **Ưu tiên** | **Cao nhất** — làm trước nhóm A, vì nó quyết định nhóm A có đáng làm không |
 
@@ -276,11 +276,40 @@ Host ở `GameScene` trước, client join sau; Relay thật; tổng cộng 2 pl
   (`Touchscreen.current == null`) đã fix null guard. Host có 2 NRE nội bộ MPPM
   (`MainPlayerSystems.Listen`) khi clone được launch qua API nội bộ; không phải game code,
   và console đã được clear.
-- **Chưa đo:** S8 4-player, băng thông `NetworkTransport` (bytes/s, packet count) và thời gian
-  snapshot tách riêng.
+- **Chưa đo:** thời gian snapshot tách riêng; S8 4-player + băng thông ở mục dưới.
 - **Số trước reset (2026-10-22, chỉ tham chiếu):** 5.45 s / 909 chars / 484 bytes / 1 chunk
   trên clone cũ `mppm159b293e`; không dùng làm số hiện tại. Số 7.85 s / 449–463 bytes thuộc
   clone tạo tay `S8Test` và cũng **không dùng**.
+
+### 2026-10-23 — S8 4 player + băng thông nhẹ (MPPM)
+
+**Điều kiện đo:** host Editor chính + 3 virtual Editor `Player 2`/`Player 3`/`Player 4`
+(`Library/VP/mppm4214af7c`, `mppm5d14303d`, `mppmd382a7e5`), save test mới `S8Four`,
+Relay thật.
+
+| Hạng mục | Kết quả đo được |
+|---|---|
+| S8 — host | `clients=4`, `players=4`, cả 4 `PlayerObject != null`, scene `GameScene` |
+| S8 — 3 client | `connected=True`, scene `GameScene`, `players=4` |
+| Join snapshot | host log 3 lần: **760 chars, 449 bytes compressed, 1 chunk** mỗi client |
+| Bandwidth host (không thao tác, ~36.6 s) | Tx **1.12 KB/s**, Rx **0.81 KB/s**, Tx **8.50 pps**, Rx **7.16 pps** |
+| Bandwidth client cao nhất | Tx **1.07 KB/s**, Rx **0.81 KB/s**, Tx **8.14 pps**, Rx **7.12 pps** |
+
+Chi tiết client (Tx/Rx KB/s, Tx/Rx pps):
+
+- `Player 2`: 1.07 / 0.81, 8.14 / 7.12
+- `Player 3`: 0.34 / 0.41, 3.28 / 3.50
+- `Player 4`: 0.36 / 0.46, 3.39 / 3.85
+
+- Đo bằng `NetworkDriver.GetStatistics()` (UTP transport), lấy tổng bytes/packets chia cho cửa sổ
+  ~36.6 s. Đây là traffic **lúc không thao tác người chơi**; cao nhất ~1.9 KB/s tổng hai chiều
+  mỗi client, **thấp hơn nhiều** ngưỡng 100 KB/s/client, nhưng **chưa đo lúc di chuyển/nấu**.
+- `chunkCount=1` với cả 3 client; chưa kiểm nhánh nhiều chunk.
+- Console: `Player 2`/`Player 4` **0 error / 0 warning** sau clear; `Player 3` có 2 lỗi auth
+  `already signing in` do harness gọi sign-in trùng, đã clear và không tái phát. Host có NRE
+  nội bộ MPPM lặp lại trong `MainPlayerSystems+<>c__DisplayClass8_0.<Listen>b__1`
+  (`UpdateCloneLogCountsMessage`), không phải game code.
+- **Chưa đo:** bandwidth lúc gameplay nặng, thời gian snapshot tách riêng, GC trên Player build.
 
 ### So với ngưỡng ở Bước 4
 
@@ -293,7 +322,7 @@ Host ở `GameScene` trước, client join sau; Relay thật; tổng cộng 2 pl
 | S6 GC > 1 MB/s (làm 04) | Chưa đo được GC KB/s (xem "Chưa đo được") | ⏸ Treo |
 | S5 `List<T>.Find` < 0.1 ms (bỏ phần perf của 12) | Mở shop chỉ +0.4–0.7 ms main thread so S2 | ✅ **Bỏ phần perf**, giữ phần `LogError` |
 | Join > 1s / `chunkCount` > 5 (làm 02) | `chunkCount=1`; tổng join 3.77 s (sign-in 0.37 s + join 3.40 s), chưa tách snapshot | `chunkCount` đạt; thời gian snapshot chưa kết luận |
-| Bandwidth > 100 KB/s/client (làm 01+03) | Chưa đo (S8 mới có 2 player) | ⏸ Treo |
+| Bandwidth > 100 KB/s/client (làm 01+03) | 4 player, không thao tác: cao nhất ~1.9 KB/s/client (UTP, ~36.6 s); chưa đo gameplay nặng | ⏸ Chưa kết luận |
 
 ### Kết luận theo mục
 
@@ -311,9 +340,10 @@ Host ở `GameScene` trước, client join sau; Relay thật; tổng cộng 2 pl
 - **06 PlayerStats cache** — S2 (đứng yên, `HandleMovement` chạy 60 lần/s) chỉ tốn 2.92–3.55 ms
   cho **toàn bộ** frame. → **KHÔNG LÀM**.
 - **01, 02, 03** — S9 có `chunkCount=1`, snapshot 449 bytes compressed; tổng join 3.77 s gồm
-  sign-in (0.37 s) nên **chưa đủ** để kết luận snapshot chậm. S8 mới 2 player, **chưa có bandwidth**.
-  Vì p95 < 16 ms và chưa có số bandwidth/join-snapshot tách riêng → **không làm**, trừ khi đo
-  thêm 4 player + bytes/s chứng minh có vấn đề.
+  sign-in (0.37 s) nên **chưa đủ** để kết luận snapshot chậm. S8 4-player lúc không thao tác
+  chỉ ~1.9 KB/s/client, **chưa thấy vấn đề bandwidth**, nhưng chưa đo gameplay nặng.
+  Vì p95 < 16 ms và bandwidth nhẹ/join-snapshot chưa tách riêng → **không làm**, trừ khi đo
+  thêm gameplay nặng + snapshot time chứng minh có vấn đề.
 
 ### Phát hiện phụ từ lúc đo
 
@@ -337,18 +367,21 @@ Host ở `GameScene` trước, client join sau; Relay thật; tổng cộng 2 pl
   Editor (2026-10-21), nhưng số này gồm Editor + probe, **chưa dùng để kết luận**. `get_counters`
   vẫn không dùng được từ cầu nối MCP (xem cạm bẫy #2); muốn số sạch phải mở Profiler UI trên
   Development Build / đọc file `.raw`.
-- **S8 4-player và băng thông** — mới kiểm 2 player (host + `Player 2`); chưa đo bytes/s,
-  packet count, và chưa thử 4 player.
+- **Băng thông lúc gameplay nặng** — đã đo 4 player lúc không thao tác: cao nhất ~1.9 KB/s/client,
+  ~8 pps; chưa đo lúc di chuyển/nấu.
 - **S9 tách riêng thời gian snapshot** — tổng join 3.77 s đã đo, nhưng gồm sign-in + Relay;
   chưa đo riêng lúc nhận/ghép chunk.
 
-### Đã đo (2026-10-20/21/22)
+### Đã đo (2026-10-20/21/22/23)
 
 - **S3 + S7-rút gọn** — ngày 2026-10-21 (mục ở trên).
 - **S7 đầy đủ** — ngày 2026-10-22: 60 s, 5/5 vòng nấu/cắt/phục vụ (mục ở trên).
 - **S8/S9 2-player + late join** — ngày 2026-10-23 (sau reset `Library`): host + MPPM
   `Player 2`; join 3.77 s (sign-in 0.37 s + join 3.40 s); snapshot 449 bytes compressed /
   1 chunk (mục ở trên). Số 2026-10-22 trước reset chỉ tham chiếu.
+- **S8 4-player + băng thông nhẹ** — ngày 2026-10-23: host + `Player 2`/`Player 3`/`Player 4`;
+  `clients=4`/`players=4`; snapshot 449 bytes / 1 chunk mỗi client; bandwidth không thao tác
+  cao nhất ~1.9 KB/s/client, ~8 pps; chưa đo gameplay nặng.
 - **S4** — ngày 2026-10-20
   ([16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md)).
 - Lịch sử: **đã thử tự động hoá S3/S4 bằng computer-control (2026-10-13) và thất bại** —
@@ -452,13 +485,15 @@ Host ở `GameScene` trước, client join sau; Relay thật; tổng cộng 2 pl
   System — xem [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md).
   Đường computer-control lái chuột OS vẫn đóng (2026-10-13): bàn phím không vào
   `Keyboard.current`, sự kiện OS không tới `EventSystem`.
-- **S8/S9 đã kiểm một phần ngày 2026-10-23 (sau reset `Library`)**: host + MPPM `Player 2`
-  (2 player), host `clients=2`/`players=2`, client `GameScene`/`connected=True`; late join
-  **3.77 s** (sign-in cached 0.37 s + join 3.40 s), snapshot 449 bytes compressed / 1 chunk.
-  Chi tiết + caveat MPPM ở mục "S8/S9" phía trên.
-- **Còn:** S8 4-player, băng thông bytes/s + packet count, thời gian snapshot tách riêng khỏi
-  sign-in, và **GC KB/s trên Player build** — S7 chỉ có số Editor + probe; cần Development
-  Build + Profiler UI (hoặc đọc `.raw`).
+- **S8/S9 đã kiểm một phần ngày 2026-10-23 (sau reset `Library`)**: 2 player host + MPPM
+  `Player 2`, host `clients=2`/`players=2`; late join **3.77 s** (sign-in cached 0.37 s +
+  join 3.40 s), snapshot 449 bytes compressed / 1 chunk. 4 player host + `Player 2`/
+  `Player 3`/`Player 4`: `clients=4`/`players=4`, snapshot 449 bytes / 1 chunk mỗi client;
+  bandwidth không thao tác cao nhất **~1.9 KB/s/client**, **~8 pps**. Chi tiết + caveat MPPM
+  ở mục "S8/S9" phía trên.
+- **Còn:** băng thông lúc gameplay nặng, thời gian snapshot tách riêng khỏi sign-in, và
+  **GC KB/s trên Player build** — S7 chỉ có số Editor + probe; cần Development Build +
+  Profiler UI (hoặc đọc `.raw`).
 - Sau khi có đủ số → ghi `docs/profiler_baseline.md` và dán nhãn **LÀM / KHÔNG LÀM** cho từng mục
   trong `optimization_plan.md` §3.
 - **Tài sản để lại:** `Assets/Editor/PerfScenarios.cs` có 4 probe mới —

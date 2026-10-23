@@ -80,8 +80,8 @@ còn đúng: `StoveCounter.png` (thay đổi sẵn có của bạn), thư mục 
   trực tiếp** với 5.45 s cũ (sign-in lạnh).
 - Snapshot 760/449 nhỏ hơn 909/484 cũ vì save test `S8PostReset` mới, không phải regression.
 - `chunkCount=1` < ngưỡng `> 5`: lần này **không** kiểm được nhánh ghép nhiều chunk.
-- **Chưa đo:** S8 4-player, băng thông bytes/s + packet count, và thời gian snapshot tách riêng
-  khỏi sign-in.
+- **Chưa đo:** băng thông lúc gameplay nặng và thời gian snapshot tách riêng khỏi sign-in.
+  S8 4-player + băng thông nhẹ đã kiểm ở §4.
 - **MPPM console:** clone `Player 2` **0 error / 0 warning**. Lỗi read-only/shader trước đó do
   cache `Library` lệch, đã xử lý bằng reset `Library`; NRE `GameInput.IsMouseOverUI`
   (`Touchscreen.current == null`) đã fix null guard. Host có 2 NRE nội bộ MPPM
@@ -89,3 +89,27 @@ còn đúng: `StoveCounter.png` (thay đổi sẵn có của bạn), thư mục 
   console đã được clear.
 - Số cũ **5.45 s / 909 chars / 484 bytes** đo trên clone `mppm159b293e` trước reset, chỉ tham
   chiếu. Số **7.85 s / 449–463 bytes** thuộc clone tạo tay `S8Test`, **không dùng**.
+
+## 4. S8 4 player + bandwidth — **ĐÃ KIỂM MỘT PHẦN** (2026-10-23)
+
+Host Editor chính + 3 MPPM virtual Editor `Player 2`/`Player 3`/`Player 4`
+(`mppm4214af7c`, `mppm5d14303d`, `mppmd382a7e5`), save test `S8Four`, Relay thật.
+
+| Hạng mục | Kết quả |
+|---|---|
+| Host | scene `GameScene`, `IsServer=True`, `clients=4`, `players=4`, cả 4 `PlayerObject != null` |
+| 3 client | `connected=True`, scene `GameScene`, `players=4` |
+| Join snapshot | host log 3 lần: **760 chars, 449 bytes compressed, 1 chunk** mỗi client |
+| Bandwidth host | Tx **1.12 KB/s**, Rx **0.81 KB/s**, Tx **8.50 pps**, Rx **7.16 pps** |
+| Bandwidth client cao nhất | Tx **1.07 KB/s**, Rx **0.81 KB/s**, Tx **8.14 pps**, Rx **7.12 pps** |
+
+- Đo bằng `NetworkDriver.GetStatistics()` (UTP transport), cửa sổ ~36.6 s, **không thao tác
+  người chơi**. Cao nhất ~1.9 KB/s tổng hai chiều mỗi client, thấp hơn nhiều ngưỡng
+  100 KB/s/client; **chưa đo lúc di chuyển/nấu**.
+- `Player 2`: 1.07/0.81 KB/s, 8.14/7.12 pps; `Player 3`: 0.34/0.41 KB/s, 3.28/3.50 pps;
+  `Player 4`: 0.36/0.46 KB/s, 3.39/3.85 pps.
+- Clone `Player 2`/`Player 4` **0 error / 0 warning** sau clear; `Player 3` có 2 lỗi auth
+  `already signing in` do harness gọi sign-in trùng, đã clear và không tái phát.
+- Host có NRE nội bộ MPPM lặp lại trong `MainPlayerSystems+<>c__DisplayClass8_0.<Listen>b__1`
+  (`UpdateCloneLogCountsMessage`), **không phải game code**.
+- **Chưa đo:** bandwidth lúc gameplay nặng, snapshot time tách riêng, GC trên Player build.
