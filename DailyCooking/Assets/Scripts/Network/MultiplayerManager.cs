@@ -314,6 +314,8 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     }
     public void ShutdownAndReset()
     {
+        bool wasServer = NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer;
+
         // Flush the host's save while it is still the server, then detach the file.
         if (GameManager.Instance != null)
             GameManager.Instance.ClearActiveSave(discardData: false);
@@ -333,8 +335,9 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             NetworkManager.Singleton.Shutdown();
         }
 
-        // 4. Clear your runtime lists so they don't hold stale player profiles
-        if (playerDataNetworkList != null)
+        // 4. NetworkList is server-authoritative: only the host may clear it.
+        // A client calling Clear() logs "Write permissions (Server) ... not allowed".
+        if (playerDataNetworkList != null && wasServer)
         {
             playerDataNetworkList.Clear();
         }
