@@ -252,38 +252,35 @@ tay người chơi.
 - S7-rút gọn (chỉ đi lại + 5 bot) có p50/p95 thấp hơn (7.50/8.45 ms), phù hợp với việc ít
   `KitchenObject`/bot state hơn; đây là **hai kịch bản khác nhau**, không phải regression.
 
-### 2026-10-22 — S8/S9: 2 player + late join (MPPM `Player 2`)
+### 2026-10-23 — S8/S9 rerun sau reset `Library` (MPPM `Player 2`)
 
-**Điều kiện đo:** host chạy trong Editor chính; client là **một virtual Editor do MPPM tạo đúng
-tên `Player 2`** (`Library/VP/mppm159b293e`), không phải clone tạo tay. Host ở `GameScene` trước,
-client join sau. Tổng cộng **2 player** (host + 1 client), Relay thật, không dùng build standalone.
+**Điều kiện đo:** host chạy trong Editor chính; client là virtual Editor `Player 2`
+(`Library/VP/mppm4214af7c`), tạo lại sau khi xoá `Library`; save test mới `S8PostReset`.
+Host ở `GameScene` trước, client join sau; Relay thật; tổng cộng 2 player.
 
 | Hạng mục | Kết quả đo được |
 |---|---|
 | S8 — host | `clients=2`, `players=2`, scene `GameScene`, `IsServer=True` |
 | S8 — `Player 2` | scene `GameScene`, `connected=True`, `players=2` |
-| S9 — join | gọi `Join` → `Status=joined`: **5.45 s** |
-| S9 — snapshot | host log: **909 chars, 484 bytes compressed, 1 chunk** (`SNAPSHOT_CHUNK_SIZE=4000`) |
+| S9 — join tổng | **3.77 s** (sign-in **0.37 s** + join **3.40 s**) |
+| S9 — snapshot | host log: **760 chars, 449 bytes compressed, 1 chunk** (`SNAPSHOT_CHUNK_SIZE=4000`) |
 
-- **5.45 s là toàn bộ quá trình join**, gồm anonymous sign-in + Relay + load scene + poll 250 ms;
-  **không phải** thời gian riêng của snapshot. Vì vậy **không gán** con số này cho ngưỡng
-  “snapshot > 1 s”.
-- `chunkCount=1` < ngưỡng `> 5`: lần join này **không tạo nhiều chunk**, nên chưa chứng minh được
-  phần ghép nhiều chunk. Vẫn cần một snapshot lớn hơn nếu muốn kiểm nhánh đó.
-- **Chưa đo:** S8 4-player, băng thông `NetworkTransport` (bytes/s, packet count) và join time
-  tách riêng khỏi sign-in.
-- **MPPM console (đã xử lý 2026-10-22):** các lỗi
-  `Asset Database is set to Read Only...`, `MissingReferenceException ... Shader has been destroyed`
-  và `ArgumentNullException: shader` đến từ cache `Library` của MPPM bị lệch. Theo hướng dẫn
-  Unity Support, đóng project → xoá `Library` → mở lại → tạo lại `Player 2` thì console clone
-  **0 error / 0 warning** khi vào play `MainMenuScene`. Sau reset còn một NRE thật trong
-  `GameInput.IsMouseOverUI` (`Touchscreen.current == null`), đã thêm null guard; đây là lỗi
-  game code, không phải MPPM. Bản clone tạo tay `S8Test318cc0d4` (cửa sổ “Unknown Player”)
-  đã bị xoá; các dòng `Unknown Player with VP ID S8Test...` + `NullReferenceException` trong
-  `MainPlayerSystems.Listen` của host là log cũ từ clone đó, **không phải player trong game**.
-  Số 7.85 s / 449–463 bytes của lần chạy trước thuộc clone tạo tay này và **không dùng** cho
-  `Player 2`. **Chưa rerun S8/S9 trên clone mới sau reset**; số 5.45 s / 909 chars ở trên là
-  đo trước reset.
+- **3.77 s** đo từ trước `SignInAnonymouslyAsync` đến khi client `connected=True`, scene
+  `GameScene` và `GameData != null`; sampler chạy trên main thread. Sign-in dùng token cache
+  nên chỉ 0.37 s — **không so trực tiếp** với 5.45 s cũ (sign-in lạnh).
+- Snapshot 760/449 nhỏ hơn 909/484 cũ vì save test `S8PostReset` mới, không phải regression.
+- `chunkCount=1` < ngưỡng `> 5`: lần join này **không tạo nhiều chunk**, nên chưa chứng minh
+  được phần ghép nhiều chunk.
+- Console `Player 2`: **0 error / 0 warning**. Trước đó lỗi read-only/shader do cache `Library`
+  lệch, đã xử lý bằng reset `Library`; NRE `GameInput.IsMouseOverUI`
+  (`Touchscreen.current == null`) đã fix null guard. Host có 2 NRE nội bộ MPPM
+  (`MainPlayerSystems.Listen`) khi clone được launch qua API nội bộ; không phải game code,
+  và console đã được clear.
+- **Chưa đo:** S8 4-player, băng thông `NetworkTransport` (bytes/s, packet count) và thời gian
+  snapshot tách riêng.
+- **Số trước reset (2026-10-22, chỉ tham chiếu):** 5.45 s / 909 chars / 484 bytes / 1 chunk
+  trên clone cũ `mppm159b293e`; không dùng làm số hiện tại. Số 7.85 s / 449–463 bytes thuộc
+  clone tạo tay `S8Test` và cũng **không dùng**.
 
 ### So với ngưỡng ở Bước 4
 
@@ -295,7 +292,7 @@ client join sau. Tổng cộng **2 player** (host + 1 client), Relay thật, kh�
 | `FindGameObjectsWithTag` hiện ở S4 (làm 05) | S10 rung camera (2 lookup/frame) — **không khác gì S2** | ❌ Không đủ lý do |
 | S6 GC > 1 MB/s (làm 04) | Chưa đo được GC KB/s (xem "Chưa đo được") | ⏸ Treo |
 | S5 `List<T>.Find` < 0.1 ms (bỏ phần perf của 12) | Mở shop chỉ +0.4–0.7 ms main thread so S2 | ✅ **Bỏ phần perf**, giữ phần `LogError` |
-| Join > 1s / `chunkCount` > 5 (làm 02) | `chunkCount=1`; tổng join 5.45 s gồm sign-in, chưa tách snapshot | `chunkCount` đạt; thời gian snapshot chưa kết luận |
+| Join > 1s / `chunkCount` > 5 (làm 02) | `chunkCount=1`; tổng join 3.77 s (sign-in 0.37 s + join 3.40 s), chưa tách snapshot | `chunkCount` đạt; thời gian snapshot chưa kết luận |
 | Bandwidth > 100 KB/s/client (làm 01+03) | Chưa đo (S8 mới có 2 player) | ⏸ Treo |
 
 ### Kết luận theo mục
@@ -313,8 +310,8 @@ client join sau. Tổng cộng **2 player** (host + 1 client), Relay thật, kh�
   (đây là bug robustness, không phải perf — vẫn làm).
 - **06 PlayerStats cache** — S2 (đứng yên, `HandleMovement` chạy 60 lần/s) chỉ tốn 2.92–3.55 ms
   cho **toàn bộ** frame. → **KHÔNG LÀM**.
-- **01, 02, 03** — S9 có `chunkCount=1`, snapshot 484 bytes compressed; tổng join 5.45 s gồm
-  sign-in nên **chưa đủ** để kết luận snapshot chậm. S8 mới 2 player, **chưa có bandwidth**.
+- **01, 02, 03** — S9 có `chunkCount=1`, snapshot 449 bytes compressed; tổng join 3.77 s gồm
+  sign-in (0.37 s) nên **chưa đủ** để kết luận snapshot chậm. S8 mới 2 player, **chưa có bandwidth**.
   Vì p95 < 16 ms và chưa có số bandwidth/join-snapshot tách riêng → **không làm**, trừ khi đo
   thêm 4 player + bytes/s chứng minh có vấn đề.
 
@@ -342,15 +339,16 @@ client join sau. Tổng cộng **2 player** (host + 1 client), Relay thật, kh�
   Development Build / đọc file `.raw`.
 - **S8 4-player và băng thông** — mới kiểm 2 player (host + `Player 2`); chưa đo bytes/s,
   packet count, và chưa thử 4 player.
-- **S9 tách riêng thời gian snapshot** — tổng join 5.45 s đã đo, nhưng gồm sign-in + Relay;
+- **S9 tách riêng thời gian snapshot** — tổng join 3.77 s đã đo, nhưng gồm sign-in + Relay;
   chưa đo riêng lúc nhận/ghép chunk.
 
 ### Đã đo (2026-10-20/21/22)
 
 - **S3 + S7-rút gọn** — ngày 2026-10-21 (mục ở trên).
 - **S7 đầy đủ** — ngày 2026-10-22: 60 s, 5/5 vòng nấu/cắt/phục vụ (mục ở trên).
-- **S8/S9 2-player + late join** — ngày 2026-10-22: host + MPPM `Player 2`; join 5.45 s;
-  snapshot 484 bytes compressed / 1 chunk (mục ở trên).
+- **S8/S9 2-player + late join** — ngày 2026-10-23 (sau reset `Library`): host + MPPM
+  `Player 2`; join 3.77 s (sign-in 0.37 s + join 3.40 s); snapshot 449 bytes compressed /
+  1 chunk (mục ở trên). Số 2026-10-22 trước reset chỉ tham chiếu.
 - **S4** — ngày 2026-10-20
   ([16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md)).
 - Lịch sử: **đã thử tự động hoá S3/S4 bằng computer-control (2026-10-13) và thất bại** —
@@ -454,9 +452,10 @@ client join sau. Tổng cộng **2 player** (host + 1 client), Relay thật, kh�
   System — xem [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md).
   Đường computer-control lái chuột OS vẫn đóng (2026-10-13): bàn phím không vào
   `Keyboard.current`, sự kiện OS không tới `EventSystem`.
-- **S8/S9 đã kiểm một phần ngày 2026-10-22**: host + MPPM `Player 2` (2 player), host
-  `clients=2`/`players=2`, client `GameScene`/`connected=True`; late join 5.45 s (gồm sign-in),
-  snapshot 484 bytes compressed / 1 chunk. Chi tiết + caveat MPPM ở mục "S8/S9" phía trên.
+- **S8/S9 đã kiểm một phần ngày 2026-10-23 (sau reset `Library`)**: host + MPPM `Player 2`
+  (2 player), host `clients=2`/`players=2`, client `GameScene`/`connected=True`; late join
+  **3.77 s** (sign-in cached 0.37 s + join 3.40 s), snapshot 449 bytes compressed / 1 chunk.
+  Chi tiết + caveat MPPM ở mục "S8/S9" phía trên.
 - **Còn:** S8 4-player, băng thông bytes/s + packet count, thời gian snapshot tách riêng khỏi
   sign-in, và **GC KB/s trên Player build** — S7 chỉ có số Editor + probe; cần Development
   Build + Profiler UI (hoặc đọc `.raw`).

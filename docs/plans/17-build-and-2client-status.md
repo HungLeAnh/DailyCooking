@@ -63,31 +63,29 @@ Tất cả đã được **revert/xoá** (`git checkout --`, xoá file untracked
 còn đúng: `StoveCounter.png` (thay đổi sẵn có của bạn), thư mục untracked
 `GooglePlayGames/.../current-build/`, và các file doc.
 
-## 3. 2 client / late join — **ĐÃ KIỂM MỘT PHẦN** (2 player, 2026-10-22)
+## 3. 2 client / late join — **ĐÃ KIỂM MỘT PHẦN** (2 player, 2026-10-23, sau reset `Library`)
 
-Đã chạy được **host + 1 MPPM virtual Editor đúng tên `Player 2`** trên clone cũ
-`Library/VP/mppm159b293e` (clone này đã bị xoá khi reset `Library`), không dùng build standalone:
+Đã rerun **host + 1 MPPM virtual Editor đúng tên `Player 2`** trên clone mới
+`Library/VP/mppm4214af7c`, không dùng build standalone:
 
 | Hạng mục | Kết quả |
 |---|---|
 | Host | scene `GameScene`, `IsServer=True`, `clients=2`, `players=2` |
 | `Player 2` | scene `GameScene`, `connected=True`, `players=2` |
-| Late join | gọi `Join` → `Status=joined`: **5.45 s** |
-| Join snapshot | **909 chars, 484 bytes compressed, 1 chunk** (`SNAPSHOT_CHUNK_SIZE=4000`) |
+| Late join | **3.77 s** (sign-in **0.37 s** + join **3.40 s**) |
+| Join snapshot | host log: **760 chars, 449 bytes compressed, 1 chunk** (`SNAPSHOT_CHUNK_SIZE=4000`) |
 
-- **5.45 s là toàn bộ join**, gồm anonymous sign-in + Relay + load scene + poll 250 ms; **không
-  phải** thời gian riêng của snapshot. Không gán con số này cho ngưỡng “snapshot > 1 s”.
+- **3.77 s** đo từ trước `SignInAnonymouslyAsync` đến khi client `connected=True`, scene
+  `GameScene` và `GameData != null`. Sign-in dùng token cache nên chỉ 0.37 s; **không so
+  trực tiếp** với 5.45 s cũ (sign-in lạnh).
+- Snapshot 760/449 nhỏ hơn 909/484 cũ vì save test `S8PostReset` mới, không phải regression.
 - `chunkCount=1` < ngưỡng `> 5`: lần này **không** kiểm được nhánh ghép nhiều chunk.
 - **Chưa đo:** S8 4-player, băng thông bytes/s + packet count, và thời gian snapshot tách riêng
   khỏi sign-in.
-- **MPPM console (đã xử lý 2026-10-22):** các lỗi `Asset Database is set to Read Only...`,
-  `MissingReferenceException ... Shader has been destroyed`, `ArgumentNullException: shader`
-  do cache `Library` của MPPM bị lệch. Theo hướng dẫn Unity Support, đóng project → xoá
-  `Library` → mở lại → tạo lại `Player 2`; clone mới `mppm4214af7c` có console
-  **0 error / 0 warning** khi vào play `MainMenuScene`. Sau reset còn một NRE thật trong
-  `GameInput.IsMouseOverUI` (`Touchscreen.current == null`), đã thêm null guard.
-  Bản clone tạo tay `S8Test318cc0d4` (cửa sổ “Unknown Player”) đã bị xoá; log
-  `Unknown Player with VP ID S8Test...` và `NullReferenceException` trong
-  `MainPlayerSystems.Listen` là log cũ từ clone đó, **không phải player trong game**.
-  Các số trong bảng đo trên clone cũ trước reset; **chưa rerun S8/S9 trên clone mới**.
-- Số cũ **7.85 s / 449–463 bytes** thuộc clone tạo tay `S8Test`, **không dùng** cho `Player 2`.
+- **MPPM console:** clone `Player 2` **0 error / 0 warning**. Lỗi read-only/shader trước đó do
+  cache `Library` lệch, đã xử lý bằng reset `Library`; NRE `GameInput.IsMouseOverUI`
+  (`Touchscreen.current == null`) đã fix null guard. Host có 2 NRE nội bộ MPPM
+  (`MainPlayerSystems.Listen`) khi clone được launch qua API nội bộ; không phải game code,
+  console đã được clear.
+- Số cũ **5.45 s / 909 chars / 484 bytes** đo trên clone `mppm159b293e` trước reset, chỉ tham
+  chiếu. Số **7.85 s / 449–463 bytes** thuộc clone tạo tay `S8Test`, **không dùng**.
