@@ -93,23 +93,29 @@ còn đúng: `StoveCounter.png` (thay đổi sẵn có của bạn), thư mục 
 ## 4. S8 4 player + bandwidth — **ĐÃ KIỂM MỘT PHẦN** (2026-10-23)
 
 Host Editor chính + 3 MPPM virtual Editor `Player 2`/`Player 3`/`Player 4`
-(`mppm4214af7c`, `mppm5d14303d`, `mppmd382a7e5`), save test `S8Four`, Relay thật.
+(`mppm4214af7c`, `mppm5d14303d`, `mppmd382a7e5`), save test `S8Four`, Relay thật. Mỗi clone
+dùng profile riêng (`s8_player2/3/4`) nên `PlayerId` khác nhau.
 
 | Hạng mục | Kết quả |
 |---|---|
 | Host | scene `GameScene`, `IsServer=True`, `clients=4`, `players=4`, cả 4 `PlayerObject != null` |
 | 3 client | `connected=True`, scene `GameScene`, `players=4` |
-| Join snapshot | host log 3 lần: **760 chars, 449 bytes compressed, 1 chunk** mỗi client |
+| Join snapshot | host log 3 lần: **990 / 1139 / 1288 chars**, **496 / 523 / 549 bytes**, **1 chunk** mỗi client |
+| Snapshot phase (`Player 2`, first join) | **1.251 s** từ connected/scene → `GameData != null` |
 | Bandwidth host | Tx **1.12 KB/s**, Rx **0.81 KB/s**, Tx **8.50 pps**, Rx **7.16 pps** |
 | Bandwidth client cao nhất | Tx **1.07 KB/s**, Rx **0.81 KB/s**, Tx **8.14 pps**, Rx **7.12 pps** |
 
-- Đo bằng `NetworkDriver.GetStatistics()` (UTP transport), cửa sổ ~36.6 s, **không thao tác
-  người chơi**. Cao nhất ~1.9 KB/s tổng hai chiều mỗi client, thấp hơn nhiều ngưỡng
+- **1.251 s** là một mẫu first join, gồm RPC + decompress + JSON; **chưa lặp lại** và là
+  Editor/MPPM nên chưa đủ kết luận. Bỏ số rejoin `1.082 s` / `2.976 s` vì gọi
+  `ShutdownAndReset()` trực tiếp, không phải flow leave chuẩn.
+- Bandwidth đo bằng `NetworkDriver.GetStatistics()` (UTP transport), cửa sổ ~36.6 s, **không
+  thao tác người chơi**. Cao nhất ~1.9 KB/s tổng hai chiều mỗi client, thấp hơn nhiều ngưỡng
   100 KB/s/client; **chưa đo lúc di chuyển/nấu**.
 - `Player 2`: 1.07/0.81 KB/s, 8.14/7.12 pps; `Player 3`: 0.34/0.41 KB/s, 3.28/3.50 pps;
   `Player 4`: 0.36/0.46 KB/s, 3.39/3.85 pps.
-- Clone `Player 2`/`Player 4` **0 error / 0 warning** sau clear; `Player 3` có 2 lỗi auth
-  `already signing in` do harness gọi sign-in trùng, đã clear và không tái phát.
+- 3 client **0 error / 0 warning** sau clear. Khi thử rejoin, `ShutdownAndReset()` trên client
+  làm lộ bug thật: `playerDataNetworkList.Clear()` báo `Write permissions (Server)`. Đã fix
+  `f2240ca4d` (chỉ host clear) và verify flow leave chuẩn: **0 error / 0 warning**.
 - Host có NRE nội bộ MPPM lặp lại trong `MainPlayerSystems+<>c__DisplayClass8_0.<Listen>b__1`
   (`UpdateCloneLogCountsMessage`), **không phải game code**.
-- **Chưa đo:** bandwidth lúc gameplay nặng, snapshot time tách riêng, GC trên Player build.
+- **Chưa đo:** lặp lại snapshot phase, bandwidth lúc gameplay nặng, GC trên Player build.

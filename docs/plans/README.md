@@ -252,7 +252,7 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
   burn timer 5.00). Phục vụ trong **bát**: bot order → `Eating` → `eaten=True`,
   `pendingCash=54` / `pendingExp=40`; collect → `Coins 200→254`, `Exp 0→40`.
   Đã sửa `StewSO.kitchenObjectSOList` → `[StewCookedSO]` và chạy lại sau reimport.
-- **Chưa kiểm:** băng thông lúc gameplay nặng, thời gian snapshot tách riêng khỏi sign-in và
+- **Chưa kiểm:** băng thông lúc gameplay nặng, lặp lại snapshot phase (mới 1 mẫu 4-player) và
   GC trên Development Build. (S8/S9 2-player, S8 4-player và bandwidth nhẹ đã kiểm ngày
   2026-10-23 — xem dưới.)
 - Không commit PNG; probe tạm `Assets/Scripts/TmpInputProbe.cs` đã xoá kèm `.meta`.
@@ -281,17 +281,21 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
   `chunkCount=1` < ngưỡng `> 5`, nên chưa kiểm nhánh nhiều chunk. Snapshot nhỏ hơn 909/484 cũ
   vì save test mới.
 - **S8 4-player:** host + `Player 2`/`Player 3`/`Player 4` (`mppm4214af7c`, `mppm5d14303d`,
-  `mppmd382a7e5`), save `S8Four`; host `clients=4`/`players=4`, cả 4 `PlayerObject != null`;
-  3 client `connected=True`/`GameScene`/`players=4`; snapshot 760/449/1 mỗi client.
+  `mppmd382a7e5`), save `S8Four`, mỗi clone profile riêng; host `clients=4`/`players=4`, cả 4
+  `PlayerObject != null`; 3 client `connected=True`/`GameScene`/`players=4`; snapshot
+  **990/1139/1288 chars**, **496/523/549 bytes**, **1 chunk** mỗi client.
+- **Snapshot phase (`Player 2`, first join):** **1.251 s** từ connected/scene → `GameData != null`;
+  mới 1 mẫu Editor/MPPM, chưa đủ kết luận. Bỏ số rejoin `1.082 s`/`2.976 s` vì flow không chuẩn.
 - **Bandwidth nhẹ (UTP, ~36.6 s, không thao tác):** host Tx/Rx **1.12/0.81 KB/s**, **8.50/7.16 pps**;
   client cao nhất **1.07/0.81 KB/s**, **8.14/7.12 pps**; thấp hơn nhiều ngưỡng 100 KB/s/client,
   nhưng chưa đo lúc gameplay nặng.
-- **Chưa đo:** băng thông lúc gameplay nặng, snapshot time tách riêng, GC trên Player build.
-- **MPPM console:** `Player 2`/`Player 4` **0 error / 0 warning** sau clear; `Player 3` có 2 lỗi
-  auth `already signing in` do harness gọi trùng, đã clear và không tái phát. Lỗi read-only/shader
-  trước đó do cache `Library` lệch, đã xử lý bằng reset `Library`; NRE `GameInput.IsMouseOverUI`
-  đã fix. Host có NRE nội bộ MPPM lặp lại trong `MainPlayerSystems.Listen`
-  (`UpdateCloneLogCountsMessage`), không phải game code.
+- **Chưa đo:** lặp lại snapshot phase, băng thông lúc gameplay nặng, GC trên Player build.
+- **MPPM console:** 3 client **0 error / 0 warning** sau clear. Khi thử rejoin,
+  `ShutdownAndReset()` trên client làm lộ bug thật `playerDataNetworkList.Clear()` →
+  `Write permissions (Server)`; đã fix `f2240ca4d` (chỉ host clear), verify flow leave chuẩn
+  **0 error / 0 warning**. Lỗi read-only/shader trước đó do cache `Library` lệch, đã xử lý bằng
+  reset `Library`; NRE `GameInput.IsMouseOverUI` đã fix. Host có NRE nội bộ MPPM lặp lại trong
+  `MainPlayerSystems.Listen` (`UpdateCloneLogCountsMessage`), không phải game code.
 - Số cũ **5.45 s / 909 chars / 484 bytes** đo trước reset, chỉ tham chiếu. Số **7.85 s /
   449–463 bytes** thuộc clone tạo tay `S8Test`, **không dùng**.
 - Chi tiết + caveat: [13-profiler-baseline.md](13-profiler-baseline.md) § "S8/S9" và
