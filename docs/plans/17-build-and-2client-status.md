@@ -1,15 +1,16 @@
 # 17 — Kiểm lại các mục "chưa chạy": build APK và 2/4 client
 
-Ngày: 2026-10-20; §3 cập nhật 2026-10-22; §5 cập nhật 2026-10-25. Không có thay đổi runtime nào
-trong file này — chỉ ghi **kết quả kiểm** và **những gì chưa kiểm được**, kèm lý do cụ thể.
+Ngày: 2026-10-20; §3 cập nhật 2026-10-22; §5 cập nhật 2026-10-25; §6 cập nhật 2026-10-26.
+Không có thay đổi runtime nào trong file này — chỉ ghi **kết quả kiểm** và **những gì chưa
+kiểm được**, kèm lý do cụ thể.
 
 ## 1. Chạy lại bộ kiểm tiêu chuẩn (sau khi dọn file tạm)
 
 | Bước | Kết quả |
 |---|---|
 | `refresh_unity(force)` → 32 s | OK |
-| `read_console(error, warning)` | **0 error / 0 warning** |
-| `run_tests(EditMode)` | **49/49 passed**, 0 failed, 0 skipped (`0.236 s`) |
+| `read_console(error, warning)` | **0 error / 0 warning**; 2026-10-26 sau refresh cũng **0/0** |
+| `run_tests(EditMode)` | **49/49 passed**, 0 failed, 0 skipped (`0.236 s`); chạy lại **2026-10-26** sau fix `Player.prefab`: **49/49**, 0 failed/skipped (`1.109 s`) |
 | `Tools/Build Checks/Compile Android Player Scripts` | **`[BuildChecks] Android player scripts compiled: 110 assemblies.`** |
 
 ## 2. Build Android thật (APK) — **CHƯA KIỂM ĐƯỢC** trong môi trường này
@@ -80,8 +81,8 @@ còn đúng: `StoveCounter.png` (thay đổi sẵn có của bạn), thư mục 
   trực tiếp** với 5.45 s cũ (sign-in lạnh).
 - Snapshot 760/449 nhỏ hơn 909/484 cũ vì save test `S8PostReset` mới, không phải regression.
 - `chunkCount=1` < ngưỡng `> 5`: lần này **không** kiểm được nhánh ghép nhiều chunk.
-- **Chưa đo:** băng thông lúc gameplay nặng và thời gian snapshot tách riêng khỏi sign-in.
-  S8 4-player + băng thông nhẹ đã kiểm ở §4.
+- **Lượt này chưa đo:** băng thông lúc gameplay nặng và thời gian snapshot tách riêng khỏi sign-in.
+  S8 4-player + băng thông nhẹ đã kiểm ở §4; movement/bandwidth/snapshot lặp lại đã kiểm ở §6.
 - **MPPM console:** clone `Player 2` **0 error / 0 warning**. Lỗi read-only/shader trước đó do
   cache `Library` lệch, đã xử lý bằng reset `Library`; NRE `GameInput.IsMouseOverUI`
   (`Touchscreen.current == null`) đã fix null guard. Host có 2 NRE nội bộ MPPM
@@ -105,12 +106,13 @@ dùng profile riêng (`s8_player2/3/4`) nên `PlayerId` khác nhau.
 | Bandwidth host | Tx **1.12 KB/s**, Rx **0.81 KB/s**, Tx **8.50 pps**, Rx **7.16 pps** |
 | Bandwidth client cao nhất | Tx **1.07 KB/s**, Rx **0.81 KB/s**, Tx **8.14 pps**, Rx **7.12 pps** |
 
-- **1.251 s** là một mẫu first join, gồm RPC + decompress + JSON; **chưa lặp lại** và là
-  Editor/MPPM nên chưa đủ kết luận. Bỏ số rejoin `1.082 s` / `2.976 s` vì gọi
-  `ShutdownAndReset()` trực tiếp, không phải flow leave chuẩn.
+- **1.251 s** là một mẫu first join, gồm RPC + decompress + JSON; lượt này **chưa lặp lại**
+  và là Editor/MPPM nên chưa đủ kết luận. Bỏ số rejoin `1.082 s` / `2.976 s` vì gọi
+  `ShutdownAndReset()` trực tiếp, không phải flow leave chuẩn. Đã lặp lại 3 mẫu ngày
+  2026-10-26 ở §6.
 - Bandwidth đo bằng `NetworkDriver.GetStatistics()` (UTP transport), cửa sổ ~36.6 s, **không
   thao tác người chơi**. Cao nhất ~1.9 KB/s tổng hai chiều mỗi client, thấp hơn nhiều ngưỡng
-  100 KB/s/client; **chưa đo lúc di chuyển/nấu**.
+  100 KB/s/client; lượt này **chưa đo lúc di chuyển/nấu** — đã đo ngày 2026-10-26 ở §6.
 - `Player 2`: 1.07/0.81 KB/s, 8.14/7.12 pps; `Player 3`: 0.34/0.41 KB/s, 3.28/3.50 pps;
   `Player 4`: 0.36/0.46 KB/s, 3.39/3.85 pps.
 - 3 client **0 error / 0 warning** sau clear. Khi thử rejoin, `ShutdownAndReset()` trên client
@@ -118,7 +120,8 @@ dùng profile riêng (`s8_player2/3/4`) nên `PlayerId` khác nhau.
   `f2240ca4d` (chỉ host clear) và verify flow leave chuẩn: **0 error / 0 warning**.
 - Host có NRE nội bộ MPPM lặp lại trong `MainPlayerSystems+<>c__DisplayClass8_0.<Listen>b__1`
   (`UpdateCloneLogCountsMessage`), **không phải game code**.
-- **Chưa đo:** lặp lại snapshot phase, bandwidth lúc gameplay nặng, GC trên Player build.
+- **Lượt này chưa đo:** lặp lại snapshot phase, bandwidth lúc gameplay nặng, GC trên Player build.
+  Đã đo lại movement/bandwidth/snapshot ngày 2026-10-26 ở §6.
 
 ## 5. S8 4 player join/visual + sync vị trí — 2026-10-25
 
@@ -161,8 +164,8 @@ Host + `Player 2`, save `S8Move`, Relay thật:
   nhỏ do interpolation.
 - Dòng joystick là **kiểm tay**, không phải log tự động.
 - Console P2 sau test: **0 error / 0 warning**; host chỉ NRE nội bộ MPPM.
-- **4 player sau fix chưa kiểm sync vị trí** — người dùng chọn bỏ qua P3/P4. Không suy ra
-  từ lượt 4-player visual ở trên.
+- **4 player sau fix:** lượt 2026-10-25 này chưa kiểm sync vị trí (bỏ qua P3/P4); đã kiểm
+  ngày 2026-10-26 ở §6. Không suy ra từ lượt 4-player visual ở trên.
 
 ### Tutorial khi test S8
 
@@ -172,3 +175,65 @@ mới thấy `HasPlayedFirstTime == false` để `UnlockGrid()` và set flag. Sa
 `UIHUDManager.ShowAllUIElement()` + `GameManager.ShowJoyStick()`. **Không set
 `HasPlayedFirstTime=true` trước `CloseTutorial()`**, vì khi đó `TutorialManager` sẽ bỏ qua
 `UnlockGrid()`. Đây là flow test, không phải flow production (production vẫn 8 lần Next).
+
+## 6. S8 4 player movement + bandwidth + snapshot + EditMode — 2026-10-26
+
+Tiếp nối §5, cùng host + 3 MPPM virtual Editor, save `S8Move`, Relay thật. Probe tạm
+`TmpS8Probe` đã xoá cùng `.meta`; không còn file tạm. **Đây là Editor/MPPM, không phải build.**
+
+### 6.1 4-player movement — probe
+
+Cho 4 owner chạy vòng tròn 8 s bằng `transform.position` (owner-authoritative
+`NetworkTransform`), dừng 1 s rồi đọc trên cả 4 editor:
+
+| Owner | Vị trí đích | Sai lệch lớn nhất |
+|---|---|---|
+| 0 host | `(-3.000, 0, -3.000)` | 0.005 m |
+| 1 P2 | `(-3.000, 0, -1.000)` | 0.005 m |
+| 2 P3 | `(-3.000, 0, 1.000)` | 0.005 m |
+| 3 P4 | `(-3.000, 0, 3.000)` | 0.005 m |
+
+Cả 4 editor `players=4`; đây là **probe/automation**, không phải joystick tay. Kiểm tay
+vẫn chỉ có 2 player.
+
+### 6.2 Snapshot phase — 3 mẫu, probe
+
+| Client | Phase |
+|---|---:|
+| P2 | 0.994 s |
+| P3 | 1.226 s |
+| P4 | 1.285 s |
+
+Đo từ `GameScene` active → `GameData != null`; **không gồm** sign-in/connect. Trung bình
+1.168 s, trung vị 1.226 s; 2/3 > 1 s. Mẫu trước 1.251 s (2026-10-23) cùng bậc.
+
+### 6.3 Bandwidth — UTP `NetworkDriver.GetStatistics()`
+
+**Di chuyển**, cửa sổ 12.00 s/editor:
+
+| Editor | Tx KB/s | Rx KB/s | Tổng |
+|---|---:|---:|---:|
+| Host | 50.87 | 13.98 | 64.85 |
+| P2 | 7.93 | 12.54 | 20.47 |
+| P3 | 8.36 | 12.57 | 20.93 |
+| P4 | 7.39 | 11.23 | 18.62 |
+
+**Nấu**, 8 chu kỳ `Cooking` (`PotatoSlices`, restart 5.5 s < 6 s), cửa sổ 10.00 s/editor:
+
+| Editor | Tx KB/s | Rx KB/s | Tổng |
+|---|---:|---:|---:|
+| Host | 10.14 | 2.51 | 12.65 |
+| P2 | 0.82 | 2.57 | 3.39 |
+| P3 | 0.88 | 3.75 | 4.63 |
+| P4 | 0.93 | 4.17 | 5.10 |
+
+- Client movement **18.6–20.9 KB/s** tổng hai chiều, cooking **3.4–5.1 KB/s**; đều dưới
+  ngưỡng 100 KB/s/client.
+- Workload nấu là **spawn/despawn + NetworkVariable**, chưa phải full serve/cắt.
+
+### 6.4 EditMode + console
+
+- Xoá probe → `refresh_unity(force/all)` → console **0 error / 0 warning**.
+- `run_tests(EditMode)`: **49/49 passed**, 0 failed, 0 skipped (`1.109 s`) — chạy lại sau fix prefab.
+- 3 client **0 error / 0 warning**; host có 1 NRE nội bộ MPPM (`MainPlayerSystems.Listen`),
+  không phải game code, clear console rồi không lặp lại.

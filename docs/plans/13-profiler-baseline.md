@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | D. Chưa làm vì thiếu dữ liệu |
 | **Nguồn** | `docs/optimization_plan.md` §4 ("chưa chạy profiler") |
-| **Trạng thái** | 🟡 **Đã đo S3, S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join, S8 4-player + băng thông nhẹ (2026-10-23), và 4-player join/visual + fix sync vị trí (2026-10-25)** trên Editor/MPPM; băng thông lúc gameplay nặng, snapshot phase lặp lại và GC trên Player build vẫn chưa. |
+| **Trạng thái** | 🟡 **Đã đo S3, S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join, S8 4-player + băng thông nhẹ (2026-10-23), 4-player join/visual + fix sync vị trí (2026-10-25), và 4-player movement + bandwidth movement/cooking + 3 mẫu snapshot + EditMode 49/49 (2026-10-26)** trên Editor/MPPM; GC trên Player build vẫn chưa. |
 | **Rủi ro** | **0** — chỉ đo, không sửa code |
 | **Ưu tiên** | **Cao nhất** — làm trước nhóm A, vì nó quyết định nhóm A có đáng làm không |
 
@@ -309,17 +309,19 @@ Chi tiết client (Tx/Rx KB/s, Tx/Rx pps):
 - **1.251 s** là mẫu first join của `Player 2`, đo từ lúc `connected=True`/`GameScene` đến khi
   `GameData != null`, gồm RPC + decompress + JSON; **mới 1 mẫu Editor/MPPM**, chưa đủ kết luận.
   Bỏ số rejoin `1.082 s` / `2.976 s` vì đó là flow gọi `ShutdownAndReset()` trực tiếp, không chuẩn.
+  Đã lặp lại 3 mẫu ngày 2026-10-26 (mục dưới).
 - Bandwidth đo bằng `NetworkDriver.GetStatistics()` (UTP transport) ở lần 4 client trước khi tách
   profile; `PlayerId` không ảnh hưởng transport. Cửa sổ ~36.6 s, **không thao tác người chơi**;
   cao nhất ~1.9 KB/s tổng hai chiều mỗi client, **thấp hơn nhiều** ngưỡng 100 KB/s/client,
-  nhưng **chưa đo lúc di chuyển/nấu**.
+  nhưng lượt này **chưa đo lúc di chuyển/nấu**; đã đo ngày 2026-10-26 (mục dưới).
 - Console: 3 client **0 error / 0 warning** sau clear. Khi thử rejoin (không phải flow thường),
   `ShutdownAndReset()` trên client làm lộ bug thật: `playerDataNetworkList.Clear()` báo
   `Write permissions (Server)`. Đã fix `f2240ca4d` (chỉ host clear) và verify flow leave chuẩn
   (`ShutdownAndReset()` + `Loader.Load(MainMenuScene)`): **0 error / 0 warning**. Host có NRE
   nội bộ MPPM lặp lại trong `MainPlayerSystems+<>c__DisplayClass8_0.<Listen>b__1`
   (`UpdateCloneLogCountsMessage`), không phải game code.
-- **Chưa đo:** bandwidth lúc gameplay nặng, snapshot phase lặp lại nhiều mẫu, GC trên Player build.
+- **Lượt này chưa đo:** bandwidth lúc gameplay nặng, snapshot phase lặp lại nhiều mẫu, GC trên
+  Player build. Đã đo lại bandwidth movement/cooking + 3 mẫu snapshot ngày 2026-10-26 (mục dưới).
 
 ### 2026-10-25 — S8 4 player join/visual + fix sync vị trí
 
@@ -359,8 +361,8 @@ class name hay field name của script game.
   nhỏ do interpolation.
 - Dòng joystick là **kiểm tay**, không phải log tự động.
 - Console P2 sau test: **0 error / 0 warning**; host chỉ NRE nội bộ MPPM.
-- **4 player sau fix chưa kiểm sync vị trí** — người dùng chọn bỏ qua P3/P4. Không suy ra
-  từ lượt 4-player visual ở trên.
+- **4 player sau fix:** lượt 2026-10-25 này chưa kiểm sync vị trí (bỏ qua P3/P4); đã kiểm
+  ngày 2026-10-26 (mục dưới). Không suy ra từ lượt 4-player visual ở trên.
 
 **Tutorial khi test S8:** `GameMechanicPanel` là panel chặn, 8 bước, không có nút close
 (`closeButton: 0`). Để test nhanh, gọi `CloseTutorial()` trước: callback
@@ -369,6 +371,89 @@ class name hay field name của script game.
 `GameManager.ShowJoyStick()`. **Không set `HasPlayedFirstTime=true` trước `CloseTutorial()`**,
 vì khi đó `TutorialManager` sẽ bỏ qua `UnlockGrid()`. Đây là flow test, không phải flow
 production (production vẫn 8 lần Next).
+
+### 2026-10-26 — S8 4 player movement + bandwidth movement/cooking + snapshot lặp lại + EditMode
+
+**Điều kiện:** tiếp nối lượt 2026-10-25; host Editor chính + 3 MPPM virtual Editor
+`Player 2`/`Player 3`/`Player 4` (`mppm4214af7c`, `mppm5d14303d`, `mppmd382a7e5`),
+profile riêng `s8_player2/3/4`, save `S8Move`, Relay thật, join code `LKNP6R`.
+Probe tạm `Assets/Scripts/TmpS8Probe.cs` dùng để đo; đã xoá cùng `.meta` trước khi chạy test.
+
+#### 4-player movement sau fix — **probe, không phải joystick tay**
+
+Cho cả 4 owner chạy vòng tròn bằng `transform.position` trong 8 s (owner-authoritative
+`NetworkTransform`), rồi để dừng 1 s và đọc vị trí trên **cả 4 editor**:
+
+| Owner | Vị trí đích | Sai lệch lớn nhất giữa 4 editor |
+|---|---|---|
+| 0 (host) | `(-3.000, 0, -3.000)` | **0.005 m** |
+| 1 (P2) | `(-3.000, 0, -1.000)` | **0.005 m** |
+| 2 (P3) | `(-3.000, 0, 1.000)` | **0.005 m** |
+| 3 (P4) | `(-3.000, 0, 3.000)` | **0.005 m** |
+
+- Cả 4 editor đều thấy `players=4`; mỗi owner thấy đúng `isOwner` của mình.
+- Đây là **probe/automation** (teleport theo path), không phải người chơi cầm joystick.
+  Kiểm joystick tay vẫn chỉ có 2 player (mục 2026-10-25).
+- Sai lệch ~0.005 m là do interpolation, cùng mức với phép thử 2 player.
+
+#### Snapshot phase — 3 mẫu first join
+
+Đo từ lúc `GameScene` active đến khi `GameData != null`; **không gồm** sign-in/connect:
+
+| Client | Snapshot phase |
+|---|---|
+| `Player 2` | **0.994 s** |
+| `Player 3` | **1.226 s** |
+| `Player 4` | **1.285 s** |
+
+- Trung bình **1.168 s**, trung vị **1.226 s**; 2/3 mẫu > 1 s.
+- Đây là **probe** trên Editor/MPPM, không phải profiler; chưa tách RPC / decompress / JSON.
+- So với mẫu 1.251 s ngày 2026-10-23: cùng bậc, không có regression rõ ràng.
+
+#### Bandwidth — UTP `NetworkDriver.GetStatistics()`
+
+Đo tổng byte/packet của driver trong cửa sổ, rồi chia cho thời lượng thật. Đây là số
+**Editor/MPPM**, không phải Player build.
+
+**Di chuyển:** cả 4 owner chạy vòng tròn liên tục; cửa sổ **12.00 s** mỗi editor.
+
+| Editor | Tx KB/s | Rx KB/s | Tx pps | Rx pps |
+|---|---:|---:|---:|---:|
+| Host | **50.87** | **13.98** | 297.9 | 98.6 |
+| `Player 2` | **7.93** | **12.54** | 53.9 | 76.2 |
+| `Player 3` | **8.36** | **12.57** | 56.2 | 75.3 |
+| `Player 4` | **7.39** | **11.23** | 49.0 | 66.6 |
+
+- Host Tx cao vì server gửi cho 3 client; client chỉ gửi lên server.
+- Tổng hai chiều mỗi client **18.6–20.9 KB/s**, vẫn dưới ngưỡng **100 KB/s/client**.
+
+**Nấu:** spawn `PotCookingTool` + `PotatoSlices`, lặp 8 chu kỳ `Cooking` (restart mỗi 5.5 s,
+cooking time 6 s) để có tải liên tục; cửa sổ **10.00 s** mỗi editor.
+
+| Editor | Tx KB/s | Rx KB/s | Tx pps | Rx pps |
+|---|---:|---:|---:|---:|
+| Host | **10.14** | **2.51** | 59.6 | 20.0 |
+| `Player 2` | **0.82** | **2.57** | 6.6 | 15.4 |
+| `Player 3` | **0.88** | **3.75** | 7.1 | 22.4 |
+| `Player 4` | **0.93** | **4.17** | 7.5 | 24.5 |
+
+- Tổng hai chiều mỗi client **3.4–5.1 KB/s**; host **12.65 KB/s**.
+- Workload là **spawn/despawn + NetworkVariable cooking**, chưa phải full vòng serve/cắt;
+  restart 5.5 s < 6 s nên mỗi chu kỳ chưa đi tới `Cooked`.
+- Cả hai workload đều **thấp hơn nhiều** ngưỡng 100 KB/s/client.
+
+#### EditMode sau fix prefab
+
+- Xoá probe, `refresh_unity(force/all)` → compile sạch, console **0 error / 0 warning**.
+- `run_tests(EditMode)`: **49/49 passed**, 0 failed, 0 skipped, **1.109 s**.
+- Đây là lần chạy lại sau khi thay `ClientNetworkTransform` missing bằng `NetworkTransform`
+  owner authority; không có test nào bị ảnh hưởng.
+
+#### Console
+
+- 3 client: **0 error / 0 warning**.
+- Host: 1 NRE nội bộ MPPM trong lúc join (`MainPlayerSystems.Listen`), không phải game code;
+  clear console rồi không lặp lại. Không có error từ probe/cooking.
 
 ### So với ngưỡng ở Bước 4
 
@@ -380,8 +465,8 @@ production (production vẫn 8 lần Next).
 | `FindGameObjectsWithTag` hiện ở S4 (làm 05) | S10 rung camera (2 lookup/frame) — **không khác gì S2** | ❌ Không đủ lý do |
 | S6 GC > 1 MB/s (làm 04) | Chưa đo được GC KB/s (xem "Chưa đo được") | ⏸ Treo |
 | S5 `List<T>.Find` < 0.1 ms (bỏ phần perf của 12) | Mở shop chỉ +0.4–0.7 ms main thread so S2 | ✅ **Bỏ phần perf**, giữ phần `LogError` |
-| Join > 1s / `chunkCount` > 5 (làm 02) | `chunkCount=1`; 2-player join 3.77 s; 4-player first-join snapshot phase **1.251 s** (1 mẫu, Editor/MPPM) | `chunkCount` đạt; snapshot **>1 s nhưng chưa đủ kết luận**, cần lặp lại |
-| Bandwidth > 100 KB/s/client (làm 01+03) | 4 player, không thao tác: cao nhất ~1.9 KB/s/client (UTP, ~36.6 s); chưa đo gameplay nặng | ⏸ Chưa kết luận |
+| Join > 1s / `chunkCount` > 5 (làm 02) | `chunkCount=1` (2026-10-23); 4-player first-join snapshot phase **0.994 / 1.226 / 1.285 s**, trung bình **1.168 s** (3 mẫu, Editor/MPPM) | 2/3 mẫu > 1 s; **đủ tín hiệu để điều tra 02**, nhưng chưa tách RPC/decompress/JSON và chưa có Player build |
+| Bandwidth > 100 KB/s/client (làm 01+03) | 4 player: di chuyển **18.6–20.9 KB/s/client** tổng hai chiều; nấu **3.4–5.1 KB/s/client**; host aggregate **64.9 / 12.65 KB/s** (UTP, 12 s / 10 s) | ✅ **Không vượt ngưỡng** trên Editor/MPPM; chưa có Player build |
 
 ### Kết luận theo mục
 
@@ -398,12 +483,12 @@ production (production vẫn 8 lần Next).
   (đây là bug robustness, không phải perf — vẫn làm).
 - **06 PlayerStats cache** — S2 (đứng yên, `HandleMovement` chạy 60 lần/s) chỉ tốn 2.92–3.55 ms
   cho **toàn bộ** frame. → **KHÔNG LÀM**.
-- **01, 02, 03** — `chunkCount=1`; 2-player join 3.77 s gồm sign-in (0.37 s). 4-player first
-  join có snapshot phase **1.251 s** (đã trừ sign-in, nhưng mới 1 mẫu Editor/MPPM), **>1 s**;
-  chưa đủ kết luận vì chưa lặp lại và chưa tách RPC/decompress/JSON. S8 4-player lúc không
-  thao tác chỉ ~1.9 KB/s/client, **chưa thấy vấn đề bandwidth**, nhưng chưa đo gameplay nặng.
-  Vì p95 < 16 ms và bằng chứng snapshot mới 1 mẫu → **chưa làm 02**, cần lặp lại snapshot phase
-  và đo gameplay nặng trước khi kết luận.
+- **01, 02, 03** — `chunkCount=1` (2026-10-23). 4-player first-join snapshot phase lặp lại
+  **0.994 / 1.226 / 1.285 s** (trung bình 1.168 s; 2/3 > 1 s), đã trừ sign-in/connect nhưng
+  vẫn là Editor/MPPM và chưa tách RPC/decompress/JSON. Bandwidth 4 player: di chuyển
+  **18.6–20.9 KB/s/client** tổng hai chiều, nấu **3.4–5.1 KB/s/client** — **không vượt ngưỡng
+  100 KB/s**. Vì p95 < 16 ms, bandwidth thấp, còn snapshot >1 s nhưng chưa tách giai đoạn →
+  **chưa sửa 01/02/03**; 02 có tín hiệu cần điều tra, muốn chốt thì profile/tách RPC + Player build.
 
 ### Phát hiện phụ từ lúc đo
 
@@ -427,10 +512,11 @@ production (production vẫn 8 lần Next).
   Editor (2026-10-21), nhưng số này gồm Editor + probe, **chưa dùng để kết luận**. `get_counters`
   vẫn không dùng được từ cầu nối MCP (xem cạm bẫy #2); muốn số sạch phải mở Profiler UI trên
   Development Build / đọc file `.raw`.
-- **Băng thông lúc gameplay nặng** — đã đo 4 player lúc không thao tác: cao nhất ~1.9 KB/s/client,
-  ~8 pps; chưa đo lúc di chuyển/nấu.
-- **S9 tách riêng thời gian snapshot** — tổng join 3.77 s đã đo, nhưng gồm sign-in + Relay;
-  chưa đo riêng lúc nhận/ghép chunk.
+- **Băng thông lúc gameplay nặng trên Player build** — đã đo 4 player trên Editor/MPPM:
+  di chuyển **18.6–20.9 KB/s/client** tổng hai chiều, nấu **3.4–5.1 KB/s/client** (2026-10-26);
+  chưa đo trên máy Android/Player build.
+- **S9 tách riêng thời gian snapshot** — đã lặp lại 3 mẫu **0.994–1.285 s**
+  (`GameScene` → `GameData != null`), nhưng chưa tách RPC / decompress / JSON.
 
 ### Đã đo (2026-10-20/21/22/23)
 
@@ -442,12 +528,17 @@ production (production vẫn 8 lần Next).
 - **S8 4-player + băng thông nhẹ** — ngày 2026-10-23: host + `Player 2`/`Player 3`/`Player 4`
   (profile riêng); `clients=4`/`players=4`; snapshot **496–549 bytes / 1 chunk** mỗi client;
   snapshot phase **1.251 s** (1 mẫu first join); bandwidth không thao tác cao nhất
-  ~1.9 KB/s/client, ~8 pps; chưa đo gameplay nặng.
+  ~1.9 KB/s/client, ~8 pps; lượt đó chưa đo gameplay nặng, đã đo lại ngày 2026-10-26.
 - **S8 4-player join/visual + fix sync vị trí** — ngày 2026-10-25: host + 3 MPPM,
   `clients=4`/`players=4`, cả 3 client ở `GameScene`, popup đã hide, client 0/0; phát hiện
   `ClientNetworkTransform` missing, thay bằng `NetworkTransform` owner authority; 2 player
-  sync đúng cả hai chiều (transform + joystick tay). **4-player movement chưa kiểm** vì bỏ qua
-  P3/P4.
+  sync đúng cả hai chiều (transform + joystick tay). **4-player movement kiểm ngày 2026-10-26**
+  (xem bullet dưới).
+- **S8 4-player movement + bandwidth + snapshot + EditMode** — ngày 2026-10-26: 4 owner chạy
+  vòng tròn 8 s, cả 4 editor thấy vị trí khớp trong **0.005 m**; bandwidth di chuyển
+  **18.6–20.9 KB/s/client** tổng hai chiều, nấu **3.4–5.1 KB/s/client**; snapshot phase
+  **0.994 / 1.226 / 1.285 s** (3 mẫu, trung bình 1.168 s); EditMode **49/49**. Tất cả là
+  Editor/MPPM, chưa phải Player build.
 - **S4** — ngày 2026-10-20
   ([16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md)).
 - Lịch sử: **đã thử tự động hoá S3/S4 bằng computer-control (2026-10-13) và thất bại** —
@@ -565,10 +656,13 @@ production (production vẫn 8 lần Next).
   bandwidth không thao tác cao nhất **~1.9 KB/s/client**, **~8 pps**. Chi tiết + caveat MPPM
   ở mục "S8/S9" phía trên.
 - **2026-10-25:** 4 player join/visual đã chạy sạch; sync vị trí đã fix và kiểm 2 player
-  (transform + joystick tay), **4-player movement chưa kiểm** vì bỏ qua P3/P4.
-- **Còn:** 4-player movement sau fix (chưa làm), lặp lại snapshot phase, băng thông lúc
-  gameplay nặng, và **GC KB/s trên Player build** — S7 chỉ có số Editor + probe; cần
-  Development Build + Profiler UI (hoặc đọc `.raw`).
+  (transform + joystick tay).
+- **2026-10-26:** 4-player movement đã kiểm bằng probe (khớp **0.005 m**); snapshot phase
+  lặp lại 3 mẫu **0.994–1.285 s**; bandwidth di chuyển/nấu đã đo trên Editor/MPPM;
+  EditMode **49/49**.
+- **Còn:** **GC KB/s trên Player build**, bandwidth trên Android/Player build, và tách
+  snapshot phase thành RPC/decompress/JSON. S7 chỉ có số Editor + probe; cần Development
+  Build + Profiler UI (hoặc đọc `.raw`).
 - Sau khi có đủ số → ghi `docs/profiler_baseline.md` và dán nhãn **LÀM / KHÔNG LÀM** cho từng mục
   trong `optimization_plan.md` §3.
 - **Tài sản để lại:** `Assets/Editor/PerfScenarios.cs` có 4 probe mới —
@@ -583,7 +677,7 @@ production (production vẫn 8 lần Next).
 |---|---|
 | Code | Profiler **không đổi code**; S8 2026-10-25 có sửa `Player.prefab` (thay missing `ClientNetworkTransform` bằng `NetworkTransform` owner authority). |
 | Thời gian | 1 buổi (30–60 phút) cho editor, thêm thời gian nếu build Android. |
-| Rủi ro | 0 cho phần đo; prefab fix đã kiểm 2 player, 4-player movement chưa kiểm. |
+| Rủi ro | 0 cho phần đo; prefab fix đã kiểm 2 player + **4-player movement** (probe, 2026-10-26). |
 | Lợi ích | Chấm được 6/13 mục ở nhóm A sang "không làm" → tránh rủi ro regresion không cần thiết. |
 
 ## Kiểm chứng
