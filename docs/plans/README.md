@@ -16,7 +16,7 @@ xem ghi chú ở từng file.
 | 14 | **Runtime ghi thẳng vào material asset** — ✅ đã sửa | [14-grid-guide-material-mutation.md](14-grid-guide-material-mutation.md) · `GridBuildingSystem.cs:26` (`[SerializeField] Material gridGuideMaterial`) → `GridVisualizer.cs:24-28` `SetFloat(...)` | Chạy play mode 1 lần là `GridShaderMaterial.mat` bị commit đè vĩnh viễn (đã thấy `5/5.01` → `0/0.01`). Giá trị đó vô nghĩa vì runtime vẫn set lại, nhưng **working tree bẩn sau mỗi lần chạy** và designer có thể vô tình commit. Đã sửa bằng `new Material(sharedMaterial)` + `Dispose`; kiểm bằng `EditorUtility.IsDirty` và SHA256 của `.mat`. |
 | 15 | **Cắt trên thớt không bấm được** — ✅ đã sửa, đã chơi kiểm | [15-cutting-interaction-ihasprogress.md](15-cutting-interaction-ihasprogress.md) · `CookingToolCounterController.cs:5` thiếu `IHasProgress` → `PlayerStateMachine.cs:200` luôn thấy `null` → `InteractAlternateEvent` không bao giờ chạy → `CookingTool.Cut()` không bao giờ được gọi | Phát hiện khi chơi thật để đo S7: đặt tomato lên thớt rồi click thì **nhấc tomato trả lại tay** thay vì cắt. Hồi quy từ `git show 9e3c5fe4e` (class cũ `CuttingCounterController`/`StoveCounterController` đều có `IHasProgress`). Chặn toàn bộ vòng lặp: không có slices → không nấu được → không phục vụ được → **không lên Level 2**. |
 | 16 | **Tự động hoá input bằng Input System** — ✅ đã kiểm | [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md) | Tìm ra nguyên nhân các lần inject trước thất bại: editor mất focus → `Application.isFocused == false` → `InputManager` chạy `Editor` update type → InputAction không actuate. Công thức: `IgnoreFocus` + `AllDeviceInputAlwaysGoesToGameView` + `runPlayerUpdatesInEditMode`, inject state trong `[DefaultExecutionOrder(-1000)]`. Kéo ghost bằng chuột: **PASS**. |
-| 17 | **Build APK + 2 client** — 🟡 APK chưa kiểm; 2 player/late join đã kiểm một phần | [17-build-and-2client-status.md](17-build-and-2client-status.md) | APK vẫn chặn bởi thiếu mật khẩu keystore (`MyRestaurant.keystore`, alias `dev`) và Android SDK platform 35. 2 player + late join đã chạy ngày 2026-10-22 bằng MPPM `Player 2`; **chưa** kiểm 4 player và băng thông. |
+| 17 | **Build APK + 2/4 client** — 🟡 APK chưa kiểm; 2 player/late join + 4 player join/visual đã kiểm; sync vị trí đã fix, kiểm 2 player | [17-build-and-2client-status.md](17-build-and-2client-status.md) | APK vẫn chặn bởi thiếu mật khẩu keystore (`MyRestaurant.keystore`, alias `dev`) và Android SDK platform 35. 2 player + late join đã chạy ngày 2026-10-22 bằng MPPM `Player 2`; 4 player join/visual + fix sync vị trí ngày 2026-10-25; **4-player movement chưa kiểm** (bỏ qua P3/P4) và băng thông gameplay nặng chưa đo. |
 | 18 | **Warning `Look rotation viewing vector is zero`** — ✅ đã sửa | [18-look-rotation-warning.md](18-look-rotation-warning.md) · `PlayerStateMachine.HandleMovement()` | Khi idle `moveDir == zero`, `Vector3.Slerp(a, zero, t)` trả đúng `zero` lúc `t >= 1` (frame ≥ 100 ms) → `transform.forward = zero` → `LookRotation` log warning. Bọc trong `if (Context.IsWalking)`. |
 | 19 | **3 subscriber `OnMouseClickPerformed` / "1 click ra 3 nhát cắt"** — ✅ đã điều tra, không sửa | [19-click-subscribers-audit.md](19-click-subscribers-audit.md) | 3 subscriber có việc khác nhau; chỉ `PlayerStateMachine` cắt. Đo: mỗi lần nhấn = **1** event; 3 nhát cắt = **3 click** (`CookingTimer` 0→1→2→3). Không có bug. |
 | 20 | **Kéo ghost bằng touch** — ✅ đã kiểm | [20-touch-drag-verification.md](20-touch-drag-verification.md) | Inject `TouchState` (`Began`/`Moved`/`Ended`) vào `Touchscreen`: `Pointer.current = FastTouchscreen`, `IsDragging=true`, ghost bám ô (2,2) → (4,1), thả → `false`. |
@@ -59,7 +59,7 @@ xem ghi chú ở từng file.
 
 | # | File | Ưu tiên |
 |---|---|---|
-| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — đã đo S3/S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join và S8 4-player + băng thông nhẹ (2026-10-23, sau reset `Library`) trên Editor/MPPM; băng thông lúc gameplay nặng và GC trên Player build vẫn chờ |
+| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — đã đo S3/S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join, S8 4-player + băng thông nhẹ (2026-10-23, sau reset `Library`) và 4-player join/visual + fix sync vị trí (2026-10-25) trên Editor/MPPM; băng thông lúc gameplay nặng và GC trên Player build vẫn chờ |
 
 ---
 
@@ -218,8 +218,8 @@ Tools → Build Checks → Compile Android Player Scripts # DLL ở Temp/BuildCh
 
 Kết quả chạy lại đầy đủ ngày **2026-10-20**: 0 error / 0 warning, **49/49 pass**,
 **110 assemblies**. Build APK thật thì **chưa kiểm được** (thiếu mật khẩu keystore + máy thiếu
-Android SDK platform 35). 2 player/late join đã kiểm một phần ngày **2026-10-22** bằng MPPM
-`Player 2` (4 player + băng thông chưa) — chi tiết ở
+Android SDK platform 35). 2 player/late join đã kiểm một phần ngày **2026-10-22**; 4 player
+join/visual + fix sync vị trí đã kiểm ngày **2026-10-25** (4-player movement chưa) — chi tiết ở
 [17-build-and-2client-status.md](17-build-and-2client-status.md).
 
 ### Kiểm lại 2026-10-21 (sau nhóm 2)
@@ -300,3 +300,27 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
   449–463 bytes** thuộc clone tạo tay `S8Test`, **không dùng**.
 - Chi tiết + caveat: [13-profiler-baseline.md](13-profiler-baseline.md) § "S8/S9" và
   [17-build-and-2client-status.md](17-build-and-2client-status.md) §3–4.
+
+### Kiểm thêm 2026-10-25 — S8 4 player visual + fix sync vị trí
+
+- **4 player join/visual:** host + `Player 2`/`Player 3`/`Player 4` (`mppm4214af7c`,
+  `mppm5d14303d`, `mppmd382a7e5`), mỗi clone profile riêng, save `S8Verify3`; host
+  `clients=4`/`players=4`, 3 client `connected=True`/`GameScene`/`players=4`, popup
+  `UIMainMenuPopup(Clone)` đã hide. 3 client **0 error / 0 warning**; host chỉ NRE nội bộ MPPM.
+  Đây là **join/visual**, không phải movement.
+- **Bug sync:** `Player.prefab` reference `ClientNetworkTransform` GUID
+  `da52bf8bbc1de48cfb221a6ff30f7972`; GUID không còn asset nên prefab có component
+  **MISSING**, player chỉ move local. Đã thay bằng `Unity.Netcode.Components.NetworkTransform`
+  chuẩn với `AuthorityMode=Owner`, sync position `X/Y/Z`, rotation `Y`, interpolation; không
+  đổi GUID/class/field của script game.
+- **2 player sau fix:** host → P2 `(1.500, 0, -3.000)` → P2 thấy `(1.495, 0, -3.000)`;
+  P2 → host `(0, 0, 0.500)` → host thấy `(-0.004, 0, 0.496)`; sau đó **người dùng cầm joystick
+  di chuyển host + P2** và thấy hai bên chạy theo nhau. P2 console **0/0**; host chỉ NRE MPPM.
+- **4 player movement sau fix chưa kiểm** — người dùng chọn bỏ qua P3/P4; không suy ra từ lượt
+  4-player visual.
+- **Tutorial test:** `GameMechanicPanel` chặn, 8 bước, không nút close. Gọi `CloseTutorial()`
+  trước để `TutorialManager` thấy `HasPlayedFirstTime == false`, unlock grid và set flag; sau đó
+  `UIHUDManager.ShowAllUIElement()` + `GameManager.ShowJoyStick()`. **Không set flag trước
+  `CloseTutorial()`**; production vẫn cần 8 lần Next.
+- Chi tiết: [13-profiler-baseline.md](13-profiler-baseline.md) § "2026-10-25" và
+  [17-build-and-2client-status.md](17-build-and-2client-status.md) §5.

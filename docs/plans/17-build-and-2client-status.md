@@ -1,7 +1,7 @@
-# 17 — Kiểm lại các mục "chưa chạy": build APK và 2 client
+# 17 — Kiểm lại các mục "chưa chạy": build APK và 2/4 client
 
-Ngày: 2026-10-20; §3 cập nhật 2026-10-22. Không có thay đổi runtime nào trong file này — chỉ ghi
-**kết quả kiểm** và **những gì chưa kiểm được**, kèm lý do cụ thể.
+Ngày: 2026-10-20; §3 cập nhật 2026-10-22; §5 cập nhật 2026-10-25. Không có thay đổi runtime nào
+trong file này — chỉ ghi **kết quả kiểm** và **những gì chưa kiểm được**, kèm lý do cụ thể.
 
 ## 1. Chạy lại bộ kiểm tiêu chuẩn (sau khi dọn file tạm)
 
@@ -119,3 +119,56 @@ dùng profile riêng (`s8_player2/3/4`) nên `PlayerId` khác nhau.
 - Host có NRE nội bộ MPPM lặp lại trong `MainPlayerSystems+<>c__DisplayClass8_0.<Listen>b__1`
   (`UpdateCloneLogCountsMessage`), **không phải game code**.
 - **Chưa đo:** lặp lại snapshot phase, bandwidth lúc gameplay nặng, GC trên Player build.
+
+## 5. S8 4 player join/visual + sync vị trí — 2026-10-25
+
+Đã chạy host Editor chính + 3 MPPM virtual Editor `Player 2`/`Player 3`/`Player 4`
+(`mppm4214af7c`, `mppm5d14303d`, `mppmd382a7e5`), mỗi clone profile riêng
+(`s8_player2/3/4`), save test `S8Verify3`, Relay thật.
+
+| Hạng mục | Kết quả |
+|---|---|
+| Host | scene `GameScene`, `IsServer=True`, `clients=4`, `players=4` |
+| 3 client | `connected=True`, scene `GameScene`, `players=4` |
+| UI | `UIMainMenuPopup(Clone)` đã hide; không còn popup che scene game |
+| Console | 3 client **0 error / 0 warning**; host chỉ NRE nội bộ MPPM |
+
+Đây là kiểm **join/visual**, không phải kiểm sync vị trí.
+
+### Bug sync vị trí
+
+`Player.prefab` reference script GUID `da52bf8bbc1de48cfb221a6ff30f7972`, class
+`Unity.Multiplayer.Center.NetcodeForGameObjectsExample.ClientNetworkTransform`. GUID này
+**không còn asset** (`AssetDatabase.GUIDToAssetPath` trả rỗng), nên prefab load ra một
+component **MISSING**. Player chỉ di chuyển local, không replicate transform.
+
+Đã xoá component missing và thêm `Unity.Netcode.Components.NetworkTransform` với
+`AuthorityMode=Owner`, sync position `X/Y/Z`, rotation `Y`, `Interpolate=true`. Giữ nguyên
+`NetworkObject`, `PlayerStateMachine`, `PlayerIKHandler`, `NetworkAnimator`; không đổi GUID,
+class name hay field name của script game.
+
+### Kiểm 2 player sau fix
+
+Host + `Player 2`, save `S8Move`, Relay thật:
+
+| Chiều | Kết quả |
+|---|---|
+| Host → P2 | host đặt owner 0 ở `(1.500, 0, -3.000)`; P2 thấy owner 0 ở `(1.495, 0, -3.000)` |
+| P2 → host | P2 đặt owner 1 ở `(0, 0, 0.500)`; host thấy owner 1 ở `(-0.004, 0, 0.496)` |
+| Tay — joystick | người dùng cầm joystick di chuyển host + P2; hai bên thấy player của nhau chạy theo |
+
+- Hai dòng transform là **probe bằng `execute_code`**, không phải số đo profiler; chênh lệch
+  nhỏ do interpolation.
+- Dòng joystick là **kiểm tay**, không phải log tự động.
+- Console P2 sau test: **0 error / 0 warning**; host chỉ NRE nội bộ MPPM.
+- **4 player sau fix chưa kiểm sync vị trí** — người dùng chọn bỏ qua P3/P4. Không suy ra
+  từ lượt 4-player visual ở trên.
+
+### Tutorial khi test S8
+
+`GameMechanicPanel` là panel chặn, 8 bước, không có nút close (`closeButton: 0`). Để test
+nhanh, gọi `CloseTutorial()` trước: callback `TutorialManager_OnTutorialGameMechanicClosed`
+mới thấy `HasPlayedFirstTime == false` để `UnlockGrid()` và set flag. Sau đó gọi
+`UIHUDManager.ShowAllUIElement()` + `GameManager.ShowJoyStick()`. **Không set
+`HasPlayedFirstTime=true` trước `CloseTutorial()`**, vì khi đó `TutorialManager` sẽ bỏ qua
+`UnlockGrid()`. Đây là flow test, không phải flow production (production vẫn 8 lần Next).

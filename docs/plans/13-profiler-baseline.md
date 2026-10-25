@@ -4,7 +4,7 @@
 |---|---|
 | **Nhóm** | D. Chưa làm vì thiếu dữ liệu |
 | **Nguồn** | `docs/optimization_plan.md` §4 ("chưa chạy profiler") |
-| **Trạng thái** | 🟡 **Đã đo S3, S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join và S8 4-player + băng thông nhẹ (2026-10-23)** trên Editor/MPPM; băng thông lúc gameplay nặng, snapshot phase lặp lại và GC trên Player build vẫn chưa. |
+| **Trạng thái** | 🟡 **Đã đo S3, S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join, S8 4-player + băng thông nhẹ (2026-10-23), và 4-player join/visual + fix sync vị trí (2026-10-25)** trên Editor/MPPM; băng thông lúc gameplay nặng, snapshot phase lặp lại và GC trên Player build vẫn chưa. |
 | **Rủi ro** | **0** — chỉ đo, không sửa code |
 | **Ưu tiên** | **Cao nhất** — làm trước nhóm A, vì nó quyết định nhóm A có đáng làm không |
 
@@ -321,6 +321,55 @@ Chi tiết client (Tx/Rx KB/s, Tx/Rx pps):
   (`UpdateCloneLogCountsMessage`), không phải game code.
 - **Chưa đo:** bandwidth lúc gameplay nặng, snapshot phase lặp lại nhiều mẫu, GC trên Player build.
 
+### 2026-10-25 — S8 4 player join/visual + fix sync vị trí
+
+**Điều kiện:** host Editor chính + 3 MPPM virtual Editor `Player 2`/`Player 3`/`Player 4`
+(`mppm4214af7c`, `mppm5d14303d`, `mppmd382a7e5`), profile riêng `s8_player2/3/4`, save test
+`S8Verify3`, Relay thật.
+
+| Hạng mục | Kết quả |
+|---|---|
+| Host | scene `GameScene`, `IsServer=True`, `clients=4`, `players=4` |
+| 3 client | `connected=True`, scene `GameScene`, `players=4` |
+| UI | `UIMainMenuPopup(Clone)` đã hide; không còn popup che scene game |
+| Console | 3 client **0 error / 0 warning**; host chỉ NRE nội bộ MPPM |
+
+Đây là kiểm **join/visual**, không phải kiểm sync vị trí.
+
+**Bug sync vị trí phát hiện sau lượt 4 player:** `Player.prefab` reference script GUID
+`da52bf8bbc1de48cfb221a6ff30f7972`, class
+`Unity.Multiplayer.Center.NetcodeForGameObjectsExample.ClientNetworkTransform`. GUID này
+**không còn asset** (`AssetDatabase.GUIDToAssetPath` trả rỗng), và prefab có component
+`MISSING` lúc load. Vì vậy player chỉ di chuyển local, không replicate transform.
+
+**Fix:** xoá component missing; thêm `Unity.Netcode.Components.NetworkTransform` với
+`AuthorityMode=Owner`, sync position `X/Y/Z`, rotation `Y`, `Interpolate=true`; giữ nguyên
+`NetworkObject`, `PlayerStateMachine`, `PlayerIKHandler`, `NetworkAnimator`. Không đổi GUID,
+class name hay field name của script game.
+
+**Kiểm 2 player sau fix:** host + `Player 2`, save `S8Move`, Relay thật.
+
+| Chiều | Kết quả |
+|---|---|
+| Host → P2 | host đặt owner 0 ở `(1.500, 0, -3.000)`; P2 thấy owner 0 ở `(1.495, 0, -3.000)` |
+| P2 → host | P2 đặt owner 1 ở `(0, 0, 0.500)`; host thấy owner 1 ở `(-0.004, 0, 0.496)` |
+| Tay — joystick | người dùng cầm joystick di chuyển host + P2; hai bên thấy player của nhau chạy theo |
+
+- Hai dòng transform là **probe bằng `execute_code`**, không phải số đo profiler; chênh lệch
+  nhỏ do interpolation.
+- Dòng joystick là **kiểm tay**, không phải log tự động.
+- Console P2 sau test: **0 error / 0 warning**; host chỉ NRE nội bộ MPPM.
+- **4 player sau fix chưa kiểm sync vị trí** — người dùng chọn bỏ qua P3/P4. Không suy ra
+  từ lượt 4-player visual ở trên.
+
+**Tutorial khi test S8:** `GameMechanicPanel` là panel chặn, 8 bước, không có nút close
+(`closeButton: 0`). Để test nhanh, gọi `CloseTutorial()` trước: callback
+`TutorialManager_OnTutorialGameMechanicClosed` mới thấy `HasPlayedFirstTime == false` để
+`UnlockGrid()` và set flag. Sau đó gọi `UIHUDManager.ShowAllUIElement()` +
+`GameManager.ShowJoyStick()`. **Không set `HasPlayedFirstTime=true` trước `CloseTutorial()`**,
+vì khi đó `TutorialManager` sẽ bỏ qua `UnlockGrid()`. Đây là flow test, không phải flow
+production (production vẫn 8 lần Next).
+
 ### So với ngưỡng ở Bước 4
 
 | Ngưỡng đã chốt trước khi đo (§ Bước 4) | Kết quả | Kết luận |
@@ -394,6 +443,11 @@ Chi tiết client (Tx/Rx KB/s, Tx/Rx pps):
   (profile riêng); `clients=4`/`players=4`; snapshot **496–549 bytes / 1 chunk** mỗi client;
   snapshot phase **1.251 s** (1 mẫu first join); bandwidth không thao tác cao nhất
   ~1.9 KB/s/client, ~8 pps; chưa đo gameplay nặng.
+- **S8 4-player join/visual + fix sync vị trí** — ngày 2026-10-25: host + 3 MPPM,
+  `clients=4`/`players=4`, cả 3 client ở `GameScene`, popup đã hide, client 0/0; phát hiện
+  `ClientNetworkTransform` missing, thay bằng `NetworkTransform` owner authority; 2 player
+  sync đúng cả hai chiều (transform + joystick tay). **4-player movement chưa kiểm** vì bỏ qua
+  P3/P4.
 - **S4** — ngày 2026-10-20
   ([16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md)).
 - Lịch sử: **đã thử tự động hoá S3/S4 bằng computer-control (2026-10-13) và thất bại** —
@@ -486,6 +540,12 @@ Chi tiết client (Tx/Rx KB/s, Tx/Rx pps):
     không phải giá trị vừa inject. Chỉ tin số đọc bên trong `Update()` của game (hoặc log trong
     frame). Vì vậy test kéo ghost phải log `ptr/pan/visual` từ probe, không đọc lẻ từng lệnh.
 
+16. **Prefab có component `MISSING` thì đừng tin class name trong YAML.** `Player.prefab` ghi
+    `ClientNetworkTransform` nhưng GUID `da52bf8bbc1de48cfb221a6ff30f7972` không còn asset;
+    `GetComponents<Component>()` trả một component `null` (MISSING), nên không có transform
+    replication. Kiểm bằng `AssetDatabase.GUIDToAssetPath(guid)` + load prefab, không chỉ đọc
+    YAML. Fix bằng `NetworkTransform` chuẩn, `AuthorityMode=Owner`; đừng tạo lại script mẫu đã mất.
+
 ### Việc còn lại
 
 - **S3 + S7-rút gọn đã đo ngày 2026-10-21** (Editor + probe, 1 client, Relay host): S3 đi lại +
@@ -504,8 +564,11 @@ Chi tiết client (Tx/Rx KB/s, Tx/Rx pps):
   **496–549 bytes / 1 chunk** mỗi client; first-join snapshot phase **1.251 s** (1 mẫu);
   bandwidth không thao tác cao nhất **~1.9 KB/s/client**, **~8 pps**. Chi tiết + caveat MPPM
   ở mục "S8/S9" phía trên.
-- **Còn:** lặp lại snapshot phase, băng thông lúc gameplay nặng, và **GC KB/s trên Player
-  build** — S7 chỉ có số Editor + probe; cần Development Build + Profiler UI (hoặc đọc `.raw`).
+- **2026-10-25:** 4 player join/visual đã chạy sạch; sync vị trí đã fix và kiểm 2 player
+  (transform + joystick tay), **4-player movement chưa kiểm** vì bỏ qua P3/P4.
+- **Còn:** 4-player movement sau fix (chưa làm), lặp lại snapshot phase, băng thông lúc
+  gameplay nặng, và **GC KB/s trên Player build** — S7 chỉ có số Editor + probe; cần
+  Development Build + Profiler UI (hoặc đọc `.raw`).
 - Sau khi có đủ số → ghi `docs/profiler_baseline.md` và dán nhãn **LÀM / KHÔNG LÀM** cho từng mục
   trong `optimization_plan.md` §3.
 - **Tài sản để lại:** `Assets/Editor/PerfScenarios.cs` có 4 probe mới —
@@ -518,9 +581,9 @@ Chi tiết client (Tx/Rx KB/s, Tx/Rx pps):
 
 | Hạng mục | Ảnh hưởng |
 |---|---|
-| Code | **Không đổi một dòng.** |
+| Code | Profiler **không đổi code**; S8 2026-10-25 có sửa `Player.prefab` (thay missing `ClientNetworkTransform` bằng `NetworkTransform` owner authority). |
 | Thời gian | 1 buổi (30–60 phút) cho editor, thêm thời gian nếu build Android. |
-| Rủi ro | 0 (chỉ đọc số). |
+| Rủi ro | 0 cho phần đo; prefab fix đã kiểm 2 player, 4-player movement chưa kiểm. |
 | Lợi ích | Chấm được 6/13 mục ở nhóm A sang "không làm" → tránh rủi ro regresion không cần thiết. |
 
 ## Kiểm chứng
