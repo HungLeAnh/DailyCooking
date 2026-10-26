@@ -276,8 +276,9 @@ Host ở `GameScene` trước, client join sau; Relay thật; tổng cộng 2 pl
   (`Touchscreen.current == null`) đã fix null guard. Host có 2 NRE nội bộ MPPM
   (`MainPlayerSystems.Listen`) khi clone được launch qua API nội bộ; không phải game code,
   và console đã được clear.
-- **Chưa đo ở mục 2-player:** snapshot phase tách riêng; S8 4-player + bandwidth + snapshot
-  1 mẫu ở mục dưới.
+- **Đã đo thêm ở mục 2-player:** snapshot phase tách riêng ngày 2026-10-26 (P2 snapshot thường:
+  `GameScene` → `GameData != null` **0.541 s**; JSON + decompress + replace **53 ms**;
+  `OnDataSync` **0.995 s**). S8 4-player + bandwidth ở mục dưới.
 - **Số trước reset (2026-10-22, chỉ tham chiếu):** 5.45 s / 909 chars / 484 bytes / 1 chunk
   trên clone cũ `mppm159b293e`; không dùng làm số hiện tại. Số 7.85 s / 449–463 bytes thuộc
   clone tạo tay `S8Test` và cũng **không dùng**.
@@ -306,10 +307,10 @@ Chi tiết client (Tx/Rx KB/s, Tx/Rx pps):
 
 - Snapshot tăng dần vì host state thay đổi giữa các lần join (bot/thời gian), không phải nhiều
   chunk; cả 3 vẫn `chunkCount=1`.
-- **1.251 s** là mẫu first join của `Player 2`, đo từ lúc `connected=True`/`GameScene` đến khi
-  `GameData != null`, gồm RPC + decompress + JSON; **mới 1 mẫu Editor/MPPM**, chưa đủ kết luận.
-  Bỏ số rejoin `1.082 s` / `2.976 s` vì đó là flow gọi `ShutdownAndReset()` trực tiếp, không chuẩn.
-  Đã lặp lại 3 mẫu ngày 2026-10-26 (mục dưới).
+- **1.251 s** là mẫu first join cũ của `Player 2`, đo từ lúc `connected=True`/`GameScene` đến khi
+  `GameData != null`; probe cũ **gồm cả `OnDataSyncToNewClient`**, nên chỉ dùng tham chiếu, không
+  dùng để kết luận JSON/decompress. Bỏ số rejoin `1.082 s` / `2.976 s` vì đó là flow gọi
+  `ShutdownAndReset()` trực tiếp, không chuẩn. Đã tách lại ngày 2026-10-26 (mục dưới).
 - Bandwidth đo bằng `NetworkDriver.GetStatistics()` (UTP transport) ở lần 4 client trước khi tách
   profile; `PlayerId` không ảnh hưởng transport. Cửa sổ ~36.6 s, **không thao tác người chơi**;
   cao nhất ~1.9 KB/s tổng hai chiều mỗi client, **thấp hơn nhiều** ngưỡng 100 KB/s/client,
@@ -321,7 +322,8 @@ Chi tiết client (Tx/Rx KB/s, Tx/Rx pps):
   nội bộ MPPM lặp lại trong `MainPlayerSystems+<>c__DisplayClass8_0.<Listen>b__1`
   (`UpdateCloneLogCountsMessage`), không phải game code.
 - **Lượt này chưa đo:** bandwidth lúc gameplay nặng, snapshot phase lặp lại nhiều mẫu, GC trên
-  Player build. Đã đo lại bandwidth movement/cooking + 3 mẫu snapshot ngày 2026-10-26 (mục dưới).
+  Player build. Đã đo lại ngày 2026-10-26: bandwidth movement/cooking, tách snapshot phase
+  (P2/P3) và multi-chunk 4 chunk; GC/Player build vẫn chờ (mục dưới).
 
 ### 2026-10-25 — S8 4 player join/visual + fix sync vị trí
 
@@ -396,9 +398,10 @@ Cho cả 4 owner chạy vòng tròn bằng `transform.position` trong 8 s (owner
   Kiểm joystick tay vẫn chỉ có 2 player (mục 2026-10-25).
 - Sai lệch ~0.005 m là do interpolation, cùng mức với phép thử 2 player.
 
-#### Snapshot phase — 3 mẫu first join
+#### Snapshot phase — 3 mẫu first join (probe cũ)
 
-Đo từ lúc `GameScene` active đến khi `GameData != null`; **không gồm** sign-in/connect:
+Đo từ lúc `GameScene` active đến khi `GameData != null`; **không gồm** sign-in trước `GameScene`.
+Probe cũ không tách connect/first chunk/event:
 
 | Client | Snapshot phase |
 |---|---|
@@ -407,8 +410,41 @@ Cho cả 4 owner chạy vòng tròn bằng `transform.position` trong 8 s (owner
 | `Player 4` | **1.285 s** |
 
 - Trung bình **1.168 s**, trung vị **1.226 s**; 2/3 mẫu > 1 s.
-- Đây là **probe** trên Editor/MPPM, không phải profiler; chưa tách RPC / decompress / JSON.
+- Đây là **probe cũ** trên Editor/MPPM, không phải profiler. Probe cũ **không tách**
+  `OnDataSyncToNewClient`; vì vậy các số này **không dùng để kết luận JSON/decompress**.
 - So với mẫu 1.251 s ngày 2026-10-23: cùng bậc, không có regression rõ ràng.
+
+#### Tách snapshot phase + multi-chunk — 2026-10-26 (probe)
+
+Bật instrumentation tạm trong `MultiplayerManager.cs` để đo từng mốc; **không commit**
+instrumentation. Đo trên Editor/MPPM, host + `Player 2` (snapshot thường) và `Player 3`
+(snapshot 601 menu, 4 chunk). Đây là **probe**, không phải Profiler/Player build.
+
+| Mốc | P2 — snapshot thường | P3 — snapshot 601 menu |
+|---|---:|---:|
+| Compressed bytes / chunks | 483 B / **1** | 12,685 B / **4** |
+| `GameScene` active → `GameData != null` | **540.988 ms** | **577.582 ms** |
+| JSON deserialize (`jsonMs`) | 49.489 ms | 55.385 ms |
+| Giải nén (`decompressMs`) | 2.570 ms | 4.517 ms |
+| Ghép chunk (`assembleMs`) | 0.018 ms | 0.035 ms |
+| `ReplaceGameDataFromHost` | 1.062 ms | 1.871 ms |
+| `OnDataSyncToNewClient` | **994.972 ms** | **1,066.094 ms** |
+| `GameScene` active → sau event | 1,535.980 ms | 1,643.697 ms |
+
+- P2: client connected ở `scene + 228.489 ms`; first chunk ở `scene + 486.567 ms`. Từ first
+  chunk đến `GameData != null` chỉ còn **54.421 ms** — đúng bằng JSON + decompress + ghép +
+  replace. Phần lớn 0.541 s là connect/chờ chunk đầu (first chunk ở 486.567 ms), không phải parse.
+- P3: server log `jsonChars=22090`, `gzip=12685`, `chunks=4`; client log
+  `compressedBytes=12685`, `rawBytes=22090`, `jsonChars=22090`, `chunks=4`. Server
+  `jsonMs=0.459`, `compressMs=0.884`, `sendMs=0.520`.
+- Ghép 4 chunk hoạt động đúng: JSON hash trên host và client **giống hệt**
+  `39A40EB1C19887EE4DC4D273`; `menu=601`; sentinel `S8_MULTI_CHUNK_SENTINEL_9f3a2c` có trên cả hai.
+- **Kết luận:** JSON + decompress + replace chỉ **~53–62 ms** cho cả snapshot thường và
+  4 chunk. Con số >1 s (nếu đo sau event) là **`OnDataSyncToNewClient`**, hiện do
+  `UIPlayerResources.Initialize()` cập nhật TMP; **không phải JSON/decompress**.
+- Vì vậy **mục 02 KHÔNG LÀM**. `chunkCount=4` vẫn dưới ngưỡng >5 và đường multi-chunk đã
+  chạy đúng; không cần hạ `SNAPSHOT_CHUNK_SIZE`. Nếu muốn giảm thời gian join UX, phải điều tra
+  riêng event/TMP, không phải đổi wire format.
 
 #### Bandwidth — UTP `NetworkDriver.GetStatistics()`
 
@@ -444,8 +480,10 @@ cooking time 6 s) để có tải liên tục; cửa sổ **10.00 s** mỗi edit
 
 #### EditMode sau fix prefab
 
-- Xoá probe, `refresh_unity(force/all)` → compile sạch, console **0 error / 0 warning**.
-- `run_tests(EditMode)`: **49/49 passed**, 0 failed, 0 skipped, **1.109 s**.
+- Xoá probe + revert instrumentation, `refresh_unity(force/all)` → compile sạch, console
+  **0 error / 0 warning** trên cả 4 editor.
+- `run_tests(EditMode)`: **49/49 passed**, 0 failed, 0 skipped, **1.16 s** (lần cuối sau
+  cleanup; lần trước 1.109 s).
 - Đây là lần chạy lại sau khi thay `ClientNetworkTransform` missing bằng `NetworkTransform`
   owner authority; không có test nào bị ảnh hưởng.
 
@@ -465,7 +503,7 @@ cooking time 6 s) để có tải liên tục; cửa sổ **10.00 s** mỗi edit
 | `FindGameObjectsWithTag` hiện ở S4 (làm 05) | S10 rung camera (2 lookup/frame) — **không khác gì S2** | ❌ Không đủ lý do |
 | S6 GC > 1 MB/s (làm 04) | Chưa đo được GC KB/s (xem "Chưa đo được") | ⏸ Treo |
 | S5 `List<T>.Find` < 0.1 ms (bỏ phần perf của 12) | Mở shop chỉ +0.4–0.7 ms main thread so S2 | ✅ **Bỏ phần perf**, giữ phần `LogError` |
-| Join > 1s / `chunkCount` > 5 (làm 02) | `chunkCount=1` (2026-10-23); 4-player first-join snapshot phase **0.994 / 1.226 / 1.285 s**, trung bình **1.168 s** (3 mẫu, Editor/MPPM) | 2/3 mẫu > 1 s; **đủ tín hiệu để điều tra 02**, nhưng chưa tách RPC/decompress/JSON và chưa có Player build |
+| Join > 1s / `chunkCount` > 5 (làm 02) | Probe cũ: **0.994 / 1.226 / 1.285 s** (3 mẫu, chưa tách event). Probe tách 2026-10-26: `GameScene` → `GameData != null` **0.541 / 0.578 s**; JSON + decompress + replace **53–62 ms**; `OnDataSyncToNewClient` **0.995 / 1.066 s**; multi-chunk **4 chunk**, hash host == client | ✅ Ngưỡng >1 s đến từ event/TMP, **không phải JSON/decompress** → **KHÔNG LÀM 02**; `chunkCount=4` < 5 |
 | Bandwidth > 100 KB/s/client (làm 01+03) | 4 player: di chuyển **18.6–20.9 KB/s/client** tổng hai chiều; nấu **3.4–5.1 KB/s/client**; host aggregate **64.9 / 12.65 KB/s** (UTP, 12 s / 10 s) | ✅ **Không vượt ngưỡng** trên Editor/MPPM; chưa có Player build |
 
 ### Kết luận theo mục
@@ -483,12 +521,14 @@ cooking time 6 s) để có tải liên tục; cửa sổ **10.00 s** mỗi edit
   (đây là bug robustness, không phải perf — vẫn làm).
 - **06 PlayerStats cache** — S2 (đứng yên, `HandleMovement` chạy 60 lần/s) chỉ tốn 2.92–3.55 ms
   cho **toàn bộ** frame. → **KHÔNG LÀM**.
-- **01, 02, 03** — `chunkCount=1` (2026-10-23). 4-player first-join snapshot phase lặp lại
-  **0.994 / 1.226 / 1.285 s** (trung bình 1.168 s; 2/3 > 1 s), đã trừ sign-in/connect nhưng
-  vẫn là Editor/MPPM và chưa tách RPC/decompress/JSON. Bandwidth 4 player: di chuyển
-  **18.6–20.9 KB/s/client** tổng hai chiều, nấu **3.4–5.1 KB/s/client** — **không vượt ngưỡng
-  100 KB/s**. Vì p95 < 16 ms, bandwidth thấp, còn snapshot >1 s nhưng chưa tách giai đoạn →
-  **chưa sửa 01/02/03**; 02 có tín hiệu cần điều tra, muốn chốt thì profile/tách RPC + Player build.
+- **02 JSON join sync — KHÔNG LÀM (2026-10-26).** Probe tách giai đoạn cho thấy `GameData` sẵn
+  sàng sau **0.541 s** (snapshot thường) và **0.578 s** (601 menu / 4 chunk); JSON + decompress +
+  replace chỉ **53–62 ms**. Con số >1 s là `OnDataSyncToNewClient` (**0.995–1.066 s**, hiện do
+  `UIPlayerResources.Initialize()` cập nhật TMP), không phải JSON/decompress. Multi-chunk 4 chunk
+  ghép đúng, hash host == client. Không đổi wire format, không hạ `SNAPSHOT_CHUNK_SIZE`.
+- **01, 03** — chưa sửa. Bandwidth 4 player: di chuyển **18.6–20.9 KB/s/client** tổng hai chiều,
+  nấu **3.4–5.1 KB/s/client** — **không vượt ngưỡng 100 KB/s**; p95 < 16 ms. Các mục này vẫn
+  chờ Player build nếu muốn tối ưu thêm, nhưng chưa có bằng chứng cấp thiết.
 
 ### Phát hiện phụ từ lúc đo
 
@@ -515,8 +555,9 @@ cooking time 6 s) để có tải liên tục; cửa sổ **10.00 s** mỗi edit
 - **Băng thông lúc gameplay nặng trên Player build** — đã đo 4 player trên Editor/MPPM:
   di chuyển **18.6–20.9 KB/s/client** tổng hai chiều, nấu **3.4–5.1 KB/s/client** (2026-10-26);
   chưa đo trên máy Android/Player build.
-- **S9 tách riêng thời gian snapshot** — đã lặp lại 3 mẫu **0.994–1.285 s**
-  (`GameScene` → `GameData != null`), nhưng chưa tách RPC / decompress / JSON.
+- **S9 tách riêng thời gian snapshot** — đã tách ngày 2026-10-26: data sẵn sàng
+  **0.541 / 0.578 s**; JSON + decompress + replace **53–62 ms**; `OnDataSyncToNewClient`
+  **0.995–1.066 s**. Vẫn chưa đo trên Android/Player build.
 
 ### Đã đo (2026-10-20/21/22/23)
 
@@ -527,7 +568,7 @@ cooking time 6 s) để có tải liên tục; cửa sổ **10.00 s** mỗi edit
   1 chunk (mục ở trên). Số 2026-10-22 trước reset chỉ tham chiếu.
 - **S8 4-player + băng thông nhẹ** — ngày 2026-10-23: host + `Player 2`/`Player 3`/`Player 4`
   (profile riêng); `clients=4`/`players=4`; snapshot **496–549 bytes / 1 chunk** mỗi client;
-  snapshot phase **1.251 s** (1 mẫu first join); bandwidth không thao tác cao nhất
+  snapshot phase cũ **1.251 s** (1 mẫu, gồm cả event); bandwidth không thao tác cao nhất
   ~1.9 KB/s/client, ~8 pps; lượt đó chưa đo gameplay nặng, đã đo lại ngày 2026-10-26.
 - **S8 4-player join/visual + fix sync vị trí** — ngày 2026-10-25: host + 3 MPPM,
   `clients=4`/`players=4`, cả 3 client ở `GameScene`, popup đã hide, client 0/0; phát hiện
@@ -536,9 +577,11 @@ cooking time 6 s) để có tải liên tục; cửa sổ **10.00 s** mỗi edit
   (xem bullet dưới).
 - **S8 4-player movement + bandwidth + snapshot + EditMode** — ngày 2026-10-26: 4 owner chạy
   vòng tròn 8 s, cả 4 editor thấy vị trí khớp trong **0.005 m**; bandwidth di chuyển
-  **18.6–20.9 KB/s/client** tổng hai chiều, nấu **3.4–5.1 KB/s/client**; snapshot phase
-  **0.994 / 1.226 / 1.285 s** (3 mẫu, trung bình 1.168 s); EditMode **49/49**. Tất cả là
-  Editor/MPPM, chưa phải Player build.
+  **18.6–20.9 KB/s/client** tổng hai chiều, nấu **3.4–5.1 KB/s/client**; probe cũ 3 mẫu
+  **0.994 / 1.226 / 1.285 s** (chưa tách event). Probe tách sau đó: data sẵn sàng
+  **0.541 / 0.578 s**, JSON + decompress + replace **53–62 ms**, `OnDataSyncToNewClient`
+  **0.995 / 1.066 s**; multi-chunk **4 chunk**, hash host == client. EditMode **49/49**.
+  Tất cả là Editor/MPPM/probe, chưa phải Player build.
 - **S4** — ngày 2026-10-20
   ([16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md)).
 - Lịch sử: **đã thử tự động hoá S3/S4 bằng computer-control (2026-10-13) và thất bại** —
@@ -652,19 +695,20 @@ cooking time 6 s) để có tải liên tục; cửa sổ **10.00 s** mỗi edit
   `Player 2`, host `clients=2`/`players=2`; late join **3.77 s** (sign-in cached 0.37 s +
   join 3.40 s), snapshot 449 bytes compressed / 1 chunk. 4 player host + `Player 2`/
   `Player 3`/`Player 4` (profile riêng): `clients=4`/`players=4`, snapshot
-  **496–549 bytes / 1 chunk** mỗi client; first-join snapshot phase **1.251 s** (1 mẫu);
-  bandwidth không thao tác cao nhất **~1.9 KB/s/client**, **~8 pps**. Chi tiết + caveat MPPM
-  ở mục "S8/S9" phía trên.
+  **496–549 bytes / 1 chunk** mỗi client; first-join snapshot phase cũ **1.251 s** (1 mẫu, gồm
+  cả event); bandwidth không thao tác cao nhất **~1.9 KB/s/client**, **~8 pps**. Chi tiết +
+  caveat MPPM ở mục "S8/S9" phía trên; tách phase ngày 2026-10-26 ở mục dưới.
 - **2026-10-25:** 4 player join/visual đã chạy sạch; sync vị trí đã fix và kiểm 2 player
   (transform + joystick tay).
 - **2026-10-26:** 4-player movement đã kiểm bằng probe (khớp **0.005 m**); snapshot phase
-  lặp lại 3 mẫu **0.994–1.285 s**; bandwidth di chuyển/nấu đã đo trên Editor/MPPM;
-  EditMode **49/49**.
-- **Còn:** **GC KB/s trên Player build**, bandwidth trên Android/Player build, và tách
-  snapshot phase thành RPC/decompress/JSON. S7 chỉ có số Editor + probe; cần Development
-  Build + Profiler UI (hoặc đọc `.raw`).
-- Sau khi có đủ số → ghi `docs/profiler_baseline.md` và dán nhãn **LÀM / KHÔNG LÀM** cho từng mục
-  trong `optimization_plan.md` §3.
+  đã tách: data sẵn sàng **0.541 / 0.578 s**, JSON + decompress + replace **53–62 ms**,
+  `OnDataSyncToNewClient` **0.995 / 1.066 s**; multi-chunk **4 chunk**, hash host == client;
+  bandwidth di chuyển/nấu đã đo trên Editor/MPPM; EditMode **49/49**.
+- **Còn:** **GC KB/s trên Player build** và bandwidth trên Android/Player build. S7 chỉ có số
+  Editor + probe; cần Development Build + Profiler UI (hoặc đọc `.raw`). Nếu muốn giảm thời
+  gian join UX, điều tra `OnDataSyncToNewClient`/TMP — **không phải mục 02**.
+- Đã dán nhãn **LÀM / KHÔNG LÀM** cho từng mục trong `optimization_plan.md` §3; mục **02 là
+  KHÔNG LÀM** vì JSON/decompress không phải phần lớn thời gian.
 - **Tài sản để lại:** `Assets/Editor/PerfScenarios.cs` có 4 probe mới —
   `Tools/Profiling/S4 - Start placement (ghost)` (vào placement từ code, đã chạy thành công),
   `Tools/Profiling/S4 - Cancel placement`, `Tools/Verify/Input diagnostics (…)`,

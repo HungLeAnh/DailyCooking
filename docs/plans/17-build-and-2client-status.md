@@ -1,6 +1,6 @@
 # 17 — Kiểm lại các mục "chưa chạy": build APK và 2/4 client
 
-Ngày: 2026-10-20; §3 cập nhật 2026-10-22; §5 cập nhật 2026-10-25; §6 cập nhật 2026-10-26.
+Ngày: 2026-10-20; §3 cập nhật 2026-10-22; §5 cập nhật 2026-10-25; §6 + §6.5 cập nhật 2026-10-26.
 Không có thay đổi runtime nào trong file này — chỉ ghi **kết quả kiểm** và **những gì chưa
 kiểm được**, kèm lý do cụ thể.
 
@@ -10,7 +10,7 @@ kiểm được**, kèm lý do cụ thể.
 |---|---|
 | `refresh_unity(force)` → 32 s | OK |
 | `read_console(error, warning)` | **0 error / 0 warning**; 2026-10-26 sau refresh cũng **0/0** |
-| `run_tests(EditMode)` | **49/49 passed**, 0 failed, 0 skipped (`0.236 s`); chạy lại **2026-10-26** sau fix `Player.prefab`: **49/49**, 0 failed/skipped (`1.109 s`) |
+| `run_tests(EditMode)` | **49/49 passed**, 0 failed, 0 skipped (`0.236 s`); chạy lại **2026-10-26** sau fix `Player.prefab` và sau cleanup: **49/49**, 0 failed/skipped (`1.16 s`) |
 | `Tools/Build Checks/Compile Android Player Scripts` | **`[BuildChecks] Android player scripts compiled: 110 assemblies.`** |
 
 ## 2. Build Android thật (APK) — **CHƯA KIỂM ĐƯỢC** trong môi trường này
@@ -81,8 +81,8 @@ còn đúng: `StoveCounter.png` (thay đổi sẵn có của bạn), thư mục 
   trực tiếp** với 5.45 s cũ (sign-in lạnh).
 - Snapshot 760/449 nhỏ hơn 909/484 cũ vì save test `S8PostReset` mới, không phải regression.
 - `chunkCount=1` < ngưỡng `> 5`: lần này **không** kiểm được nhánh ghép nhiều chunk.
-- **Lượt này chưa đo:** băng thông lúc gameplay nặng và thời gian snapshot tách riêng khỏi sign-in.
-  S8 4-player + băng thông nhẹ đã kiểm ở §4; movement/bandwidth/snapshot lặp lại đã kiểm ở §6.
+- **Lượt này chưa đo:** băng thông lúc gameplay nặng. Thời gian snapshot đã tách khỏi sign-in
+  ở §6.5; S8 4-player + băng thông nhẹ đã kiểm ở §4; movement/bandwidth/snapshot lặp lại ở §6.
 - **MPPM console:** clone `Player 2` **0 error / 0 warning**. Lỗi read-only/shader trước đó do
   cache `Library` lệch, đã xử lý bằng reset `Library`; NRE `GameInput.IsMouseOverUI`
   (`Touchscreen.current == null`) đã fix null guard. Host có 2 NRE nội bộ MPPM
@@ -196,7 +196,7 @@ Cho 4 owner chạy vòng tròn 8 s bằng `transform.position` (owner-authoritat
 Cả 4 editor `players=4`; đây là **probe/automation**, không phải joystick tay. Kiểm tay
 vẫn chỉ có 2 player.
 
-### 6.2 Snapshot phase — 3 mẫu, probe
+### 6.2 Snapshot phase — 3 mẫu cũ, probe
 
 | Client | Phase |
 |---|---:|
@@ -204,8 +204,11 @@ vẫn chỉ có 2 player.
 | P3 | 1.226 s |
 | P4 | 1.285 s |
 
-Đo từ `GameScene` active → `GameData != null`; **không gồm** sign-in/connect. Trung bình
-1.168 s, trung vị 1.226 s; 2/3 > 1 s. Mẫu trước 1.251 s (2026-10-23) cùng bậc.
+Đo từ `GameScene` active → `GameData != null`; **không gồm** sign-in trước `GameScene`; probe cũ
+không tách connect/first chunk/event. Trung bình
+1.168 s, trung vị 1.226 s; 2/3 > 1 s. Mẫu trước 1.251 s (2026-10-23) cùng bậc. **Probe cũ
+không tách `OnDataSyncToNewClient`**, nên các số này chỉ để so bậc, không dùng để kết luận
+JSON/decompress. Đã tách lại ở §6.5.
 
 ### 6.3 Bandwidth — UTP `NetworkDriver.GetStatistics()`
 
@@ -233,7 +236,36 @@ vẫn chỉ có 2 player.
 
 ### 6.4 EditMode + console
 
-- Xoá probe → `refresh_unity(force/all)` → console **0 error / 0 warning**.
-- `run_tests(EditMode)`: **49/49 passed**, 0 failed, 0 skipped (`1.109 s`) — chạy lại sau fix prefab.
-- 3 client **0 error / 0 warning**; host có 1 NRE nội bộ MPPM (`MainPlayerSystems.Listen`),
-  không phải game code, clear console rồi không lặp lại.
+- Xoá probe + revert instrumentation → `refresh_unity(force/all)` cả 4 editor → console
+  **0 error / 0 warning**.
+- `run_tests(EditMode)`: **49/49 passed**, 0 failed, 0 skipped (`1.16 s`) — lần cuối sau cleanup
+  (lần trước `1.109 s`).
+- 3 client **0 error / 0 warning**; trong lúc join host có 1 NRE nội bộ MPPM
+  (`MainPlayerSystems.Listen`), không phải game code; clear console rồi không lặp lại.
+
+### 6.5 Tách snapshot phase + multi-chunk — 2026-10-26 (probe)
+
+Bật instrumentation tạm trong `MultiplayerManager.cs`; **không commit**. Đo trên Editor/MPPM,
+host + P2 (snapshot thường) và P3 (snapshot 601 menu). Đây là **probe**, không phải
+Profiler/Player build.
+
+| Mốc | P2 — thường | P3 — 601 menu |
+|---|---:|---:|
+| Compressed / chunks | 483 B / **1** | 12,685 B / **4** |
+| `GameScene` → `GameData != null` | **540.988 ms** | **577.582 ms** |
+| JSON deserialize | 49.489 ms | 55.385 ms |
+| Giải nén | 2.570 ms | 4.517 ms |
+| Ghép chunk | 0.018 ms | 0.035 ms |
+| `ReplaceGameDataFromHost` | 1.062 ms | 1.871 ms |
+| `OnDataSyncToNewClient` | **994.972 ms** | **1,066.094 ms** |
+| `GameScene` → sau event | 1,535.980 ms | 1,643.697 ms |
+
+- P2: client connected ở `scene + 228.489 ms`; first chunk ở `scene + 486.567 ms`; từ first
+  chunk đến `GameData != null` chỉ còn **54.421 ms**.
+- P3: host `jsonChars=22090`, `gzip=12685`, `chunks=4`; client ghép đủ 4 chunk, `menu=601`,
+  sentinel `S8_MULTI_CHUNK_SENTINEL_9f3a2c` có trên cả hai. JSON hash host == client:
+  `39A40EB1C19887EE4DC4D273`. Server `jsonMs=0.459`, `compressMs=0.884`, `sendMs=0.520`.
+- **Kết luận:** JSON + decompress + replace chỉ **53–62 ms**. Phần >1 s là
+  `OnDataSyncToNewClient` (hiện do `UIPlayerResources.Initialize()` cập nhật TMP), không phải
+  JSON/decompress. **Mục 02 KHÔNG LÀM**; multi-chunk 4 chunk đã đúng, không hạ
+  `SNAPSHOT_CHUNK_SIZE`.

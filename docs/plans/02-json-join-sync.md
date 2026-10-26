@@ -4,9 +4,28 @@
 |---|---|
 | **Nhóm** | A. Mạng / tối ưu (đã hoãn) |
 | **Nguồn** | `docs/optimization_plan.md` §3.2, `docs/dataflow.md` §2.4 |
-| **Trạng thái** | Chưa làm |
+| **Trạng thái** | **KHÔNG LÀM** — đo 2026-10-26; JSON/decompress không phải bottleneck |
 | **Rủi ro** | **Cao nhất trong 13 mục** — đụng thẳng đường join/save |
 | **Ưu tiên** | Làm sau cùng, hoặc không làm nếu profiler chưa chỉ ra bottleneck |
+
+---
+
+## Kết luận 2026-10-26 — KHÔNG LÀM
+
+Probe tách giai đoạn trên Editor/MPPM (không phải Profiler/Player build):
+
+- `GameScene` active → `GameData != null`: **0.541 s** (snapshot thường, 483 B / 1 chunk) và
+  **0.578 s** (601 menu, 12,685 B / **4 chunk**).
+- JSON deserialize + giải nén + `ReplaceGameDataFromHost`: **53–62 ms**.
+- `OnDataSyncToNewClient`: **0.995–1.066 s** — đây mới là phần >1 s; subscriber hiện tại là
+  `UIPlayerResources.Initialize()` cập nhật TMP, không phải JSON/decompress.
+- Multi-chunk 4 chunk ghép đúng; JSON hash host == client `39A40EB1C19887EE4DC4D273`; `menu=601`;
+  sentinel có trên cả hai. `chunkCount=4` vẫn dưới ngưỡng >5.
+
+Vì vậy **không sửa wire format, không hạ `SNAPSHOT_CHUNK_SIZE`**. Nếu muốn giảm thời gian join UX,
+điều tra `OnDataSyncToNewClient`/TMP. Chi tiết:
+[13-profiler-baseline.md](13-profiler-baseline.md) và
+[17-build-and-2client-status.md](17-build-and-2client-status.md) §6.5.
 
 ---
 
@@ -74,7 +93,7 @@ dùng khi có thay đổi giữa lúc connect và lúc ObjectManager spawn xong.
 
 ### Đề xuất
 
-Không chọn vội. Xem mục 13 (chạy Profiler) trước; nếu join không phải điểm nghẽn thì giữ nguyên.
+**Không chọn.** Đã đo mục 13 ngày 2026-10-26: JSON/decompress không phải điểm nghẽn; giữ nguyên.
 
 ## Ảnh hưởng
 

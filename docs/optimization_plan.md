@@ -71,11 +71,19 @@ blast radius and how to verify it. The owner can pull any of them back into the 
 time; the only reason they sit last in the order is the recommendation below, which is still waiting
 on numbers from `docs/plans/13-profiler-baseline.md`.
 
+**Update 2026-10-26 — item 02 measured, decision: KHÔNG LÀM.** The join snapshot data is ready
+after **0.541 s** (normal) / **0.578 s** (601-menu, 4-chunk) from `GameScene` active. JSON,
+decompress and `ReplaceGameDataFromHost` together cost **53–62 ms**. The >1 s figure comes from
+`OnDataSyncToNewClient` (**0.995–1.066 s**, TMP update in `UIPlayerResources.Initialize`), not
+from JSON/decompress. A 4-chunk snapshot was also verified: 12,685 B compressed, host and client
+JSON hash identical. See `docs/plans/13-profiler-baseline.md` and
+`docs/plans/17-build-and-2client-status.md` §6.5.
+
 **Stated reason (technical, not a priority call).** Each one changes on-the-wire or save behaviour,
 so it needs a plan plus a multiplayer test pass before it is safe to start.
 
 1. **Redundant `ServerRpc` → `ClientRpc` chains.** `ContainerCounterController`, `Table` and `KitchenObject` forward a `ServerRpc` that does nothing server-side and immediately mirrors to clients, even though the value is already a `NetworkVariable`. Removing them halves RPC traffic, but every consumer that currently reacts to the RPC has to be re-wired to `OnValueChanged` — this is where visual desync would show up.
-2. **JSON game-state sync.** `MultiplayerManager` serialises the whole `GameData` to JSON, gzips it and ships it in 4 KB chunks on join (`ReceiveGameDataChunkClientRpc`, see `docs/dataflow.md` §2). Replacing it with structured `NetworkVariable` sync or binary writing removes the CPU cost and the chunking, but the join path and the save snapshot share the same serialiser, so both must move together.
+2. **JSON game-state sync — KHÔNG LÀM (đo 2026-10-26).** `MultiplayerManager` serialises the whole `GameData` to JSON, gzips it and ships it in 4 KB chunks on join (`ReceiveGameDataChunkClientRpc`, see `docs/dataflow.md` §2). Replacing it with structured `NetworkVariable` sync or binary writing removes the CPU cost and the chunking, but the join path and the save snapshot share the same serialiser, so both must move together. Measurement shows JSON + decompress + replace only cost **53–62 ms**; the >1 s join delay is `OnDataSyncToNewClient`/TMP, so this change is **not justified**.
 3. **GUID string → integer / `NetworkGuid`.** RPCs carry 36-character content GUIDs (`kitchenObjectSO.Guid`). Compressing them would need a stable GUID↔index table that survives reordering of the config assets, on both hosts and clients, and must not change the save format (`GameData.SaveVersion` bump).
 4. **UI object pooling.** Tabs, inventory rows and popup frames are instantiated and destroyed on open/close (`UICharacterPopup`, `UIUpgradePopup`, `UIMenuPopup`). Low value on its own — popups open rarely — but it is the prerequisite for removing the LINQ chains in §2.
 5. **Remaining `Camera.main` references (17).** All are in click/drag handlers (`UtilsClass`, `GameInput`, `BuildingPlacementManager`, `GridBuildingSystem`, `PlayerStateMachine`, `DOTweenHandClick`, `Button_Sprite`), so they are event-driven rather than per-frame. Bundle with any input refactor rather than doing them one by one.
@@ -94,5 +102,6 @@ Profiling was **not** run for the §1 fixes — those changes are reasoned about
 
 A baseline captured on 2026-10-12 (Unity Editor Play Mode, single client on a real Relay host) is
 recorded in `docs/plans/13-profiler-baseline.md`: across scenarios S1/S2/S5/S6/S10 the main thread
-never exceeded **4.59 ms**. Still unmeasured: GC bytes per second, and scenarios S3/S4/S7/S8/S9,
-which need a hand-driven run. Those gaps are the reason §3 is still open rather than closed.
+never exceeded **4.59 ms**. S3/S4/S7/S8/S9 have since been measured on Editor/MPPM, including the
+2026-10-26 snapshot breakdown and 4-chunk test. Still unmeasured: GC bytes per second and bandwidth
+on an Android/Player build; those gaps are the reason §3 is not fully closed.

@@ -16,7 +16,7 @@ xem ghi chú ở từng file.
 | 14 | **Runtime ghi thẳng vào material asset** — ✅ đã sửa | [14-grid-guide-material-mutation.md](14-grid-guide-material-mutation.md) · `GridBuildingSystem.cs:26` (`[SerializeField] Material gridGuideMaterial`) → `GridVisualizer.cs:24-28` `SetFloat(...)` | Chạy play mode 1 lần là `GridShaderMaterial.mat` bị commit đè vĩnh viễn (đã thấy `5/5.01` → `0/0.01`). Giá trị đó vô nghĩa vì runtime vẫn set lại, nhưng **working tree bẩn sau mỗi lần chạy** và designer có thể vô tình commit. Đã sửa bằng `new Material(sharedMaterial)` + `Dispose`; kiểm bằng `EditorUtility.IsDirty` và SHA256 của `.mat`. |
 | 15 | **Cắt trên thớt không bấm được** — ✅ đã sửa, đã chơi kiểm | [15-cutting-interaction-ihasprogress.md](15-cutting-interaction-ihasprogress.md) · `CookingToolCounterController.cs:5` thiếu `IHasProgress` → `PlayerStateMachine.cs:200` luôn thấy `null` → `InteractAlternateEvent` không bao giờ chạy → `CookingTool.Cut()` không bao giờ được gọi | Phát hiện khi chơi thật để đo S7: đặt tomato lên thớt rồi click thì **nhấc tomato trả lại tay** thay vì cắt. Hồi quy từ `git show 9e3c5fe4e` (class cũ `CuttingCounterController`/`StoveCounterController` đều có `IHasProgress`). Chặn toàn bộ vòng lặp: không có slices → không nấu được → không phục vụ được → **không lên Level 2**. |
 | 16 | **Tự động hoá input bằng Input System** — ✅ đã kiểm | [16-input-automation-and-ghost-drag.md](16-input-automation-and-ghost-drag.md) | Tìm ra nguyên nhân các lần inject trước thất bại: editor mất focus → `Application.isFocused == false` → `InputManager` chạy `Editor` update type → InputAction không actuate. Công thức: `IgnoreFocus` + `AllDeviceInputAlwaysGoesToGameView` + `runPlayerUpdatesInEditMode`, inject state trong `[DefaultExecutionOrder(-1000)]`. Kéo ghost bằng chuột: **PASS**. |
-| 17 | **Build APK + 2/4 client** — 🟡 APK chưa kiểm; 2/4 player, movement, bandwidth, snapshot đã kiểm | [17-build-and-2client-status.md](17-build-and-2client-status.md) | APK vẫn chặn bởi thiếu mật khẩu keystore (`MyRestaurant.keystore`, alias `dev`) và Android SDK platform 35. 2 player + late join đã chạy ngày 2026-10-22 bằng MPPM `Player 2`; 4 player join/visual + fix sync vị trí ngày 2026-10-25; **4-player movement, bandwidth movement/cooking, 3 mẫu snapshot và EditMode 49/49** đã kiểm ngày 2026-10-26. |
+| 17 | **Build APK + 2/4 client** — 🟡 APK chưa kiểm; 2/4 player, movement, bandwidth, snapshot đã kiểm | [17-build-and-2client-status.md](17-build-and-2client-status.md) | APK vẫn chặn bởi thiếu mật khẩu keystore (`MyRestaurant.keystore`, alias `dev`) và Android SDK platform 35. 2 player + late join đã chạy ngày 2026-10-22 bằng MPPM `Player 2`; 4 player join/visual + fix sync vị trí ngày 2026-10-25; **4-player movement, bandwidth movement/cooking, snapshot tách phase, multi-chunk 4 chunk và EditMode 49/49** đã kiểm ngày 2026-10-26. |
 | 18 | **Warning `Look rotation viewing vector is zero`** — ✅ đã sửa | [18-look-rotation-warning.md](18-look-rotation-warning.md) · `PlayerStateMachine.HandleMovement()` | Khi idle `moveDir == zero`, `Vector3.Slerp(a, zero, t)` trả đúng `zero` lúc `t >= 1` (frame ≥ 100 ms) → `transform.forward = zero` → `LookRotation` log warning. Bọc trong `if (Context.IsWalking)`. |
 | 19 | **3 subscriber `OnMouseClickPerformed` / "1 click ra 3 nhát cắt"** — ✅ đã điều tra, không sửa | [19-click-subscribers-audit.md](19-click-subscribers-audit.md) | 3 subscriber có việc khác nhau; chỉ `PlayerStateMachine` cắt. Đo: mỗi lần nhấn = **1** event; 3 nhát cắt = **3 click** (`CookingTimer` 0→1→2→3). Không có bug. |
 | 20 | **Kéo ghost bằng touch** — ✅ đã kiểm | [20-touch-drag-verification.md](20-touch-drag-verification.md) | Inject `TouchState` (`Began`/`Moved`/`Ended`) vào `Touchscreen`: `Pointer.current = FastTouchscreen`, `IsDragging=true`, ghost bám ô (2,2) → (4,1), thả → `false`. |
@@ -33,7 +33,7 @@ xem ghi chú ở từng file.
 | # | File | Đã điều tra | Rủi ro | Nên làm? |
 |---|---|---|---|---|
 | 01 | [01-rpc-chain-removal.md](01-rpc-chain-removal.md) | ⚠️ Mô tả gốc **sai** — 3 class được nêu không còn RPC. Chuỗi RPC thật nằm ở `GameManager.Data.cs` và **bắt buộc** (GameData không phải NetworkVariable) | Cao | Chỉ bước 1 (gom RPC), bước 2 giao mục 02 |
-| 02 | [02-json-join-sync.md](02-json-join-sync.md) | ✅ Hoạt động đúng, chunk 4000 B, chạy **1 lần mỗi lần join** | **Cao nhất** | Chưa — xem 13 trước |
+| 02 | [02-json-join-sync.md](02-json-join-sync.md) | ✅ Hoạt động đúng, chunk 4000 B, chạy **1 lần mỗi lần join**; multi-chunk 4 chunk ghép đúng | **Cao nhất** | **KHÔNG LÀM (2026-10-26)** — JSON + decompress + replace chỉ **53–62 ms**; >1 s là `OnDataSyncToNewClient`/TMP |
 | 03 | [03-guid-to-int.md](03-guid-to-int.md) | ✅ `.Guid` = Unity asset GUID 32 hex; 6 RPC chở GUID | TB–cao | Không (tiết kiệm ~28 B/RPC) |
 | 04 | [04-ui-object-pooling.md](04-ui-object-pooling.md) | ⚠️ Popup root **đã cache sẵn**; `UICharacterItem` **đã pool**. Còn lại `UIMenuPopup` rebuild mỗi lần mở | TB | ✅ **Bước 1 đã làm (2026-10-21)** — `UIMenuPopup` create-once + pool; 10 lần mở vẫn 5 category / 20 food item |
 | 05 | [05-camera-main-remaining.md](05-camera-main-remaining.md) | ✅ 17 lần gọi thật; **chỉ 1 đường per-frame** (`BuildingGhost` kéo ghost) | **Thấp** | ✅ **Đã làm** — vệ sinh code, không phải thắng perf có số đo |
@@ -59,7 +59,7 @@ xem ghi chú ở từng file.
 
 | # | File | Ưu tiên |
 |---|---|---|
-| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — đã đo S3/S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join, S8 4-player + băng thông nhẹ (2026-10-23, sau reset `Library`), 4-player join/visual + fix sync vị trí (2026-10-25), và 4-player movement + bandwidth movement/cooking + 3 mẫu snapshot + EditMode 49/49 (2026-10-26) trên Editor/MPPM; GC trên Player build vẫn chờ |
+| 13 | [13-profiler-baseline.md](13-profiler-baseline.md) | **Cao nhất** — đã đo S3/S7-rút gọn (2026-10-21), S7 đầy đủ 60 s, S8/S9 2-player + late join, S8 4-player + băng thông nhẹ (2026-10-23, sau reset `Library`), 4-player join/visual + fix sync vị trí (2026-10-25), 4-player movement + bandwidth + EditMode 49/49, và **tách snapshot phase + multi-chunk** (2026-10-26) trên Editor/MPPM; GC trên Player build vẫn chờ |
 
 ---
 
@@ -253,8 +253,8 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
   burn timer 5.00). Phục vụ trong **bát**: bot order → `Eating` → `eaten=True`,
   `pendingCash=54` / `pendingExp=40`; collect → `Coins 200→254`, `Exp 0→40`.
   Đã sửa `StewSO.kitchenObjectSOList` → `[StewCookedSO]` và chạy lại sau reimport.
-- **Đã kiểm thêm 2026-10-26:** bandwidth movement/cooking và lặp lại snapshot phase (3 mẫu);
-  xem mục dưới. **Còn:** GC trên Development Build/Player build.
+- **Đã kiểm thêm 2026-10-26:** bandwidth movement/cooking; tách snapshot phase (P2/P3) và
+  multi-chunk 4 chunk; xem mục dưới. **Còn:** GC trên Development Build/Player build.
 - Không commit PNG; probe tạm `Assets/Scripts/TmpInputProbe.cs` đã xoá kèm `.meta`.
 
 ### Kiểm thêm 2026-10-22 — S7 đầy đủ 60 s
@@ -278,20 +278,21 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
 - **Late join:** **3.77 s** (sign-in cached **0.37 s** + join **3.40 s**) — đo đến khi client
   connected + `GameScene` + `GameData != null`; **không phải** thời gian snapshot riêng.
 - **Join snapshot:** host log **760 chars, 449 bytes compressed, 1 chunk** (`SNAPSHOT_CHUNK_SIZE=4000`);
-  `chunkCount=1` < ngưỡng `> 5`, nên chưa kiểm nhánh nhiều chunk. Snapshot nhỏ hơn 909/484 cũ
-  vì save test mới.
+  `chunkCount=1` < ngưỡng `> 5`, lượt này chưa kiểm nhánh nhiều chunk; đã kiểm 4 chunk ngày
+  2026-10-26 (mục dưới). Snapshot nhỏ hơn 909/484 cũ vì save test mới.
 - **S8 4-player:** host + `Player 2`/`Player 3`/`Player 4` (`mppm4214af7c`, `mppm5d14303d`,
   `mppmd382a7e5`), save `S8Four`, mỗi clone profile riêng; host `clients=4`/`players=4`, cả 4
   `PlayerObject != null`; 3 client `connected=True`/`GameScene`/`players=4`; snapshot
   **990/1139/1288 chars**, **496/523/549 bytes**, **1 chunk** mỗi client.
-- **Snapshot phase (`Player 2`, first join):** **1.251 s** từ connected/scene → `GameData != null`;
-  lượt này mới 1 mẫu Editor/MPPM, chưa đủ kết luận. Bỏ số rejoin `1.082 s`/`2.976 s` vì flow
-  không chuẩn. Đã lặp lại 3 mẫu ngày 2026-10-26 — xem mục dưới.
+- **Snapshot phase cũ (`Player 2`, first join):** **1.251 s** từ connected/scene → `GameData != null`;
+  probe cũ **gồm cả event**, nên chỉ tham chiếu. Bỏ số rejoin `1.082 s`/`2.976 s` vì flow không
+  chuẩn. Đã tách lại ngày 2026-10-26: data sẵn sàng **0.541/0.578 s**, JSON + decompress + replace
+  **53–62 ms**, `OnDataSync` **0.995/1.066 s** — xem mục dưới.
 - **Bandwidth nhẹ (UTP, ~36.6 s, không thao tác):** host Tx/Rx **1.12/0.81 KB/s**, **8.50/7.16 pps**;
   client cao nhất **1.07/0.81 KB/s**, **8.14/7.12 pps**; thấp hơn nhiều ngưỡng 100 KB/s/client,
   nhưng lượt này chưa đo lúc gameplay nặng — đã đo ngày 2026-10-26.
-- **Lượt này chưa đo:** lặp lại snapshot phase, băng thông lúc gameplay nặng, GC trên Player build.
-  Đã đo lại movement/bandwidth/snapshot ngày 2026-10-26 — xem mục dưới.
+- **Lượt này chưa đo:** băng thông lúc gameplay nặng, GC trên Player build. Đã đo lại
+  movement/bandwidth/snapshot ngày 2026-10-26, gồm tách phase + multi-chunk — xem mục dưới.
 - **MPPM console:** 3 client **0 error / 0 warning** sau clear. Khi thử rejoin,
   `ShutdownAndReset()` trên client làm lộ bug thật `playerDataNetworkList.Clear()` →
   `Write permissions (Server)`; đã fix `f2240ca4d` (chỉ host clear), verify flow leave chuẩn
@@ -333,9 +334,14 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
   (owner-authoritative `NetworkTransform`), dừng 1 s rồi đọc trên cả 4 editor. Cả 4 thấy
   `players=4`; vị trí đích owner 0/1/2/3 là `(-3,0,-3)`, `(-3,0,-1)`, `(-3,0,1)`,
   `(-3,0,3)`; **sai lệch lớn nhất 0.005 m**. Đây là **probe/automation**, không phải joystick tay.
-- **Snapshot phase (probe):** 3 mẫu first join **0.994 / 1.226 / 1.285 s** từ `GameScene`
-  active → `GameData != null`, không gồm sign-in/connect; trung bình **1.168 s**, trung vị
-  **1.226 s**, 2/3 > 1 s. Cùng bậc mẫu 1.251 s ngày 2026-10-23.
+- **Snapshot phase (probe cũ):** 3 mẫu first join **0.994 / 1.226 / 1.285 s** từ `GameScene`
+  active → `GameData != null`, không gồm sign-in trước `GameScene`; probe cũ không tách
+  connect/first chunk/event. Trung bình **1.168 s**, trung vị **1.226 s**, 2/3 > 1 s. Vì vậy
+  **không dùng để kết luận JSON/decompress**.
+- **Tách snapshot + multi-chunk (probe, 2026-10-26):** data sẵn sàng sau **0.541 s** (snapshot
+  thường) / **0.578 s** (601 menu); JSON + decompress + replace chỉ **53–62 ms**;
+  `OnDataSyncToNewClient` **0.995 / 1.066 s**. Snapshot 601 menu nén **12,685 B / 4 chunk**;
+  host và client có JSON hash giống hệt `39A40EB1C19887EE4DC4D273`. **Mục 02 KHÔNG LÀM**.
 - **Bandwidth (UTP `NetworkDriver.GetStatistics()`):**
   - di chuyển, cửa sổ 12.00 s/editor: host **50.87 / 13.98 KB/s** (Tx/Rx); P2 **7.93 / 12.54**;
     P3 **8.36 / 12.57**; P4 **7.39 / 11.23**. Tổng hai chiều mỗi client **18.6–20.9 KB/s**.
@@ -343,9 +349,9 @@ Chưa commit `DailyCooking/Assets/GooglePlayGames/.../current-build/` (untracked
     **10.14 / 2.51 KB/s**; P2 **0.82 / 2.57**; P3 **0.88 / 3.75**; P4 **0.93 / 4.17**.
     Tổng hai chiều mỗi client **3.4–5.1 KB/s**.
   - Cả hai đều dưới ngưỡng **100 KB/s/client**; đây là Editor/MPPM, chưa phải Player build.
-- **EditMode:** xoá probe → refresh sạch **0 error / 0 warning**; `run_tests(EditMode)`
-  **49/49 passed**, 0 failed, 0 skipped (**1.109 s**) sau fix `Player.prefab`.
-- **Console:** 3 client **0/0**; host có 1 NRE nội bộ MPPM (`MainPlayerSystems.Listen`),
-  không phải game code, clear console rồi không lặp lại.
-- **Chưa kiểm:** bandwidth/GC trên Android/Player build; tách snapshot phase thành
-  RPC/decompress/JSON.
+- **EditMode:** xoá probe + revert instrumentation → refresh sạch **0 error / 0 warning** trên
+  cả 4 editor; `run_tests(EditMode)` **49/49 passed**, 0 failed, 0 skipped (**1.16 s**).
+- **Console:** 3 client **0/0**; trong lúc join host có 1 NRE nội bộ MPPM
+  (`MainPlayerSystems.Listen`), không phải game code, clear console rồi không lặp lại.
+- **Chưa kiểm:** bandwidth/GC trên Android/Player build. Snapshot đã tách phase; nếu muốn giảm
+  thời gian join UX thì điều tra `OnDataSyncToNewClient`/TMP, không phải mục 02.
