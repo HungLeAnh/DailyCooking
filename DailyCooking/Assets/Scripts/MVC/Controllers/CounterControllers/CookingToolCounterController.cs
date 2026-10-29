@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class CookingToolCounterController : ClearCounterController, IHasOptionalSO, IHasProgress
 {
-    [SerializeField] private List<CookingToolConfigSO.CookingToolType> acceptedToolTypes = new List<CookingToolConfigSO.CookingToolType>();
-
     private CookingTool _cookingTool;
 
     public bool HasToolInstalled() => TryResolveTool();
@@ -120,8 +118,16 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
                     else
                     {
                         _cookingTool.SetCookingRecipeSO();
-                        if (_cookingTool.HasValidRecipe())
+                        if (_cookingTool.IsCuttingActive)
+                        {
+                            // Cutting progresses one click at a time; the timed state would
+                            // auto-advance the bar and play the cooking sizzle.
+                            _cookingTool.UpdateCookingState(CookingTool.State.Idle);
+                        }
+                        else if (_cookingTool.HasValidRecipe())
+                        {
                             _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
+                        }
                     }
                 }
             }
@@ -175,12 +181,16 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         return TryResolveTool() && _cookingTool.IsDone();
     }
 
-    // Server: the actor picked a combine option for the food waiting in the tool.
+    // Server: the actor picked a cutting or combine option for the food waiting in the tool.
     public void ApplyOption(PlayerStateMachine actor, int index)
     {
         if (!TryResolveTool() || _cookingTool.CurrentState != CookingTool.State.Idle)
             return;
-        if (_cookingTool.ApplyOption(index) && _cookingTool.CookingTimeMax > 0f)
+        if (!_cookingTool.ApplyOption(index))
+            return;
+        if (_cookingTool.IsCuttingActive)
+            _cookingTool.UpdateCookingState(CookingTool.State.Idle);
+        else if (_cookingTool.CookingTimeMax > 0f)
             _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
     }
 

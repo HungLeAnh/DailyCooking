@@ -30,7 +30,7 @@ public enum UpgradeType
 public enum UpgradeTarget
 {
     MoveSpeed,
-    CookingSpeed,
+    CuttingSpeed,
     CarryingCapacity,
     TipIncrease,
     ExpansionRestaurant,

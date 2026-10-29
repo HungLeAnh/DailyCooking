@@ -16,8 +16,19 @@ public class CombineDetailUI : MonoBehaviour
         _container.SetActive(false);
     }
 
+    public void Hide()
+    {
+        if (_container != null)
+            _container.SetActive(false);
+    }
+
     public void InitUI(CombineRecipeSO combineRecipeSO)
     {
+        if (combineRecipeSO == null)
+        {
+            Hide();
+            return;
+        }
         _container.SetActive(true);
 
         foreach (var gameObject in foodIngredientIconGOList)

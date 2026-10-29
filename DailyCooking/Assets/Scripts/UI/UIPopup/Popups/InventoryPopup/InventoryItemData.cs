@@ -18,11 +18,19 @@ public class InventoryItemData
     }
     public static InventoryItemData CreateInventoryItem(string id)
     {     
-        Debug.Log("CreateInventoryItem: " + id);
+        if (string.IsNullOrEmpty(id) || GridBuildingSystem.Instance == null)
+        {
+            Debug.LogError("CreateInventoryItem: invalid inventory id or GridBuildingSystem is not ready: " + id);
+            return null;
+        }
+
         var placeObjectTypeSO = GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(id);
-        if(placeObjectTypeSO == null) 
+        if (placeObjectTypeSO == null)
+        {
             Debug.LogError("CreateInventoryItem: placeObjectTypeSO is null for id: " + id);
-        var inventoryItem = new InventoryItemData(placeObjectTypeSO.Guid, placeObjectTypeSO.itemType.TabType);
-        return inventoryItem;
+            return null;
+        }
+
+        return new InventoryItemData(placeObjectTypeSO.Guid, placeObjectTypeSO.itemType.TabType);
     }
 }

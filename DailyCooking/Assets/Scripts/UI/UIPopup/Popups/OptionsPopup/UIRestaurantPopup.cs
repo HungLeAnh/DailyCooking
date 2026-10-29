@@ -140,7 +140,7 @@ public class UIRestaurantPopup : UIPopup
         PlayerStats stats = gameData.GetPlayerStatsById(SessionManager.Instance.PlayerId);
         if (stats == null) return;
         moveSpeedText.text = stats.MoveSpeed.ToString("F2");
-        cookingSpeedText.text = stats.CookingSpeed.ToString("F2");
+        cookingSpeedText.text = stats.CuttingSpeed.ToString("F2");
         carryingCapacityText.text = stats.CarryingCapacity.ToString();
         tipIncreaseText.text = stats.TipIncrease.ToString("F2") + "%";
     }

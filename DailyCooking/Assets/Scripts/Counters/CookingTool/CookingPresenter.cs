@@ -24,7 +24,8 @@ public sealed class CookingPresenter
         _progress = progress;
         _burnUI = burnUI;
         _combineUI = combineUI;
-        _burnThreshold = burnThreshold;
+        _burnThreshold = Mathf.Clamp01(burnThreshold);
+        _burnUI?.SetThreshold(_burnThreshold);
     }
 
     public void Reset()
@@ -33,16 +34,20 @@ public sealed class CookingPresenter
         _posCached = false;
     }
 
-    public void HideAll(ProgressBarUI progress, BurnWarningUI burnUI)
-    {
-        progress?.Hide();
-        burnUI?.Hide();
-    }
-
     public void OnCombineResolved(CombineRecipeSO recipe)
     {
+        if (recipe == null)
+        {
+            HideCombineDetail();
+            return;
+        }
         if (_combineUI != null)
             _combineUI.InitUI(recipe);
+    }
+
+    public void HideCombineDetail()
+    {
+        _combineUI?.Hide();
     }
 
     public void OnStateChanged(CookingTool.State state, Vector3 pos)
@@ -50,6 +55,11 @@ public sealed class CookingPresenter
         _cachedPos = pos;
         _posCached = true;
         _lastShown = -1f;
+        if (state == CookingTool.State.Idle || state == CookingTool.State.Burned ||
+            state == CookingTool.State.Cooked)
+        {
+            HideCombineDetail();
+        }
         if (state == CookingTool.State.Idle || state == CookingTool.State.Burned)
         {
             SoundManager.Instance.StopSound(_cookingSound);

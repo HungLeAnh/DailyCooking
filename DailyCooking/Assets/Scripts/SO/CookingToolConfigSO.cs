@@ -18,16 +18,6 @@ public class CookingToolConfigSO : ScriptableObject
     [Tooltip("Set multiple (e.g. DeepFry + Combine) for tools like the Pot.")]
     public List<CookingToolType> toolTypes = new List<CookingToolType>();
 
-    public List<CookingToolType> EffectiveToolTypes
-    {
-        get
-        {
-            if (toolTypes != null && toolTypes.Count > 0)
-                return toolTypes;
-            return new List<CookingToolType>();
-        }
-    }
-
     public bool Supports(CookingToolType type)
     {
         return toolTypes != null && toolTypes.Contains(type);

@@ -22,7 +22,7 @@ public static class BuildChecks
     private static readonly (string Name, int Value)[] PinnedShopItemCategory =
     {
         ("Counters", 0), ("Tables", 1), ("Walls", 2), ("Vegetables", 3),
-        ("Bakery", 4), ("Dairy", 5), ("Patties", 6), ("Meats", 7), ("None", 9999),
+        ("Bakery", 4), ("Dairy", 5), ("Patties", 6), ("Meats", 7), ("Tools", 8), ("None", 9999),
     };
 
     private static readonly (string Name, int Value)[] PinnedShopItemType =
@@ -38,6 +38,7 @@ public static class BuildChecks
         public void OnPreprocessBuild(BuildReport report)
         {
             VerifyPinnedEnums();
+            VerifyPlacedObjectGuids();
         }
     }
 
@@ -68,6 +69,66 @@ public static class BuildChecks
                          "value in ConfigShopSO.asset, prefabs, scenes and the network payload. " +
                         "If this change is intentional, append the new value and update the " +
                         "snapshot in BuildChecks.cs in the same commit.";
+        if (Application.isBatchMode)
+            throw new BuildFailedException(message);
+        Debug.LogError(message);
+    }
+
+    [MenuItem("Tools/Build Checks/Verify Placed Object GUIDs")]
+    public static void VerifyPlacedObjectGuidsMenuItem()
+    {
+        VerifyPlacedObjectGuids();
+    }
+
+    // PlacedObjectTypeSO stores a copy of its asset GUID; inventory and shop rewards use
+    // that copy as the key. An empty/stale copy makes a purchased item disappear after the
+    // coins are spent, so fail the build before it can ship.
+    public static void VerifyPlacedObjectGuids()
+    {
+        List<string> problems = new List<string>();
+        Dictionary<string, PlacedObjectTypeSO> placedObjects =
+            new Dictionary<string, PlacedObjectTypeSO>();
+
+        foreach (string assetGuid in AssetDatabase.FindAssets("t:PlacedObjectTypeSO", new[] { "Assets/SO/BuildingSO" }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(assetGuid);
+            PlacedObjectTypeSO placedObject = AssetDatabase.LoadAssetAtPath<PlacedObjectTypeSO>(path);
+            if (placedObject == null)
+                continue;
+
+            if (string.IsNullOrEmpty(placedObject.Guid))
+                problems.Add($"{path}: _guid is empty (asset guid is {assetGuid}).");
+            else
+            {
+                if (placedObject.Guid != assetGuid)
+                    problems.Add($"{path}: _guid {placedObject.Guid} does not match asset guid {assetGuid}.");
+                placedObjects[placedObject.Guid] = placedObject;
+            }
+        }
+
+        ConfigShop shop = AssetDatabase.LoadAssetAtPath<ConfigShop>(
+            "Assets/Configs/ConfigShop/ConfigShopSO.asset");
+        if (shop != null && shop.ShopItems != null)
+        {
+            foreach (ConfigShopItem item in shop.ShopItems)
+            {
+                if (item == null || item.Type != ShopItemType.Item || item.Rewards == null)
+                    continue;
+                foreach (ShopReward reward in item.Rewards)
+                {
+                    if (string.IsNullOrEmpty(reward.Guid) || !placedObjects.ContainsKey(reward.Guid))
+                        problems.Add($"Shop item {item.Id} ({item.Name}): reward guid '{reward.Guid}' does not resolve.");
+                }
+            }
+        }
+
+        if (problems.Count == 0)
+        {
+            Debug.Log("[BuildChecks] Placed object GUIDs and shop rewards resolve.");
+            return;
+        }
+
+        string message = "[BuildChecks] Invalid placed object GUIDs:\n  " + string.Join("\n  ", problems);
         if (Application.isBatchMode)
             throw new BuildFailedException(message);
         Debug.LogError(message);

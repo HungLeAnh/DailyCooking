@@ -104,6 +104,7 @@ public class UIShopItem : MonoBehaviour
             case ShopItemCategory.Counters :
             case ShopItemCategory.Tables:
             case ShopItemCategory.Walls:
+            case ShopItemCategory.Tools:
 
                 // PlacedObjectTypeSODictionary is built from PlacedObjectDatabase.PlacedObjects
                 // (GridBuildingSystem.cs:86-88), so use it instead of scanning the list again.

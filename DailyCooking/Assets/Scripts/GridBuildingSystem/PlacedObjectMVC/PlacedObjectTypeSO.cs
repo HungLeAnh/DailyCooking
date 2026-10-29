@@ -29,10 +29,6 @@ public class PlacedObjectTypeSO : SerializableScriptableObject
     [Tooltip("The type of item")]
     public ItemType itemType = default;
 
-    [Header("Cooking Tool")]
-    [Tooltip("Optional. When set, this appliance hosts the single CookingTool with the chosen recipe lists.")]
-    public CookingToolConfigSO cookingToolConfigSO;
-
     [Header("Tool Item")]
     [Tooltip("True when this PlacedObjectTypeSO represents a carryable cooking tool (sold in shop, stored, placed on counters). Every tool must sit on one of the allowed counters below.")]
     public bool isTool;

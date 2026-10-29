@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 4286304823402038373}
   - component: {fileID: 9166071045143958725}
   - component: {fileID: 7851957273285177182}
-  m_Layer: 0
+  - component: {fileID: 7593845620174839201}
+  m_Layer: 6
   m_Name: Cutting_board
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 4, y: 1, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3112621484202335087}
@@ -90,6 +91,28 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &7593845620174839201
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8754266411532224104}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -4505545555416900872, guid: dc61fa6af07bef34aa6fb9e64717ceee, type: 3}
 --- !u!1001 &8300010000000000001
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -176,7 +199,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9202884289748628511, guid: 4a801dc69a4e67a4ca1b6a934b352653, type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 3420389973
+      value: 3312249582
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

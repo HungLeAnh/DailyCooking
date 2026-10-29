@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 [System.Serializable]
 public class PlayerStats
@@ -9,14 +10,16 @@ public class PlayerStats
 
     private string playerId;
     private float moveSpeed = 5f;
-    private float cookingSpeed = 1f;
+    private float cuttingSpeed = 1f;
     private int carryingCapacity = 1;
     private float tipIncrease = 0f;
     private Dictionary<string, int> characterCustomizationIds = new Dictionary<string, int>();
 
     public string PlayerId { get => playerId; set => playerId = value; }
     public float MoveSpeed { get => moveSpeed; set => moveSpeed = value; }
-    public float CookingSpeed { get => cookingSpeed; set => cookingSpeed = value; }
+    // Kept as "CookingSpeed" in save files so existing saves still load.
+    [JsonProperty("CookingSpeed")]
+    public float CuttingSpeed { get => cuttingSpeed; set => cuttingSpeed = value; }
     public int CarryingCapacity { get => carryingCapacity; set => carryingCapacity = value; }
     public float TipIncrease { get => tipIncrease; set => tipIncrease = value; }
     public Dictionary<string, int> CharacterCustomizationIds { get => characterCustomizationIds; set => characterCustomizationIds = value; }
@@ -32,9 +35,9 @@ public class PlayerStats
         OnResourceChange?.Invoke();
 
     }
-    public void UpdatePlayerCookingSpeed(float amount)
+    public void UpdatePlayerCuttingSpeed(float amount)
     {
-        CookingSpeed += CookingSpeed * amount;
+        CuttingSpeed += CuttingSpeed * amount;
         OnResourceChange?.Invoke();
 
     }

@@ -1,4 +1,6 @@
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 public class InventoryDataTests
 {
@@ -52,5 +54,14 @@ public class InventoryDataTests
         inv.Add(MakeItem("a"), 2);
         inv.Add(MakeItem("b"), 3);
         Assert.AreEqual(5, inv.GetNumberOfItems());
+    }
+    [Test] public void Add_UnknownGuid_DoesNotThrowOrAdd()
+    {
+        var inv = new InventoryData();
+        inv.Init();
+        LogAssert.Expect(LogType.Error,
+            "CreateInventoryItem: invalid inventory id or GridBuildingSystem is not ready: missing-guid");
+        Assert.DoesNotThrow(() => inv.Add("missing-guid"));
+        Assert.AreEqual(0, inv.Items.Count);
     }
 }

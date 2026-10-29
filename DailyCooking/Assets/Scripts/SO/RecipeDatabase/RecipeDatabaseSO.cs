@@ -13,7 +13,7 @@ public class RecipeDatabaseSO : ScriptableObject
     [SerializeField] private List<DeepFryRecipeSO> deepFryRecipes;
     [SerializeField] private List<DrinkRecipeSO> drinkRecipes;
 
-    private Dictionary<KitchenObjectSO, CuttingRecipeSO> _cuttingCache;
+    private Dictionary<KitchenObjectSO, List<CuttingRecipeSO>> _cuttingCache;
     private Dictionary<KitchenObjectSO, FryingRecipeSO> _fryingCache;
     private Dictionary<KitchenObjectSO, BurningRecipeSO> _burningCache;
     private Dictionary<KitchenObjectSO, List<CombineRecipeSO>> _combineCache;
@@ -24,10 +24,25 @@ public class RecipeDatabaseSO : ScriptableObject
 
     public void Initialize()
     {
-        _cuttingCache = new Dictionary<KitchenObjectSO, CuttingRecipeSO>();
+        // One input may offer several outputs (Potato -> Chopped or Mashed). They are
+        // selected through the cutting option menu; only the same input/output pair is
+        // treated as a data error.
+        _cuttingCache = new Dictionary<KitchenObjectSO, List<CuttingRecipeSO>>();
         foreach (var recipe in cuttingRecipes)
         {
-            _cuttingCache[recipe.input] = recipe;
+            if (recipe == null || recipe.input == null || recipe.output == null)
+                continue;
+            if (!_cuttingCache.TryGetValue(recipe.input, out var list))
+            {
+                list = new List<CuttingRecipeSO>();
+                _cuttingCache[recipe.input] = list;
+            }
+            if (list.Exists(existing => existing.output == recipe.output))
+            {
+                Debug.LogError($"[RecipeDatabase] Duplicate cutting recipe '{recipe.input.name} -> {recipe.output.name}'; keeping the first entry.");
+                continue;
+            }
+            list.Add(recipe);
         }
 
         _fryingCache = new Dictionary<KitchenObjectSO, FryingRecipeSO>();
@@ -87,8 +102,16 @@ public class RecipeDatabaseSO : ScriptableObject
 
     public CuttingRecipeSO GetCuttingRecipe(KitchenObjectSO input)
     {
-        _cuttingCache.TryGetValue(input, out var recipe);
-        return recipe;
+        if (input != null && _cuttingCache.TryGetValue(input, out var recipes) && recipes.Count > 0)
+            return recipes[0];
+        return null;
+    }
+
+    public List<CuttingRecipeSO> GetCuttingRecipesForInput(KitchenObjectSO input)
+    {
+        if (input == null || !_cuttingCache.TryGetValue(input, out var recipes))
+            return null;
+        return recipes;
     }
 
     public FryingRecipeSO GetFryingRecipe(KitchenObjectSO input)

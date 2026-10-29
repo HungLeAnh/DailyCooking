@@ -1,4 +1,5 @@
 using Unity.Netcode;
+using UnityEngine;
 
 // Restaurant economy. Clients only send intents ("buy shop item 7"); the server looks prices
 // up in config, checks the balance, applies the change to its own GameData (the save) and
@@ -95,6 +96,27 @@ public partial class GameManager
         }
         if (item.Type == ShopItemType.Ingredient && GridBuildingSystem.Instance?.PostBox == null)
             return;
+        if (item.Rewards == null || item.Rewards.Count == 0)
+        {
+            AlertClient(sender, "This item is not configured correctly.");
+            Debug.LogError($"BuyShopItemServerRpc: shop item {item.Id} has no rewards.");
+            return;
+        }
+        // Validate every reward before spending so a broken asset cannot charge the player.
+        foreach (ShopReward reward in item.Rewards)
+        {
+            bool valid = item.Type == ShopItemType.Item
+                ? GridBuildingSystem.Instance != null &&
+                  GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(reward.Guid) != null
+                : KitchenGameManager.Instance != null &&
+                  KitchenGameManager.Instance.GetKitchenObjectSOByGuid(reward.Guid) != null;
+            if (valid)
+                continue;
+
+            AlertClient(sender, "This item is not configured correctly.");
+            Debug.LogError($"BuyShopItemServerRpc: shop item {item.Id} ({item.Name}) has invalid reward guid '{reward.Guid}' ({item.Type}).");
+            return;
+        }
         if (!TrySpendCoins(item.Price))
         {
             AlertClient(sender, "Not enough money to buy this item.");
@@ -217,8 +239,8 @@ public partial class GameManager
             case UpgradeTarget.MoveSpeed:
                 stats.UpdatePlayerMoveSpeed(amount);
                 break;
-            case UpgradeTarget.CookingSpeed:
-                stats.UpdatePlayerCookingSpeed(amount);
+            case UpgradeTarget.CuttingSpeed:
+                stats.UpdatePlayerCuttingSpeed(amount);
                 break;
             case UpgradeTarget.CarryingCapacity:
                 stats.UpdatePlayerCarryingCapacity(amount);

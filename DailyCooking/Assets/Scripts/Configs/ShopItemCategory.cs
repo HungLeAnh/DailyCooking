@@ -23,5 +23,6 @@ public enum ShopItemCategory
     [InspectorName("Dairy (5)")] Dairy = 5,
     [InspectorName("Patties (6)")] Patties = 6,
     [InspectorName("Meats (7)")] Meats = 7,
+    [InspectorName("Tools (8)")] Tools = 8,
     [InspectorName("None (9999)")] None = 9999
 }

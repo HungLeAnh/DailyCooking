@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
+using UnityEngine;
 
 // Server-authoritative restaurant data the clients can change: name, menu, inventory, PostBox
 // and the owning player's customization.
@@ -62,6 +63,12 @@ public partial class GameManager
     public void ServerAddInventory(string guid)
     {
         if (!IsServer || GameData == null || string.IsNullOrEmpty(guid)) return;
+        if (GridBuildingSystem.Instance == null ||
+            GridBuildingSystem.Instance.GetPlacedObjectTypeSOByGuid(guid) == null)
+        {
+            Debug.LogError($"ServerAddInventory: no PlacedObjectTypeSO for guid '{guid}'. Reward was not added.");
+            return;
+        }
         GameData.AddInventoryData(guid);
         AddInventoryDataClientRpc(guid);
     }

@@ -21,7 +21,7 @@ public class InventoryData
 
     public void Add(InventoryItemData item, int count = 1)
     {
-        if (count <= 0)
+        if (item == null || count <= 0)
             return;
 
         for (int i = 0; i < _items.Count; i++)
@@ -54,7 +54,11 @@ public class InventoryData
             }
         }
 
-        _items.Add(new ItemStack(InventoryItemData.CreateInventoryItem(id), count));
+        var item = InventoryItemData.CreateInventoryItem(id);
+        if (item == null)
+            return;
+
+        _items.Add(new ItemStack(item, count));
         OnInventoryDataChanged?.Invoke();
     }
 

@@ -15,6 +15,7 @@ public sealed class RecipeResolver
     private DrinkRecipeSO _drink;
     private CombineRecipeSO _combine;
     private CuttingRecipeSO _cutting;
+    private List<CuttingRecipeSO> _cuttingOptions;
     private BurningRecipeSO _burning;
 
     private bool _lookupDone;
@@ -65,14 +66,12 @@ public sealed class RecipeResolver
         _drink = null;
         _combine = null;
         _cutting = null;
+        _cuttingOptions = null;
+        _burning = null;
         CookingTimeMax = 0f;
+        BurningTimeMax = 0f;
         _lookupDone = false;
         _burningResolved = false;
-        _appliedCombineIndex = -2;
-    }
-
-    public void ResetCombine()
-    {
         _appliedCombineIndex = -2;
     }
 
@@ -128,6 +127,7 @@ public sealed class RecipeResolver
         _deepFry = null;
         _drink = null;
         _cutting = null;
+        _cuttingOptions = null;
         CookingTimeMax = 0f;
         _lookupDone = true;
         if (_config == null || input == null || KitchenGameManager.Instance.RecipeDatabase == null)
@@ -155,7 +155,8 @@ public sealed class RecipeResolver
                 case CookingToolConfigSO.CookingToolType.Combine:
                     break;
                 case CookingToolConfigSO.CookingToolType.Cutting:
-                    _cutting = KitchenGameManager.Instance.RecipeDatabase.GetCuttingRecipe(input);
+                    _cuttingOptions = KitchenGameManager.Instance.RecipeDatabase.GetCuttingRecipesForInput(input);
+                    _cutting = _cuttingOptions != null && _cuttingOptions.Count > 0 ? _cuttingOptions[0] : null;
                     if (_cutting != null) { CookingTimeMax = _cutting.cuttingProgressMax; return; }
                     break;
             }
@@ -167,6 +168,47 @@ public sealed class RecipeResolver
         if (_lookupDone)
             return;
         ResolveFor(input);
+    }
+
+    public List<CuttingRecipeSO> GetCuttingOptions(KitchenObjectSO input)
+    {
+        if (!Supports(CookingToolConfigSO.CookingToolType.Cutting) ||
+            input == null || KitchenGameManager.Instance.RecipeDatabase == null)
+            return null;
+        return KitchenGameManager.Instance.RecipeDatabase.GetCuttingRecipesForInput(input);
+    }
+
+    public bool HasCuttingOptions(KitchenObjectSO input)
+    {
+        List<CuttingRecipeSO> options = GetCuttingOptions(input);
+        return options != null && options.Count > 0;
+    }
+
+    public bool RequiresCuttingChoice(KitchenObjectSO input)
+    {
+        List<CuttingRecipeSO> options = GetCuttingOptions(input);
+        return options != null && options.Count > 1;
+    }
+
+    public bool ApplyCuttingOption(KitchenObjectSO input, int index)
+    {
+        if (!Supports(CookingToolConfigSO.CookingToolType.Cutting) ||
+            input == null || index < 0 || KitchenGameManager.Instance.RecipeDatabase == null)
+            return false;
+        List<CuttingRecipeSO> options =
+            KitchenGameManager.Instance.RecipeDatabase.GetCuttingRecipesForInput(input);
+        if (options == null || index >= options.Count || options[index] == null)
+            return false;
+        _frying = null;
+        _baking = null;
+        _deepFry = null;
+        _drink = null;
+        _combine = null;
+        _cuttingOptions = options;
+        _cutting = options[index];
+        CookingTimeMax = _cutting.cuttingProgressMax;
+        _lookupDone = true;
+        return true;
     }
 
     public void ResolveBurning(KitchenObjectSO input)
