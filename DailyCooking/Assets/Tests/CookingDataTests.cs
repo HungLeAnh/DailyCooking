@@ -6,6 +6,11 @@ using UnityEngine;
 public class CookingDataTests
 {
     private const string CuttingBoardPath = "Assets/SO/BuildingSO/Counters/Tools/CuttingBoard.asset";
+    private const string OvenPath = "Assets/SO/BuildingSO/Counters/Tools/Oven.asset";
+    private const string OvenConfigPath = "Assets/SO/CookingToolConfigSO/Oven.asset";
+    private const string OvenPrefabPath = "Assets/Prefab/CookingTool/OvenCookingTool.prefab";
+    private const string PlacedObjectDatabasePath = "Assets/SO/PlacedObjectDatabase/PlacedObjectDatabase.asset";
+    private const string DefaultNetworkPrefabsPath = "Assets/DefaultNetworkPrefabs.asset";
     private const string RecipeDatabasePath = "Assets/SO/RecipeDatabase/RecipeDatabase.asset";
     private const string PotatoPath = "Assets/SO/KitchenObjectSO/PotatoSO.asset";
     private const string ChoppedPotatoPath = "Assets/SO/KitchenObjectSO/PotatoChoppedSO.asset";
@@ -27,6 +32,149 @@ public class CookingDataTests
 
         Assert.IsFalse(string.IsNullOrEmpty(cuttingBoard.Guid));
         Assert.AreEqual(assetGuid, cuttingBoard.Guid);
+    }
+
+    [Test] public void OvenConfig_SupportsBakingOnly()
+    {
+        CookingToolConfigSO config = Load<CookingToolConfigSO>(OvenConfigPath);
+
+        Assert.IsTrue(config.Supports(CookingToolConfigSO.CookingToolType.Baking));
+        Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.Cutting));
+        Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.Combine));
+        Assert.IsFalse(config.supportsOptionMenu);
+    }
+
+    [Test] public void OvenGuid_MatchesAssetGuid()
+    {
+        PlacedObjectTypeSO oven = Load<PlacedObjectTypeSO>(OvenPath);
+        string assetGuid = AssetDatabase.AssetPathToGUID(OvenPath);
+
+        Assert.IsFalse(string.IsNullOrEmpty(oven.Guid));
+        Assert.AreEqual(assetGuid, oven.Guid);
+    }
+
+    [Test] public void Oven_IsToolWithExpectedPlacement()
+    {
+        PlacedObjectTypeSO oven = Load<PlacedObjectTypeSO>(OvenPath);
+
+        Assert.IsTrue(oven.isTool);
+        Assert.AreEqual(1, oven.width);
+        Assert.AreEqual(1, oven.height);
+        Assert.IsNotNull(oven.prefab);
+        Assert.AreEqual("OvenCookingTool", oven.prefab.name);
+    }
+
+    [Test] public void PlacedObjectDatabase_ContainsOven()
+    {
+        PlacedObjectTypeSO oven = Load<PlacedObjectTypeSO>(OvenPath);
+        ScriptableObject database = Load<ScriptableObject>(PlacedObjectDatabasePath);
+        SerializedProperty placeObjects = new SerializedObject(database).FindProperty("placeObjects");
+        bool found = false;
+
+        for (int i = 0; i < placeObjects.arraySize; i++)
+        {
+            if (placeObjects.GetArrayElementAtIndex(i).objectReferenceValue == oven)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        Assert.IsTrue(found, "Oven is missing from PlacedObjectDatabase.");
+    }
+
+    [Test] public void DefaultNetworkPrefabs_ContainsOven()
+    {
+        GameObject ovenPrefab = Load<GameObject>(OvenPrefabPath);
+        ScriptableObject networkPrefabs = Load<ScriptableObject>(DefaultNetworkPrefabsPath);
+        SerializedProperty list = new SerializedObject(networkPrefabs).FindProperty("List");
+        bool found = false;
+
+        for (int i = 0; i < list.arraySize; i++)
+        {
+            SerializedProperty prefab = list.GetArrayElementAtIndex(i).FindPropertyRelative("Prefab");
+            if (prefab != null && prefab.objectReferenceValue == ovenPrefab)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        Assert.IsTrue(found, "Oven is missing from DefaultNetworkPrefabs.");
+    }
+
+    [Test] public void CookingToolPrefabs_HaveUniqueNetworkHashes()
+    {
+        HashSet<int> hashes = new HashSet<int>();
+
+        foreach (string assetGuid in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Prefab/CookingTool" }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(assetGuid);
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            Unity.Netcode.NetworkObject networkObject = prefab != null ? prefab.GetComponent<Unity.Netcode.NetworkObject>() : null;
+            if (networkObject == null)
+                continue;
+
+            SerializedProperty hash = new SerializedObject(networkObject).FindProperty("GlobalObjectIdHash");
+            Assert.IsNotNull(hash, path);
+            Assert.IsTrue(hashes.Add(hash.intValue), $"Duplicate NetworkObject hash in {path}");
+        }
+    }
+
+    [Test] public void OvenPrefab_HasCookingToolAndCollider()
+    {
+        GameObject prefab = Load<GameObject>(OvenPrefabPath);
+        MeshCollider[] colliders = prefab.GetComponentsInChildren<MeshCollider>(true);
+
+        Assert.IsNotNull(prefab.GetComponent<CookingTool>());
+        Assert.Greater(colliders.Length, 0, "Oven has no MeshCollider.");
+        foreach (MeshCollider collider in colliders)
+            Assert.IsTrue(collider.convex, $"{collider.name} collider must be convex.");
+    }
+
+    [Test] public void RecipeDatabase_BakingRecipesAreComplete()
+    {
+        RecipeDatabaseSO database = Load<RecipeDatabaseSO>(RecipeDatabasePath);
+        SerializedProperty recipes = new SerializedObject(database).FindProperty("bakingRecipes");
+        database.Initialize();
+
+        Assert.GreaterOrEqual(recipes.arraySize, 7, "Expected all baking recipes in the database.");
+        for (int i = 0; i < recipes.arraySize; i++)
+        {
+            BakingRecipeSO recipe = recipes.GetArrayElementAtIndex(i).objectReferenceValue as BakingRecipeSO;
+            Assert.IsNotNull(recipe, $"Baking recipe {i} is null.");
+            Assert.IsNotNull(recipe.input, $"{recipe.name} has no input.");
+            Assert.IsNotNull(recipe.output, $"{recipe.name} has no output.");
+            Assert.Greater(recipe.bakingTimerMax, 0f, $"{recipe.name} has no timer.");
+            Assert.AreSame(recipe, database.GetBakingRecipe(recipe.input), recipe.name);
+            Assert.IsNotNull(database.GetBurningRecipe(recipe.output), $"{recipe.name}: output has no burning recipe.");
+        }
+    }
+
+    [Test] public void ShopItem37_UsesOvenToolReward()
+    {
+        ConfigShop shop = Load<ConfigShop>(ShopPath);
+        PlacedObjectTypeSO oven = Load<PlacedObjectTypeSO>(OvenPath);
+        ConfigShopItem item = null;
+
+        foreach (ConfigShopItem candidate in shop.ShopItems)
+        {
+            if (candidate != null && candidate.Id == 37)
+            {
+                item = candidate;
+                break;
+            }
+        }
+
+        Assert.IsNotNull(item, "Missing shop item 37.");
+        Assert.AreEqual("Oven Tool", item.Name);
+        Assert.AreEqual(ShopItemCategory.Tools, item.Category);
+        Assert.AreEqual(ShopItemType.Item, item.Type);
+        Assert.AreEqual(200, item.Price);
+        Assert.AreEqual(3, item.UnlockLevel);
+        Assert.IsNotNull(item.Rewards);
+        Assert.AreEqual(1, item.Rewards.Count);
+        Assert.AreEqual(oven.Guid, item.Rewards[0].Guid);
     }
 
     [Test] public void RecipeDatabase_PotatoResolvesToChoppedPotato()
