@@ -118,10 +118,12 @@ public class GridXZ<TGridObject> {
         return new Vector3(position.x, 0, position.y) * cellSize + originPosition;
     }
 
+    // World positions are cell corners (GetWorldPosition), so use floor to map any point
+    // inside a cell to that cell. Round-to-nearest sends centres/edges to the next cell.
     public void GetXZ(Vector3 worldPosition, out int x, out int z) 
     {
-        x = Mathf.RoundToInt((worldPosition - originPosition).x / cellSize);
-        z = Mathf.RoundToInt((worldPosition - originPosition).z / cellSize);
+        x = Mathf.FloorToInt((worldPosition - originPosition).x / cellSize);
+        z = Mathf.FloorToInt((worldPosition - originPosition).z / cellSize);
         if (x < 0)
             x = 0;       
         if (x >= widthMax)
@@ -136,8 +138,8 @@ public class GridXZ<TGridObject> {
     // Like GetXZ, but reports positions outside the grid instead of clamping them onto the edge.
     public bool TryGetXZ(Vector3 worldPosition, out int x, out int z)
     {
-        x = Mathf.RoundToInt((worldPosition - originPosition).x / cellSize);
-        z = Mathf.RoundToInt((worldPosition - originPosition).z / cellSize);
+        x = Mathf.FloorToInt((worldPosition - originPosition).x / cellSize);
+        z = Mathf.FloorToInt((worldPosition - originPosition).z / cellSize);
         return x >= 0 && z >= 0 && x < widthMax && z < heightMax;
     }
 

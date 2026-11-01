@@ -41,6 +41,34 @@ public class GridPlacementTests
         Assert.IsFalse(grid.TryGetXZ(new Vector3(0f, 0f, 20f), out _, out _));
     }
 
+    [Test] public void TryGetXZ_MapsPointsInsideCellToOwningCell()
+    {
+        var grid = new GridXZ<GridObject>(0, 0, 2f, new Vector3(3f, 0f, 2f),
+            (g, x, z) => new List<GridObject> { new GridObject(g, x, z) });
+        grid.SetSize(8, 8, 8, 8);
+
+        for (int x = 0; x < 8; x++)
+        {
+            for (int z = 0; z < 8; z++)
+            {
+                Vector3 corner = grid.GetWorldPosition(x, z);
+                Vector3[] points =
+                {
+                    corner,
+                    corner + new Vector3(0.1f, 0f, 0.1f),
+                    corner + new Vector3(1f, 0f, 1f),
+                    corner + new Vector3(1.9f, 0f, 1.9f),
+                };
+                foreach (Vector3 point in points)
+                {
+                    Assert.IsTrue(grid.TryGetXZ(point, out int resolvedX, out int resolvedZ), $"{point}");
+                    Assert.AreEqual(x, resolvedX, $"x for {point}");
+                    Assert.AreEqual(z, resolvedZ, $"z for {point}");
+                }
+            }
+        }
+    }
+
     [Test] public void IsCellUnlocked_MatchesFloorRule()
     {
         var grid = CreateGrid(10);

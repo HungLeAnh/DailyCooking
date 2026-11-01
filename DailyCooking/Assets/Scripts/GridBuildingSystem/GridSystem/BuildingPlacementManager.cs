@@ -41,10 +41,9 @@ public class BuildingPlacementManager : IBuildingPlacementManager
     {
         if (placedObjectTypeSO == null) return false;
 
-        Vector3 roundedPos = new Vector3(Mathf.RoundToInt(interactPos.x),
-                                Mathf.RoundToInt(interactPos.y),
-                                Mathf.RoundToInt(interactPos.z));
-        if (!gridManager.Grid.TryGetXZ(roundedPos, out int x, out int z))
+        // interactPos is a cell corner for counters and a top-slot centre for tools; floor
+        // mapping in TryGetXZ resolves either point to the cell that contains it.
+        if (!gridManager.Grid.TryGetXZ(interactPos, out int x, out int z))
             return false;
 
         Vector2Int placedObjectOrigin = new Vector2Int(x, z);
@@ -107,9 +106,7 @@ public class BuildingPlacementManager : IBuildingPlacementManager
         Ray ray = UtilsClass.MainCamera.ScreenPointToRay(GameInput.Instance.GetClickPosition());
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f))
         {     
-            gridManager.GetXZ(new Vector3(Mathf.RoundToInt(raycastHit.point.x),
-                                    Mathf.RoundToInt(raycastHit.point.y),
-                                    Mathf.RoundToInt(raycastHit.point.z)), out int x, out int z);
+            gridManager.GetXZ(raycastHit.point, out int x, out int z);
             Vector2Int placedObjectOrigin = new Vector2Int(x, z);
             placedObjectOrigin = gridManager.ValidateGridPosition(placedObjectOrigin);
             if (placedObjectTypeSO != null)

@@ -68,12 +68,8 @@ public class GridManager : IGridManager
 
     public int2 WorldPositionToGridPos(float x, float y)
     {
-        if(grid.ValidateGridPosition(new Vector2Int(Mathf.RoundToInt(x), Mathf.RoundToInt(y))) != null)
-        {
-            grid.GetXZ(new Vector3(Mathf.RoundToInt(x), 0, Mathf.RoundToInt(y)), out int xPos, out int yPos);
-            return new int2(xPos, yPos);
-        }
-        return  new int2(-int.MaxValue, -int.MaxValue);
+        grid.GetXZ(new Vector3(x, 0, y), out int xPos, out int yPos);
+        return new int2(xPos, yPos);
     }
 
     public Vector3 GridPositionToWorldPosition(int2 int2)

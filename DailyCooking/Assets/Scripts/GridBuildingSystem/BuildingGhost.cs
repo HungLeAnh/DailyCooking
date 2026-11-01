@@ -302,7 +302,7 @@ public class BuildingGhost : NetworkSingleton<BuildingGhost>
         if (placedObjectTypeSO == null || !placedObjectTypeSO.isTool) return;
         GridBuildingSystem gbs = GridBuildingSystem.Instance;
         if (gbs == null || gbs.GridManager == null) return;
-        gbs.GridManager.GetXZ(new Vector3(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y), Mathf.RoundToInt(pos.z)), out int x, out int z);
+        gbs.GridManager.GetXZ(pos, out int x, out int z);
         Vector2Int origin = gbs.GridManager.ValidateGridPosition(new Vector2Int(x, z));
         if (ToolSlotResolver.TryFindUnderlyingCounter(gbs.GridManager.Grid, placedObjectTypeSO, origin, out PlacedObjectView counterView) &&
             ToolSlotResolver.TryGetToolSlotPosition(counterView, origin, out Vector3 slotPos))
