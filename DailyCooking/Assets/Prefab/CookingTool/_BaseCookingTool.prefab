@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 9202884289748628511}
   - component: {fileID: -4974422150347824267}
   - component: {fileID: 4487132799419500801}
+  - component: {fileID: 9043855787257887650}
   m_Layer: 0
   m_Name: _BaseCookingTool
   m_TagString: Untagged
@@ -83,10 +84,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
   GlobalObjectIdHash: 2860414876
   InScenePlacedSourceGlobalObjectIdHash: 0
+  m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 1
   SpawnWithObservers: 1
@@ -126,6 +129,26 @@ MonoBehaviour:
   burnShowProgressAmount: 0.5
   combineDetailUI: {fileID: 7607826310878232945}
   cookingToolConfig: {fileID: 0}
+--- !u!114 &9043855787257887650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3835830830082720915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 1
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffffi
 --- !u!1001 &4211775579329258646
 PrefabInstance:
   m_ObjectHideFlags: 0
