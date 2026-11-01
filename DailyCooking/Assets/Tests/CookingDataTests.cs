@@ -9,6 +9,12 @@ public class CookingDataTests
     private const string OvenPath = "Assets/SO/BuildingSO/Counters/Tools/Oven.asset";
     private const string OvenConfigPath = "Assets/SO/CookingToolConfigSO/Oven.asset";
     private const string OvenPrefabPath = "Assets/Prefab/CookingTool/OvenCookingTool.prefab";
+    private const string FryerPath = "Assets/SO/BuildingSO/Counters/Tools/Fryer.asset";
+    private const string FryerConfigPath = "Assets/SO/CookingToolConfigSO/Fryer.asset";
+    private const string FryerPrefabPath = "Assets/Prefab/CookingTool/FryerCookingTool.prefab";
+    private const string BlenderPath = "Assets/SO/BuildingSO/Counters/Tools/Blender.asset";
+    private const string BlenderConfigPath = "Assets/SO/CookingToolConfigSO/Blender.asset";
+    private const string BlenderPrefabPath = "Assets/Prefab/CookingTool/BlenderCookingTool.prefab";
     private const string PlacedObjectDatabasePath = "Assets/SO/PlacedObjectDatabase/PlacedObjectDatabase.asset";
     private const string DefaultNetworkPrefabsPath = "Assets/DefaultNetworkPrefabs.asset";
     private const string RecipeDatabasePath = "Assets/SO/RecipeDatabase/RecipeDatabase.asset";
@@ -175,6 +181,173 @@ public class CookingDataTests
         Assert.IsNotNull(item.Rewards);
         Assert.AreEqual(1, item.Rewards.Count);
         Assert.AreEqual(oven.Guid, item.Rewards[0].Guid);
+    }
+
+    [Test] public void FryerConfig_SupportsDeepFryOnly()
+    {
+        CookingToolConfigSO config = Load<CookingToolConfigSO>(FryerConfigPath);
+
+        Assert.IsTrue(config.Supports(CookingToolConfigSO.CookingToolType.DeepFry));
+        Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.Frying));
+        Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.Baking));
+        Assert.IsFalse(config.supportsOptionMenu);
+    }
+
+    [Test] public void BlenderConfig_SupportsBeverageOnly()
+    {
+        CookingToolConfigSO config = Load<CookingToolConfigSO>(BlenderConfigPath);
+
+        Assert.IsTrue(config.Supports(CookingToolConfigSO.CookingToolType.Beverage));
+        Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.DeepFry));
+        Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.Baking));
+        Assert.IsFalse(config.supportsOptionMenu);
+    }
+
+    [Test] public void Fryer_IsToolOnStove()
+    {
+        PlacedObjectTypeSO fryer = Load<PlacedObjectTypeSO>(FryerPath);
+
+        Assert.IsTrue(fryer.isTool);
+        Assert.AreEqual(1, fryer.width);
+        Assert.AreEqual(1, fryer.height);
+        Assert.IsNotNull(fryer.prefab);
+        Assert.AreEqual("FryerCookingTool", fryer.prefab.name);
+        Assert.AreEqual(1, fryer.allowedUnderlyingCounters.Count);
+        Assert.AreEqual("StoveCounter", fryer.allowedUnderlyingCounters[0].name);
+    }
+
+    [Test] public void Blender_IsToolOnClearCounter()
+    {
+        PlacedObjectTypeSO blender = Load<PlacedObjectTypeSO>(BlenderPath);
+
+        Assert.IsTrue(blender.isTool);
+        Assert.AreEqual(1, blender.width);
+        Assert.AreEqual(1, blender.height);
+        Assert.IsNotNull(blender.prefab);
+        Assert.AreEqual("BlenderCookingTool", blender.prefab.name);
+        Assert.AreEqual(1, blender.allowedUnderlyingCounters.Count);
+        Assert.AreEqual("ClearCounter", blender.allowedUnderlyingCounters[0].name);
+    }
+
+    [Test] public void PlacedObjectDatabase_ContainsFryerAndBlender()
+    {
+        PlacedObjectTypeSO fryer = Load<PlacedObjectTypeSO>(FryerPath);
+        PlacedObjectTypeSO blender = Load<PlacedObjectTypeSO>(BlenderPath);
+        ScriptableObject database = Load<ScriptableObject>(PlacedObjectDatabasePath);
+        SerializedProperty placeObjects = new SerializedObject(database).FindProperty("placeObjects");
+        bool foundFryer = false;
+        bool foundBlender = false;
+
+        for (int i = 0; i < placeObjects.arraySize; i++)
+        {
+            Object placedObject = placeObjects.GetArrayElementAtIndex(i).objectReferenceValue;
+            if (placedObject == fryer) foundFryer = true;
+            if (placedObject == blender) foundBlender = true;
+        }
+
+        Assert.IsTrue(foundFryer, "Fryer is missing from PlacedObjectDatabase.");
+        Assert.IsTrue(foundBlender, "Blender is missing from PlacedObjectDatabase.");
+    }
+
+    [Test] public void DefaultNetworkPrefabs_ContainsFryerAndBlender()
+    {
+        GameObject fryerPrefab = Load<GameObject>(FryerPrefabPath);
+        GameObject blenderPrefab = Load<GameObject>(BlenderPrefabPath);
+        ScriptableObject networkPrefabs = Load<ScriptableObject>(DefaultNetworkPrefabsPath);
+        SerializedProperty list = new SerializedObject(networkPrefabs).FindProperty("List");
+        bool foundFryer = false;
+        bool foundBlender = false;
+
+        for (int i = 0; i < list.arraySize; i++)
+        {
+            SerializedProperty prefab = list.GetArrayElementAtIndex(i).FindPropertyRelative("Prefab");
+            if (prefab != null && prefab.objectReferenceValue == fryerPrefab) foundFryer = true;
+            if (prefab != null && prefab.objectReferenceValue == blenderPrefab) foundBlender = true;
+        }
+
+        Assert.IsTrue(foundFryer, "Fryer is missing from DefaultNetworkPrefabs.");
+        Assert.IsTrue(foundBlender, "Blender is missing from DefaultNetworkPrefabs.");
+    }
+
+    [Test] public void FryerAndBlenderPrefabs_HaveCookingToolAndConvexCollider()
+    {
+        string[] prefabPaths = { FryerPrefabPath, BlenderPrefabPath };
+
+        foreach (string path in prefabPaths)
+        {
+            GameObject prefab = Load<GameObject>(path);
+            MeshCollider[] colliders = prefab.GetComponentsInChildren<MeshCollider>(true);
+
+            Assert.IsNotNull(prefab.GetComponent<CookingTool>(), path);
+            Assert.Greater(colliders.Length, 0, $"{path} has no MeshCollider.");
+            foreach (MeshCollider collider in colliders)
+                Assert.IsTrue(collider.convex, $"{path}: {collider.name} collider must be convex.");
+        }
+    }
+
+    [Test] public void ShopItems38And39_UseNewToolRewards()
+    {
+        ConfigShop shop = Load<ConfigShop>(ShopPath);
+        PlacedObjectTypeSO fryer = Load<PlacedObjectTypeSO>(FryerPath);
+        PlacedObjectTypeSO blender = Load<PlacedObjectTypeSO>(BlenderPath);
+
+        ConfigShopItem fryerItem = null;
+        ConfigShopItem blenderItem = null;
+        foreach (ConfigShopItem item in shop.ShopItems)
+        {
+            if (item == null) continue;
+            if (item.Id == 38) fryerItem = item;
+            if (item.Id == 39) blenderItem = item;
+        }
+
+        Assert.IsNotNull(fryerItem, "Missing shop item 38.");
+        Assert.AreEqual("Fryer Tool", fryerItem.Name);
+        Assert.AreEqual(ShopItemCategory.Tools, fryerItem.Category);
+        Assert.AreEqual(ShopItemType.Item, fryerItem.Type);
+        Assert.AreEqual(250, fryerItem.Price);
+        Assert.AreEqual(3, fryerItem.UnlockLevel);
+        Assert.AreEqual(fryer.Guid, fryerItem.Rewards[0].Guid);
+
+        Assert.IsNotNull(blenderItem, "Missing shop item 39.");
+        Assert.AreEqual("Blender Tool", blenderItem.Name);
+        Assert.AreEqual(ShopItemCategory.Tools, blenderItem.Category);
+        Assert.AreEqual(ShopItemType.Item, blenderItem.Type);
+        Assert.AreEqual(220, blenderItem.Price);
+        Assert.AreEqual(2, blenderItem.UnlockLevel);
+        Assert.AreEqual(blender.Guid, blenderItem.Rewards[0].Guid);
+    }
+
+    [Test] public void RecipeDatabase_DeepFryAndDrinkRecipesAreComplete()
+    {
+        RecipeDatabaseSO database = Load<RecipeDatabaseSO>(RecipeDatabasePath);
+        SerializedObject serializedDatabase = new SerializedObject(database);
+        database.Initialize();
+
+        SerializedProperty deepFryRecipes = serializedDatabase.FindProperty("deepFryRecipes");
+        Assert.GreaterOrEqual(deepFryRecipes.arraySize, 4, "Expected all deep-fry recipes in the database.");
+        for (int i = 0; i < deepFryRecipes.arraySize; i++)
+        {
+            DeepFryRecipeSO recipe = deepFryRecipes.GetArrayElementAtIndex(i).objectReferenceValue as DeepFryRecipeSO;
+            Assert.IsNotNull(recipe, $"Deep-fry recipe {i} is null.");
+            Assert.IsNotNull(recipe.input, $"{recipe.name} has no input.");
+            Assert.IsNotNull(recipe.output, $"{recipe.name} has no output.");
+            Assert.Greater(recipe.deepFryTimerMax, 0f, $"{recipe.name} has no timer.");
+            Assert.AreSame(recipe, database.GetDeepFryRecipe(recipe.input), recipe.name);
+            Assert.IsNotNull(database.GetBurningRecipe(recipe.output), $"{recipe.name}: output has no burning recipe.");
+        }
+
+        SerializedProperty drinkRecipes = serializedDatabase.FindProperty("drinkRecipes");
+        Assert.GreaterOrEqual(drinkRecipes.arraySize, 3, "Expected all drink recipes in the database.");
+        for (int i = 0; i < drinkRecipes.arraySize; i++)
+        {
+            DrinkRecipeSO recipe = drinkRecipes.GetArrayElementAtIndex(i).objectReferenceValue as DrinkRecipeSO;
+            Assert.IsNotNull(recipe, $"Drink recipe {i} is null.");
+            Assert.IsNotNull(recipe.input, $"{recipe.name} has no input list.");
+            Assert.Greater(recipe.input.Count, 0, $"{recipe.name} has no ingredients.");
+            Assert.IsNotNull(recipe.output, $"{recipe.name} has no output.");
+            Assert.Greater(recipe.drinkTimerMax, 0f, $"{recipe.name} has no timer.");
+            Assert.AreSame(recipe, database.GetDrinkRecipeByIngredient(recipe.input[0]), recipe.name);
+        }
     }
 
     [Test] public void RecipeDatabase_PotatoResolvesToChoppedPotato()
