@@ -90,17 +90,17 @@ Shader "Cooked Food/CookedFoodLit"
         // 0 = raw (no change), 1 = fully cooked.
         _CookAmount("Cook Amount", Range(0.0, 1.0)) = 1.0
         // Warm brown tint applied via the Maillard reaction (multiply onto albedo).
-        _CookTint("Cook Tint", Color) = (0.55, 0.36, 0.22, 1.0)
-        // Dark sear marks blended into the mid tones.
-        _SearedColor("Seared Color", Color) = (0.22, 0.13, 0.08, 1.0)
+        _CookTint("Cook Tint", Color) = (0.88, 0.62, 0.33, 1.0)
+        // Warm sear marks blended into the mid tones.
+        _SearedColor("Seared Color", Color) = (0.50, 0.27, 0.11, 1.0)
         // Lighter caramel glaze blended into the highlights.
-        _CaramelColor("Caramel Color", Color) = (0.66, 0.45, 0.28, 1.0)
+        _CaramelColor("Caramel Color", Color) = (0.84, 0.60, 0.31, 1.0)
         // Tiling of the procedural sear/caramel noise.
         _CaramelTiling("Caramel Tiling", Range(1.0, 40.0)) = 14.0
         // How much the surface dries out (smoothness drops) while cooking.
         _CookSmoothnessReduction("Cook Smoothness Reduction", Range(0.0, 0.5)) = 0.1
         // How much saturation is lost as the food cooks.
-        _CookDesaturation("Cook Desaturation", Range(0.0, 1.0)) = 0.4
+        _CookDesaturation("Cook Desaturation", Range(0.0, 1.0)) = 0.18
     }
 
     SubShader

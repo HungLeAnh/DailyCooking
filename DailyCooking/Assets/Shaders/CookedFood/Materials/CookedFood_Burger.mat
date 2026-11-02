@@ -92,7 +92,7 @@ Material:
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _CookAmount: 0
-    - _CookDesaturation: 0.4
+    - _CookDesaturation: 0.18
     - _CookSmoothnessReduction: 0.1
     - _Cull: 2
     - _Cutoff: 0.5
@@ -122,11 +122,11 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _CaramelColor: {r: 0.65999997, g: 0.45, b: 0.27999997, a: 1}
+    - _CaramelColor: {r: 0.84, g: 0.6, b: 0.31, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _CookTint: {r: 0.54999995, g: 0.35999998, b: 0.21999997, a: 1}
+    - _CookTint: {r: 0.88, g: 0.62, b: 0.33, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _SearedColor: {r: 0.21999997, g: 0.12999997, b: 0.079999976, a: 1}
+    - _SearedColor: {r: 0.5, g: 0.27, b: 0.11, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
