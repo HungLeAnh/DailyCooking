@@ -23,6 +23,8 @@ public class CookingDataTests
     private const string MashedPotatoPath = "Assets/SO/KitchenObjectSO/PotatoMashedSO.asset";
     private const string StewPath = "Assets/SO/CombineRecipeSO/StewCombineRecipeSO.asset";
     private const string ShopPath = "Assets/Configs/ConfigShop/ConfigShopSO.asset";
+    private const string MilkPrefabPath = "Assets/Prefab/KitchenObjects/food_ingredient_milk.prefab";
+    private const string FriedChickenPrefabPath = "Assets/Prefab/KitchenObjects/food_ingredient_friedchicken.prefab";
 
     private static T Load<T>(string path) where T : Object
     {
@@ -48,6 +50,7 @@ public class CookingDataTests
         Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.Cutting));
         Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.Combine));
         Assert.IsFalse(config.supportsOptionMenu);
+        Assert.IsTrue(config.supportsBurning);
     }
 
     [Test] public void OvenGuid_MatchesAssetGuid()
@@ -201,6 +204,27 @@ public class CookingDataTests
         Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.DeepFry));
         Assert.IsFalse(config.Supports(CookingToolConfigSO.CookingToolType.Baking));
         Assert.IsFalse(config.supportsOptionMenu);
+        Assert.IsFalse(config.supportsBurning, "The Blender must not burn its output.");
+    }
+
+    [Test] public void MilkPrefab_UsesGlassMilkModel()
+    {
+        GameObject prefab = Load<GameObject>(MilkPrefabPath);
+        MeshFilter meshFilter = prefab.GetComponentInChildren<MeshFilter>(true);
+
+        Assert.IsNotNull(meshFilter, "Milk prefab has no MeshFilter.");
+        Assert.IsNotNull(meshFilter.sharedMesh, "Milk prefab has no mesh.");
+        Assert.AreEqual("Glass_Milk", meshFilter.sharedMesh.name);
+    }
+
+    [Test] public void FriedChickenPrefab_UsesDrumstickModel()
+    {
+        GameObject prefab = Load<GameObject>(FriedChickenPrefabPath);
+        MeshFilter meshFilter = prefab.GetComponentInChildren<MeshFilter>(true);
+
+        Assert.IsNotNull(meshFilter, "Fried chicken prefab has no MeshFilter.");
+        Assert.IsNotNull(meshFilter.sharedMesh, "Fried chicken prefab has no mesh.");
+        Assert.AreEqual("Fried chicken B", meshFilter.sharedMesh.name);
     }
 
     [Test] public void Fryer_IsToolOnStove()

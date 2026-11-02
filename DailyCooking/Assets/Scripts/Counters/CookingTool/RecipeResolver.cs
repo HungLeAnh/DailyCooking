@@ -213,7 +213,10 @@ public sealed class RecipeResolver
 
     public void ResolveBurning(KitchenObjectSO input)
     {
-        _burning = input != null && KitchenGameManager.Instance.RecipeDatabase != null ? KitchenGameManager.Instance.RecipeDatabase.GetBurningRecipe(input) : null;
+        bool canBurn = _config != null && _config.supportsBurning;
+        _burning = canBurn && input != null && KitchenGameManager.Instance.RecipeDatabase != null
+            ? KitchenGameManager.Instance.RecipeDatabase.GetBurningRecipe(input)
+            : null;
         BurningTimeMax = _burning != null ? _burning.burningTimerMax : 0f;
     }
 

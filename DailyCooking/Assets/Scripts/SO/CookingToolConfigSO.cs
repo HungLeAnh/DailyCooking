@@ -27,6 +27,10 @@ public class CookingToolConfigSO : ScriptableObject
     [Tooltip("True when this tool uses the option-menu flow (Combine/Pot).")]
     public bool supportsOptionMenu;
 
+    [Header("Burning")]
+    [Tooltip("False for tools that should never burn their output, such as the Blender.")]
+    public bool supportsBurning = true;
+
     private void OnValidate()
     {
         if (supportsOptionMenu && (toolTypes == null || !toolTypes.Contains(CookingToolType.Combine)))
