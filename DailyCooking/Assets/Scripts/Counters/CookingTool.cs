@@ -33,6 +33,8 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     private readonly CookingPresenter _presenter = new CookingPresenter();
 
     private bool _configResolved;
+    private KitchenObject _hiddenFood;
+    private bool _hasHiddenFood;
     public event Action OnDestroySelf;
 
     public event Action OnCut;
@@ -93,9 +95,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     private void TryResolveFoodReference()
     {
-        if (_slot.HasFood)
-            return;
-        if (_slot.TryResolveFrom(_netFood.Value))
+        if (!_slot.HasFood && _slot.TryResolveFrom(_netFood.Value))
         {
             _resolver.ResetSlot();
             KitchenObjectSO foodSO = _slot.Current.GetKitchenObjectSO();
@@ -108,6 +108,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             _clock.Reset(_netCookingTimer.Value, _netBurningTimer.Value);
             _presenter.Reset();
         }
+        RefreshFoodVisibility();
     }
 
     public bool RequiresOptionChoice(KitchenObjectSO input)
@@ -123,6 +124,15 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         get
         {
             return _resolver.Supports(CookingToolConfigSO.CookingToolType.Cutting);
+        }
+    }
+
+    // Beverage tools (blender) consume the ingredient while cooking and only show the result.
+    public bool IsBeverageTool
+    {
+        get
+        {
+            return _resolver.Supports(CookingToolConfigSO.CookingToolType.Beverage);
         }
     }
 
@@ -143,7 +153,55 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             _resolver.EnsureBurning(_slot.Current.GetKitchenObjectSO());
         _clock.Reset(_netCookingTimer.Value, _netBurningTimer.Value);
         _presenter.Reset();
+        RefreshFoodVisibility();
         FireOnStateChange();
+    }
+
+    // Beverage tools swallow their input while cooking: hide the ingredient and keep it
+    // hidden until the cooked output replaces it or the player cancels.
+    public void RefreshFoodVisibility()
+    {
+        if (!IsBeverageTool)
+        {
+            ShowHiddenFood();
+            return;
+        }
+
+        switch (_netState.Value)
+        {
+            case State.Cooking:
+                if (!_hasHiddenFood && _slot.HasFood)
+                {
+                    _hiddenFood = _slot.Current;
+                    _hasHiddenFood = true;
+                }
+                if (_hasHiddenFood && _hiddenFood != null && _slot.Current == _hiddenFood)
+                    _hiddenFood.SetVisualsVisible(false);
+                break;
+            case State.Cooked:
+                // Keep the old input hidden until the cooked output takes its place.
+                if (_hasHiddenFood && _slot.Current != _hiddenFood)
+                {
+                    _hasHiddenFood = false;
+                    _hiddenFood = null;
+                }
+                break;
+            default:
+                ShowHiddenFood();
+                break;
+        }
+    }
+
+    private void ShowHiddenFood()
+    {
+        if (!_hasHiddenFood)
+            return;
+        // A parentless item is being despawned (already replaced by the cooked output);
+        // re-enabling it would flash the raw ingredient for a frame.
+        if (_hiddenFood != null && _hiddenFood.GetKitchenObjectParent() != null)
+            _hiddenFood.SetVisualsVisible(true);
+        _hasHiddenFood = false;
+        _hiddenFood = null;
     }
 
     private void HandleCombineIndexChanged(int previousValue, int newValue)
@@ -254,6 +312,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         _clock.Reset(0f, 0f);
         _presenter.Reset();
         _netState.Value = state;
+        RefreshFoodVisibility();
     }
 
     public void FireOnStateChange()
@@ -387,6 +446,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         burnWarningUI?.Hide();
         if (IsServer && kitchenObject != null && kitchenObject.NetworkObject != null)
             _netFood.Value = kitchenObject.NetworkObject;
+        RefreshFoodVisibility();
     }
 
     public Transform GetKitchenObjectFollowTransform(int index = 0)

@@ -57,6 +57,15 @@ public class KitchenObject : NetworkBehaviour
     {
         return kitchenObjectSO;
     }
+
+    // Hides or restores the item's meshes without touching its colliders or network state.
+    // Used while a tool consumes the item (e.g. the blender hides its input until the drink is ready).
+    public void SetVisualsVisible(bool visible)
+    {
+        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+            renderers[i].enabled = visible;
+    }
     public KitchenObjectOptionalProcessSO GetKitchenObjectOptionalProcessSO()
     {
         if (kitchenObjectSO == null)

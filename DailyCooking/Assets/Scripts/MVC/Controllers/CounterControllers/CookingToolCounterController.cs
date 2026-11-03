@@ -138,6 +138,11 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         }
         else
         {
+            // Beverage tools consume their input: the raw ingredient is not available
+            // again until the drink is ready.
+            if (_cookingTool.CurrentState == CookingTool.State.Cooking && _cookingTool.IsBeverageTool)
+                return;
+
             if (playerStateMachine.HasKitchenObject())
             {
                 if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject plateKitchenObject))
