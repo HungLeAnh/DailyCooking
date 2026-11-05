@@ -19,7 +19,6 @@ public class RecipeDatabaseSO : ScriptableObject
     private Dictionary<KitchenObjectSO, List<CombineRecipeSO>> _combineCache;
     private Dictionary<KitchenObjectSO, BakingRecipeSO> _bakingCache;
     private Dictionary<KitchenObjectSO, DeepFryRecipeSO> _deepFryCache;
-    private Dictionary<KitchenObjectSO, List<DrinkRecipeSO>> _drinkIngredientCache;
     private List<DrinkRecipeSO> _drinkCache;
 
     public void Initialize()
@@ -83,20 +82,7 @@ public class RecipeDatabaseSO : ScriptableObject
             _deepFryCache[recipe.input] = recipe;
         }
 
-        _drinkIngredientCache = new Dictionary<KitchenObjectSO, List<DrinkRecipeSO>>();
         _drinkCache = new List<DrinkRecipeSO>(drinkRecipes);
-        foreach (var recipe in drinkRecipes)
-        {
-            foreach (var input in recipe.input)
-            {
-                if (!_drinkIngredientCache.TryGetValue(input, out var list))
-                {
-                    list = new List<DrinkRecipeSO>();
-                    _drinkIngredientCache[input] = list;
-                }
-                list.Add(recipe);
-            }
-        }
     }
 
 
@@ -152,10 +138,89 @@ public class RecipeDatabaseSO : ScriptableObject
         return recipe;
     }
 
-    public DrinkRecipeSO GetDrinkRecipeByIngredient(KitchenObjectSO input)
+    // Multi-input lookups. A tool may hold several ingredients (the Blender), so a drink
+    // recipe is resolved against the whole set, not against each ingredient on its own.
+    public DrinkRecipeSO GetDrinkRecipeForIngredients(IReadOnlyList<KitchenObjectSO> ingredients)
     {
-        if (_drinkIngredientCache.TryGetValue(input, out var list) && list.Count > 0)
-            return list[0];
+        if (ingredients == null || ingredients.Count == 0)
+            return null;
+        EnsureDrinkCaches();
+        for (int i = 0; i < _drinkCache.Count; i++)
+        {
+            DrinkRecipeSO recipe = _drinkCache[i];
+            if (recipe == null || recipe.input == null || recipe.input.Count == 0)
+                continue;
+            if (IngredientsMatch(recipe.input, ingredients))
+                return recipe;
+        }
         return null;
+    }
+
+    // True when `candidate` can still be added to `current` and some drink recipe remains possible.
+    public bool CanAcceptDrinkIngredient(IReadOnlyList<KitchenObjectSO> current, KitchenObjectSO candidate)
+    {
+        if (candidate == null)
+            return false;
+        EnsureDrinkCaches();
+
+        List<KitchenObjectSO> withCandidate = new List<KitchenObjectSO>((current != null ? current.Count : 0) + 1);
+        if (current != null)
+            withCandidate.AddRange(current);
+        withCandidate.Add(candidate);
+
+        for (int i = 0; i < _drinkCache.Count; i++)
+        {
+            DrinkRecipeSO recipe = _drinkCache[i];
+            if (recipe == null || recipe.input == null || recipe.input.Count == 0)
+                continue;
+            if (withCandidate.Count > recipe.input.Count)
+                continue;
+            if (IsSubset(recipe.input, withCandidate))
+                return true;
+        }
+        return false;
+    }
+
+    // Order independent multiset comparison (the same ingredient may appear more than once).
+    public static bool IngredientsMatch(IReadOnlyList<KitchenObjectSO> recipeInputs, IReadOnlyList<KitchenObjectSO> ingredients)
+    {
+        if (recipeInputs == null || ingredients == null || recipeInputs.Count != ingredients.Count)
+            return false;
+        return IsSubset(recipeInputs, ingredients);
+    }
+
+    // True when every entry of `ingredients` is available in `recipeInputs`, counting duplicates.
+    public static bool IsSubset(IReadOnlyList<KitchenObjectSO> recipeInputs, IReadOnlyList<KitchenObjectSO> ingredients)
+    {
+        if (recipeInputs == null || ingredients == null || ingredients.Count > recipeInputs.Count)
+            return false;
+
+        bool[] used = new bool[recipeInputs.Count];
+        for (int i = 0; i < ingredients.Count; i++)
+        {
+            KitchenObjectSO ingredient = ingredients[i];
+            if (ingredient == null)
+                return false;
+            bool found = false;
+            for (int j = 0; j < recipeInputs.Count; j++)
+            {
+                if (used[j] || recipeInputs[j] != ingredient)
+                    continue;
+                used[j] = true;
+                found = true;
+                break;
+            }
+            if (!found)
+                return false;
+        }
+        return true;
+    }
+
+    private void EnsureDrinkCaches()
+    {
+        // Lookups can run before KitchenGameManager calls Initialize() (EditMode tests,
+        // a prefab inspected in the editor), so build the caches on first use.
+        if (_drinkCache == null)
+            Initialize();
     }
 }

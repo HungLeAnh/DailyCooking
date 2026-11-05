@@ -466,6 +466,27 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         InteractServerRpc(target, alternate);
     }
 
+    // Client: the HUD start button for a manual-start tool (the Blender). Kept separate from
+    // InteractServerRpc so pressing start never doubles as a place/take-back interaction.
+    public void RequestStartCooking(NetworkBehaviour target)
+    {
+        if (!(target is CookingToolCounterController) || !target.IsSpawned)
+            return;
+        StartCookingServerRpc(target);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void StartCookingServerRpc(NetworkBehaviourReference targetReference, RpcParams rpcParams = default)
+    {
+        if (rpcParams.Receive.SenderClientId != OwnerClientId)
+            return;
+        if (!targetReference.TryGet(out NetworkBehaviour target) || !(target is CookingToolCounterController controller))
+            return;
+        if (!IsInInteractRange(target))
+            return;
+        controller.StartCooking();
+    }
+
     [Rpc(SendTo.Server)]
     private void InteractServerRpc(NetworkBehaviourReference targetReference, bool alternate, RpcParams rpcParams = default)
     {

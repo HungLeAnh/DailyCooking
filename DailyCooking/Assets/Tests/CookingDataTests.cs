@@ -18,6 +18,12 @@ public class CookingDataTests
     private const string PlacedObjectDatabasePath = "Assets/SO/PlacedObjectDatabase/PlacedObjectDatabase.asset";
     private const string DefaultNetworkPrefabsPath = "Assets/DefaultNetworkPrefabs.asset";
     private const string RecipeDatabasePath = "Assets/SO/RecipeDatabase/RecipeDatabase.asset";
+    private const string MilkPath = "Assets/SO/KitchenObjectSO/Milk.asset";
+    private const string OrangePath = "Assets/SO/KitchenObjectSO/Orange.asset";
+    private const string PeachPath = "Assets/SO/KitchenObjectSO/Peach.asset";
+    private const string MilkDrinkPath = "Assets/SO/DrinkRecipeSO/Drink_Milk_Milkshake.asset";
+    private const string OrangeJuiceDrinkPath = "Assets/SO/DrinkRecipeSO/Drink_Orange_OrangeJuice.asset";
+    private const string PeachSmoothieDrinkPath = "Assets/SO/DrinkRecipeSO/Drink_PeachOrange_PeachSmoothie.asset";
     private const string PotatoPath = "Assets/SO/KitchenObjectSO/PotatoSO.asset";
     private const string ChoppedPotatoPath = "Assets/SO/KitchenObjectSO/PotatoChoppedSO.asset";
     private const string MashedPotatoPath = "Assets/SO/KitchenObjectSO/PotatoMashedSO.asset";
@@ -206,6 +212,133 @@ public class CookingDataTests
         Assert.IsFalse(config.supportsBurning, "The Blender must not burn its output.");
     }
 
+    [Test] public void BlenderConfig_HoldsMultipleIngredients()
+    {
+        CookingToolConfigSO config = Load<CookingToolConfigSO>(BlenderConfigPath);
+
+        Assert.GreaterOrEqual(config.maxFoodSlots, 2,
+            "The Blender must be able to hold more than one ingredient.");
+        Assert.IsTrue(config.requiresManualStart,
+            "The Blender must wait for the player to press start.");
+    }
+
+    [Test] public void OtherToolConfigs_StaySingleSlot()
+    {
+        string[] paths =
+        {
+            OvenConfigPath,
+            FryerConfigPath,
+            "Assets/SO/CookingToolConfigSO/Pan.asset",
+            "Assets/SO/CookingToolConfigSO/CuttingBoard.asset",
+            "Assets/SO/CookingToolConfigSO/Pot.asset",
+        };
+
+        foreach (string path in paths)
+        {
+            CookingToolConfigSO config = Load<CookingToolConfigSO>(path);
+            Assert.AreEqual(1, config.maxFoodSlots, path);
+            Assert.IsFalse(config.requiresManualStart, $"{path} must keep auto-starting.");
+        }
+    }
+
+    [Test] public void RecipeDatabase_IngredientsMatch_IgnoresOrderAndCountsDuplicates()
+    {
+        KitchenObjectSO milk = ScriptableObject.CreateInstance<KitchenObjectSO>();
+        KitchenObjectSO orange = ScriptableObject.CreateInstance<KitchenObjectSO>();
+        KitchenObjectSO peach = ScriptableObject.CreateInstance<KitchenObjectSO>();
+        try
+        {
+            List<KitchenObjectSO> recipe = new List<KitchenObjectSO> { milk, orange };
+
+            Assert.IsTrue(RecipeDatabaseSO.IngredientsMatch(recipe, new List<KitchenObjectSO> { orange, milk }));
+            Assert.IsFalse(RecipeDatabaseSO.IngredientsMatch(recipe, new List<KitchenObjectSO> { milk }));
+            Assert.IsFalse(RecipeDatabaseSO.IngredientsMatch(recipe, new List<KitchenObjectSO> { milk, peach }));
+
+            Assert.IsTrue(RecipeDatabaseSO.IngredientsMatch(
+                new List<KitchenObjectSO> { milk, milk },
+                new List<KitchenObjectSO> { milk, milk }));
+            Assert.IsFalse(RecipeDatabaseSO.IngredientsMatch(
+                new List<KitchenObjectSO> { milk, milk },
+                new List<KitchenObjectSO> { milk, orange }));
+
+            Assert.IsTrue(RecipeDatabaseSO.IsSubset(recipe, new List<KitchenObjectSO> { milk }));
+            Assert.IsFalse(RecipeDatabaseSO.IsSubset(recipe, new List<KitchenObjectSO> { peach }));
+        }
+        finally
+        {
+            Object.DestroyImmediate(milk);
+            Object.DestroyImmediate(orange);
+            Object.DestroyImmediate(peach);
+        }
+    }
+
+    [Test] public void DrinkRecipes_ResolveOnlyWithTheirExactIngredientSet()
+    {
+        RecipeDatabaseSO database = Load<RecipeDatabaseSO>(RecipeDatabasePath);
+        database.Initialize();
+
+        DrinkRecipeSO milkshake = Load<DrinkRecipeSO>(MilkDrinkPath);
+        DrinkRecipeSO orangeJuice = Load<DrinkRecipeSO>(OrangeJuiceDrinkPath);
+        DrinkRecipeSO peachSmoothie = Load<DrinkRecipeSO>(PeachSmoothieDrinkPath);
+        KitchenObjectSO milk = Load<KitchenObjectSO>(MilkPath);
+        KitchenObjectSO orange = Load<KitchenObjectSO>(OrangePath);
+        KitchenObjectSO peach = Load<KitchenObjectSO>(PeachPath);
+
+        // Exact sets resolve, and the order the ingredients were added does not matter.
+        Assert.AreSame(milkshake, database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { milk }));
+        Assert.AreSame(orangeJuice, database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { orange }));
+        Assert.AreSame(peachSmoothie, database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { peach, orange }));
+        Assert.AreSame(peachSmoothie, database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { orange, peach }),
+            "Drink recipes must not depend on the order the ingredients were added.");
+
+        // Incomplete or wrong sets must not resolve to a recipe.
+        Assert.IsNull(database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { peach }));
+        Assert.IsNull(database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { milk, orange }),
+            "A one-ingredient recipe must not run when a second ingredient is also inside the tool.");
+        Assert.IsNull(database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { orange, orange }),
+            "No recipe uses two oranges.");
+        Assert.IsNull(database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { peach, orange, orange }),
+            "Extra ingredients must not match a smaller recipe.");
+
+        // The blender keeps accepting ingredients until a recipe is complete.
+        Assert.IsTrue(database.CanAcceptDrinkIngredient(new List<KitchenObjectSO>(), milk));
+        Assert.IsTrue(database.CanAcceptDrinkIngredient(new List<KitchenObjectSO>(), orange));
+        Assert.IsTrue(database.CanAcceptDrinkIngredient(new List<KitchenObjectSO> { orange }, peach));
+        Assert.IsTrue(database.CanAcceptDrinkIngredient(new List<KitchenObjectSO> { peach }, orange));
+        Assert.IsFalse(database.CanAcceptDrinkIngredient(new List<KitchenObjectSO> { orange }, orange),
+            "No recipe uses two oranges.");
+        Assert.IsFalse(database.CanAcceptDrinkIngredient(new List<KitchenObjectSO> { milk }, orange));
+        Assert.IsFalse(database.CanAcceptDrinkIngredient(new List<KitchenObjectSO> { milk }, milk),
+            "A single-input recipe must not accept a second ingredient.");
+        Assert.IsFalse(database.CanAcceptDrinkIngredient(new List<KitchenObjectSO> { peach, orange }, milk),
+            "A complete two-ingredient drink must not take a third ingredient.");
+    }
+
+    // A multi-ingredient recipe must never resolve from only some of its ingredients.
+    [Test] public void DrinkRecipes_MultiInputRecipesNeverResolveFromAPartialSet()
+    {
+        string[] guids = AssetDatabase.FindAssets("t:DrinkRecipeSO");
+        Assert.Greater(guids.Length, 0, "No drink recipes found.");
+
+        RecipeDatabaseSO database = Load<RecipeDatabaseSO>(RecipeDatabasePath);
+        database.Initialize();
+
+        foreach (string guid in guids)
+        {
+            DrinkRecipeSO recipe = AssetDatabase.LoadAssetAtPath<DrinkRecipeSO>(AssetDatabase.GUIDToAssetPath(guid));
+            if (recipe == null || recipe.input == null || recipe.input.Count < 2)
+                continue;
+
+            for (int skip = 0; skip < recipe.input.Count; skip++)
+            {
+                List<KitchenObjectSO> partial = new List<KitchenObjectSO>(recipe.input);
+                partial.RemoveAt(skip);
+                Assert.AreNotSame(recipe, database.GetDrinkRecipeForIngredients(partial),
+                    $"{recipe.name} must not resolve from a partial set (missing '{recipe.input[skip].name}').");
+            }
+        }
+    }
+
     [Test] public void FriedChickenPrefab_UsesDrumstickModelAtLegSize()
     {
         GameObject prefab = Load<GameObject>(FriedChickenPrefabPath);
@@ -362,7 +495,7 @@ public class CookingDataTests
             Assert.Greater(recipe.input.Count, 0, $"{recipe.name} has no ingredients.");
             Assert.IsNotNull(recipe.output, $"{recipe.name} has no output.");
             Assert.Greater(recipe.drinkTimerMax, 0f, $"{recipe.name} has no timer.");
-            Assert.AreSame(recipe, database.GetDrinkRecipeByIngredient(recipe.input[0]), recipe.name);
+            Assert.AreSame(recipe, database.GetDrinkRecipeForIngredients(recipe.input), recipe.name);
         }
     }
 
@@ -426,6 +559,35 @@ public class CookingDataTests
         KitchenObjectSO choppedPotato = Load<KitchenObjectSO>(ChoppedPotatoPath);
 
         CollectionAssert.Contains(stew.input, choppedPotato);
+    }
+
+    [Test] public void FoodSlot_KeepsSlotIndexesWhenAnItemLeaves()
+    {
+        GameObject root = new GameObject("FoodSlotTest");
+        try
+        {
+            KitchenObject first = root.AddComponent<KitchenObject>();
+            KitchenObject second = root.AddComponent<KitchenObject>();
+            FoodSlot slot = new FoodSlot();
+
+            slot.Set(first, 0);
+            slot.Set(second, 1);
+
+            Assert.AreEqual(2, slot.FoodCount);
+            Assert.AreSame(first, slot.Current);
+            Assert.AreEqual(-1, slot.FirstFreeIndex(2), "A full tool has no free slot.");
+
+            slot.ClearAt(0);
+
+            Assert.AreSame(second, slot.Get(1), "Removing slot 0 must not shift the item in slot 1.");
+            Assert.AreSame(second, slot.Current);
+            Assert.AreEqual(0, slot.FirstFreeIndex(2));
+            Assert.AreEqual(1, slot.CopyFoods().Count);
+        }
+        finally
+        {
+            Object.DestroyImmediate(root);
+        }
     }
 
     [Test] public void ShopToolItems_UseToolsCategoryAndResolveRewards()

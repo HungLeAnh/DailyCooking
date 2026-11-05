@@ -10,9 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1adbe61ac1330dc4cad8f6d57af79168, type: 3}
-  m_Name: Drink_Peach_PeachSmoothie
+  m_Name: Drink_PeachOrange_PeachSmoothie
   m_EditorClassIdentifier: Scripts::DrinkRecipeSO
   input:
   - {fileID: 11400000, guid: 6b2b9621459ec5b4d8f54f84461ceeea, type: 2}
+  - {fileID: 11400000, guid: 0c2abdde5317def4380b9515f3ac827e, type: 2}
   output: {fileID: 11400000, guid: 6b5ef1e167fb1fb44804ecc3b8018283, type: 2}
   drinkTimerMax: 4

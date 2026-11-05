@@ -8,7 +8,7 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     public bool HasToolInstalled() => TryResolveTool();
 
-    public bool HasFood() => TryResolveTool() && _cookingTool.HasKitchenObject();
+    public bool HasFood() => TryResolveTool() && _cookingTool.HasAnyFood;
 
     private bool TryResolveTool()
     {
@@ -80,7 +80,7 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
     {
         // Don't yank the counter out from under a tool that holds food.
         TryResolveTool();
-        if (_cookingTool != null && _cookingTool.HasKitchenObject())
+        if (_cookingTool != null && _cookingTool.HasAnyFood)
             return false;
         return base.CanRemove();
     }
@@ -99,66 +99,108 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     private void HandleCookingInteraction(PlayerStateMachine playerStateMachine)
     {
-        if (!_cookingTool.HasKitchenObject())
+        // Manual-start tools (the Blender) commit their ingredients: once something is inside,
+        // nothing comes back out until the finished dish is ready. Players may still add more
+        // ingredients while the tool is idle, which is what keeps multi-ingredient drinks possible.
+        if (_cookingTool.RequiresManualStart && _cookingTool.CurrentState == CookingTool.State.Idle)
         {
             if (playerStateMachine.HasKitchenObject())
+                TryAddInput(playerStateMachine, playerStateMachine.GetKitchenObject());
+            return;
+        }
+
+        if (!_cookingTool.HasAnyFood)
+        {
+            if (playerStateMachine.HasKitchenObject())
+                TryAddInput(playerStateMachine, playerStateMachine.GetKitchenObject());
+            return;
+        }
+
+        // Beverage tools consume their input: the raw ingredient is not available
+        // again until the drink is ready.
+        if (_cookingTool.CurrentState == CookingTool.State.Cooking && _cookingTool.IsBeverageTool)
+            return;
+
+        if (playerStateMachine.HasKitchenObject())
+        {
+            KitchenObject heldObject = playerStateMachine.GetKitchenObject();
+            if (heldObject.TryGetTableware(out TablewareKitchenObject plateKitchenObject))
             {
-                KitchenObjectSO inputKitchenObjectSO = playerStateMachine.GetKitchenObject().GetKitchenObjectSO();
-                if (_cookingTool.HasRecipeWithInput(inputKitchenObjectSO))
+                if (_cookingTool.TryGetFirstFood(out KitchenObject food, out _) &&
+                    plateKitchenObject.TryAddIngredient(food.GetKitchenObjectSO()))
                 {
-                    if (!playerStateMachine.GetKitchenObject().SetKitchenObjectParent(_cookingTool))
-                        return;
-                    if (_cookingTool.RequiresOptionChoice(inputKitchenObjectSO))
-                    {
-                        // Pending choice: stay Idle so server guard doesn't soft-lock in Cooking with 0 time.
-                        // Popup cancel leaves food in Idle, player can take it back.
-                        _cookingTool.UpdateCookingState(CookingTool.State.Idle);
-                        _cookingTool.ShowOptionMenu(playerStateMachine, this, inputKitchenObjectSO);
-                    }
-                    else
-                    {
-                        _cookingTool.SetCookingRecipeSO();
-                        if (_cookingTool.IsCuttingActive)
-                        {
-                            // Cutting progresses one click at a time; the timed state would
-                            // auto-advance the bar and play the cooking sizzle.
-                            _cookingTool.UpdateCookingState(CookingTool.State.Idle);
-                        }
-                        else if (_cookingTool.HasValidRecipe())
-                        {
-                            _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
-                        }
-                    }
+                    food.DestroySelf();
+                    _cookingTool.UpdateCookingState(CookingTool.State.Idle);
                 }
+                return;
             }
-            else
-            {
-                // Empty-handed on empty static tool -> no carry removal (tools are grid-placed)
-            }
+
+            // Multi-ingredient tools (the Blender) take more ingredients while they still fit.
+            TryAddInput(playerStateMachine, heldObject);
+            return;
+        }
+
+        if (_cookingTool.TryGetFirstFood(out KitchenObject firstFood, out _))
+        {
+            firstFood.SetKitchenObjectParent(playerStateMachine);
+            _cookingTool.UpdateCookingState(CookingTool.State.Idle);
+        }
+    }
+
+    // Server: moves the held ingredient into the tool when the recipe still accepts it.
+    private void TryAddInput(PlayerStateMachine playerStateMachine, KitchenObject heldObject)
+    {
+        if (heldObject == null)
+            return;
+        KitchenObjectSO inputKitchenObjectSO = heldObject.GetKitchenObjectSO();
+        if (!_cookingTool.CanAcceptInput(inputKitchenObjectSO))
+        {
+            // The Blender refuses what no drink can use: say so, since the ingredient was not taken.
+            if (_cookingTool.RequiresManualStart && UIManager.Instance != null)
+                UIManager.Instance.ShowAlertMessage("This ingredient doesn't fit the blender.");
+            return;
+        }
+
+        int slot = _cookingTool.GetFirstFreeSlotIndex();
+        if (slot < 0)
+        {
+            if (_cookingTool.RequiresManualStart && UIManager.Instance != null)
+                UIManager.Instance.ShowAlertMessage("The blender is full.");
+            return;
+        }
+        if (!heldObject.SetKitchenObjectParent(_cookingTool, slot))
+            return;
+
+        if (_cookingTool.RequiresOptionChoice(inputKitchenObjectSO))
+        {
+            // Pending choice: stay Idle so server guard doesn't soft-lock in Cooking with 0 time.
+            // Popup cancel leaves food in Idle, player can take it back.
+            _cookingTool.UpdateCookingState(CookingTool.State.Idle);
+            _cookingTool.ShowOptionMenu(playerStateMachine, this, inputKitchenObjectSO);
+            return;
+        }
+
+        _cookingTool.SetCookingRecipeSO();
+        if (_cookingTool.IsCuttingActive)
+        {
+            // Cutting progresses one click at a time; the timed state would
+            // auto-advance the bar and play the cooking sizzle.
+            _cookingTool.UpdateCookingState(CookingTool.State.Idle);
+        }
+        else if (_cookingTool.RequiresManualStart)
+        {
+            // The Blender waits for the player to press the start button, so a matching set
+            // stays idle until then (more ingredients can still be added).
+            _cookingTool.UpdateCookingState(CookingTool.State.Idle);
+        }
+        else if (_cookingTool.HasValidRecipe())
+        {
+            _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
         }
         else
         {
-            // Beverage tools consume their input: the raw ingredient is not available
-            // again until the drink is ready.
-            if (_cookingTool.CurrentState == CookingTool.State.Cooking && _cookingTool.IsBeverageTool)
-                return;
-
-            if (playerStateMachine.HasKitchenObject())
-            {
-                if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject plateKitchenObject))
-                {
-                    if (plateKitchenObject.TryAddIngredient(_cookingTool.GetKitchenObject().GetKitchenObjectSO()))
-                    {
-                        _cookingTool.GetKitchenObject().DestroySelf();
-                        _cookingTool.UpdateCookingState(CookingTool.State.Idle);
-                    }
-                }
-            }
-            else
-            {
-                _cookingTool.GetKitchenObject().SetKitchenObjectParent(playerStateMachine);
-                _cookingTool.UpdateCookingState(CookingTool.State.Idle);
-            }
+            // Multi-input recipe still missing ingredients: keep the tool idle and visible.
+            _cookingTool.UpdateCookingState(CookingTool.State.Idle);
         }
     }
 
@@ -166,17 +208,31 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
     {
         if (!TryResolveTool())
             return;
-        if (!_cookingTool.HasKitchenObject())
+        if (!_cookingTool.HasAnyFood)
             return;
         _cookingTool.Cut(playerStateMachine);
     }
 
+    // True when the HUD start button should be offered for this tool: a manual-start tool
+    // (the Blender) holding a complete recipe and waiting for the press.
+    public bool CanPressStart()
+    {
+        return TryResolveTool() && _cookingTool.RequiresManualStart && _cookingTool.IsReadyToStart;
+    }
+
+    // Server: the player pressed the HUD start button.
+    public bool StartCooking()
+    {
+        return TryResolveTool() && _cookingTool.TryStartCooking();
+    }
+
     // PlayerStateMachine treats -1 as "no alternate action on this interactable".
     // Only a cutting tool with food offers the alternate action (one cut per click).
-    // Everything else (place / take back / plate transfer / frying) must stay on the normal interact path.
+    // Starting a manual-start tool goes through the HUD button, and everything else
+    // (place / take back / plate transfer / frying) stays on the normal interact path.
     public float GetProgress()
     {
-        if (!TryResolveTool() || !_cookingTool.HasKitchenObject() || !_cookingTool.IsCuttingActive)
+        if (!TryResolveTool() || !_cookingTool.HasAnyFood || !_cookingTool.IsCuttingActive)
             return -1f;
         return _cookingTool.GetProgress();
     }
@@ -195,7 +251,7 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
             return;
         if (_cookingTool.IsCuttingActive)
             _cookingTool.UpdateCookingState(CookingTool.State.Idle);
-        else if (_cookingTool.CookingTimeMax > 0f)
+        else if (!_cookingTool.RequiresManualStart && _cookingTool.CookingTimeMax > 0f)
             _cookingTool.UpdateCookingState(CookingTool.State.Cooking);
     }
 
