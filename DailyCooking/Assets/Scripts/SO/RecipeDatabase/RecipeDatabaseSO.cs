@@ -156,6 +156,22 @@ public class RecipeDatabaseSO : ScriptableObject
         return null;
     }
 
+    // A served drink is a single item, so its FoodSO lists the drink itself. Menus want the
+    // ingredients that went into it instead, which they can look up from the drink output.
+    public DrinkRecipeSO GetDrinkRecipeForOutput(KitchenObjectSO output)
+    {
+        if (output == null)
+            return null;
+        EnsureDrinkCaches();
+        for (int i = 0; i < _drinkCache.Count; i++)
+        {
+            DrinkRecipeSO recipe = _drinkCache[i];
+            if (recipe != null && recipe.output == output)
+                return recipe;
+        }
+        return null;
+    }
+
     // True when `candidate` can still be added to `current` and some drink recipe remains possible.
     public bool CanAcceptDrinkIngredient(IReadOnlyList<KitchenObjectSO> current, KitchenObjectSO candidate)
     {

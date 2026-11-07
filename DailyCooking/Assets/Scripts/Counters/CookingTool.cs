@@ -255,8 +255,9 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         FireOnStateChange();
     }
 
-    // Beverage tools swallow their input while cooking: hide the ingredients and keep them
-    // hidden until the cooked output replaces them. Other tools always show their food.
+    // Beverage tools swallow their ingredients the moment they go in: the raw item never
+    // sits on the machine. Only the finished drink (Cooked) is shown. Other tools always
+    // show their food.
     public void RefreshFoodVisibility()
     {
         if (!IsBeverageTool)
@@ -265,43 +266,38 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             return;
         }
 
-        switch (_netState.Value)
+        if (_netState.Value == State.Cooked)
         {
-            case State.Cooking:
-                HideCookingInputs();
-                break;
-            case State.Cooked:
-                // Keep the old inputs hidden until the cooked output takes their place.
-                PruneHiddenFoods();
-                break;
-            default:
-                ShowHiddenFood();
-                break;
+            // Keep the old inputs hidden until the cooked output takes their place.
+            PruneHiddenFoods();
+            return;
+        }
+        HideBeverageInputs();
+    }
+
+    // Hides every drink ingredient in the slots and leaves the finished drink visible.
+    // Ingredients are recognised by the recipe database, which also covers late joiners
+    // (the hidden state itself is not replicated).
+    private void HideBeverageInputs()
+    {
+        for (int i = 0; i < _slot.SlotCount; i++)
+        {
+            KitchenObject food = _slot.Get(i);
+            if (food == null || !IsDrinkIngredient(food.GetKitchenObjectSO()))
+                continue;
+            if (!_hiddenFoods.Contains(food))
+                _hiddenFoods.Add(food);
+            food.SetVisualsVisible(false);
         }
     }
 
-    private void HideCookingInputs()
+    private static bool IsDrinkIngredient(KitchenObjectSO foodSO)
     {
-        if (_hiddenFoods.Count == 0)
-        {
-            // First frame of cooking: remember and hide every ingredient that goes in.
-            for (int i = 0; i < _slot.SlotCount; i++)
-            {
-                KitchenObject food = _slot.Get(i);
-                if (food == null) continue;
-                _hiddenFoods.Add(food);
-                food.SetVisualsVisible(false);
-            }
-            return;
-        }
-
-        // A new output may already sit in the slot: only re-hide the remembered inputs.
-        for (int i = 0; i < _hiddenFoods.Count; i++)
-        {
-            KitchenObject food = _hiddenFoods[i];
-            if (food != null && _slot.Contains(food))
-                food.SetVisualsVisible(false);
-        }
+        if (foodSO == null || KitchenGameManager.Instance == null ||
+            KitchenGameManager.Instance.RecipeDatabase == null)
+            return false;
+        return KitchenGameManager.Instance.RecipeDatabase
+            .CanAcceptDrinkIngredient(Array.Empty<KitchenObjectSO>(), foodSO);
     }
 
     private void PruneHiddenFoods()

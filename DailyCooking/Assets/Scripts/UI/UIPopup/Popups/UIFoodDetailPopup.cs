@@ -51,7 +51,30 @@ public class UIFoodDetailPopup : UIPopup
         foodTypeText.text = foodSO.foodType.ToString();
         foodPriceText.text = $"${foodSO.price}";
         foodEXPText.text = $"{foodSO.exp} XP";
-        GenerateTags(foodSO.kitchenObjectSOList);
+        GenerateTags(ResolveIngredients(foodSO));
+    }
+
+    // Drinks are served as one finished item, so their food list holds the drink itself.
+    // Show the drink recipe's ingredients instead (Milk, Orange, ...).
+    private List<KitchenObjectSO> ResolveIngredients(FoodSO foodSO)
+    {
+        List<KitchenObjectSO> listed = foodSO.kitchenObjectSOList;
+        if (listed == null || listed.Count == 0)
+            return listed;
+
+        RecipeDatabaseSO database = KitchenGameManager.Instance != null
+            ? KitchenGameManager.Instance.RecipeDatabase
+            : null;
+        if (database == null)
+            return listed;
+
+        foreach (KitchenObjectSO item in listed)
+        {
+            DrinkRecipeSO drinkRecipe = database.GetDrinkRecipeForOutput(item);
+            if (drinkRecipe != null && drinkRecipe.input != null && drinkRecipe.input.Count > 0)
+                return drinkRecipe.input;
+        }
+        return listed;
     }
     public void GenerateTags(List<KitchenObjectSO> ingredients)
     {

@@ -314,6 +314,37 @@ public class CookingDataTests
             "A complete two-ingredient drink must not take a third ingredient.");
     }
 
+    // Menus look a drink up by its finished item, so the reverse lookup must find the
+    // recipe that produced it (and return the raw ingredients, not the drink again).
+    [Test] public void DrinkRecipes_OutputLookupReturnsTheRecipeThatMakesTheDrink()
+    {
+        RecipeDatabaseSO database = Load<RecipeDatabaseSO>(RecipeDatabasePath);
+        database.Initialize();
+
+        DrinkRecipeSO milkshake = Load<DrinkRecipeSO>(MilkDrinkPath);
+        DrinkRecipeSO orangeJuice = Load<DrinkRecipeSO>(OrangeJuiceDrinkPath);
+        DrinkRecipeSO peachSmoothie = Load<DrinkRecipeSO>(PeachSmoothieDrinkPath);
+
+        Assert.AreSame(milkshake, database.GetDrinkRecipeForOutput(milkshake.output));
+        Assert.AreSame(orangeJuice, database.GetDrinkRecipeForOutput(orangeJuice.output));
+        Assert.AreSame(peachSmoothie, database.GetDrinkRecipeForOutput(peachSmoothie.output));
+
+        foreach (DrinkRecipeSO recipe in new[] { milkshake, orangeJuice, peachSmoothie })
+        {
+            DrinkRecipeSO found = database.GetDrinkRecipeForOutput(recipe.output);
+            Assert.IsNotNull(found);
+            Assert.IsNotNull(found.input);
+            Assert.Greater(found.input.Count, 0);
+            CollectionAssert.DoesNotContain(found.input, recipe.output,
+                $"{recipe.name} must list its ingredients, not the finished drink.");
+        }
+
+        // Ingredients are not outputs, so they must not resolve to a drink recipe.
+        Assert.IsNull(database.GetDrinkRecipeForOutput(Load<KitchenObjectSO>(MilkPath)));
+        Assert.IsNull(database.GetDrinkRecipeForOutput(Load<KitchenObjectSO>(OrangePath)));
+        Assert.IsNull(database.GetDrinkRecipeForOutput(null));
+    }
+
     // A multi-ingredient recipe must never resolve from only some of its ingredients.
     [Test] public void DrinkRecipes_MultiInputRecipesNeverResolveFromAPartialSet()
     {
