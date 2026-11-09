@@ -41,6 +41,22 @@ public class CookingToolConfigSO : ScriptableObject
              "(the Blender). False keeps the classic auto-start on a valid recipe.")]
     public bool requiresManualStart;
 
+    [Header("Allowed Ingredients (optional)")]
+    [Tooltip("Leave empty to accept any ingredient the recipe database knows. Fill it to restrict " +
+             "this tool to specific ingredients (e.g. Coffee Machine -> Coffee Bean only).")]
+    public List<KitchenObjectSO> allowedIngredients = new List<KitchenObjectSO>();
+
+    // Empty list means unrestricted, so existing tools (such as the Blender) keep their
+    // current behaviour without any asset changes.
+    public bool AllowsIngredient(KitchenObjectSO ingredient)
+    {
+        if (ingredient == null)
+            return false;
+        return allowedIngredients == null ||
+               allowedIngredients.Count == 0 ||
+               allowedIngredients.Contains(ingredient);
+    }
+
     private void OnValidate()
     {
         if (supportsOptionMenu && (toolTypes == null || !toolTypes.Contains(CookingToolType.Combine)))

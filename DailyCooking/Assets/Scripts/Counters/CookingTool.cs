@@ -159,7 +159,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     public bool RequiresOptionChoice(KitchenObjectSO input)
     {
         return _resolver.RequiresCuttingChoice(input) ||
-               _resolver.RequiresOption(input, cookingToolConfig != null && cookingToolConfig.supportsOptionMenu);
+               _resolver.RequiresCombineChoice(_inputSOs, cookingToolConfig != null && cookingToolConfig.supportsOptionMenu);
     }
 
     public bool HasValidRecipe() => _resolver.HasValidRecipe;
@@ -200,7 +200,13 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         InitializeConfig();
         if (IsBeverageTool)
             return _resolver.CanAcceptDrinkIngredient(_inputSOs, input);
-        return !_slot.HasFood && _resolver.HasRecipe(input);
+        if (_inputSOs.Count == 0)
+            return _resolver.CanStartWith(input);
+        // Multi-ingredient combine tools take another item only while a combine recipe
+        // still fits (the Pot holds the two halves of a Stew).
+        if (MaxFoodSlots > 1 && _resolver.Supports(CookingToolConfigSO.CookingToolType.Combine))
+            return _resolver.CanAcceptCombineIngredient(_inputSOs, input);
+        return false;
     }
 
     public int GetFirstFreeSlotIndex()
@@ -329,7 +335,8 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         if (!_slot.HasFood)
             return;
-        _resolver.EnsureCombine(_slot.Current.GetKitchenObjectSO(), newValue);
+        RebuildInputs();
+        _resolver.EnsureCombine(_inputSOs, newValue);
     }
 
     private void HandleCuttingRecipeIndexChanged(int previousValue, int newValue)
@@ -420,8 +427,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         if (state == State.Cooking)
         {
             RebuildInputs();
-            KitchenObjectSO currentSO = _slot.Current != null ? _slot.Current.GetKitchenObjectSO() : null;
-            _resolver.EnsureCombine(currentSO, _netCombineRecipeIndex.Value);
+            _resolver.EnsureCombine(_inputSOs, _netCombineRecipeIndex.Value);
             _resolver.EnsureResolved(_inputSOs);
             if (!_resolver.HasValidRecipe)
                 return;
@@ -452,8 +458,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         }
 
         RebuildInputs();
-        KitchenObjectSO currentSO = _slot.Current != null ? _slot.Current.GetKitchenObjectSO() : null;
-        _resolver.EnsureCombine(currentSO, _netCombineRecipeIndex.Value);
+        _resolver.EnsureCombine(_inputSOs, _netCombineRecipeIndex.Value);
         _resolver.EnsureResolved(_inputSOs);
         // Defensive: an old Cooking state on a cutting tool must not advance the timer.
         State clockState = _netState.Value == State.Cooking && _resolver.IsCutting
@@ -737,6 +742,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     {
         if (!IsServer || !_slot.HasFood)
             return false;
+        RebuildInputs();
         KitchenObjectSO input = _slot.Current.GetKitchenObjectSO();
         if (_resolver.HasCuttingOptions(input))
         {
@@ -747,7 +753,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             _netCuttingRecipeIndex.Value = index;
             return true;
         }
-        if (!_resolver.ApplyOption(input, index))
+        if (!_resolver.ApplyCombineOption(_inputSOs, index))
             return false;
         _netCombineRecipeIndex.Value = index;
         return true;
@@ -773,7 +779,9 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         }
         if (cookingToolConfig == null || !cookingToolConfig.supportsOptionMenu || !_resolver.Supports(CookingToolConfigSO.CookingToolType.Combine))
             return;
-        UIManager.Instance.ShowOptionMenu(actor, sender, _resolver.GetOptions(input), CookingPresenter.OptionTitle);
+        RebuildInputs();
+        UIManager.Instance.ShowOptionMenu(actor, sender,
+            _resolver.GetCombineOptionsForIngredients(_inputSOs), CookingPresenter.OptionTitle);
     }
 
     public List<KitchenObjectSO> GetListKitchenObjectList(KitchenObjectSO kitchenObjectSO)

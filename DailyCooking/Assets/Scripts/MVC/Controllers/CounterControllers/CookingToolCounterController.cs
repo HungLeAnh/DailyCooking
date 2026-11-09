@@ -155,9 +155,10 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         KitchenObjectSO inputKitchenObjectSO = heldObject.GetKitchenObjectSO();
         if (!_cookingTool.CanAcceptInput(inputKitchenObjectSO))
         {
-            // The Blender refuses what no drink can use: say so, since the ingredient was not taken.
-            if (_cookingTool.RequiresManualStart && UIManager.Instance != null)
-                UIManager.Instance.ShowAlertMessage("This ingredient doesn't fit the blender.");
+            // Refuse the ingredient and say so, whatever the tool: a silent rejection leaves
+            // the player pressing interact with no idea why nothing happens.
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowAlertMessage("This ingredient doesn't fit this tool.");
             return;
         }
 
@@ -165,7 +166,7 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         if (slot < 0)
         {
             if (_cookingTool.RequiresManualStart && UIManager.Instance != null)
-                UIManager.Instance.ShowAlertMessage("The blender is full.");
+                UIManager.Instance.ShowAlertMessage("This tool is full.");
             return;
         }
         if (!heldObject.SetKitchenObjectParent(_cookingTool, slot))

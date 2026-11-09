@@ -126,6 +126,55 @@ public class RecipeDatabaseSO : ScriptableObject
         return list;
     }
 
+    // Multi-input combine lookups (the Pot's Stew). Like drinks, a combine recipe resolves
+    // only when the whole ingredient set matches, and an item may be added while some
+    // recipe still fits.
+    public CombineRecipeSO GetCombineRecipeForIngredients(IReadOnlyList<KitchenObjectSO> ingredients)
+    {
+        List<CombineRecipeSO> recipes = GetCombineRecipesForIngredients(ingredients);
+        return recipes.Count > 0 ? recipes[0] : null;
+    }
+
+    public List<CombineRecipeSO> GetCombineRecipesForIngredients(IReadOnlyList<KitchenObjectSO> ingredients)
+    {
+        List<CombineRecipeSO> matches = new List<CombineRecipeSO>();
+        if (ingredients == null || ingredients.Count == 0 || combineRecipes == null)
+            return matches;
+        for (int i = 0; i < combineRecipes.Count; i++)
+        {
+            CombineRecipeSO recipe = combineRecipes[i];
+            if (recipe == null || recipe.input == null || recipe.input.Count == 0)
+                continue;
+            if (IngredientsMatch(recipe.input, ingredients))
+                matches.Add(recipe);
+        }
+        return matches;
+    }
+
+    // True when `candidate` can still be added to `current` and some combine recipe remains possible.
+    public bool CanAcceptCombineIngredient(IReadOnlyList<KitchenObjectSO> current, KitchenObjectSO candidate)
+    {
+        if (candidate == null || combineRecipes == null)
+            return false;
+
+        List<KitchenObjectSO> withCandidate = new List<KitchenObjectSO>((current != null ? current.Count : 0) + 1);
+        if (current != null)
+            withCandidate.AddRange(current);
+        withCandidate.Add(candidate);
+
+        for (int i = 0; i < combineRecipes.Count; i++)
+        {
+            CombineRecipeSO recipe = combineRecipes[i];
+            if (recipe == null || recipe.input == null || recipe.input.Count == 0)
+                continue;
+            if (withCandidate.Count > recipe.input.Count)
+                continue;
+            if (IsSubset(recipe.input, withCandidate))
+                return true;
+        }
+        return false;
+    }
+
     public BakingRecipeSO GetBakingRecipe(KitchenObjectSO input)
     {
         _bakingCache.TryGetValue(input, out var recipe);
