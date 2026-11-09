@@ -1158,4 +1158,124 @@ public class CookingDataTests
         }
         Assert.IsTrue(registered, "Bitter Tea prefab missing from DefaultNetworkPrefabs.");
     }
+
+    // -----------------------------------------------------------------------------------------
+    // Regression guards for the grill / beverage-machine batch (2026-11-09).
+    // ConfigFood keys FoodItemDic by FoodSO.Guid, so an empty _guid silently drops the dish out
+    // of every GUID lookup (menu, orders, rewards). The cup is the only tableware that accepts
+    // drinks, so a drink missing from its valid list can be brewed but never served.
+    // -----------------------------------------------------------------------------------------
+
+    private static readonly string[] AllFoodSOPaths = new[]
+    {
+        "Assets/SO/FoodSO/BaconBurger.asset",
+        "Assets/SO/FoodSO/BakedPotatoes.asset",
+        "Assets/SO/FoodSO/CheeseBurgerSO.asset",
+        "Assets/SO/FoodSO/ChickenNuggetsMeal.asset",
+        "Assets/SO/FoodSO/CoffeeDrink.asset",
+        "Assets/SO/FoodSO/CorndogSpecial.asset",
+        "Assets/SO/FoodSO/CroissantSnack.asset",
+        "Assets/SO/FoodSO/GardenSalad.asset",
+        "Assets/SO/FoodSO/GrilledSalmonPlate.asset",
+        "Assets/SO/FoodSO/HamburgerFullSO.asset",
+        "Assets/SO/FoodSO/HotDogMeal.asset",
+        "Assets/SO/FoodSO/LoadedFries.asset",
+        "Assets/SO/FoodSO/MilkshakeDrink.asset",
+        "Assets/SO/FoodSO/OnionSaladSO.asset",
+        "Assets/SO/FoodSO/OrangeJuiceDrink.asset",
+        "Assets/SO/FoodSO/PeachSmoothieDrink.asset",
+        "Assets/SO/FoodSO/RoastChickenMeal.asset",
+        "Assets/SO/FoodSO/SaladSO.asset",
+        "Assets/SO/FoodSO/SodaDrink.asset",
+        "Assets/SO/FoodSO/SteakFrites.asset",
+        "Assets/SO/FoodSO/StewSO.asset",
+        "Assets/SO/FoodSO/TeaDrink.asset",
+        "Assets/SO/FoodSO/VegetableHamBurgerFullSO.asset"
+    };
+
+    [Test] public void EveryFoodSO_HasGuidMatchingItsAsset()
+    {
+        foreach (string path in AllFoodSOPaths)
+        {
+            FoodSO food = Load<FoodSO>(path);
+            string assetGuid = AssetDatabase.AssetPathToGUID(path);
+
+            Assert.IsFalse(string.IsNullOrEmpty(food.Guid), $"{path} has an empty _guid; ConfigFood cannot key it.");
+            Assert.AreEqual(assetGuid, food.Guid, $"{path} _guid must match the asset GUID.");
+        }
+    }
+
+    [Test] public void ConfigFood_EveryEntryResolvesByItsGuid()
+    {
+        ConfigFood cfg = Load<ConfigFood>("Assets/Configs/ConfigFood/ConfigFoodSO.asset");
+        cfg.Initialize();
+
+        foreach (FoodSO food in cfg.FoodItems)
+        {
+            Assert.IsNotNull(food, "ConfigFood holds a null entry.");
+            Assert.IsFalse(string.IsNullOrEmpty(food.Guid), $"{food.name} has an empty _guid.");
+            Assert.IsTrue(cfg.FoodItemDic.ContainsKey(food.Guid),
+                $"{food.name} is in foodItems but missing from FoodItemDic (duplicate or empty guid).");
+            Assert.AreSame(food, cfg.FoodItemDic[food.Guid], $"{food.name} resolves to the wrong FoodSO.");
+        }
+    }
+
+    private static bool CupAccepts(SerializedProperty valid, KitchenObjectSO drink)
+    {
+        for (int i = 0; i < valid.arraySize; i++)
+        {
+            if (valid.GetArrayElementAtIndex(i).objectReferenceValue == drink)
+                return true;
+        }
+        return false;
+    }
+
+    [Test] public void Cup_AcceptsEveryDrinkKitchenObject()
+    {
+        string[] drinkKitchenObjectPaths = new[]
+        {
+            "Assets/SO/KitchenObjectSO/OrangeJuice.asset",
+            "Assets/SO/KitchenObjectSO/Milkshake.asset",
+            "Assets/SO/KitchenObjectSO/PeachSmoothie.asset",
+            "Assets/SO/KitchenObjectSO/Coffee.asset",
+            "Assets/SO/KitchenObjectSO/Tea.asset",
+            "Assets/SO/KitchenObjectSO/Soda.asset"
+        };
+
+        GameObject cup = Load<GameObject>("Assets/Prefab/KitchenObjects/cup.prefab");
+        TablewareKitchenObject tableware = cup.GetComponent<TablewareKitchenObject>();
+        Assert.IsNotNull(tableware, "cup.prefab has no TablewareKitchenObject component.");
+
+        SerializedProperty valid = new SerializedObject(tableware).FindProperty("validKitchenObjectSOList");
+        Assert.IsNotNull(valid, "cup.prefab has no validKitchenObjectSOList.");
+
+        foreach (string path in drinkKitchenObjectPaths)
+        {
+            KitchenObjectSO drink = Load<KitchenObjectSO>(path);
+            Assert.IsTrue(CupAccepts(valid, drink),
+                $"cup.prefab does not accept {drink.objectName} ({path}); it cannot be served.");
+        }
+    }
+
+    [Test] public void EveryDrinkFoodSO_IsServableInACup()
+    {
+        ConfigFood cfg = Load<ConfigFood>("Assets/Configs/ConfigFood/ConfigFoodSO.asset");
+        GameObject cup = Load<GameObject>("Assets/Prefab/KitchenObjects/cup.prefab");
+        TablewareKitchenObject tableware = cup.GetComponent<TablewareKitchenObject>();
+        Assert.IsNotNull(tableware, "cup.prefab has no TablewareKitchenObject component.");
+        SerializedProperty valid = new SerializedObject(tableware).FindProperty("validKitchenObjectSOList");
+
+        foreach (FoodSO food in cfg.FoodItems)
+        {
+            if (food == null || food.foodType != FoodType.Drink)
+                continue;
+
+            Assert.IsNotNull(food.kitchenObjectSOList, $"{food.name} has no kitchenObjectSOList.");
+            Assert.AreEqual(1, food.kitchenObjectSOList.Count, $"{food.name} should list exactly one drink KitchenObject.");
+            KitchenObjectSO drink = food.kitchenObjectSOList[0];
+            Assert.IsNotNull(drink, $"{food.name} lists a null KitchenObject.");
+            Assert.IsTrue(CupAccepts(valid, drink),
+                $"Drink dish {food.name} uses {drink.objectName}, which cup.prefab rejects.");
+        }
+    }
 }

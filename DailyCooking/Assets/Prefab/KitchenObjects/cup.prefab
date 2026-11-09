@@ -102,7 +102,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 442d780bb1a99214597d0d3d83bc87c1, type: 2}
     - target: {fileID: 8121191103929895968, guid: e2ea2de7418dabb40816017224610779, type: 3}
       propertyPath: validKitchenObjectSOList.Array.size
-      value: 4
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8121191103929895968, guid: e2ea2de7418dabb40816017224610779, type: 3}
       propertyPath: 'validKitchenObjectSOList.Array.data[1]'
@@ -116,6 +116,18 @@ PrefabInstance:
       propertyPath: 'validKitchenObjectSOList.Array.data[3]'
       value: 
       objectReference: {fileID: 11400000, guid: 6b5ef1e167fb1fb44804ecc3b8018283, type: 2}
+    - target: {fileID: 8121191103929895968, guid: e2ea2de7418dabb40816017224610779, type: 3}
+      propertyPath: 'validKitchenObjectSOList.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 3acf05c490ea66f4e818af4348c52f0b, type: 2}
+    - target: {fileID: 8121191103929895968, guid: e2ea2de7418dabb40816017224610779, type: 3}
+      propertyPath: 'validKitchenObjectSOList.Array.data[5]'
+      value: 
+      objectReference: {fileID: 11400000, guid: d489ad9f0d097e1498baee6fd97ba344, type: 2}
+    - target: {fileID: 8121191103929895968, guid: e2ea2de7418dabb40816017224610779, type: 3}
+      propertyPath: 'validKitchenObjectSOList.Array.data[6]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 40380105b6eb4c841a6e76c2ab4d32a5, type: 2}
     - target: {fileID: 8247675298563034635, guid: e2ea2de7418dabb40816017224610779, type: 3}
       propertyPath: m_Layer
       value: 10
