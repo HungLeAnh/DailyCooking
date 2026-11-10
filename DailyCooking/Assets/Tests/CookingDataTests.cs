@@ -1278,4 +1278,185 @@ public class CookingDataTests
                 $"Drink dish {food.name} uses {drink.objectName}, which cup.prefab rejects.");
         }
     }
+
+    // -----------------------------------------------------------------------------------------
+    // Dessert machines (Ice Cream Machine, Pancake Machine) and the dish-reachability invariant.
+    // A dish is only servable if every ingredient in its list can be obtained: either bought
+    // from the shop or produced by some recipe. An orphaned KitchenObjectSO (one no recipe
+    // outputs and no shop item grants) makes its dish impossible to complete, silently.
+    // -----------------------------------------------------------------------------------------
+
+    private const string IceCreamMachinePath = "Assets/SO/BuildingSO/Counters/Tools/IceCreamMachine.asset";
+    private const string IceCreamConfigPath = "Assets/SO/CookingToolConfigSO/IceCreamMachine.asset";
+    private const string IceCreamPrefabPath = "Assets/Prefab/CookingTool/IceCreamMachineCookingTool.prefab";
+    private const string PancakeMachinePath = "Assets/SO/BuildingSO/Counters/Tools/PancakeMachine.asset";
+    private const string PancakeConfigPath = "Assets/SO/CookingToolConfigSO/PancakeMachine.asset";
+    private const string PancakePrefabPath = "Assets/Prefab/CookingTool/PancakeMachineCookingTool.prefab";
+    private const string IceCreamDrinkRecipePath = "Assets/SO/DrinkRecipeSO/Drink_MilkDough_IceCream.asset";
+    private const string PancakeBakeRecipePath = "Assets/SO/BakingRecipeSO/Bake_Dough_Pancake.asset";
+
+    [Test] public void DessertMachineConfigs_MatchExpectedSettings()
+    {
+        CookingToolConfigSO iceCream = Load<CookingToolConfigSO>(IceCreamConfigPath);
+        Assert.IsTrue(iceCream.Supports(CookingToolConfigSO.CookingToolType.Beverage));
+        Assert.IsFalse(iceCream.supportsOptionMenu);
+        Assert.IsFalse(iceCream.supportsBurning, "Ice cream must not burn.");
+        Assert.AreEqual(2, iceCream.maxFoodSlots, "Ice cream needs milk and dough.");
+        Assert.IsTrue(iceCream.requiresManualStart, "The player presses start once both ingredients are in.");
+
+        CookingToolConfigSO pancake = Load<CookingToolConfigSO>(PancakeConfigPath);
+        Assert.IsTrue(pancake.Supports(CookingToolConfigSO.CookingToolType.Baking));
+        Assert.IsFalse(pancake.supportsOptionMenu);
+        Assert.IsTrue(pancake.supportsBurning, "A pancake left in the machine burns.");
+        Assert.AreEqual(1, pancake.maxFoodSlots);
+        Assert.IsFalse(pancake.requiresManualStart, "The pancake machine auto-starts.");
+    }
+
+    [Test] public void DessertMachines_GuidsMatchAssetGuids()
+    {
+        foreach (string path in new[] { IceCreamMachinePath, PancakeMachinePath })
+        {
+            PlacedObjectTypeSO placed = Load<PlacedObjectTypeSO>(path);
+            Assert.IsFalse(string.IsNullOrEmpty(placed.Guid), path);
+            Assert.AreEqual(AssetDatabase.AssetPathToGUID(path), placed.Guid, path);
+        }
+    }
+
+    [Test] public void DessertMachines_AreToolsOnTheStove()
+    {
+        PlacedObjectTypeSO stove = Load<PlacedObjectTypeSO>("Assets/SO/BuildingSO/Counters/StoveCounter.asset");
+
+        foreach (string path in new[] { IceCreamMachinePath, PancakeMachinePath })
+        {
+            PlacedObjectTypeSO tool = Load<PlacedObjectTypeSO>(path);
+            Assert.IsTrue(tool.isTool, path);
+            Assert.AreEqual(1, tool.width, path);
+            Assert.AreEqual(1, tool.height, path);
+            Assert.AreEqual(InventoryTabType.Tool, tool.itemType.TabType, path);
+            Assert.AreEqual(1, tool.allowedUnderlyingCounters.Count, path);
+            Assert.AreSame(stove, tool.allowedUnderlyingCounters[0], $"{path} sits on StoveCounter.");
+        }
+    }
+
+    [Test] public void DessertMachinePrefabs_CarryCookingToolAndConfig()
+    {
+        var cases = new[]
+        {
+            new { Prefab = IceCreamPrefabPath, Config = IceCreamConfigPath, Name = "IceCreamMachineCookingTool" },
+            new { Prefab = PancakePrefabPath, Config = PancakeConfigPath, Name = "PancakeMachineCookingTool" }
+        };
+
+        foreach (var c in cases)
+        {
+            GameObject prefab = Load<GameObject>(c.Prefab);
+            Assert.AreEqual(c.Name, prefab.name, c.Prefab);
+
+            CookingTool tool = prefab.GetComponent<CookingTool>();
+            Assert.IsNotNull(tool, $"{c.Prefab} has no CookingTool.");
+            Assert.IsNotNull(prefab.GetComponent<Unity.Netcode.NetworkObject>(), $"{c.Prefab} needs a NetworkObject.");
+
+            SerializedProperty cfg = new SerializedObject(tool).FindProperty("cookingToolConfig");
+            Assert.IsNotNull(cfg, $"{c.Prefab} has no cookingToolConfig field.");
+            Assert.AreSame(Load<CookingToolConfigSO>(c.Config), cfg.objectReferenceValue,
+                $"{c.Prefab} must point at {c.Config}.");
+        }
+    }
+
+    [Test] public void DessertRecipes_ProduceTheDessertKitchenObjects()
+    {
+        KitchenObjectSO iceCream = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/IceCream.asset");
+        KitchenObjectSO pancake = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Pancake.asset");
+        KitchenObjectSO milk = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Milk.asset");
+        KitchenObjectSO dough = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Dough.asset");
+
+        DrinkRecipeSO iceCreamRecipe = Load<DrinkRecipeSO>(IceCreamDrinkRecipePath);
+        CollectionAssert.Contains(iceCreamRecipe.input, milk, "Ice cream needs milk.");
+        CollectionAssert.Contains(iceCreamRecipe.input, dough, "Ice cream needs dough.");
+        Assert.AreSame(iceCream, iceCreamRecipe.output);
+        Assert.Greater(iceCreamRecipe.drinkTimerMax, 0f);
+
+        BakingRecipeSO pancakeRecipe = Load<BakingRecipeSO>(PancakeBakeRecipePath);
+        Assert.AreSame(dough, pancakeRecipe.input);
+        Assert.AreSame(pancake, pancakeRecipe.output);
+        Assert.Greater(pancakeRecipe.bakingTimerMax, 0f);
+    }
+
+    [Test] public void DessertDishes_AreServableOnAPlate()
+    {
+        ConfigFood cfg = Load<ConfigFood>("Assets/Configs/ConfigFood/ConfigFoodSO.asset");
+        GameObject plate = Load<GameObject>("Assets/Prefab/KitchenObjects/plate.prefab");
+        TablewareKitchenObject tableware = plate.GetComponent<TablewareKitchenObject>();
+        Assert.IsNotNull(tableware, "plate.prefab has no TablewareKitchenObject.");
+        SerializedProperty valid = new SerializedObject(tableware).FindProperty("validKitchenObjectSOList");
+
+        foreach (string name in new[] { "Ice Cream Sundae", "Pancake Stack" })
+        {
+            FoodSO food = cfg.FoodItems.Find(f => f != null && f.recipeName == name);
+            Assert.IsNotNull(food, $"ConfigFood missing dessert {name}.");
+            Assert.AreEqual(FoodType.Dessert, food.foodType, name);
+            Assert.AreEqual(1, food.kitchenObjectSOList.Count, name);
+            KitchenObjectSO item = food.kitchenObjectSOList[0];
+            Assert.IsNotNull(item, name);
+
+            bool found = false;
+            for (int i = 0; i < valid.arraySize; i++)
+            {
+                if (valid.GetArrayElementAtIndex(i).objectReferenceValue == item) { found = true; break; }
+            }
+            Assert.IsTrue(found, $"Dessert {name} uses {item.objectName}, which plate.prefab rejects.");
+        }
+    }
+
+    // The invariant that catches the whole class of "dish exists but can never be made" bugs.
+    [Test] public void EveryDishIngredient_IsObtainable()
+    {
+        RecipeDatabaseSO database = Load<RecipeDatabaseSO>(RecipeDatabasePath);
+        database.Initialize();
+        ConfigShop shop = Load<ConfigShop>(ShopPath);
+
+        // Everything a recipe can output.
+        var produced = new HashSet<KitchenObjectSO>();
+        foreach (var r in LoadAll<CuttingRecipeSO>("Assets/SO/CuttingRecipeSO")) if (r != null && r.output != null) produced.Add(r.output);
+        foreach (var r in LoadAll<FryingRecipeSO>("Assets/SO/FryingRecipeSO")) if (r != null && r.output != null) produced.Add(r.output);
+        foreach (var r in LoadAll<BakingRecipeSO>("Assets/SO/BakingRecipeSO")) if (r != null && r.output != null) produced.Add(r.output);
+        foreach (var r in LoadAll<DeepFryRecipeSO>("Assets/SO/DeepFryRecipeSO")) if (r != null && r.output != null) produced.Add(r.output);
+        foreach (var r in LoadAll<DrinkRecipeSO>("Assets/SO/DrinkRecipeSO")) if (r != null && r.output != null) produced.Add(r.output);
+        foreach (var r in LoadAll<CombineRecipeSO>("Assets/SO/CombineRecipeSO")) if (r != null && r.output != null) produced.Add(r.output);
+
+        // Everything the shop grants by KitchenObject GUID.
+        var shopGuids = new HashSet<string>();
+        foreach (var item in shop.ShopItems)
+        {
+            if (item?.Rewards == null) continue;
+            foreach (var reward in item.Rewards)
+                if (!string.IsNullOrEmpty(reward.Guid)) shopGuids.Add(reward.Guid);
+        }
+
+        var failures = new List<string>();
+        foreach (FoodSO food in Load<ConfigFood>("Assets/Configs/ConfigFood/ConfigFoodSO.asset").FoodItems)
+        {
+            if (food == null || food.kitchenObjectSOList == null) continue;
+            foreach (KitchenObjectSO ingredient in food.kitchenObjectSOList)
+            {
+                if (ingredient == null) { failures.Add($"{food.recipeName}: null ingredient"); continue; }
+                if (produced.Contains(ingredient)) continue;
+                if (!string.IsNullOrEmpty(ingredient.Guid) && shopGuids.Contains(ingredient.Guid)) continue;
+                failures.Add($"{food.recipeName} needs {ingredient.objectName}, which no recipe produces and no shop item sells");
+            }
+        }
+
+        Assert.IsEmpty(failures, "Unobtainable dish ingredients:\n" + string.Join("\n", failures));
+    }
+
+    private static List<T> LoadAll<T>(string folder) where T : Object
+    {
+        var result = new List<T>();
+        foreach (string guid in AssetDatabase.FindAssets("t:" + typeof(T).Name, new[] { folder }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (asset != null) result.Add(asset);
+        }
+        return result;
+    }
 }

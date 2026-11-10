@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e7747bdf78fa6141a2f81d16ff91e5f, type: 3}
+  m_Name: PancakeMachine
+  m_EditorClassIdentifier: Scripts::PlacedObjectTypeSO
+  _guid: a1b2c3d4e5f6000011112222333414
+  id: PancakeMachine
+  nameString: Pancake Machine
+  prefab: {fileID: 3835830830082720915, guid: a1b2c3d4e5f6000011112222333412, type: 3}
+  visual: {fileID: 0}
+  icon: {fileID: 0}
+  width: 1
+  height: 1
+  itemType:
+    _typeColor: {r: 0, g: 0, b: 0, a: 0}
+    _tabType: 3
+  isTool: 1
+  allowedUnderlyingCounters:
+  - {fileID: 11400000, guid: 5b81ed65ae3b6144289206c5e1142af8, type: 2}
