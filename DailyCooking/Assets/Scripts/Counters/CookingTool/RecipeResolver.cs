@@ -90,6 +90,15 @@ public sealed class RecipeResolver
         return _config == null || _config.AllowsIngredient(ingredient);
     }
 
+    // Frying recipes can be limited to tools that can actually boil (the Kettle), so the
+    // Pan and Grill refuse Water -> Hot Water even though they share the Frying type.
+    private bool CanUseFrying(FryingRecipeSO recipe)
+    {
+        if (recipe == null)
+            return false;
+        return !recipe.requiresBoilingTool || (_config != null && _config.canBoilWater);
+    }
+
     private bool AllowsAllInputs(IReadOnlyList<KitchenObjectSO> inputs)
     {
         if (_config == null || _config.allowedIngredients == null || _config.allowedIngredients.Count == 0)
@@ -116,6 +125,10 @@ public sealed class RecipeResolver
     {
         if (_config == null || inputs == null || inputs.Count == 0 || KitchenGameManager.Instance.RecipeDatabase == null)
             return false;
+        // The per-tool whitelist gates every recipe type, not just drinks: the Kettle only
+        // boils Water, the Teapot only takes tea leaves and hot water.
+        if (!AllowsAllInputs(inputs))
+            return false;
         KitchenObjectSO firstInput = inputs[0];
         if (firstInput == null)
             return false;
@@ -126,7 +139,7 @@ public sealed class RecipeResolver
             switch (_types[i])
             {
                 case CookingToolConfigSO.CookingToolType.Frying:
-                    if (singleInput && KitchenGameManager.Instance.RecipeDatabase.GetFryingRecipe(firstInput) != null) return true;
+                    if (singleInput && CanUseFrying(KitchenGameManager.Instance.RecipeDatabase.GetFryingRecipe(firstInput))) return true;
                     break;
                 case CookingToolConfigSO.CookingToolType.Baking:
                     if (singleInput && KitchenGameManager.Instance.RecipeDatabase.GetBakingRecipe(firstInput) != null) return true;
@@ -156,13 +169,15 @@ public sealed class RecipeResolver
     {
         if (input == null || _config == null || KitchenGameManager.Instance.RecipeDatabase == null)
             return false;
+        if (!AllowsIngredient(input))
+            return false;
         RecipeDatabaseSO database = KitchenGameManager.Instance.RecipeDatabase;
         for (int i = 0; i < _types.Count; i++)
         {
             switch (_types[i])
             {
                 case CookingToolConfigSO.CookingToolType.Frying:
-                    if (database.GetFryingRecipe(input) != null) return true;
+                    if (CanUseFrying(database.GetFryingRecipe(input))) return true;
                     break;
                 case CookingToolConfigSO.CookingToolType.Baking:
                     if (database.GetBakingRecipe(input) != null) return true;
@@ -199,6 +214,7 @@ public sealed class RecipeResolver
     public bool CanAcceptCombineIngredient(IReadOnlyList<KitchenObjectSO> current, KitchenObjectSO candidate)
     {
         if (!Supports(CookingToolConfigSO.CookingToolType.Combine) || candidate == null ||
+            !AllowsIngredient(candidate) ||
             KitchenGameManager.Instance.RecipeDatabase == null)
             return false;
         return KitchenGameManager.Instance.RecipeDatabase.CanAcceptCombineIngredient(current, candidate);
@@ -254,6 +270,8 @@ public sealed class RecipeResolver
         _lookupDone = true;
         if (_config == null || inputs == null || inputs.Count == 0 || KitchenGameManager.Instance.RecipeDatabase == null)
             return;
+        if (!AllowsAllInputs(inputs))
+            return;
 
         KitchenObjectSO firstInput = inputs[0];
         if (firstInput == null)
@@ -267,8 +285,8 @@ public sealed class RecipeResolver
             {
                 case CookingToolConfigSO.CookingToolType.Frying:
                     if (!singleInput) break;
-                    _frying = KitchenGameManager.Instance.RecipeDatabase.GetFryingRecipe(firstInput);
-                    if (_frying != null) { CookingTimeMax = _frying.fryingTimerMax; return; }
+                    FryingRecipeSO frying = KitchenGameManager.Instance.RecipeDatabase.GetFryingRecipe(firstInput);
+                    if (CanUseFrying(frying)) { _frying = frying; CookingTimeMax = frying.fryingTimerMax; return; }
                     break;
                 case CookingToolConfigSO.CookingToolType.Baking:
                     if (!singleInput) break;

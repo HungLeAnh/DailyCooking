@@ -162,7 +162,11 @@ public class CookingDataTests
             Assert.IsNotNull(recipe.input, $"{recipe.name} has no input.");
             Assert.IsNotNull(recipe.output, $"{recipe.name} has no output.");
             Assert.Greater(recipe.bakingTimerMax, 0f, $"{recipe.name} has no timer.");
-            Assert.AreSame(recipe, database.GetBakingRecipe(recipe.input), recipe.name);
+            // Dough feeds two oven products (croissant and pancake), so the lookup returns
+            // one of the recipes for that input rather than necessarily this exact asset.
+            BakingRecipeSO resolved = database.GetBakingRecipe(recipe.input);
+            Assert.IsNotNull(resolved, $"{recipe.name}: no baking recipe resolves for its input.");
+            Assert.AreSame(recipe.input, resolved.input, recipe.name);
             Assert.IsNotNull(database.GetBurningRecipe(recipe.output), $"{recipe.name}: output has no burning recipe.");
         }
     }
@@ -697,14 +701,14 @@ public class CookingDataTests
     }
 
     // -----------------------------------------------------------------------------------------
-    // New Cooking Tools: Grill, Coffee Machine, Tea Machine, Soda Machine
+    // New Cooking Tools: Grill, Coffee Machine, Teapot, Soda Machine
     // -----------------------------------------------------------------------------------------
 
     private static readonly string[] NewToolPlacedPaths = new[]
     {
         "Assets/SO/BuildingSO/Counters/Tools/Grill.asset",
         "Assets/SO/BuildingSO/Counters/Tools/CoffeeMachine.asset",
-        "Assets/SO/BuildingSO/Counters/Tools/TeaMachine.asset",
+        "Assets/SO/BuildingSO/Counters/Tools/Teapot.asset",
         "Assets/SO/BuildingSO/Counters/Tools/SodaMachine.asset"
     };
 
@@ -712,7 +716,7 @@ public class CookingDataTests
     {
         "Assets/SO/CookingToolConfigSO/Grill.asset",
         "Assets/SO/CookingToolConfigSO/CoffeeMachine.asset",
-        "Assets/SO/CookingToolConfigSO/TeaMachine.asset",
+        "Assets/SO/CookingToolConfigSO/Teapot.asset",
         "Assets/SO/CookingToolConfigSO/SodaMachine.asset"
     };
 
@@ -720,7 +724,7 @@ public class CookingDataTests
     {
         "Assets/Prefab/CookingTool/GrillCookingTool.prefab",
         "Assets/Prefab/CookingTool/CoffeeMachineCookingTool.prefab",
-        "Assets/Prefab/CookingTool/TeaMachineCookingTool.prefab",
+        "Assets/Prefab/CookingTool/TeapotCookingTool.prefab",
         "Assets/Prefab/CookingTool/SodaMachineCookingTool.prefab"
     };
 
@@ -731,7 +735,9 @@ public class CookingDataTests
         "Assets/SO/KitchenObjectSO/Syrup.asset",
         "Assets/SO/KitchenObjectSO/Coffee.asset",
         "Assets/SO/KitchenObjectSO/Tea.asset",
-        "Assets/SO/KitchenObjectSO/Soda.asset"
+        "Assets/SO/KitchenObjectSO/Soda.asset",
+        "Assets/SO/KitchenObjectSO/HotWater.asset",
+        "Assets/SO/KitchenObjectSO/EmptyCup.asset"
     };
 
     private static readonly string[] NewKitchenObjectPrefabPaths = new[]
@@ -741,7 +747,9 @@ public class CookingDataTests
         "Assets/Prefab/KitchenObjects/food_ingredient_syrup.prefab",
         "Assets/Prefab/KitchenObjects/food_drink_coffee.prefab",
         "Assets/Prefab/KitchenObjects/food_drink_tea.prefab",
-        "Assets/Prefab/KitchenObjects/food_drink_soda.prefab"
+        "Assets/Prefab/KitchenObjects/food_drink_soda.prefab",
+        "Assets/Prefab/KitchenObjects/food_ingredient_hotwater.prefab",
+        "Assets/Prefab/KitchenObjects/food_drink_emptycup.prefab"
     };
 
     [Test] public void NewToolConfigs_MatchExpectedSettings()
@@ -757,7 +765,6 @@ public class CookingDataTests
         string[] machineConfigs = new[]
         {
             "Assets/SO/CookingToolConfigSO/CoffeeMachine.asset",
-            "Assets/SO/CookingToolConfigSO/TeaMachine.asset",
             "Assets/SO/CookingToolConfigSO/SodaMachine.asset"
         };
         foreach (string path in machineConfigs)
@@ -769,16 +776,18 @@ public class CookingDataTests
             Assert.IsFalse(cfg.requiresManualStart, $"{path} is auto-start.");
         }
 
-        // Only the tea machine takes two ingredients (tea leaf + water).
-        Assert.AreEqual(1, Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/CoffeeMachine.asset").maxFoodSlots);
-        Assert.AreEqual(2, Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/TeaMachine.asset").maxFoodSlots,
-            "The Tea Machine needs room for the leaf and the water.");
-        Assert.AreEqual(1, Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/SodaMachine.asset").maxFoodSlots);
-
-        // Only the tea machine models over-steeping: the finished tea goes bitter if it is
-        // left inside instead of being taken out.
-        CookingToolConfigSO tea = Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/TeaMachine.asset");
-        Assert.IsTrue(tea.supportsBurning, "The Tea Machine must over-steep (burn) its tea.");
+        // The Teapot is no longer a beverage machine: it brews tea through a combine recipe,
+        // hides what goes in and only gives the tea back in an empty cup.
+        CookingToolConfigSO tea = Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/Teapot.asset");
+        Assert.IsTrue(tea.Supports(CookingToolConfigSO.CookingToolType.Combine), "Teapot must combine.");
+        Assert.IsFalse(tea.Supports(CookingToolConfigSO.CookingToolType.Beverage), "Teapot is not a beverage machine.");
+        Assert.IsFalse(tea.supportsOptionMenu, "Teapot brews without the option menu.");
+        Assert.AreEqual(2, tea.maxFoodSlots, "The Teapot needs room for the leaf and the hot water.");
+        Assert.IsFalse(tea.requiresManualStart, "The Teapot starts once the leaf and hot water are in.");
+        Assert.IsTrue(tea.hidesContents, "The Teapot hides its ingredients behind the HUD.");
+        Assert.IsTrue(tea.commitsInputs, "Nothing comes back out of the Teapot once it went in.");
+        Assert.IsNotNull(tea.outputVessel, "The Teapot needs an empty cup to serve the tea.");
+        Assert.IsTrue(tea.supportsBurning, "The Teapot must over-steep (burn) its tea.");
         Assert.IsFalse(Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/CoffeeMachine.asset").supportsBurning);
         Assert.IsFalse(Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/SodaMachine.asset").supportsBurning);
     }
@@ -811,7 +820,7 @@ public class CookingDataTests
         string[] machines = new[]
         {
             "Assets/SO/BuildingSO/Counters/Tools/CoffeeMachine.asset",
-            "Assets/SO/BuildingSO/Counters/Tools/TeaMachine.asset",
+            "Assets/SO/BuildingSO/Counters/Tools/Teapot.asset",
             "Assets/SO/BuildingSO/Counters/Tools/SodaMachine.asset"
         };
         foreach (string path in machines)
@@ -931,38 +940,49 @@ public class CookingDataTests
         KitchenObjectSO leaf = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/TeaLeaf.asset");
         KitchenObjectSO syrup = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Syrup.asset");
         KitchenObjectSO water = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Water.asset");
+        KitchenObjectSO hotWater = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/HotWater.asset");
 
         KitchenObjectSO coffee = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Coffee.asset");
         KitchenObjectSO tea = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Tea.asset");
         KitchenObjectSO soda = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Soda.asset");
 
         DrinkRecipeSO rCoffee = database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { bean });
-        // Tea is brewed from the leaf AND water, in either order.
-        DrinkRecipeSO rTea = database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { leaf, water });
         DrinkRecipeSO rSoda = database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { syrup });
 
         Assert.IsNotNull(rCoffee, "Coffee recipe not found for CoffeeBean.");
         Assert.AreSame(coffee, rCoffee.output);
 
-        Assert.IsNotNull(rTea, "Tea recipe not found for TeaLeaf + Water.");
-        Assert.AreSame(tea, rTea.output);
-        Assert.AreSame(rTea, database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { water, leaf }),
-            "Tea recipe must be order independent.");
-
         Assert.IsNotNull(rSoda, "Soda recipe not found for Syrup.");
         Assert.AreSame(soda, rSoda.output);
 
         Assert.AreSame(rCoffee, database.GetDrinkRecipeForOutput(coffee));
-        Assert.AreSame(rTea, database.GetDrinkRecipeForOutput(tea));
         Assert.AreSame(rSoda, database.GetDrinkRecipeForOutput(soda));
+
+        // Tea is brewed in the Teapot from the leaf AND hot water, in either order.
+        CombineRecipeSO rTea = database.GetCombineRecipeForIngredients(
+            new List<KitchenObjectSO> { leaf, hotWater });
+        Assert.IsNotNull(rTea, "Tea recipe not found for TeaLeaf + HotWater.");
+        Assert.AreSame(tea, rTea.output);
+        Assert.Greater(rTea.combineTimerMax, 0f);
+        Assert.AreSame(rTea, database.GetCombineRecipeForIngredients(new List<KitchenObjectSO> { hotWater, leaf }),
+            "Tea recipe must be order independent.");
+        Assert.AreSame(rTea, database.GetCombineRecipeForOutput(tea),
+            "The food detail popup must find the tea ingredients from the drink.");
+
+        // The blender no longer brews tea: cold water is not a tea ingredient any more.
+        Assert.IsNull(database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { leaf, water }),
+            "Tea must not be brewed by the blender.");
+        Assert.IsNull(database.GetDrinkRecipeForOutput(tea), "Tea is a combine output, not a drink recipe.");
 
         // Mixed/wrong ingredients must not resolve
         Assert.IsNull(database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { bean, leaf }));
         Assert.IsNull(database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { bean, bean }));
-        Assert.IsNull(database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { leaf }),
-            "Tea alone must not brew without water.");
-        Assert.IsNull(database.GetDrinkRecipeForIngredients(new List<KitchenObjectSO> { leaf, leaf }),
+        Assert.IsNull(database.GetCombineRecipeForIngredients(new List<KitchenObjectSO> { leaf }),
+            "Tea alone must not brew without hot water.");
+        Assert.IsNull(database.GetCombineRecipeForIngredients(new List<KitchenObjectSO> { leaf, leaf }),
             "Two leaves are not a tea recipe.");
+        Assert.IsNull(database.GetCombineRecipeForIngredients(new List<KitchenObjectSO> { leaf, water }),
+            "Cold water is not a tea recipe.");
     }
 
     [Test] public void ShopItems40To47_UseNewToolAndIngredientRewards()
@@ -974,7 +994,7 @@ public class CookingDataTests
         {
             (40, "Grill Tool", "Assets/SO/BuildingSO/Counters/Tools/Grill.asset", ShopItemCategory.Tools, 150, 2),
             (41, "Coffee Machine", "Assets/SO/BuildingSO/Counters/Tools/CoffeeMachine.asset", ShopItemCategory.Tools, 200, 3),
-            (42, "Tea Machine", "Assets/SO/BuildingSO/Counters/Tools/TeaMachine.asset", ShopItemCategory.Tools, 190, 3),
+            (42, "Teapot", "Assets/SO/BuildingSO/Counters/Tools/Teapot.asset", ShopItemCategory.Tools, 190, 3),
             (43, "Soda Machine", "Assets/SO/BuildingSO/Counters/Tools/SodaMachine.asset", ShopItemCategory.Tools, 210, 4),
         };
         foreach (var def in expectedTools)
@@ -1036,9 +1056,11 @@ public class CookingDataTests
         KitchenObjectSO leaf = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/TeaLeaf.asset");
         KitchenObjectSO syrup = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Syrup.asset");
         KitchenObjectSO water = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Water.asset");
+        KitchenObjectSO hotWater = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/HotWater.asset");
+        KitchenObjectSO emptyCup = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/EmptyCup.asset");
 
         CookingToolConfigSO coffee = Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/CoffeeMachine.asset");
-        CookingToolConfigSO tea = Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/TeaMachine.asset");
+        CookingToolConfigSO tea = Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/Teapot.asset");
         CookingToolConfigSO soda = Load<CookingToolConfigSO>("Assets/SO/CookingToolConfigSO/SodaMachine.asset");
 
         Assert.AreEqual(1, coffee.allowedIngredients.Count, "Coffee Machine must whitelist exactly one ingredient.");
@@ -1047,12 +1069,14 @@ public class CookingDataTests
         Assert.IsFalse(coffee.AllowsIngredient(leaf));
         Assert.IsFalse(coffee.AllowsIngredient(syrup));
 
-        // Tea is brewed from a leaf and water, so the machine accepts both (and nothing else).
-        Assert.AreEqual(2, tea.allowedIngredients.Count, "Tea Machine must whitelist the leaf and the water.");
+        // The Teapot takes the tea leaf and the hot water, nothing else.
+        Assert.AreEqual(2, tea.allowedIngredients.Count, "Teapot must whitelist the leaf and the hot water.");
         CollectionAssert.Contains(tea.allowedIngredients, leaf);
-        CollectionAssert.Contains(tea.allowedIngredients, water);
+        CollectionAssert.Contains(tea.allowedIngredients, hotWater);
         Assert.IsTrue(tea.AllowsIngredient(leaf));
-        Assert.IsTrue(tea.AllowsIngredient(water));
+        Assert.IsTrue(tea.AllowsIngredient(hotWater));
+        Assert.IsFalse(tea.AllowsIngredient(water), "Cold water must not go in the Teapot.");
+        Assert.IsFalse(tea.AllowsIngredient(emptyCup), "The empty cup is the serving vessel, not an ingredient.");
         Assert.IsFalse(tea.AllowsIngredient(bean));
         Assert.IsFalse(tea.AllowsIngredient(syrup));
 
@@ -1081,7 +1105,7 @@ public class CookingDataTests
         Assert.IsTrue(resolver.AllowsIngredient(syrup));
     }
 
-    [Test] public void Water_IsAnIngredientTheTeaMachineCanBrew()
+    [Test] public void Water_IsAnIngredientTheKettleCanBoil()
     {
         KitchenObjectSO water = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Water.asset");
         Assert.IsNotNull(water, "Water SO is missing.");
@@ -1115,7 +1139,7 @@ public class CookingDataTests
         Assert.IsTrue(registered, "Water prefab missing from DefaultNetworkPrefabs.");
     }
 
-    [Test] public void TeaMachine_OverSteepsIntoBitterTea()
+    [Test] public void Teapot_OverSteepsIntoBitterTea()
     {
         RecipeDatabaseSO database = Load<RecipeDatabaseSO>(RecipeDatabasePath);
         database.Initialize();
@@ -1448,6 +1472,187 @@ public class CookingDataTests
         Assert.IsEmpty(failures, "Unobtainable dish ingredients:\n" + string.Join("\n", failures));
     }
 
+    // -----------------------------------------------------------------------------------------
+    // Teapot + Kettle batch (2026-11-10).
+    // The teapot is a real brewing tool: the kettle boils water into hot water, the teapot
+    // combines the hot water with tea leaves, and the finished tea can only leave the pot in
+    // an empty cup. These guards keep the assets in step with that flow.
+    // -----------------------------------------------------------------------------------------
+
+    private const string TeapotToolPath = "Assets/SO/BuildingSO/Counters/Tools/Teapot.asset";
+    private const string TeapotConfigPath = "Assets/SO/CookingToolConfigSO/Teapot.asset";
+    private const string TeapotPrefabPath = "Assets/Prefab/CookingTool/TeapotCookingTool.prefab";
+    private const string KettleToolPath = "Assets/SO/BuildingSO/Counters/Tools/Kettle.asset";
+    private const string KettleConfigPath = "Assets/SO/CookingToolConfigSO/Kettle.asset";
+    private const string KettlePrefabPath = "Assets/Prefab/CookingTool/KettleCookingTool.prefab";
+    private const string HotWaterPath = "Assets/SO/KitchenObjectSO/HotWater.asset";
+    private const string EmptyCupPath = "Assets/SO/KitchenObjectSO/EmptyCup.asset";
+    private const string BoilWaterRecipePath = "Assets/SO/FryingRecipeSO/Water-HotWater.asset";
+    private const string TeaCombineRecipePath = "Assets/SO/CombineRecipeSO/TeaLeafHotWater-Tea.asset";
+
+    [Test] public void KettleConfig_BoilsWaterAndNothingElse()
+    {
+        CookingToolConfigSO kettle = Load<CookingToolConfigSO>(KettleConfigPath);
+        Assert.IsTrue(kettle.Supports(CookingToolConfigSO.CookingToolType.Frying));
+        Assert.IsFalse(kettle.Supports(CookingToolConfigSO.CookingToolType.Combine));
+        Assert.IsTrue(kettle.canBoilWater, "The kettle is the only tool allowed to boil water.");
+        Assert.IsFalse(kettle.supportsBurning, "The kettle must not burn the water.");
+        Assert.IsFalse(kettle.supportsOptionMenu);
+        Assert.AreEqual(1, kettle.maxFoodSlots);
+        Assert.IsFalse(kettle.requiresManualStart);
+
+        KitchenObjectSO water = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Water.asset");
+        Assert.AreEqual(1, kettle.allowedIngredients.Count, "The kettle only takes water.");
+        Assert.AreSame(water, kettle.allowedIngredients[0]);
+
+        // Pan, Grill and the Teapot must never boil water, even though they share Frying.
+        foreach (string path in new[]
+                 {
+                     "Assets/SO/CookingToolConfigSO/Pan.asset",
+                     "Assets/SO/CookingToolConfigSO/Grill.asset",
+                     TeapotConfigPath
+                 })
+        {
+            Assert.IsFalse(Load<CookingToolConfigSO>(path).canBoilWater, $"{path} must not boil water.");
+        }
+
+        // The boiling recipe is flagged, so the resolver can keep it for the kettle alone.
+        FryingRecipeSO boil = Load<FryingRecipeSO>(BoilWaterRecipePath);
+        KitchenObjectSO hotWater = Load<KitchenObjectSO>(HotWaterPath);
+        Assert.AreSame(water, boil.input);
+        Assert.AreSame(hotWater, boil.output);
+        Assert.Greater(boil.fryingTimerMax, 0f);
+        Assert.IsTrue(boil.requiresBoilingTool, "Water -> HotWater must require a boiling tool.");
+    }
+
+    [Test] public void Kettle_IsAToolOnTheStoveAndRegisteredEverywhere()
+    {
+        PlacedObjectTypeSO stove = Load<PlacedObjectTypeSO>("Assets/SO/BuildingSO/Counters/StoveCounter.asset");
+        PlacedObjectTypeSO kettle = Load<PlacedObjectTypeSO>(KettleToolPath);
+
+        Assert.IsTrue(kettle.isTool);
+        Assert.AreEqual(1, kettle.width);
+        Assert.AreEqual(1, kettle.height);
+        Assert.AreEqual(InventoryTabType.Tool, kettle.itemType.TabType);
+        Assert.AreEqual(1, kettle.allowedUnderlyingCounters.Count);
+        Assert.AreSame(stove, kettle.allowedUnderlyingCounters[0], "The kettle sits on the StoveCounter.");
+        Assert.AreEqual(AssetDatabase.AssetPathToGUID(KettleToolPath), kettle.Guid, "Kettle _guid must match asset GUID.");
+        Assert.AreEqual("Kettle", kettle.nameString);
+        Assert.AreEqual("KettleCookingTool", kettle.prefab.name);
+
+        // Placed object database: the shop resolves tool rewards through it.
+        SerializedProperty placeObjects = new SerializedObject(Load<ScriptableObject>(PlacedObjectDatabasePath))
+            .FindProperty("placeObjects");
+        bool inDatabase = false;
+        for (int i = 0; i < placeObjects.arraySize; i++)
+            if (placeObjects.GetArrayElementAtIndex(i).objectReferenceValue == kettle) inDatabase = true;
+        Assert.IsTrue(inDatabase, "Kettle is missing from PlacedObjectDatabase.");
+
+        // Network prefabs: clients cannot spawn an unregistered tool.
+        SerializedProperty list = new SerializedObject(Load<ScriptableObject>(DefaultNetworkPrefabsPath))
+            .FindProperty("List");
+        GameObject kettlePrefab = Load<GameObject>(KettlePrefabPath);
+        bool inNetworkList = false;
+        for (int i = 0; i < list.arraySize; i++)
+        {
+            SerializedProperty p = list.GetArrayElementAtIndex(i).FindPropertyRelative("Prefab");
+            if (p != null && p.objectReferenceValue == kettlePrefab) inNetworkList = true;
+        }
+        Assert.IsTrue(inNetworkList, "Kettle prefab is missing from DefaultNetworkPrefabs.");
+
+        // The prefab carries the kettle config, a drop point and a collider.
+        CookingTool tool = kettlePrefab.GetComponent<CookingTool>();
+        Assert.IsNotNull(tool, "Kettle prefab has no CookingTool.");
+        SerializedObject sTool = new SerializedObject(tool);
+        Assert.AreSame(Load<CookingToolConfigSO>(KettleConfigPath),
+            sTool.FindProperty("cookingToolConfig").objectReferenceValue, "Kettle prefab must use the kettle config.");
+        Assert.IsNotNull(sTool.FindProperty("placePoint").objectReferenceValue, "Kettle prefab has no placePoint.");
+        MeshCollider[] colliders = kettlePrefab.GetComponentsInChildren<MeshCollider>(true);
+        Assert.Greater(colliders.Length, 0, "Kettle prefab has no MeshCollider.");
+        foreach (MeshCollider collider in colliders)
+            Assert.IsTrue(collider.convex, "The kettle collider must be convex.");
+    }
+
+    [Test] public void Teapot_CombinesLeafAndHotWaterIntoTea()
+    {
+        RecipeDatabaseSO database = Load<RecipeDatabaseSO>(RecipeDatabasePath);
+        database.Initialize();
+
+        KitchenObjectSO leaf = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/TeaLeaf.asset");
+        KitchenObjectSO hotWater = Load<KitchenObjectSO>(HotWaterPath);
+        KitchenObjectSO tea = Load<KitchenObjectSO>("Assets/SO/KitchenObjectSO/Tea.asset");
+
+        CombineRecipeSO recipe = Load<CombineRecipeSO>(TeaCombineRecipePath);
+        CollectionAssert.Contains(recipe.input, leaf, "Tea needs the tea leaf.");
+        CollectionAssert.Contains(recipe.input, hotWater, "Tea needs the hot water.");
+        Assert.AreEqual(2, recipe.input.Count);
+        Assert.AreSame(tea, recipe.output);
+        Assert.Greater(recipe.combineTimerMax, 0f);
+
+        Assert.AreSame(recipe, database.GetCombineRecipeForIngredients(new List<KitchenObjectSO> { leaf, hotWater }));
+        Assert.AreSame(recipe, database.GetCombineRecipeForIngredients(new List<KitchenObjectSO> { hotWater, leaf }));
+    }
+
+    [Test] public void Teapot_OnlyGivesTheTeaBackInAnEmptyCup()
+    {
+        CookingToolConfigSO teapot = Load<CookingToolConfigSO>(TeapotConfigPath);
+        KitchenObjectSO cup = Load<KitchenObjectSO>(EmptyCupPath);
+
+        Assert.AreEqual("Empty Cup", cup.objectName, "The serving cup must read as an empty cup.");
+        Assert.AreSame(cup, teapot.outputVessel, "The Teapot must require the empty cup.");
+        CollectionAssert.DoesNotContain(teapot.allowedIngredients, cup,
+            "The empty cup is a vessel, never an ingredient.");
+
+        // The cup prefab is a plain KitchenObject like the other ingredients, so it can be
+        // carried, dropped and sold; it is not a tableware that accepts dishes.
+        GameObject cupPrefab = Load<GameObject>("Assets/Prefab/KitchenObjects/food_drink_emptycup.prefab");
+        Assert.IsNotNull(cupPrefab.GetComponent<KitchenObject>(), "Empty cup prefab needs a KitchenObject.");
+        Assert.IsNull(cupPrefab.GetComponent<TablewareKitchenObject>(), "The empty cup is not tableware.");
+        Assert.AreSame(cupPrefab.transform, cup.prefab, "EmptyCup SO must point at its prefab.");
+
+        // The teapot itself is a tool on a clear counter, hidden contents and all.
+        PlacedObjectTypeSO tool = Load<PlacedObjectTypeSO>(TeapotToolPath);
+        Assert.IsTrue(tool.isTool);
+        Assert.AreEqual("Teapot", tool.nameString);
+        Assert.AreEqual("TeapotCookingTool", tool.prefab.name);
+        Assert.AreEqual(AssetDatabase.AssetPathToGUID(TeapotToolPath), tool.Guid, "Teapot _guid must match asset GUID.");
+        Assert.AreEqual(1, tool.allowedUnderlyingCounters.Count);
+        Assert.AreEqual("ClearCounter", tool.allowedUnderlyingCounters[0].name);
+
+        CookingTool teapotTool = Load<GameObject>(TeapotPrefabPath).GetComponent<CookingTool>();
+        Assert.IsNotNull(teapotTool, "Teapot prefab has no CookingTool.");
+        Assert.AreSame(teapot, new SerializedObject(teapotTool).FindProperty("cookingToolConfig").objectReferenceValue,
+            "Teapot prefab must use the teapot config.");
+    }
+
+    [Test] public void ShopItems51And52_SellTheKettleAndTheEmptyCup()
+    {
+        ConfigShop shop = Load<ConfigShop>(ShopPath);
+
+        ConfigShopItem kettle = shop.GetById(51);
+        Assert.IsNotNull(kettle, "Missing shop item 51 (Kettle).");
+        Assert.AreEqual("Kettle", kettle.Name);
+        Assert.AreEqual(ShopItemType.Item, kettle.Type);
+        Assert.AreEqual(ShopItemCategory.Tools, kettle.Category);
+        Assert.AreEqual(140, kettle.Price);
+        Assert.AreEqual(3, kettle.UnlockLevel);
+        Assert.AreEqual(1, kettle.Rewards.Count);
+        Assert.AreEqual(Load<PlacedObjectTypeSO>(KettleToolPath).Guid, kettle.Rewards[0].Guid);
+
+        ConfigShopItem cup = shop.GetById(52);
+        Assert.IsNotNull(cup, "Missing shop item 52 (Empty Cup).");
+        Assert.AreEqual("Empty Cup", cup.Name);
+        Assert.AreEqual(ShopItemType.Ingredient, cup.Type);
+        Assert.AreEqual(8, cup.Price);
+        Assert.AreEqual(1, cup.UnlockLevel);
+        Assert.AreEqual(1, cup.Rewards.Count);
+        Assert.AreEqual(Load<KitchenObjectSO>(EmptyCupPath).Guid, cup.Rewards[0].Guid);
+
+        // Both new items resolve by GUID at runtime, which needs a matching _guid field.
+        Assert.AreEqual(AssetDatabase.AssetPathToGUID(EmptyCupPath), Load<KitchenObjectSO>(EmptyCupPath).Guid);
+        Assert.AreEqual(AssetDatabase.AssetPathToGUID(HotWaterPath), Load<KitchenObjectSO>(HotWaterPath).Guid);
+    }
+
     private static List<T> LoadAll<T>(string folder) where T : Object
     {
         var result = new List<T>();
@@ -1458,5 +1663,48 @@ public class CookingDataTests
             if (asset != null) result.Add(asset);
         }
         return result;
+    }
+
+    // -----------------------------------------------------------------------------------------
+    // GUID sweep for every SerializableScriptableObject subtype. The FoodSO test above covers
+    // one type; these cover the rest. An empty or stale _guid silently drops the asset out of
+    // every GUID lookup (ConfigFood dictionary, GridBuildingSystem, KitchenGameManager, shop
+    // rewards, save data), so each sweep asserts the field is present AND matches the asset's
+    // real GUID (catches stale guids after a move or rename).
+    // -----------------------------------------------------------------------------------------
+
+    private static void AssertEverySOGuidMatchesAsset<T>(string folder) where T : SerializableScriptableObject
+    {
+        List<T> assets = LoadAll<T>(folder);
+        Assert.IsNotEmpty(assets, $"No {typeof(T).Name} assets found under {folder}; check the sweep path.");
+
+        var failures = new List<string>();
+        foreach (T asset in assets)
+        {
+            string path = AssetDatabase.GetAssetPath(asset);
+            string assetGuid = AssetDatabase.AssetPathToGUID(path);
+
+            if (string.IsNullOrEmpty(asset.Guid))
+                failures.Add($"{path}: _guid is empty (asset would vanish from every GUID lookup).");
+            else if (asset.Guid != assetGuid)
+                failures.Add($"{path}: _guid '{asset.Guid}' != asset GUID '{assetGuid}' (stale after move/rename?).");
+        }
+
+        Assert.IsEmpty(failures, $"{typeof(T).Name} GUID failures:\n" + string.Join("\n", failures));
+    }
+
+    [Test] public void EveryKitchenObjectSO_HasGuidMatchingItsAsset()
+    {
+        AssertEverySOGuidMatchesAsset<KitchenObjectSO>("Assets/SO/KitchenObjectSO");
+    }
+
+    [Test] public void EveryPlacedObjectTypeSO_HasGuidMatchingItsAsset()
+    {
+        AssertEverySOGuidMatchesAsset<PlacedObjectTypeSO>("Assets/SO/BuildingSO");
+    }
+
+    [Test] public void EveryUpgradeSO_HasGuidMatchingItsAsset()
+    {
+        AssertEverySOGuidMatchesAsset<UpgradeSO>("Assets/SO/UpgradeSO");
     }
 }

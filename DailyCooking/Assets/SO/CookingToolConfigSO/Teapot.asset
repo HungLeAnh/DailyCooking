@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfbc97da426fa5b438fc0bd8cf7b5fdd, type: 3}
+  m_Name: Teapot
+  m_EditorClassIdentifier: Scripts::CookingToolConfigSO
+  toolTypes: 04000000i
+  supportsOptionMenu: 0
+  supportsBurning: 1
+  maxFoodSlots: 2
+  requiresManualStart: 0
+  hidesContents: 1
+  commitsInputs: 1
+  outputVessel: {fileID: 11400000, guid: 5ba80f18b13f64c45b779663e3ef6239, type: 2}
+  canBoilWater: 0
+  allowedIngredients:
+  - {fileID: 11400000, guid: d25e7795789c9394bafddafa511dd930, type: 2}
+  - {fileID: 11400000, guid: 61236a115a5498a49adcccac9ed8359c, type: 2}

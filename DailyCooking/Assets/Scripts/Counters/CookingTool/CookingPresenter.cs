@@ -18,6 +18,9 @@ public sealed class CookingPresenter
     private float _lastShown = -1f;
     private Vector3 _cachedPos;
     private bool _posCached;
+    private readonly List<KitchenObjectSO> _contents = new List<KitchenObjectSO>();
+    private KitchenObjectSO _contentsOutput;
+    private bool _contentsVisible;
 
     public void Init(ProgressBarUI progress, BurnWarningUI burnUI, CombineDetailUI combineUI, float burnThreshold)
     {
@@ -34,6 +37,32 @@ public sealed class CookingPresenter
         _posCached = false;
     }
 
+    // HUD-only tools (the Teapot) show what is currently inside instead of the meshes,
+    // plus the same result icon the Combine HUD shows for the other machines.
+    // Called every frame; the icon list is only rebuilt when the contents change.
+    public void ShowContents(List<KitchenObjectSO> contents, KitchenObjectSO output)
+    {
+        if (_combineUI == null || contents == null)
+            return;
+        if (_contentsVisible && _contentsOutput == output && SameContents(contents))
+            return;
+        _contentsVisible = true;
+        _contentsOutput = output;
+        _contents.Clear();
+        _contents.AddRange(contents);
+        _combineUI.InitUI(_contents, output);
+    }
+
+    private bool SameContents(List<KitchenObjectSO> contents)
+    {
+        if (_contents.Count != contents.Count)
+            return false;
+        for (int i = 0; i < contents.Count; i++)
+            if (_contents[i] != contents[i])
+                return false;
+        return true;
+    }
+
     public void OnCombineResolved(CombineRecipeSO recipe)
     {
         if (recipe == null)
@@ -47,6 +76,8 @@ public sealed class CookingPresenter
 
     public void HideCombineDetail()
     {
+        _contentsVisible = false;
+        _contentsOutput = null;
         _combineUI?.Hide();
     }
 

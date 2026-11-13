@@ -556,7 +556,7 @@ MonoBehaviour:
     category: 8
     unlockLevel: 3
   - id: 42
-    name: Tea Machine
+    name: Teapot
     type: 1
     price: 190
     rewards:
@@ -614,7 +614,7 @@ MonoBehaviour:
     type: 1
     price: 230
     rewards:
-    - Guid: a1b2c3d4e5f6000011112222333413
+    - Guid: a1b2c3d4e5f600001111222233334413
       Amount: 1
     category: 8
     unlockLevel: 3
@@ -623,7 +623,7 @@ MonoBehaviour:
     type: 1
     price: 180
     rewards:
-    - Guid: a1b2c3d4e5f6000011112222333414
+    - Guid: a1b2c3d4e5f600001111222233334414
       Amount: 1
     category: 8
     unlockLevel: 2
@@ -636,3 +636,21 @@ MonoBehaviour:
       Amount: 1
     category: 6
     unlockLevel: 3
+  - id: 51
+    name: Kettle
+    type: 1
+    price: 140
+    rewards:
+    - Guid: fc03947b1689e4442b01265aabce9124
+      Amount: 1
+    category: 8
+    unlockLevel: 3
+  - id: 52
+    name: Empty Cup
+    type: 2
+    price: 8
+    rewards:
+    - Guid: 5ba80f18b13f64c45b779663e3ef6239
+      Amount: 1
+    category: 5
+    unlockLevel: 1

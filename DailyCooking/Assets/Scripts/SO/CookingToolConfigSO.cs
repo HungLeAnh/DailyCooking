@@ -41,6 +41,23 @@ public class CookingToolConfigSO : ScriptableObject
              "(the Blender). False keeps the classic auto-start on a valid recipe.")]
     public bool requiresManualStart;
 
+    [Header("Commit / Presentation")]
+    [Tooltip("True when the ingredients are swallowed on insertion: their meshes are hidden and " +
+             "only the tool HUD shows what is inside (the Teapot).")]
+    public bool hidesContents;
+    [Tooltip("True when nothing can be taken back out of the tool once it went in.")]
+    public bool commitsInputs;
+
+    [Header("Output Vessel (optional)")]
+    [Tooltip("Item the player must hold to collect the finished output. The vessel is consumed " +
+             "and becomes the served result (e.g. the Teapot needs an Empty Cup for the tea).")]
+    public KitchenObjectSO outputVessel;
+
+    [Header("Boiling (Frying)")]
+    [Tooltip("True when this frying tool may use recipes marked 'requiresBoilingTool' " +
+             "(the Kettle). Pan and Grill leave it off.")]
+    public bool canBoilWater;
+
     [Header("Allowed Ingredients (optional)")]
     [Tooltip("Leave empty to accept any ingredient the recipe database knows. Fill it to restrict " +
              "this tool to specific ingredients (e.g. Coffee Machine -> Coffee Bean only).")]

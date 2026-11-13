@@ -73,6 +73,9 @@ public class UIFoodDetailPopup : UIPopup
             DrinkRecipeSO drinkRecipe = database.GetDrinkRecipeForOutput(item);
             if (drinkRecipe != null && drinkRecipe.input != null && drinkRecipe.input.Count > 0)
                 return drinkRecipe.input;
+            CombineRecipeSO combineRecipe = database.GetCombineRecipeForOutput(item);
+            if (combineRecipe != null && combineRecipe.input != null && combineRecipe.input.Count > 0)
+                return combineRecipe.input;
         }
         return listed;
     }

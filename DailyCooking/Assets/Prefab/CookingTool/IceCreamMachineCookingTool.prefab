@@ -68,7 +68,7 @@ Transform:
   - {fileID: 2241506545992504568}
   - {fileID: 669974697885741361}
   - {fileID: 4478873334280376362}
-  - {fileID: 2320984351277633178}
+  - {fileID: 2832545157059466387}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &9202884289748628511
@@ -160,25 +160,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6349459341066746734}
     m_Modifications:
-    - target: {fileID: 1446150654505770231, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
-      propertyPath: m_Name
-      value: ice_cream_machine
-      objectReference: {fileID: 0}
-    - target: {fileID: 1446150654505770231, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
     - target: {fileID: 761419860971933317, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
       propertyPath: m_LocalScale.x
-      value: 3.368837
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 761419860971933317, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
       propertyPath: m_LocalScale.y
-      value: 3.368837
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 761419860971933317, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
       propertyPath: m_LocalScale.z
-      value: 3.368837
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 761419860971933317, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
       propertyPath: m_LocalPosition.x
@@ -220,6 +212,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1446150654505770231, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
+      propertyPath: m_Name
+      value: ice_cream_machine
+      objectReference: {fileID: 0}
+    - target: {fileID: 1446150654505770231, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -228,12 +228,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 4719949201339519204}
   m_SourcePrefab: {fileID: 100100000, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
---- !u!4 &2320984351277633178 stripped
+--- !u!4 &2832545157059466387 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 761419860971933317, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
   m_PrefabInstance: {fileID: 3305118227635411478}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &3133971342829065248 stripped
+--- !u!1 &4165796532519651041 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1446150654505770231, guid: 882d99eff88aa544c834d757ad7df3ac, type: 3}
   m_PrefabInstance: {fileID: 3305118227635411478}
@@ -244,7 +244,7 @@ MeshCollider:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3133971342829065248}
+  m_GameObject: {fileID: 4165796532519651041}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2

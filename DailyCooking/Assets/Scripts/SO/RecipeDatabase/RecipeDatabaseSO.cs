@@ -21,6 +21,21 @@ public class RecipeDatabaseSO : ScriptableObject
     private Dictionary<KitchenObjectSO, DeepFryRecipeSO> _deepFryCache;
     private List<DrinkRecipeSO> _drinkCache;
 
+    // Cooked tools (the Teapot) produce a drink through a combine recipe. The food detail
+    // popup still wants the ingredients that went into it.
+    public CombineRecipeSO GetCombineRecipeForOutput(KitchenObjectSO output)
+    {
+        if (output == null || combineRecipes == null)
+            return null;
+        for (int i = 0; i < combineRecipes.Count; i++)
+        {
+            CombineRecipeSO recipe = combineRecipes[i];
+            if (recipe != null && recipe.output == output)
+                return recipe;
+        }
+        return null;
+    }
+
     public void Initialize()
     {
         // One input may offer several outputs (Potato -> Chopped or Mashed). They are

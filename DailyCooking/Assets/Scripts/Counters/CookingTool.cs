@@ -33,6 +33,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
 
     private readonly FoodSlot _slot = new FoodSlot();
     private readonly List<KitchenObjectSO> _inputSOs = new List<KitchenObjectSO>();
+    private readonly List<KitchenObjectSO> _hudContents = new List<KitchenObjectSO>();
     private readonly RecipeResolver _resolver = new RecipeResolver();
     private readonly CookingClock _clock = new CookingClock();
     private readonly CookingPresenter _presenter = new CookingPresenter();
@@ -55,6 +56,12 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     // Multi-input tools such as the Blender wait for the player to press start instead of
     // beginning as soon as the ingredient set matches a recipe.
     public bool RequiresManualStart => cookingToolConfig != null && cookingToolConfig.requiresManualStart;
+    // Tools that swallow their contents: the meshes are hidden and only the HUD shows them.
+    public bool HidesContents => cookingToolConfig != null && cookingToolConfig.hidesContents;
+    // Tools whose ingredients are committed: nothing comes back out once it went in.
+    public bool CommitsInputs => cookingToolConfig != null && cookingToolConfig.commitsInputs;
+    // Tools whose finished output must be collected with a specific item (the empty cup).
+    public bool RequiresVessel => cookingToolConfig != null && cookingToolConfig.outputVessel != null;
     public bool HasAnyFood => _slot.HasFood;
     public bool IsFull => _slot.FoodCount >= MaxFoodSlots;
 
@@ -251,6 +258,36 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         return false;
     }
 
+    public bool IsVessel(KitchenObjectSO kitchenObjectSO)
+    {
+        return kitchenObjectSO != null && cookingToolConfig != null &&
+               cookingToolConfig.outputVessel == kitchenObjectSO;
+    }
+
+    // Server only: the player holds the required vessel (the empty cup) and takes the
+    // finished drink. The vessel is consumed and becomes the served item, like pouring.
+    public bool TryCollectWithVessel(KitchenObject vessel, PlayerStateMachine player)
+    {
+        if (!IsServer || vessel == null || player == null || !RequiresVessel)
+            return false;
+        if (_netState.Value != State.Cooked && _netState.Value != State.Burned)
+            return false;
+        if (!IsVessel(vessel.GetKitchenObjectSO()))
+            return false;
+        if (!TryGetFirstFood(out KitchenObject food, out _))
+            return false;
+
+        // Leave the hidden list before the parent change so the prune does not show the
+        // drink for a frame while it is still sitting on the tool.
+        _hiddenFoods.Remove(food);
+        vessel.DestroySelf();
+        if (!food.SetKitchenObjectParent(player))
+            return false;
+        food.SetVisualsVisible(true);
+        UpdateCookingState(State.Idle);
+        return true;
+    }
+
     private void HandleStateChanged(State previousValue, State newValue)
     {
         if (newValue == State.Cooked && FirstInputSO != null)
@@ -266,6 +303,12 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     // show their food.
     public void RefreshFoodVisibility()
     {
+        if (HidesContents)
+        {
+            HideContents();
+            return;
+        }
+
         if (!IsBeverageTool)
         {
             ShowHiddenFood();
@@ -279,6 +322,22 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             return;
         }
         HideBeverageInputs();
+    }
+
+    // HUD tools (the Teapot) keep every slot item invisible, including the finished drink
+    // that still sits inside until the player collects it with a vessel.
+    private void HideContents()
+    {
+        PruneHiddenFoods(true);
+        for (int i = 0; i < _slot.SlotCount; i++)
+        {
+            KitchenObject food = _slot.Get(i);
+            if (food == null)
+                continue;
+            if (!_hiddenFoods.Contains(food))
+                _hiddenFoods.Add(food);
+            food.SetVisualsVisible(false);
+        }
     }
 
     // Hides every drink ingredient in the slots and leaves the finished drink visible.
@@ -306,13 +365,18 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             .CanAcceptDrinkIngredient(Array.Empty<KitchenObjectSO>(), foodSO);
     }
 
-    private void PruneHiddenFoods()
+    private void PruneHiddenFoods(bool restoreVisibility = false)
     {
         for (int i = _hiddenFoods.Count - 1; i >= 0; i--)
         {
             KitchenObject food = _hiddenFoods[i];
             if (food == null || !_slot.Contains(food))
+            {
+                // A food that left the tool must not stay invisible in the player's hands.
+                if (restoreVisibility && food != null)
+                    food.SetVisualsVisible(true);
                 _hiddenFoods.RemoveAt(i);
+            }
         }
     }
 
@@ -454,7 +518,10 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         {
             TryResolveFoodsFromNetwork();
             if (!_slot.HasFood)
+            {
+                UpdateContentsHud();
                 return;
+            }
         }
 
         RebuildInputs();
@@ -470,6 +537,27 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             AdvanceCooking();
 
         UpdateUI();
+        UpdateContentsHud();
+    }
+
+    // HUD-only tools show what is inside instead of the meshes. The list also becomes the
+    // finished drink once the tool swaps its inputs for the output.
+    private void UpdateContentsHud()
+    {
+        if (!HidesContents)
+            return;
+
+        _hudContents.Clear();
+        for (int i = 0; i < _slot.SlotCount; i++)
+        {
+            KitchenObject food = _slot.Get(i);
+            if (food == null)
+                continue;
+            KitchenObjectSO foodSO = food.GetKitchenObjectSO();
+            if (foodSO != null)
+                _hudContents.Add(foodSO);
+        }
+        _presenter.ShowContents(_hudContents, _resolver.HasValidRecipe ? _resolver.CookingOutput : null);
     }
 
     private void AdvanceCooking()

@@ -99,20 +99,46 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     private void HandleCookingInteraction(PlayerStateMachine playerStateMachine)
     {
-        // Manual-start tools (the Blender) commit their ingredients: once something is inside,
-        // nothing comes back out until the finished dish is ready. Players may still add more
-        // ingredients while the tool is idle, which is what keeps multi-ingredient drinks possible.
-        if (_cookingTool.RequiresManualStart && _cookingTool.CurrentState == CookingTool.State.Idle)
+        KitchenObject heldObject = playerStateMachine.HasKitchenObject()
+            ? playerStateMachine.GetKitchenObject()
+            : null;
+        CookingTool.State state = _cookingTool.CurrentState;
+
+        // Manual-start and committing tools swallow what goes in: once it is inside, nothing
+        // comes back out. More ingredients can still be added while the tool is idle.
+        if ((_cookingTool.RequiresManualStart || _cookingTool.CommitsInputs) &&
+            (state == CookingTool.State.Idle || state == CookingTool.State.Cooking))
         {
-            if (playerStateMachine.HasKitchenObject())
-                TryAddInput(playerStateMachine, playerStateMachine.GetKitchenObject());
+            if (state == CookingTool.State.Idle && heldObject != null)
+            {
+                // The empty cup is the output vessel, never an ingredient.
+                if (_cookingTool.RequiresVessel && _cookingTool.IsVessel(heldObject.GetKitchenObjectSO()))
+                    ShowAlert(_cookingTool.HasAnyFood
+                        ? "It is not ready yet."
+                        : "Put the ingredients in first.");
+                else
+                    TryAddInput(playerStateMachine, heldObject);
+            }
+            return;
+        }
+
+        // The finished drink stays inside until the player brings its vessel (empty cup).
+        if (_cookingTool.RequiresVessel &&
+            (state == CookingTool.State.Cooked || state == CookingTool.State.Burned))
+        {
+            if (heldObject == null || !_cookingTool.IsVessel(heldObject.GetKitchenObjectSO()))
+            {
+                ShowAlert("You need an empty cup to take this.");
+                return;
+            }
+            _cookingTool.TryCollectWithVessel(heldObject, playerStateMachine);
             return;
         }
 
         if (!_cookingTool.HasAnyFood)
         {
-            if (playerStateMachine.HasKitchenObject())
-                TryAddInput(playerStateMachine, playerStateMachine.GetKitchenObject());
+            if (heldObject != null)
+                TryAddInput(playerStateMachine, heldObject);
             return;
         }
 
@@ -121,9 +147,8 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         if (_cookingTool.CurrentState == CookingTool.State.Cooking && _cookingTool.IsBeverageTool)
             return;
 
-        if (playerStateMachine.HasKitchenObject())
+        if (heldObject != null)
         {
-            KitchenObject heldObject = playerStateMachine.GetKitchenObject();
             if (heldObject.TryGetTableware(out TablewareKitchenObject plateKitchenObject))
             {
                 if (_cookingTool.TryGetFirstFood(out KitchenObject food, out _) &&
@@ -147,26 +172,35 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         }
     }
 
+    private static void ShowAlert(string message)
+    {
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowAlertMessage(message);
+    }
+
     // Server: moves the held ingredient into the tool when the recipe still accepts it.
     private void TryAddInput(PlayerStateMachine playerStateMachine, KitchenObject heldObject)
     {
         if (heldObject == null)
             return;
+        if (_cookingTool.IsFull)
+        {
+            ShowAlert("This tool is full.");
+            return;
+        }
         KitchenObjectSO inputKitchenObjectSO = heldObject.GetKitchenObjectSO();
         if (!_cookingTool.CanAcceptInput(inputKitchenObjectSO))
         {
             // Refuse the ingredient and say so, whatever the tool: a silent rejection leaves
             // the player pressing interact with no idea why nothing happens.
-            if (UIManager.Instance != null)
-                UIManager.Instance.ShowAlertMessage("This ingredient doesn't fit this tool.");
+            ShowAlert("This ingredient doesn't fit this tool.");
             return;
         }
 
         int slot = _cookingTool.GetFirstFreeSlotIndex();
         if (slot < 0)
         {
-            if (_cookingTool.RequiresManualStart && UIManager.Instance != null)
-                UIManager.Instance.ShowAlertMessage("This tool is full.");
+            ShowAlert("This tool is full.");
             return;
         }
         if (!heldObject.SetKitchenObjectParent(_cookingTool, slot))
