@@ -124,7 +124,7 @@ All three items that used to be listed here are gone: the `CookingRecipeSO` clas
 |---|---|---|
 | Recipe data duplicated between scene lists and per-prefab arrays | — | ✅ Resolved: `RecipeDatabaseSO` is the single source |
 | Shop GUIDs duplicated across three separate lookups | `ConfigShop`, `PlacedObjectDatabase`, `KitchenObjectSODic` | ⏳ Open — three dictionaries over the same GUID space |
-| `UIShopItem.GetReward` does a linear `Find` on `PlacedObjectDatabase` | `UIShopItem.cs:107` | ⏳ Open, but only runs once per purchase, so not a perf problem |
+| `UIShopItem.GetReward` does a linear `Find` on `PlacedObjectDatabase` | `UIShopItem.cs:112,130` | ✅ Fixed — both lookups use `GetValueOrDefault` (plan 12) |
 
 ### 4.3 Fragile Couplings
 
@@ -134,7 +134,7 @@ All three items that used to be listed here are gone: the `CookingRecipeSO` clas
 | Shop reward format `"{guid}_{count}"` — contract in two places | `ConfigShopSO.asset`, `UIShopItem.cs` | ✅ Fixed |
 | Index-based RPCs (`dishIndex`, `upgradeIndex`) — list order = wire protocol | `KitchenGameManager`, `UpgradeManager` | ✅ Fixed |
 | Bot pool routing by stripping `"(Clone)"` from name — breaks on rename | `BotManager.cs` | ✅ Fixed |
-| Numeric enum values stored as raw ints in `ConfigShopSO.asset` | `ConfigShopSO.asset` | ⏳ Pending |
+| Numeric enum values stored as raw ints in `ConfigShopSO.asset` | `ConfigShopSO.asset` | ✅ Fixed — values pinned in `ShopItemCategory.cs`, `None = 9999`, 3 asset rows migrated (plan 09) |
 
 ### 4.4 Typos / Naming
 
@@ -262,7 +262,7 @@ Adding a new food/counter requires touching **4 places**:
 | 1 | Add `ObjectPool<GameObject>` for kitchen objects | Reduce GC + NetworkObject spawn/despawn churn | ❌ Reverted — pooling fought `NetworkObject` lifetimes; kitchen objects spawn/despawn directly again |
 | 2 | Extract `PrefabSpawnService` from `KitchenGameManager` | Single responsibility | ❌ Reverted with the pooling change |
 | 3 | Consider Addressables for content streaming | Enables DLC, reduces build size | ⏳ Future consideration |
-| 4 | Add a `PlacedObjectDatabase`-style lookup to `UIShopItem` instead of linear `Find` | Performance + consistency | ⏳ Open — `UIShopItem.cs:107` still does a `Find`, once per purchase |
+| 4 | Add a `PlacedObjectDatabase`-style lookup to `UIShopItem` instead of linear `Find` | Performance + consistency | ✅ Done — `UIShopItem.cs:112,130` use `GetValueOrDefault`; no linear `Find` remains (plan 12) |
 | 5 | Bot pool routing by `poolIndex` instead of name-based lookup | Survives prefab renames | ✅ Done |
 
 ---

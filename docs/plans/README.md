@@ -7,6 +7,8 @@ Nguồn gốc: `docs/optimization_plan.md` §3, `docs/datamanagement.md` §4.
 Kết quả phân tích lần này đã **sửa lại một số mô tả cũ trong optimization_plan cho khớp code** —
 xem ghi chú ở từng file.
 
+> Bản tổng hợp mọi mục đang hoãn/chưa xong và trạng thái hiện tại: [`docs/deferred.md`](../deferred.md).
+
 ---
 
 ## Mục phát sinh thêm (ngoài 13 mục trên)
