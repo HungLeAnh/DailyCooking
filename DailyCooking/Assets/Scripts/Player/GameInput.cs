@@ -22,6 +22,8 @@ public class GameInput : PersistentSingleton<GameInput>
     // Pixels moved this frame by the finger (or right-mouse drag) that turns the walking camera.
     public event EventHandler<Vector2> OnLookDelta;
     private readonly LookTouchTracker lookTouchTracker = new LookTouchTracker();
+    private readonly System.Collections.Generic.List<RaycastResult> uiRaycastResults = new System.Collections.Generic.List<RaycastResult>();
+    private PointerEventData uiRaycastPointer;
 
 
     [SerializeField] private float touchTimeThreshold = 0.1f;
@@ -183,8 +185,7 @@ public class GameInput : PersistentSingleton<GameInput>
                 switch (touch.phase)
                 {
                     case UnityEngine.InputSystem.TouchPhase.Began:
-                        bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(id);
-                        lookTouchTracker.Began(id, touch.screenPosition, overUI);
+                        lookTouchTracker.Began(id, touch.screenPosition, IsScreenPointOverUI(touch.screenPosition));
                         break;
                     case UnityEngine.InputSystem.TouchPhase.Moved:
                         delta += lookTouchTracker.Moved(id, touch.screenPosition);
@@ -202,6 +203,22 @@ public class GameInput : PersistentSingleton<GameInput>
         }
         if (delta != Vector2.zero)
             OnLookDelta?.Invoke(this, delta);
+    }
+
+    // Raycasts the UI directly instead of IsPointerOverGameObject(touchId): that reads the input
+    // module's per-pointer state, which is only filled in during EventSystem.Update, so on a touch's
+    // first frame it depends on script order whether the joystick thumb counts as "over UI".
+    public bool IsScreenPointOverUI(Vector2 screenPosition)
+    {
+        EventSystem eventSystem = EventSystem.current;
+        if (eventSystem == null)
+            return false;
+        uiRaycastPointer ??= new PointerEventData(eventSystem);
+        uiRaycastPointer.Reset();
+        uiRaycastPointer.position = screenPosition;
+        uiRaycastResults.Clear();
+        eventSystem.RaycastAll(uiRaycastPointer, uiRaycastResults);
+        return uiRaycastResults.Count > 0;
     }
 
     public bool IsMouseOverUI()
