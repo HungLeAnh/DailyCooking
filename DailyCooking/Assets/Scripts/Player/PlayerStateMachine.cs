@@ -11,6 +11,9 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
 {
     public PlayerStateContext Context { get; set; }
     public static PlayerStateMachine LocalInstance { get; private set; }
+    // Every spawned avatar on this peer (e.g. for hiding avatars that block a close-up).
+    private static readonly List<PlayerStateMachine> all = new List<PlayerStateMachine>();
+    public static IReadOnlyList<PlayerStateMachine> All => all;
 
     public event EventHandler OnPickedSomething;
     public event EventHandler<Transform> OnObjectHighlighted;
@@ -375,6 +378,8 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+        if (!all.Contains(this))
+            all.Add(this);
         if (IsOwner)
             LocalInstance = this;
         if (MultiplayerManager.Instance != null)
@@ -385,6 +390,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
 
     public override void OnNetworkDespawn()
     {
+        all.Remove(this);
         if (LocalInstance == this)
             LocalInstance = null;
         if (MultiplayerManager.Instance != null)
