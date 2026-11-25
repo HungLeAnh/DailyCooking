@@ -19,6 +19,9 @@ public class GameInput : PersistentSingleton<GameInput>
     public event EventHandler<Vector2> OnMouseClickPerformed;
     public event EventHandler OnMouseClickCanceled;
     public event EventHandler<float> OnScrollPerformed;
+    // Pixels moved this frame by the finger (or right-mouse drag) that turns the walking camera.
+    public event EventHandler<Vector2> OnLookDelta;
+    private readonly LookTouchTracker lookTouchTracker = new LookTouchTracker();
 
 
     [SerializeField] private float touchTimeThreshold = 0.1f;
@@ -42,6 +45,7 @@ public class GameInput : PersistentSingleton<GameInput>
     {
         base.Awake();
         playerAction = new PlayerAction();
+        UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
 
         if (PlayerPrefs.HasKey(PLAYER_PREFS_BINDINGS))
         {
@@ -148,6 +152,7 @@ public class GameInput : PersistentSingleton<GameInput>
     }
     private void Update()
     {
+        HandleLook();
         if (IsMouseOverUI())
         {
             isTouchOverUI = true;
@@ -165,6 +170,40 @@ public class GameInput : PersistentSingleton<GameInput>
             isPanning = true;
     }
     
+    // The look finger is the first touch that did not start on UI, so the joystick thumb never turns
+    // the camera. Without a touchscreen, a right-mouse drag does the same.
+    private void HandleLook()
+    {
+        Vector2 delta = Vector2.zero;
+        if (Touchscreen.current != null)
+        {
+            foreach (var touch in UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches)
+            {
+                int id = touch.touchId;
+                switch (touch.phase)
+                {
+                    case UnityEngine.InputSystem.TouchPhase.Began:
+                        bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(id);
+                        lookTouchTracker.Began(id, touch.screenPosition, overUI);
+                        break;
+                    case UnityEngine.InputSystem.TouchPhase.Moved:
+                        delta += lookTouchTracker.Moved(id, touch.screenPosition);
+                        break;
+                    case UnityEngine.InputSystem.TouchPhase.Ended:
+                    case UnityEngine.InputSystem.TouchPhase.Canceled:
+                        lookTouchTracker.Ended(id);
+                        break;
+                }
+            }
+        }
+        else if (Mouse.current != null && Mouse.current.rightButton.isPressed)
+        {
+            delta = Mouse.current.delta.ReadValue();
+        }
+        if (delta != Vector2.zero)
+            OnLookDelta?.Invoke(this, delta);
+    }
+
     public bool IsMouseOverUI()
     {
         if (EventSystem.current == null)

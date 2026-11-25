@@ -27,7 +27,6 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
-        //GameManager.Instance.OnPlayerSpawned += Instance_OnPlayerSpawned;
         GameInput.Instance.OnScrollPerformed += HandleZoom;
         GameInput.Instance.OnMousePanPerformed += OnPanMovedDesktop;
         if (GridBuildingSystem.Instance.IsInitialized)
@@ -75,18 +74,19 @@ public class CameraController : MonoBehaviour
         GridBuildingSystem.Instance.BuildingPlacementManager.OnBuildingEnd += OnBuildingEnd;
     }
 
+    // This camera is the build-mode overhead view; pan, zoom and rotate only apply while building.
+    private static bool IsBuildMode =>
+        CameraModeController.Instance == null || CameraModeController.Instance.Mode == CameraMode.Build;
+
     private void OnRotateClicked()
     {
+        if (!IsBuildMode)
+            return;
         isRotating = true;
 
         targetQuaternion = Quaternion.Euler(_cinemachineCamera.transform.localEulerAngles.x, 
             _cinemachineCamera.transform.localEulerAngles.y + 90,
             _cinemachineCamera.transform.localEulerAngles.z);
-    }
-
-    private void Instance_OnPlayerSpawned(object sender, EventArgs e)
-    {
-        //_cinemachineCamera.Follow = PlayerStateMachine.Instance.transform;
     }
 
     private void Update()
@@ -120,6 +120,8 @@ public class CameraController : MonoBehaviour
     #region Pan
     private void OnPanMovedDesktop(object sender, Vector2 e)
     {
+        if (!IsBuildMode)
+            return;
         if (GameInput.Instance.IsTouchOverBuildingGhost)
             return;
         panBounds = GridBuildingSystem.Instance.GridManager.GetGridSize()* 
@@ -160,6 +162,8 @@ public class CameraController : MonoBehaviour
     #region Zoom
     private void HandleZoom(object sender, float scrollValueY)
     {
+        if (!IsBuildMode)
+            return;
         var lens = _cinemachineCamera.Lens;
         if (lens.Orthographic)
         {

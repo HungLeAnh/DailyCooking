@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: -4974422150347824267}
   - component: {fileID: 4487132799419500801}
   - component: {fileID: 9043855787257887650}
+  - component: {fileID: 443609396770862094}
   m_Layer: 6
   m_Name: GrillCookingTool
   m_TagString: Untagged
@@ -152,6 +153,22 @@ MonoBehaviour:
   m_IgnoreFromBuild: 1
   m_ApplyToChildren: 1
   m_AffectedAgents: ffffffffi
+--- !u!114 &443609396770862094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3835830830082720915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 168284d47a2c07549be2ec67b168f1d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Scripts::CloseUpFraming
+  distance: 1.6
+  height: 1.4
+  fieldOfView: 40
+  lookAtOffset: {x: 0, y: 0.9, z: 0}
 --- !u!1001 &3305118227635411478
 PrefabInstance:
   m_ObjectHideFlags: 0
