@@ -15,6 +15,9 @@ public enum UIHUDElements
     Rotate,
     Restaurant,
     Character,
+    // Appended only: values are serialized as ints in GameScene.
+    Interact,
+    Back,
 }
 [Serializable]
 struct SerializableKeyValuePair<T1, T2>
@@ -43,6 +46,34 @@ public class UIHUDManager : Singleton<UIHUDManager>
         {
             uiHUDElementDictionary.TryAdd(item.Key, item.Value);
         }
+    }
+
+    private void Start()
+    {
+        if (CameraModeController.Instance != null)
+        {
+            CameraModeController.Instance.OnModeChanged += ApplyCameraModeVisibility;
+            ApplyCameraModeVisibility(CameraModeController.Instance.Mode);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (CameraModeController.Instance != null)
+            CameraModeController.Instance.OnModeChanged -= ApplyCameraModeVisibility;
+    }
+
+    // Interact: walking and close-up. Back: close-up only. Rotate: build mode only.
+    private void ApplyCameraModeVisibility(CameraMode mode)
+    {
+        SetElementVisible(UIHUDElements.Interact, mode != CameraMode.Build);
+        SetElementVisible(UIHUDElements.Back, mode == CameraMode.CloseUp);
+        SetElementVisible(UIHUDElements.Rotate, mode == CameraMode.Build);
+    }
+
+    private void SetElementVisible(UIHUDElements element, bool visible)
+    {
+        if (visible) ShowElement(element); else HideElement(element);
     }
 
     public void ShowElement(UIHUDElements element)
@@ -91,6 +122,16 @@ public class UIHUDManager : Singleton<UIHUDManager>
     public void OnRotateClick()
     {
         OnRotateClicked?.Invoke();
+    }
+    public void OnInteractClick()
+    {
+        if (PlayerStateMachine.LocalInstance != null)
+            PlayerStateMachine.LocalInstance.PressInteract();
+    }
+    public void OnBackClick()
+    {
+        if (CameraModeController.Instance != null)
+            CameraModeController.Instance.ExitCloseUp();
     }    
     public void OnRestaurantClick()
     {
@@ -114,6 +155,9 @@ public class UIHUDManager : Singleton<UIHUDManager>
         {
             item.Value.SetActive(true);
         }
+        // Mode-dependent buttons (Interact, Back, Rotate) still follow the camera mode.
+        if (CameraModeController.Instance != null)
+            ApplyCameraModeVisibility(CameraModeController.Instance.Mode);
     }
     #endregion
 }

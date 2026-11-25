@@ -39,6 +39,9 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     private const int MAX_HIGHLIGHT_HITS = 32;
     private readonly Collider[] highlightHitBuffer = new Collider[MAX_HIGHLIGHT_HITS];
     private readonly List<IHighlightable> nearbyHighlightables = new List<IHighlightable>();
+    private readonly List<(IHighlightable highlight, IInteractable interactable)> targetCandidates = new List<(IHighlightable, IInteractable)>();
+    private readonly List<Vector3> targetCandidatePositions = new List<Vector3>();
+    private IHighlightable highlightedTarget;
     // Slack on top of the highlight radius for movement lag between owner and server.
     private const float INTERACT_RANGE_TOLERANCE = 1.5f;
     // The owner's stats this avatar follows for its look (see SubscribeToOwnerStats).
@@ -101,7 +104,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     }
     private void Start()
     {
-        GameInput.Instance.OnMouseClickPerformed += PlayerStateMachine_OnMouseClickPerformed;
+        GameInput.Instance.OnInteract1Performed += GameInput_OnInteract1Performed;
     }
 
     private void OnResourceChanged()
@@ -112,7 +115,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     public override void OnDestroy()
     {
         if(GameInput.Instance != null)
-            GameInput.Instance.OnMouseClickPerformed -= PlayerStateMachine_OnMouseClickPerformed;
+            GameInput.Instance.OnInteract1Performed -= GameInput_OnInteract1Performed;
 
         Context = null;
         _stateManager.Dispose();
@@ -161,114 +164,111 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     {
         Context.IsDisableInput = isDisable;
     }
-    private void PlayerStateMachine_OnMouseClickPerformed(object sender, Vector2 e)
+    private void GameInput_OnInteract1Performed(object sender, EventArgs e)
     {
-        // Every avatar hears the click; only the local player's own avatar acts on it.
-        if (!IsOwner || Context.IsDisableInput)
+        PressInteract();
+    }
+
+    // Owner only: the Interact button (or F). Acts on Context.InteractTarget, picking the alternate
+    // interaction for a target that is mid-progress (e.g. the next cut), as tapping it again used to.
+    // Interacting with an installed cooking tool also glides the local camera into its close-up.
+    public void PressInteract()
+    {
+        if (!IsOwner || Context == null || Context.IsDisableInput)
+            return;
+        IInteractable target = Context.InteractTarget;
+        if (target == null)
             return;
 
-        float maxDistance = 999f;
-        Ray ray = UtilsClass.MainCamera.ScreenPointToRay(e);
-        if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance))
-        {
-            // Interactables and tool meshes can live on child transforms: walk up the hierarchy.
-            IInteractable interactableObject = raycastHit.transform.GetComponentInParent<IInteractable>();
-            if (interactableObject == null)
-            {
-                // Clicked a stacked tool (not IInteractable itself): forward to its counter's controller.
-                CookingTool tool = raycastHit.transform.GetComponentInParent<CookingTool>();
-                if (tool != null)
-                    interactableObject = CookingToolCounterController.FindControllerForTool(tool);
-            }
-            if (interactableObject != null)
-            {
-                IHighlightable gate = raycastHit.transform.GetComponentInParent<IHighlightable>();
-                if (gate == null && interactableObject is Component interactableComponent)
-                    gate = interactableComponent.GetComponent<IHighlightable>();
-                if (gate != null && !Context.Highlightable.Contains(gate))
-                    return;
+        bool alternate = target is IHasProgress progress && !progress.IsDone() && progress.GetProgress() != -1;
+        RequestInteract(target, alternate);
 
-
-                if (interactableObject != Context.SelectedInteractableObject)
-                {
-                    SetInteractableObject(interactableObject, raycastHit.transform);
-                    RequestInteract(Context.SelectedInteractableObject, false);
-                }
-                else if (interactableObject == Context.SelectedInteractableObject)
-                {
-                    if (Context.SelectedInteractableObject != null)
-                    {
-                        IHasProgress progress = Context.SelectedInteractableObject as IHasProgress;
-                        if (progress == null)
-                        {
-                            SetInteractableObject(interactableObject, raycastHit.transform);
-                            RequestInteract(Context.SelectedInteractableObject, false);
-                        }
-                        else
-                        {
-
-                            if (progress.IsDone() || progress.GetProgress() == -1)
-                            {
-                                RequestInteract(Context.SelectedInteractableObject, false);
-                            }
-                            else
-                            {
-                                RequestInteract(Context.SelectedInteractableObject, true);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                SetInteractableObject(null, null);
-            }
-        }
-        else
-        {
-            SetInteractableObject(null,null);
-        }
+        CameraModeController cameraMode = CameraModeController.Instance;
+        if (cameraMode != null && cameraMode.Mode == CameraMode.Walk &&
+            target is CookingToolCounterController controller && controller.HasToolInstalled())
+            cameraMode.RequestCloseUp(controller.InstalledTool);
     }
+
+    private static IInteractable ResolveInteractable(Component component)
+    {
+        if (component == null)
+            return null;
+        IInteractable interactable = component.GetComponentInParent<IInteractable>();
+        if (interactable != null)
+            return interactable;
+        // A stacked tool is not IInteractable itself: its counter's controller is.
+        CookingTool tool = component.GetComponentInParent<CookingTool>();
+        return tool != null ? CookingToolCounterController.FindControllerForTool(tool) : null;
+    }
+
+    private static Vector3 MovementDirection(Vector2 inputVector)
+    {
+        CameraModeController cameraMode = CameraModeController.Instance;
+        float yaw = cameraMode != null && cameraMode.Mode == CameraMode.Walk ? cameraMode.WalkYaw : 0f;
+        return CameraRelativeMovement.ToWorld(inputVector, yaw);
+    }
+
+    private static bool IsInCloseUp =>
+        CameraModeController.Instance != null && CameraModeController.Instance.Mode == CameraMode.CloseUp;
+
     private void HandleInteractions()
     {
-        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
-
-
-        Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
-
-        if (moveDir != Vector3.zero)
+        if (!IsInCloseUp)
         {
-            Context.LastInteractDir = moveDir;
+            Vector3 moveDir = MovementDirection(GameInput.Instance.GetMovementVectorNormalized());
+            if (moveDir != Vector3.zero)
+                Context.LastInteractDir = moveDir;
         }
 
         Vector3 p1 = transform.position + Vector3.up * radius;
         Vector3 p2 = transform.position + Vector3.up * (height - radius);
 
-        // Runs every frame: reuse buffers and only toggle what entered or left the range.
+        // Runs every frame: reuse buffers. Context.Highlightable stays the full in-range list
+        // (CookingStartButtonWorldUI reads it); only the chosen target is visibly highlighted.
         int hitCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, highlightHitBuffer, countersLayerMask);
         nearbyHighlightables.Clear();
+        targetCandidates.Clear();
+        targetCandidatePositions.Clear();
         for (int i = 0; i < hitCount; i++)
         {
-            if (highlightHitBuffer[i].transform.TryGetComponent(out IHighlightable highlightable) &&
-                !nearbyHighlightables.Contains(highlightable))
-                nearbyHighlightables.Add(highlightable);
+            if (!highlightHitBuffer[i].transform.TryGetComponent(out IHighlightable highlightable) ||
+                nearbyHighlightables.Contains(highlightable))
+                continue;
+            nearbyHighlightables.Add(highlightable);
+            IInteractable interactable = ResolveInteractable(highlightable as Component);
+            if (interactable is NetworkBehaviour behaviour && behaviour.IsSpawned)
+            {
+                targetCandidates.Add((highlightable, interactable));
+                targetCandidatePositions.Add(highlightHitBuffer[i].transform.position);
+            }
         }
+        Context.Highlightable.Clear();
+        Context.Highlightable.AddRange(nearbyHighlightables);
 
-        List<IHighlightable> current = Context.Highlightable;
-        foreach (IHighlightable highlightable in current)
+        IHighlightable targetHighlight = null;
+        IInteractable target = null;
+        CookingTool closeUpTool = IsInCloseUp ? CameraModeController.Instance.CloseUpTool : null;
+        if (closeUpTool != null)
         {
-            if (highlightable as UnityEngine.Object != null && !nearbyHighlightables.Contains(highlightable))
-                highlightable.OnDeselected();
+            target = CookingToolCounterController.FindControllerForTool(closeUpTool);
+            targetHighlight = target as IHighlightable;
         }
-        foreach (IHighlightable highlightable in nearbyHighlightables)
+        else
         {
-            if (!current.Contains(highlightable))
-                highlightable.OnSelected();
+            int index = InteractTargetSelector.SelectIndex(transform.position, transform.forward, targetCandidatePositions);
+            if (index >= 0)
+                (targetHighlight, target) = targetCandidates[index];
         }
-        current.Clear();
-        current.AddRange(nearbyHighlightables);
+        Context.InteractTarget = target;
 
-
+        if (!ReferenceEquals(targetHighlight, highlightedTarget))
+        {
+            if (highlightedTarget as UnityEngine.Object != null)
+                highlightedTarget.OnDeselected();
+            if (targetHighlight as UnityEngine.Object != null)
+                targetHighlight.OnSelected();
+            highlightedTarget = targetHighlight;
+        }
     }
     void OnDrawGizmosSelected()
     {
@@ -284,9 +284,16 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         var stats = GetOwnerStats();
         if (stats == null) return;
 
+        // In a close-up the joystick does nothing; only the Back button leaves it.
+        if (IsInCloseUp)
+        {
+            Context.IsWalking = false;
+            return;
+        }
+
         Vector2 inputVector = Context.PlayerGameInput.GetMovementVectorNormalized();
 
-        Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
+        Vector3 moveDir = MovementDirection(inputVector);
 
         float moveDistance = stats.MoveSpeed * Time.deltaTime;
         float playerRadius = 0.7f;

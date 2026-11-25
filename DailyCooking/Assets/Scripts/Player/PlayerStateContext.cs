@@ -43,6 +43,8 @@ public class PlayerStateContext
     public bool IsWalking { get => isWalking; set => isWalking = value; }
     public KitchenObject KitchenObject { get => kitchenObject; set => kitchenObject = value; }
     public IInteractable SelectedInteractableObject { get => selectedInteractableObject; set => selectedInteractableObject = value; }
+    // What the Interact button acts on; chosen every frame by the owner (PlayerStateMachine.HandleInteractions).
+    public IInteractable InteractTarget { get; set; }
     public Vector3 LastInteractDir { get => lastInteractDir;  set=> lastInteractDir = value; }
     public List<IHighlightable> Highlightable { get=>highlightable; set=> highlightable = value; }
 }

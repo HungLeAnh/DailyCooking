@@ -8,6 +8,9 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
     public bool HasToolInstalled() => TryResolveTool();
 
+    // The cooking tool stacked on this counter, or null when there is none.
+    public CookingTool InstalledTool => TryResolveTool() ? _cookingTool : null;
+
     public bool HasFood() => TryResolveTool() && _cookingTool.HasAnyFood;
 
     private bool TryResolveTool()

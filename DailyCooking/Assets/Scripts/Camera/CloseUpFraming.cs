@@ -7,7 +7,7 @@ public class CloseUpFraming : MonoBehaviour
     public const float DefaultDistance = 1.6f;
     public const float DefaultHeight = 1.4f;
     public const float DefaultFieldOfView = 40f;
-    public static readonly Vector3 DefaultLookAtOffset = new Vector3(0f, 0.9f, 0f);
+    public static readonly Vector3 DefaultLookAtOffset = new Vector3(0f, 0.2f, 0f);
 
     [SerializeField] private float distance = DefaultDistance;
     [SerializeField] private float height = DefaultHeight;
