@@ -84,6 +84,13 @@ public class CloseUpGestureController : MonoBehaviour
             flippedThisCook = false;
             lastStirPrompt = -1;
         }
+        // The cook is over: a hold still running can no longer score (the server only takes
+        // pours while cooking), so drop it instead of showing a bar that keeps filling.
+        if (previous == CookingTool.State.Cooking && pouring)
+        {
+            pouring = false;
+            pouredThisCook = true;
+        }
     }
 
     private CookingToolCounterController Controller =>
@@ -183,7 +190,8 @@ public class CloseUpGestureController : MonoBehaviour
         Report(GestureFamily.Pour, CurrentPourLevel);
     }
 
-    private float CurrentPourLevel => GestureRecognizers.PourLevel(Time.time - pourStart, tool.CookingTimeMax);
+    private float CurrentPourLevel => GestureRecognizers.PourLevel(Time.time - pourStart,
+        GestureRecognizers.PourFillSeconds(tool.CookingTimeMax, tool.RequiresManualStart));
 
     private void UpdatePrompt()
     {

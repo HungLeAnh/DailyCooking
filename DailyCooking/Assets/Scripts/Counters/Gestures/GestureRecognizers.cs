@@ -22,6 +22,15 @@ public static class GestureRecognizers
         return 1f - distance / radius;
     }
 
+    // Share of the cook a self-starting tool's pour takes to fill: its cook is already running when
+    // the hold begins, so the band must be reachable well before the cook ends.
+    public const float SelfStartPourFillFraction = 0.6f;
+
+    public static float PourFillSeconds(float cookTimeMax, bool manualStart)
+    {
+        return manualStart ? cookTimeMax : cookTimeMax * SelfStartPourFillFraction;
+    }
+
     // Fill level for a hold: 1 = full after fillSeconds; may exceed 1 (overflow).
     public static float PourLevel(float holdSeconds, float fillSeconds)
     {

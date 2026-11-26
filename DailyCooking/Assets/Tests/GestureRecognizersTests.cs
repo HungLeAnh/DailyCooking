@@ -53,6 +53,19 @@ public class GestureRecognizersTests
         }
     }
 
+    [Test] public void PourFill_SelfStartingToolFillsBeforeTheCookEnds()
+    {
+        // A self-starting tool's cook is already running when the hold begins, so the fill must
+        // be shorter than the cook for the green band to be reachable.
+        Assert.AreEqual(2.4f, GestureRecognizers.PourFillSeconds(4f, manualStart: false), 1e-5f);
+        Assert.Less(GestureRecognizers.PourFillSeconds(4f, false) * GestureScoring.PourBandMax, 4f * 0.6f);
+    }
+
+    [Test] public void PourFill_ManualStartFollowsTheCook()
+    {
+        Assert.AreEqual(4f, GestureRecognizers.PourFillSeconds(4f, manualStart: true), 1e-5f);
+    }
+
     [Test] public void PourLevel_Values()
     {
         Assert.AreEqual(0.5f, GestureRecognizers.PourLevel(1f, 2f), 1e-5f);

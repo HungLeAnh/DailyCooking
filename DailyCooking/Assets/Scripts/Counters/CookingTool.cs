@@ -693,12 +693,15 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         }
     }
 
-    // Server: a Watch tool's cooked food is being taken out; score the moment it left.
-    public void ApplyWatchStepOnTakeOut(KitchenObject food)
+    // The food's stars if it left this tool now: a Watch tool scores the moment its cooked food
+    // comes out. Pure read — the caller writes it only once the take-out really happens.
+    public QualityRecord QualityAfterTakeOut(KitchenObject food)
     {
-        if (!IsServer || food == null || GestureFamily != GestureFamily.Watch || _netState.Value != State.Cooked)
-            return;
-        food.SetQuality(food.Quality.WithStep(GestureScoring.WatchStars(BurnFraction)));
+        if (food == null)
+            return QualityRecord.None;
+        if (GestureFamily != GestureFamily.Watch || _netState.Value != State.Cooked)
+            return food.Quality;
+        return food.Quality.WithStep(GestureScoring.WatchStars(BurnFraction));
     }
 
     [Rpc(SendTo.ClientsAndHost)]

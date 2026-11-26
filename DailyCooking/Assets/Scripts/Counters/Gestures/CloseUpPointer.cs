@@ -89,7 +89,7 @@ public class CloseUpPointer : MonoBehaviour
             ShowGhost(held.GetKitchenObjectSO(), position);
             return true;
         }
-        if (GameInput.Instance != null && GameInput.Instance.IsScreenPointOverUI(position))
+        if (IsOverScreenUI(position))
             return false;
         press = PressKind.Gesture;
         pressStartedOnFood = IsNearFood(position, out _);
@@ -147,6 +147,27 @@ public class CloseUpPointer : MonoBehaviour
     }
 
     private static PlayerStateMachine LocalPlayer => PlayerStateMachine.LocalInstance;
+
+    private readonly System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult> uiHits =
+        new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+
+    // HUD buttons block a press; the tool's own world-space widgets (progress bar, burn warning)
+    // sit right over the food in the close-up and must not swallow gestures.
+    private bool IsOverScreenUI(Vector2 position)
+    {
+        var eventSystem = UnityEngine.EventSystems.EventSystem.current;
+        if (eventSystem == null)
+            return false;
+        uiHits.Clear();
+        eventSystem.RaycastAll(new UnityEngine.EventSystems.PointerEventData(eventSystem) { position = position }, uiHits);
+        foreach (var hit in uiHits)
+        {
+            Canvas canvas = hit.gameObject.GetComponentInParent<Canvas>();
+            if (canvas == null || canvas.rootCanvas.renderMode != RenderMode.WorldSpace)
+                return true;
+        }
+        return false;
+    }
 
     private static CookingToolCounterController CurrentController
     {

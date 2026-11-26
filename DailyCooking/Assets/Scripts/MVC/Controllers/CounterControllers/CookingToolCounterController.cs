@@ -154,9 +154,9 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         {
             if (heldObject.TryGetTableware(out TablewareKitchenObject plateKitchenObject))
             {
+                // A plate that refuses the food leaves its stars untouched, so retries add nothing.
                 if (_cookingTool.TryGetFirstFood(out KitchenObject food, out _) &&
-                    ScoreTakeOut(food) &&
-                    plateKitchenObject.TryAddIngredient(food.GetKitchenObjectSO(), food.Quality))
+                    plateKitchenObject.TryAddIngredient(food.GetKitchenObjectSO(), _cookingTool.QualityAfterTakeOut(food)))
                 {
                     food.DestroySelf();
                     _cookingTool.UpdateCookingState(CookingTool.State.Idle);
@@ -171,17 +171,11 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
         if (_cookingTool.TryGetFirstFood(out KitchenObject firstFood, out _))
         {
-            ScoreTakeOut(firstFood);
-            firstFood.SetKitchenObjectParent(playerStateMachine);
+            QualityRecord takenOut = _cookingTool.QualityAfterTakeOut(firstFood);
+            if (firstFood.SetKitchenObjectParent(playerStateMachine))
+                firstFood.SetQuality(takenOut);
             _cookingTool.UpdateCookingState(CookingTool.State.Idle);
         }
-    }
-
-    // Server: a Watch tool scores the moment its cooked food leaves. Always true (chains in &&).
-    private bool ScoreTakeOut(KitchenObject food)
-    {
-        _cookingTool.ApplyWatchStepOnTakeOut(food);
-        return true;
     }
 
     // Server: a gesture report from the actor in this tool's close-up.
