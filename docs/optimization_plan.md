@@ -91,6 +91,24 @@ so it needs a plan plus a multiplayer test pass before it is safe to start.
 
 ---
 
+## 3b. Mobile frame rate (2026-11-26)
+
+**Measured (Editor, PC, busy kitchen: 13 cooking tools, 9 customers, host only, 1,697 frames):** script time < 0.5 ms/frame, GC ≈ 1.4 KB/frame (≈ 1.1 KB IMGUI `GUI.Repaint`, Editor-only), ≈ 168k triangles, 239 shadow casters, 78 skinned meshes, 33 SetPass calls. Game code is not the phone bottleneck; the settings were: Android ran **Ultra** (4096 shadow map, 150 m shadows, soft shadows, depth texture) with no `targetFrameRate` (Android's default 30 FPS cap).
+
+**Done** (design `docs/superpowers/specs/2026-11-26-mobile-framerate-design.md`):
+- Three Android levels `Mobile Low/Medium/High`, Android default `Mobile Medium`; 60 FPS target with `vSyncCount = 0`.
+- Settings popup: Graphics `Auto | Low | Medium | High`, FPS `30 | 60`. Auto = device pick + remembered downgrade + runtime governor; a manual level or chosen FPS is fixed.
+- `KitchenObject` renderers stop casting shadows on Mobile Low/Medium (Editor check: 14 → 12 shadow casters with one held plate).
+- Per-frame garbage: `QualityStarsOverlay` and `CloseUpOccluderHider` iterate `KitchenObject.Spawned` / `PlayerStateMachine.All` by index (no interface enumerator), and the hider caches the held food's renderers instead of calling `GetComponentsInChildren` every frame. Editor A/B (new game, overlay + hider on vs off): median `GC Allocated In Frame` identical (28,952 B both, the rest is Editor/tutorial).
+
+**Still to do on a device** (Android builds are blocked: keystore password, SDK platform 35):
+- Tune `DeviceTierPicker` thresholds (RAM 6 GB / 3 GB, 8 / 6 cores, 2 GB graphics memory) on low, mid and high phones; read the `[Perf] launch` line from `adb logcat`.
+- Check the governor does not drop on a phone that holds 60 FPS (thermal throttling after 10+ minutes is the case to watch), and that Mobile Low at 30 FPS is acceptable on the weakest target.
+- Measure GC bytes per second in a Player build (the Editor numbers include IMGUI).
+- If skinned meshes are the GPU cost (≈ 8 customization parts per character), merging character parts is the next candidate.
+
+---
+
 ## 4. Verification
 
 Every change above was checked with:

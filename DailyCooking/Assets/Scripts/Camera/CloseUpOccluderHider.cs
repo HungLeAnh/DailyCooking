@@ -14,7 +14,15 @@ public class CloseUpOccluderHider : MonoBehaviour
     private const float WalkHeadHeight = 1.2f;
     private const float WalkTooCloseDistance = 1.2f;
 
-    private readonly Dictionary<PlayerStateMachine, List<Renderer>> hidden = new Dictionary<PlayerStateMachine, List<Renderer>>();
+    private sealed class HiddenAvatar
+    {
+        public readonly List<Renderer> TurnedOff = new List<Renderer>();
+        // The held food's renderers, fetched again only when the avatar holds something else.
+        public KitchenObject Held;
+        public Renderer[] HeldRenderers;
+    }
+
+    private readonly Dictionary<PlayerStateMachine, HiddenAvatar> hidden = new Dictionary<PlayerStateMachine, HiddenAvatar>();
     private readonly List<PlayerStateMachine> toRestore = new List<PlayerStateMachine>();
 
     private void LateUpdate()
@@ -32,20 +40,28 @@ public class CloseUpOccluderHider : MonoBehaviour
 
         if (cameraMode == null)
             return;
-        foreach (PlayerStateMachine avatar in PlayerStateMachine.All)
+        // By index: foreach over the IReadOnlyList interface allocates an enumerator every frame.
+        IReadOnlyList<PlayerStateMachine> avatars = PlayerStateMachine.All;
+        for (int i = 0; i < avatars.Count; i++)
         {
+            PlayerStateMachine avatar = avatars[i];
             if (avatar == null || !ShouldHide(cameraMode, avatar))
                 continue;
-            if (!hidden.TryGetValue(avatar, out List<Renderer> turnedOff))
+            if (!hidden.TryGetValue(avatar, out HiddenAvatar entry))
             {
-                turnedOff = new List<Renderer>();
-                hidden[avatar] = turnedOff;
-                TurnOff(avatar.GetComponentsInChildren<Renderer>(), turnedOff);
+                entry = new HiddenAvatar();
+                hidden[avatar] = entry;
+                TurnOff(avatar.GetComponentsInChildren<Renderer>(), entry.TurnedOff);
             }
             // Food picked up while hidden is hidden too.
             KitchenObject held = avatar.GetKitchenObject();
-            if (held != null)
-                TurnOff(held.GetComponentsInChildren<Renderer>(), turnedOff);
+            if (held != entry.Held)
+            {
+                entry.Held = held;
+                entry.HeldRenderers = held != null ? held.GetComponentsInChildren<Renderer>() : null;
+            }
+            if (entry.HeldRenderers != null)
+                TurnOff(entry.HeldRenderers, entry.TurnedOff);
         }
     }
 
@@ -93,9 +109,9 @@ public class CloseUpOccluderHider : MonoBehaviour
     // Re-enables exactly the renderers this component turned off, nothing else.
     private void Restore(PlayerStateMachine avatar)
     {
-        if (hidden.TryGetValue(avatar, out List<Renderer> renderers))
+        if (hidden.TryGetValue(avatar, out HiddenAvatar entry))
         {
-            foreach (Renderer renderer in renderers)
+            foreach (Renderer renderer in entry.TurnedOff)
             {
                 if (renderer != null)
                     renderer.enabled = true;

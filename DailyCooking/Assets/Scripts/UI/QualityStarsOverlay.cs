@@ -23,8 +23,11 @@ public class QualityStarsOverlay : MonoBehaviour
         if (camera != null)
         {
             Vector3 cameraPosition = camera.transform.position;
-            foreach (KitchenObject food in KitchenObject.Spawned)
+            // By index: foreach over the IReadOnlyList interface allocates an enumerator every frame.
+            IReadOnlyList<KitchenObject> spawned = KitchenObject.Spawned;
+            for (int i = 0; i < spawned.Count; i++)
             {
+                KitchenObject food = spawned[i];
                 if (food == null)
                     continue;
                 Vector3 world = food.transform.position + Vector3.up * heightOffset;
