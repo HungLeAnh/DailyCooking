@@ -29,6 +29,32 @@ public class InventoryDataTests
         inv.Remove(item, 1);
         Assert.AreEqual(0, inv.Items.Count);
     }
+    [Test] public void SetCount_Sets()
+    {
+        var inv = new InventoryData();
+        inv.Init();
+        inv.Add(MakeItem("set-guid"), 1);
+        inv.SetCount("set-guid", 5);
+        Assert.AreEqual(5, inv.Count("set-guid"));
+    }
+    [Test] public void SetCount_Zero_RemovesStack()
+    {
+        var inv = new InventoryData();
+        inv.Init();
+        inv.Add(MakeItem("set-guid"), 3);
+        inv.SetCount("set-guid", 0);
+        Assert.AreEqual(0, inv.Items.Count);
+    }
+    [Test] public void SetCount_Twice_Idempotent()
+    {
+        var inv = new InventoryData();
+        inv.Init();
+        inv.Add(MakeItem("set-guid"), 1);
+        inv.SetCount("set-guid", 4);
+        inv.SetCount("set-guid", 4);
+        Assert.AreEqual(4, inv.Count("set-guid"));
+        Assert.AreEqual(1, inv.Items.Count);
+    }
     [Test] public void Add_ZeroCount_Ignored()
     {
         var inv = new InventoryData();

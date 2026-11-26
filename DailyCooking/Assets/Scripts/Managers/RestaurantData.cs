@@ -35,6 +35,31 @@ public class RestaurantData
         Gems += addGem;
         OnResourceChange?.Invoke();
     }
+    // Clients mirror the host's totals (never deltas), so a lost or repeated message can't drift.
+    public void SetCoins(int total)
+    {
+        Coins = total;
+        OnResourceChange?.Invoke();
+    }
+    public void SetGems(int total)
+    {
+        Gems = total;
+        OnResourceChange?.Invoke();
+    }
+    // Fires OnLevelUp once for every level reached above the current one, in order.
+    public void SetProgress(int level, int exp)
+    {
+        int previous = Level;
+        Exp = exp;
+        if (level != previous)
+        {
+            Level = level;
+            OnLevelChange?.Invoke();
+            for (int reached = previous + 1; reached <= level; reached++)
+                OnLevelUp?.Invoke(reached);
+        }
+        OnExpChange?.Invoke();
+    }
     public void UpdateRestaurantExp(int addExp)
     {
         Exp += addExp;

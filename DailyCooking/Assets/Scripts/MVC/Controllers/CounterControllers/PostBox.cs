@@ -125,6 +125,7 @@ public class PostBox : NetworkBehaviour, IInteractable, IHighlightable,IHasOptio
     {
         kitchenObjectSOGuidList.Add(kitchenObjectSOGuid);
         GameManager.Instance.GameData.PostBoxData.AddPackage(kitchenObjectSOGuid);
+        GameManager.Instance.ServerSyncPostBoxPackages();
     }
 
 }

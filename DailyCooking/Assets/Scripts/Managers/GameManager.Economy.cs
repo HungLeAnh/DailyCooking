@@ -26,7 +26,7 @@ public partial class GameManager
         if (!IsServer || GameData == null || amount <= 0) return;
         int levelBefore = GameData.RestaurantData.Level;
         GameData.RestaurantData.UpdateRestaurantExp(amount);
-        UpdateRestaurantExpClientRpc(amount);
+        UpdateRestaurantExpClientRpc(GameData.RestaurantData.Level, GameData.RestaurantData.Exp);
         int levelAfter = GameData.RestaurantData.Level;
         if (levelAfter > levelBefore)
             ApplyCoins(EconomyRules.GetLevelUpRewardCoins(levelAfter));
@@ -49,32 +49,32 @@ public partial class GameManager
     private void ApplyCoins(int delta)
     {
         GameData.RestaurantData.UpdateRestaurantCoins(delta);
-        UpdateRestaurantCoinClientRpc(delta);
+        UpdateRestaurantCoinClientRpc(GameData.RestaurantData.Coins);
     }
 
     private void ApplyGems(int delta)
     {
         GameData.RestaurantData.UpdateRestaurantGems(delta);
-        UpdateRestaurantGemsClientRpc(delta);
+        UpdateRestaurantGemsClientRpc(GameData.RestaurantData.Gems);
     }
 
-    // Changes that happened before a joining client's snapshot arrived are already in it.
+    // Clients receive the host's totals, never deltas: a lost or repeated message can't make them drift.
     [Rpc(SendTo.NotServer)]
-    private void UpdateRestaurantCoinClientRpc(int delta)
+    private void UpdateRestaurantCoinClientRpc(int total)
     {
-        GameData?.RestaurantData.UpdateRestaurantCoins(delta);
-    }
-
-    [Rpc(SendTo.NotServer)]
-    private void UpdateRestaurantGemsClientRpc(int delta)
-    {
-        GameData?.RestaurantData.UpdateRestaurantGems(delta);
+        GameData?.RestaurantData.SetCoins(total);
     }
 
     [Rpc(SendTo.NotServer)]
-    private void UpdateRestaurantExpClientRpc(int amount)
+    private void UpdateRestaurantGemsClientRpc(int total)
     {
-        GameData?.RestaurantData.UpdateRestaurantExp(amount);
+        GameData?.RestaurantData.SetGems(total);
+    }
+
+    [Rpc(SendTo.NotServer)]
+    private void UpdateRestaurantExpClientRpc(int level, int exp)
+    {
+        GameData?.RestaurantData.SetProgress(level, exp);
     }
 
     #endregion
@@ -212,7 +212,8 @@ public partial class GameManager
         {
             // Skill upgrades belong to the player who bought them.
             ApplyUpgradeToStats(buyerStats, upgrade.UpgradeTarget, upgrade.UpgradeValue);
-            ApplyUpgradeToStatsClientRpc(playerId, upgrade.UpgradeTarget, upgrade.UpgradeValue);
+            SetPlayerStatsClientRpc(playerId, buyerStats.MoveSpeed, buyerStats.CuttingSpeed,
+                buyerStats.CarryingCapacity, buyerStats.TipIncrease);
         }
     }
 
@@ -225,11 +226,11 @@ public partial class GameManager
     }
 
     [Rpc(SendTo.NotServer)]
-    private void ApplyUpgradeToStatsClientRpc(string playerId, UpgradeTarget upgradeTarget, float amount)
+    private void SetPlayerStatsClientRpc(string playerId, float moveSpeed, float cuttingSpeed, int carryingCapacity, float tipIncrease)
     {
         PlayerStats stats = GameData?.GetPlayerStatsById(playerId);
         if (stats != null)
-            ApplyUpgradeToStats(stats, upgradeTarget, amount);
+            stats.SetUpgradeValues(moveSpeed, cuttingSpeed, carryingCapacity, tipIncrease);
     }
 
     private static void ApplyUpgradeToStats(PlayerStats stats, UpgradeTarget upgradeTarget, float amount)
@@ -293,7 +294,7 @@ public partial class GameManager
             return;
         }
         GameData.IncreaseShopDailyFreeWatchCount(rewardType);
-        IncreaseDailyFreeCountClientRpc(rewardType);
+        SetDailyFreeCountsClientRpc(GameData.ShopData.DailyFreeItemCoinCount, GameData.ShopData.DailyFreeItemGemCount);
 
         if (rewardType == ShopItemType.Coin)
             ApplyCoins(amount);
@@ -302,11 +303,9 @@ public partial class GameManager
     }
 
     [Rpc(SendTo.NotServer)]
-    private void IncreaseDailyFreeCountClientRpc(ShopItemType rewardType)
+    private void SetDailyFreeCountsClientRpc(int coinCount, int gemCount)
     {
-        if (GameData == null) return;
-        GameData.ShopData.RefreshDailyShopOffer();
-        GameData.IncreaseShopDailyFreeWatchCount(rewardType);
+        GameData?.ShopData.SetDailyFreeCounts(coinCount, gemCount);
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

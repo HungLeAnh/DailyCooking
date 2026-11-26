@@ -29,6 +29,15 @@ public class PlayerStats
         PlayerId = playerId;
     }
 
+    // Clients mirror the host's resulting values after an upgrade.
+    public void SetUpgradeValues(float moveSpeed, float cuttingSpeed, int carryingCapacity, float tipIncrease)
+    {
+        MoveSpeed = moveSpeed;
+        CuttingSpeed = cuttingSpeed;
+        CarryingCapacity = carryingCapacity;
+        TipIncrease = tipIncrease;
+        OnResourceChange?.Invoke();
+    }
     public void UpdatePlayerMoveSpeed(float amount)
     {
         MoveSpeed += MoveSpeed*amount;

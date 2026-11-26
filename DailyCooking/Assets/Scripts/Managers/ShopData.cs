@@ -14,6 +14,12 @@ public class ShopData
     public int DailyFreeItemGemCount { get => dailyFreeItemGemCount; set => dailyFreeItemGemCount = value; }
     public DateTime DateLastRefreshShopDailyFree { get => _dateLastRefreshShopDailyFree; set => _dateLastRefreshShopDailyFree = value; }
 
+    public void SetDailyFreeCounts(int coinCount, int gemCount)
+    {
+        dailyFreeItemCoinCount = coinCount;
+        dailyFreeItemGemCount = gemCount;
+        OnResourceChange?.Invoke();
+    }
     public void UpdateDailyFreeItemCoinCount()
     {
         dailyFreeItemCoinCount += 1;

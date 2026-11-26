@@ -105,6 +105,25 @@ public class InventoryData
         }
     }
 
+    // Clients mirror the host's count for one item (0 removes the stack).
+    public void SetCount(string id, int count)
+    {
+        for (int i = 0; i < _items.Count; i++)
+        {
+            ItemStack currentItemStack = _items[i];
+            if (currentItemStack.Item.PlacedObjectTypeSOGuid != id)
+                continue;
+            if (count <= 0)
+                _items.RemoveAt(i);
+            else
+                currentItemStack.Amount = count;
+            OnInventoryDataChanged?.Invoke();
+            return;
+        }
+        if (count > 0)
+            Add(id, count);
+    }
+
     public bool Contains(InventoryItemData item)
     {
         for (int i = 0; i < _items.Count; i++)

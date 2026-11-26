@@ -13,6 +13,13 @@ public class PostBoxData
         KitchenObjectSOGuidList.Add(kitchenObjectSOGuid);
         OnResourceChange?.Invoke();
     }
+    public void SetPackages(IList<string> guids)
+    {
+        KitchenObjectSOGuidList.Clear();
+        if (guids != null)
+            KitchenObjectSOGuidList.AddRange(guids);
+        OnResourceChange?.Invoke();
+    }
     public void RemovePackage(string guid)
     {
         KitchenObjectSOGuidList.Remove(guid);

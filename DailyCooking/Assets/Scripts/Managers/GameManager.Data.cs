@@ -70,26 +70,21 @@ public partial class GameManager
             return;
         }
         GameData.AddInventoryData(guid);
-        AddInventoryDataClientRpc(guid);
+        SetInventoryCountClientRpc(guid, GameData.InventoryData.Count(guid));
     }
 
     public void ServerRemoveInventory(string guid)
     {
         if (!IsServer || GameData?.InventoryData == null || string.IsNullOrEmpty(guid)) return;
         GameData.RemoveInventoryData(guid);
-        RemoveInventoryDataClientRpc(guid);
+        SetInventoryCountClientRpc(guid, GameData.InventoryData.Count(guid));
     }
 
+    // Clients mirror the host's count for the item, not the +1/-1.
     [Rpc(SendTo.NotServer)]
-    private void AddInventoryDataClientRpc(string guid)
+    private void SetInventoryCountClientRpc(string guid, int count)
     {
-        GameData?.AddInventoryData(guid);
-    }
-
-    [Rpc(SendTo.NotServer)]
-    private void RemoveInventoryDataClientRpc(string guid)
-    {
-        GameData?.RemoveInventoryData(guid);
+        GameData?.InventoryData.SetCount(guid, count);
     }
 
     // Server only: a package was taken out of the PostBox.
@@ -97,13 +92,20 @@ public partial class GameManager
     {
         if (!IsServer || GameData?.PostBoxData == null || string.IsNullOrEmpty(kitchenObjectSOGuid)) return;
         GameData.PostBoxData.RemovePackage(kitchenObjectSOGuid);
-        RemovePostBoxDataClientRpc(kitchenObjectSOGuid);
+        ServerSyncPostBoxPackages();
     }
-
-    [Rpc(SendTo.NotServer)]
-    private void RemovePostBoxDataClientRpc(string kitchenObjectSOGuid)
+    // Server only: clients mirror the whole package list (adds had no mirror before).
+    public void ServerSyncPostBoxPackages()
     {
-        GameData?.PostBoxData.RemovePackage(kitchenObjectSOGuid);
+        if (!IsServer || GameData?.PostBoxData == null) return;
+        SetPostBoxPackagesClientRpc(string.Join(",", GameData.PostBoxData.KitchenObjectSOGuidList));
+    }
+    [Rpc(SendTo.NotServer)]
+    private void SetPostBoxPackagesClientRpc(string kitchenObjectSOGuids)
+    {
+        // Comma-joined: NGO RPCs can't carry string[]; GUIDs contain no commas.
+        GameData?.PostBoxData.SetPackages(string.IsNullOrEmpty(kitchenObjectSOGuids)
+            ? System.Array.Empty<string>() : kitchenObjectSOGuids.Split(','));
     }
 
     #endregion
