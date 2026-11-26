@@ -401,13 +401,7 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
                 await SessionManager.Instance.SignInAnonymouslyAsync();
             }
 
-            NetworkManager.Singleton.ConnectionApprovalCallback = NetworkManager_ConnectionApprovalCallback;
-            // Remove first: a failed or repeated attempt must not leave the handlers attached twice.
-            NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Server_OnClientConnectedCallback;
-            NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Server_OnClientDisconnectCallback;
-            NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Server_OnClientConnectedCallback;
-            NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Server_OnClientDisconnectCallback;
-
+            PrepareHostCallbacks();
             if (Session.State != SessionState.Idle) Session.Reset();
             string joinCode = await SessionManager.Instance.StartHostWithRelay(MAX_PLAYER_AMOUNT, "dtls");
 
@@ -428,6 +422,43 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             return null;
         }
     }
+    private void PrepareHostCallbacks()
+    {
+        NetworkManager.Singleton.ConnectionApprovalCallback = NetworkManager_ConnectionApprovalCallback;
+        // Remove first: a failed or repeated attempt must not leave the handlers attached twice.
+        NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Server_OnClientConnectedCallback;
+        NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Server_OnClientDisconnectCallback;
+        NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Server_OnClientConnectedCallback;
+        NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Server_OnClientDisconnectCallback;
+    }
+
+#if UNITY_EDITOR
+    // Editor / Multiplayer Play Mode testing without Relay: the join code "LOCAL" means 127.0.0.1.
+    public const string LOCAL_JOIN_CODE = "LOCAL";
+    private const ushort LOCAL_PORT = 7777;
+
+    public bool StartLocalHostSession()
+    {
+        PrepareHostCallbacks();
+        if (Session.State != SessionState.Idle) Session.Reset();
+        networkManager.NetworkConfig.NetworkTransport = unityTransport;
+        unityTransport.SetConnectionData("127.0.0.1", LOCAL_PORT, "0.0.0.0");
+        if (!networkManager.StartHost())
+            return false;
+        CurrentJoinCode = LOCAL_JOIN_CODE;
+        SubscribeTransportEvents();
+        Session.StartHosting();
+        return true;
+    }
+
+    private bool StartLocalClient()
+    {
+        networkManager.NetworkConfig.NetworkTransport = unityTransport;
+        unityTransport.SetConnectionData("127.0.0.1", LOCAL_PORT);
+        return networkManager.StartClient();
+    }
+#endif
+
     public async Task<bool> StartClientSession(string joinCode)
     {
         try
@@ -452,7 +483,13 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             CurrentJoinCode = joinCode;
             Session.StartJoining();
             SubscribeTransportEvents();
-            bool started = await SessionManager.Instance.StartClientWithRelay(joinCode, "dtls");
+            bool started;
+#if UNITY_EDITOR
+            if (joinCode == LOCAL_JOIN_CODE)
+                started = StartLocalClient();
+            else
+#endif
+            started = await SessionManager.Instance.StartClientWithRelay(joinCode, "dtls");
             if (!started)
                 Session.Refused(SessionEndReason.JoinFailed);
             return started;
@@ -460,6 +497,7 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         catch (Exception e)
         {
             Debug.LogError($"Failed to join session: {e.Message}");
+            Session.Refused(SessionEndReason.JoinFailed);
             return false;
         }
     }

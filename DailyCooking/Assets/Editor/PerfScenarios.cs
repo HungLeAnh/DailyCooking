@@ -20,6 +20,21 @@ public static class PerfScenarios
     [MenuItem("Tools/Profiling/Enter Game (new host)")]
     public static void EnterGame() { EnterGameAsync(); }
 
+    // Multiplayer Play Mode without Relay: virtual players join with MultiplayerManager.LOCAL_JOIN_CODE.
+    [MenuItem("Tools/Profiling/Enter Game (local host, no Relay)")]
+    public static void EnterGameLocal()
+    {
+        if (!Application.isPlaying) { Debug.LogError("[Perf] Enter Play Mode first."); return; }
+        var existing = GameManager.Instance.SavedDataList.Find(s => s.GameDataName == SaveName);
+        if (existing != null) GameManager.Instance.DeleteSavedData(existing);
+        if (!GameManager.Instance.NewGame(SaveName, SavePassword)) { Debug.LogError("[Perf] NewGame failed."); return; }
+        if (!MultiplayerManager.Instance.StartLocalHostSession()) { Debug.LogError("[Perf] local host failed."); return; }
+        Loader.LoadNetwork(Loader.Scene.GameScene);
+        GameManager.Instance.SwitchState(new InGameState(GameManager.Instance));
+        UIPopupManager.Instance.HidePopup(UIPopupType.UIMainMenuPopup);
+        Debug.Log("[Perf] local host up (join code LOCAL)");
+    }
+
     [MenuItem("Tools/Profiling/S5 - Open Shop popup")]
     public static void S5_OpenShop()
     {
