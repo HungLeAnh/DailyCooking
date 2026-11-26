@@ -155,7 +155,7 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
             if (heldObject.TryGetTableware(out TablewareKitchenObject plateKitchenObject))
             {
                 if (_cookingTool.TryGetFirstFood(out KitchenObject food, out _) &&
-                    plateKitchenObject.TryAddIngredient(food.GetKitchenObjectSO()))
+                    plateKitchenObject.TryAddIngredient(food.GetKitchenObjectSO(), food.Quality))
                 {
                     food.DestroySelf();
                     _cookingTool.UpdateCookingState(CookingTool.State.Idle);

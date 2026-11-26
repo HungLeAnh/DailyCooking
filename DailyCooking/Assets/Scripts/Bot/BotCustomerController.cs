@@ -416,7 +416,9 @@ public class BotCustomerController : NetworkBehaviour,IInteractable,IHighlightab
             cash += (int)food.price;
             exp += food.exp;
         }
-        cash += (int)(cash * tipPercentage.Value);
+        // Wait-time tip plus the quality tip for the served plate's stars.
+        var plate = targetTable != null ? targetTable.GetKitchenObject(TargetSeatIndex.Value) as TablewareKitchenObject : null;
+        cash = QualityRules.Payment(cash, tipPercentage.Value, plate != null ? plate.DishStars : 0);
         if (targetTable != null)
             targetTable.SetEatenViual(TargetSeatIndex.Value, cash, exp);
         ResetSeat();

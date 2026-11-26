@@ -27,6 +27,11 @@ public class KitchenObject : NetworkBehaviour
     [SerializeField] protected KitchenObjectSO kitchenObjectSO;
     private readonly NetworkVariable<KitchenObjectParentSlot> parentSlot = new NetworkVariable<KitchenObjectParentSlot>(
         default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    // Gesture-step stars this food went through (server-written; see QualityRecord).
+    private readonly NetworkVariable<QualityRecord> quality = new NetworkVariable<QualityRecord>(
+        default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public event Action<QualityRecord> OnQualityChanged;
+    public QualityRecord Quality => quality.Value;
     private IKitchenObjectParent kitchenObjectParent;
     private int kitchenObjectParentIndex;
     private bool isParentPending;
@@ -39,11 +44,13 @@ public class KitchenObject : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         parentSlot.OnValueChanged += ParentSlot_OnValueChanged;
+        quality.OnValueChanged += Quality_OnValueChanged;
         ApplyParentSlot(parentSlot.Value);
     }
     public override void OnNetworkDespawn()
     {
         parentSlot.OnValueChanged -= ParentSlot_OnValueChanged;
+        quality.OnValueChanged -= Quality_OnValueChanged;
         DetachFromLocalParent();
         base.OnNetworkDespawn();
     }
@@ -53,6 +60,19 @@ public class KitchenObject : NetworkBehaviour
         if (isParentPending)
             ApplyParentSlot(parentSlot.Value);
     }
+    // Server only.
+    public void SetQuality(QualityRecord record)
+    {
+        if (!IsServer)
+            return;
+        quality.Value = record;
+    }
+
+    private void Quality_OnValueChanged(QualityRecord previousValue, QualityRecord newValue)
+    {
+        OnQualityChanged?.Invoke(newValue);
+    }
+
     public KitchenObjectSO GetKitchenObjectSO()
     {
         return kitchenObjectSO;

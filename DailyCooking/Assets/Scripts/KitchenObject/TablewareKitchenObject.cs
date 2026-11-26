@@ -21,6 +21,9 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
 
     // Replicated plate state, so late joiners see the same plate.
     private NetworkList<FixedString64Bytes> ingredientGuids;
+    // Index-aligned with ingredientGuids: the stars each added ingredient carried.
+    private NetworkList<QualityRecord> ingredientQualities;
+    public event Action OnDishStarsChanged;
     private readonly NetworkVariable<bool> isEaten = new NetworkVariable<bool>(
         false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<bool> isServed = new NetworkVariable<bool>(
@@ -39,12 +42,14 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
     {
         base.Awake();
         ingredientGuids = new NetworkList<FixedString64Bytes>();
+        ingredientQualities = new NetworkList<QualityRecord>();
     }
 
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
         ingredientGuids.OnListChanged += IngredientGuids_OnListChanged;
+        ingredientQualities.OnListChanged += IngredientQualities_OnListChanged;
         isEaten.OnValueChanged += IsEaten_OnValueChanged;
         isServed.OnValueChanged += IsServed_OnValueChanged;
 
@@ -59,20 +64,39 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
     public override void OnNetworkDespawn()
     {
         ingredientGuids.OnListChanged -= IngredientGuids_OnListChanged;
+        ingredientQualities.OnListChanged -= IngredientQualities_OnListChanged;
         isEaten.OnValueChanged -= IsEaten_OnValueChanged;
         isServed.OnValueChanged -= IsServed_OnValueChanged;
         base.OnNetworkDespawn();
     }
 
     // Server only. Returns true when the ingredient was added to the plate.
-    public bool TryAddIngredient(KitchenObjectSO kitchenObjectSO)
+    public bool TryAddIngredient(KitchenObjectSO kitchenObjectSO, QualityRecord quality)
     {
         if (!IsServer || kitchenObjectSO == null)
             return false;
         if (!validKitchenObjectSOList.Contains(kitchenObjectSO) || _ingredientSOList.Contains(kitchenObjectSO))
             return false;
+        ingredientQualities.Add(quality);
         ingredientGuids.Add(kitchenObjectSO.Guid);
         return true;
+    }
+
+    // Average stars of the gesture-made ingredients on this plate; 0 when none (no quality tip).
+    public int DishStars
+    {
+        get
+        {
+            var records = new List<QualityRecord>(ingredientQualities.Count);
+            foreach (QualityRecord record in ingredientQualities)
+                records.Add(record);
+            return QualityRules.DishStars(records);
+        }
+    }
+
+    private void IngredientQualities_OnListChanged(NetworkListEvent<QualityRecord> changeEvent)
+    {
+        OnDishStarsChanged?.Invoke();
     }
 
     private void IngredientGuids_OnListChanged(NetworkListEvent<FixedString64Bytes> changeEvent)

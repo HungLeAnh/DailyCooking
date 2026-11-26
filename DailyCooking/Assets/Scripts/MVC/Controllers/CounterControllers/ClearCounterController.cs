@@ -15,7 +15,7 @@ public class ClearCounterController : BaseCounterController
         {
             if (playerStateMachine.GetKitchenObject().TryGetTableware(out TablewareKitchenObject plateKitchenObject))
             {
-                if (plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO()))
+                if (plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO(), GetKitchenObject().Quality))
                 {
                     GetKitchenObject().DestroySelf();
                 }
@@ -24,7 +24,7 @@ public class ClearCounterController : BaseCounterController
             {
                 if (GetKitchenObject().TryGetTableware(out plateKitchenObject))
                 {
-                    if (plateKitchenObject.TryAddIngredient(playerStateMachine.GetKitchenObject().GetKitchenObjectSO()))
+                    if (plateKitchenObject.TryAddIngredient(playerStateMachine.GetKitchenObject().GetKitchenObjectSO(), playerStateMachine.GetKitchenObject().Quality))
                     {
                         playerStateMachine.GetKitchenObject().DestroySelf();
                     }
