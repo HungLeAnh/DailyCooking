@@ -183,13 +183,18 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         if (target == null)
             return;
 
+        // At a cooking tool, USE only glides into the close-up; cooking itself is done there by
+        // dragging and gestures, so nothing is sent to the server.
+        if (target is CookingToolCounterController controller && controller.HasToolInstalled())
+        {
+            CameraModeController cameraMode = CameraModeController.Instance;
+            if (cameraMode != null && cameraMode.Mode == CameraMode.Walk)
+                cameraMode.RequestCloseUp(controller.InstalledTool);
+            return;
+        }
+
         bool alternate = target is IHasProgress progress && !progress.IsDone() && progress.GetProgress() != -1;
         RequestInteract(target, alternate);
-
-        CameraModeController cameraMode = CameraModeController.Instance;
-        if (cameraMode != null && cameraMode.Mode == CameraMode.Walk &&
-            target is CookingToolCounterController controller && controller.HasToolInstalled())
-            cameraMode.RequestCloseUp(controller.InstalledTool);
     }
 
     private static IInteractable ResolveInteractable(Component component)

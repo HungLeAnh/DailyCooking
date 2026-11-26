@@ -63,10 +63,11 @@ public class UIHUDManager : Singleton<UIHUDManager>
             CameraModeController.Instance.OnModeChanged -= ApplyCameraModeVisibility;
     }
 
-    // Interact: walking and close-up. Back: close-up only. Rotate: build mode only.
+    // Interact: walking view only. Back: close-up only. Rotate: build mode only.
     private void ApplyCameraModeVisibility(CameraMode mode)
     {
-        SetElementVisible(UIHUDElements.Interact, mode != CameraMode.Build);
+        // In a close-up everything is done by dragging and gestures, so USE is walking-view only.
+        SetElementVisible(UIHUDElements.Interact, mode == CameraMode.Walk);
         SetElementVisible(UIHUDElements.Back, mode == CameraMode.CloseUp);
         SetElementVisible(UIHUDElements.Rotate, mode == CameraMode.Build);
     }
