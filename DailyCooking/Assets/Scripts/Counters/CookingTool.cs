@@ -28,6 +28,9 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     private readonly NetworkVariable<float> _netBurningTimer = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<int> _netCombineRecipeIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<int> _netCuttingRecipeIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    // Whether the current cook was flipped (FLIP tools); every peer hides the flip prompt from it.
+    private readonly NetworkVariable<bool> _netFlipped = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public bool HasBeenFlipped => _netFlipped.Value;
     // One reference per slot, so every peer (and late joiners) can rebuild every ingredient.
     private readonly NetworkList<NetworkObjectReference> _netFoods = new NetworkList<NetworkObjectReference>();
 
@@ -439,22 +442,23 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     }
 
     // Server only: one cut by actor, at the actor's own cutting speed.
-    public void Cut(PlayerStateMachine actor)
+    // Server: one cut. Returns false when the knife could not advance.
+    public bool Cut(PlayerStateMachine actor)
     {
-        if (!IsServer) return;
+        if (!IsServer) return false;
         float cuttingSpeed = 1f;
         PlayerStats stats = actor != null ? actor.GetOwnerStats() : null;
         if (stats != null)
             cuttingSpeed = stats.CuttingSpeed;
         else
             Debug.LogWarning("CookingTool.Cut: missing player stats, default CuttingSpeed=1.", this);
-        if (cuttingSpeed <= 0f) return;
+        if (cuttingSpeed <= 0f) return false;
         KitchenObject current = _slot.Current;
         if (current == null || !HasRecipeWithInput(current.GetKitchenObjectSO()))
-            return;
+            return false;
         _resolver.EnsureResolved(_inputSOs);
         if (!_resolver.IsCutting || !_resolver.HasValidRecipe)
-            return;
+            return false;
 
         _netCookingTimer.Value += cuttingSpeed;
         _clock.Reset(_netCookingTimer.Value, _netBurningTimer.Value);
@@ -468,7 +472,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
                 _resolver.ResetSlot();
                 _clock.Reset(_netCookingTimer.Value, _netBurningTimer.Value);
                 _presenter.Reset();
-                return;
+                return false;
             }
             QualityRecord cutQuality = current.Quality.WithStep(_steps.StepStars(GestureFamily.Cut, 0));
             current.DestroySelf();
@@ -476,12 +480,14 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             if (cutOutput != null)
                 cutOutput.SetQuality(cutQuality);
             _steps.Reset();
+            _netFlipped.Value = false;
             _netCookingTimer.Value = 0f;
             _clock.Reset(0f, 0f);
             _presenter.Reset();
             RebuildInputs();
             _resolver.ResolveFor(_inputSOs);
         }
+        return true;
     }
 
     [Rpc(SendTo.ClientsAndHost)]
@@ -517,6 +523,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         _netCookingTimer.Value = 0f;
         _netBurningTimer.Value = 0f;
         _steps.Reset();
+        _netFlipped.Value = false;
         _clock.Reset(0f, 0f);
         _presenter.Reset();
         _netState.Value = state;
@@ -672,11 +679,14 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
             case GestureFamily.Cut:
                 if (!_slot.HasFood || !IsCuttingActive || !_steps.RecordSwipe(value))
                     return false;
-                Cut(actor);
-                return true;
+                if (Cut(actor))
+                    return true;
+                _steps.UndoLastSwipe();
+                return false;
             case GestureFamily.Flip:
                 if (_netState.Value != State.Cooking || !_steps.RecordFlip(value, CookFraction))
                     return false;
+                _netFlipped.Value = true;
                 FlipFeedbackClientRpc();
                 return true;
             case GestureFamily.Stir:
@@ -704,10 +714,35 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         return food.Quality.WithStep(GestureScoring.WatchStars(BurnFraction));
     }
 
+    // A short hop-and-turn on the food's mesh (its first child; the root follows its parent).
+    private System.Collections.IEnumerator FlipFoodVisual(KitchenObject food)
+    {
+        const float duration = 0.35f;
+        Transform visual = food != null && food.transform.childCount > 0 ? food.transform.GetChild(0) : null;
+        if (visual == null)
+            yield break;
+        Vector3 basePosition = visual.localPosition;
+        Quaternion baseRotation = visual.localRotation;
+        for (float t = 0f; t < duration && visual != null; t += Time.deltaTime)
+        {
+            float k = t / duration;
+            visual.localPosition = basePosition + Vector3.up * (Mathf.Sin(k * Mathf.PI) * 0.25f);
+            visual.localRotation = baseRotation * Quaternion.Euler(360f * k, 0f, 0f);
+            yield return null;
+        }
+        if (visual != null)
+        {
+            visual.localPosition = basePosition;
+            visual.localRotation = baseRotation;
+        }
+    }
+
     [Rpc(SendTo.ClientsAndHost)]
     private void FlipFeedbackClientRpc()
     {
         OnFlipped?.Invoke();
+        if (TryGetFirstFood(out KitchenObject food, out _))
+            StartCoroutine(FlipFoodVisual(food));
     }
 
     private void UpdateUI()

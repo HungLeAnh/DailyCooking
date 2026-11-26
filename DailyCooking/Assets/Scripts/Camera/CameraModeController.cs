@@ -8,7 +8,10 @@ public class CameraModeController : Singleton<CameraModeController>
 {
     private const int LivePriority = 20;
     private const int IdlePriority = 0;
-    private const float LineOfSightToolMargin = 0.6f;
+    // The tool being framed and the counter under it: their own colliders never block the shot.
+    private Transform lineOfSightTool;
+    private Transform lineOfSightCounter;
+    private readonly RaycastHit[] lineOfSightHits = new RaycastHit[16];
 
     [SerializeField] private CinemachineCamera walkCamera;
     [SerializeField] private CinemachineCamera closeUpCamera;
@@ -43,10 +46,10 @@ public class CameraModeController : Singleton<CameraModeController>
             GameInput.Instance.OnLookDelta += GameInput_OnLookDelta;
         if (GridBuildingSystem.Instance != null)
         {
+            // OnObjectSpawned fires again if the grid re-initialises with a new placement manager.
+            GridBuildingSystem.Instance.OnObjectSpawned += SubscribePlacement;
             if (GridBuildingSystem.Instance.IsInitialized)
                 SubscribePlacement();
-            else
-                GridBuildingSystem.Instance.OnObjectSpawned += SubscribePlacement;
         }
     }
 
@@ -78,6 +81,7 @@ public class CameraModeController : Singleton<CameraModeController>
         {
             walkCamera.Follow = localPlayer.transform;
             walkCamera.LookAt = localPlayer.transform;
+            walkCamera.PreviousStateIsValid = false; // snap behind the player, no glide from the scene
         }
     }
 
@@ -93,6 +97,9 @@ public class CameraModeController : Singleton<CameraModeController>
         float height = framing != null ? framing.Height : CloseUpFraming.DefaultHeight;
         float fieldOfView = framing != null ? framing.FieldOfView : CloseUpFraming.DefaultFieldOfView;
 
+        lineOfSightTool = tool.transform;
+        CookingToolCounterController counter = CookingToolCounterController.FindControllerForTool(tool);
+        lineOfSightCounter = counter != null ? counter.transform : null;
         CloseUpShot shot = CloseUpPlacement.Choose(lookAt, tool.transform.forward, localPlayer.transform.position,
             distance, height, IsLineOfSightBlocked);
 
@@ -113,10 +120,20 @@ public class CameraModeController : Singleton<CameraModeController>
     private bool IsLineOfSightBlocked(Vector3 from, Vector3 to)
     {
         Vector3 toTarget = to - from;
-        float length = toTarget.magnitude - LineOfSightToolMargin;
-        if (length <= 0f)
+        float length = toTarget.magnitude;
+        if (length <= 0.01f)
             return false;
-        return Physics.Raycast(from, toTarget.normalized, length, closeUpBlockers, QueryTriggerInteraction.Ignore);
+        int count = Physics.RaycastNonAlloc(from, toTarget / length, lineOfSightHits, length, closeUpBlockers,
+            QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < count; i++)
+        {
+            Transform hit = lineOfSightHits[i].transform;
+            bool own = (lineOfSightTool != null && hit.IsChildOf(lineOfSightTool)) ||
+                       (lineOfSightCounter != null && hit.IsChildOf(lineOfSightCounter));
+            if (!own)
+                return true;
+        }
+        return false;
     }
 
     public void ExitCloseUp()
@@ -129,12 +146,28 @@ public class CameraModeController : Singleton<CameraModeController>
         IBuildingPlacementManager placement = GridBuildingSystem.Instance.BuildingPlacementManager;
         if (placement == null || placement == subscribedPlacement)
             return;
+        if (subscribedPlacement != null)
+        {
+            subscribedPlacement.OnBuildingStart -= Placement_OnBuildingStart;
+            subscribedPlacement.OnBuildingEnd -= Placement_OnBuildingEnd;
+        }
         subscribedPlacement = placement;
         placement.OnBuildingStart += Placement_OnBuildingStart;
         placement.OnBuildingEnd += Placement_OnBuildingEnd;
     }
 
-    private void Placement_OnBuildingStart(object sender, EventArgs e) => machine.BuildStarted();
+    private void Placement_OnBuildingStart(object sender, EventArgs e)
+    {
+        // Open the overhead view above the player, not wherever it was last left.
+        PlayerStateMachine localPlayer = PlayerStateMachine.LocalInstance;
+        if (buildCamera != null && localPlayer != null)
+        {
+            Vector3 position = buildCamera.transform.position;
+            Vector3 player = localPlayer.transform.position;
+            buildCamera.transform.position = new Vector3(player.x, position.y, player.z);
+        }
+        machine.BuildStarted();
+    }
     private void Placement_OnBuildingEnd(object sender, EventArgs e) => machine.BuildEnded();
 
     private void GameInput_OnLookDelta(object sender, Vector2 delta)

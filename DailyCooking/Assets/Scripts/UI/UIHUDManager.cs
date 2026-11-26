@@ -65,8 +65,14 @@ public class UIHUDManager : Singleton<UIHUDManager>
     }
 
     // Interact: walking view only. Back and the held-item slot: close-up only. Rotate: build mode only.
+    // True while HideAllUIElement is in force (tutorial, inventory): mode changes must not
+    // bring buttons back over a hidden HUD.
+    private bool hudHidden;
+
     private void ApplyCameraModeVisibility(CameraMode mode)
     {
+        if (hudHidden)
+            return;
         // In a close-up everything is done by dragging and gestures, so USE is walking-view only.
         SetElementVisible(UIHUDElements.Interact, mode == CameraMode.Walk);
         SetElementVisible(UIHUDElements.Back, mode == CameraMode.CloseUp);
@@ -146,6 +152,7 @@ public class UIHUDManager : Singleton<UIHUDManager>
     }
     public void HideAllUIElement()
     {
+        hudHidden = true;
         foreach (var item in uiHUDElementDictionary)
         {
             item.Value.SetActive(false);
@@ -154,6 +161,7 @@ public class UIHUDManager : Singleton<UIHUDManager>
 
     public void ShowAllUIElement()
     {
+        hudHidden = false;
         foreach (var item in uiHUDElementDictionary)
         {
             item.Value.SetActive(true);

@@ -11,7 +11,6 @@ public class PlayerStateContext
     private LayerMask counterLayermask;
     private KitchenObject kitchenObject;
     private Transform _kitchenObjectHoldPoint;
-    private IInteractable selectedInteractableObject;
     private Vector3 lastInteractDir;
     private List<IHighlightable> highlightable;
     private string currentAnimation;
@@ -42,7 +41,6 @@ public class PlayerStateContext
     public bool IsDisableInput { get => idDisableInput; set => idDisableInput = value; }
     public bool IsWalking { get => isWalking; set => isWalking = value; }
     public KitchenObject KitchenObject { get => kitchenObject; set => kitchenObject = value; }
-    public IInteractable SelectedInteractableObject { get => selectedInteractableObject; set => selectedInteractableObject = value; }
     // What the Interact button acts on; chosen every frame by the owner (PlayerStateMachine.HandleInteractions).
     public IInteractable InteractTarget { get; set; }
     public Vector3 LastInteractDir { get => lastInteractDir;  set=> lastInteractDir = value; }

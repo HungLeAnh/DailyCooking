@@ -28,6 +28,13 @@ public sealed class CookStepRecorder
         return true;
     }
 
+    // A recorded swipe whose cut did not happen (e.g. the knife could not advance).
+    public void UndoLastSwipe()
+    {
+        if (swipeStars.Count > 0)
+            swipeStars.RemoveAt(swipeStars.Count - 1);
+    }
+
     public bool RecordFlip(float clientFraction, float serverFraction)
     {
         if (flipFraction >= 0f || clientFraction < 0f || System.Math.Abs(clientFraction - serverFraction) > MaxReportDrift)

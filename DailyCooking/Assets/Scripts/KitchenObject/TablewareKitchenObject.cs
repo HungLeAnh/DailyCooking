@@ -87,10 +87,18 @@ public class TablewareKitchenObject : KitchenObject, IInteractable,IHighlightabl
     {
         get
         {
-            var records = new List<QualityRecord>(ingredientQualities.Count);
-            foreach (QualityRecord record in ingredientQualities)
-                records.Add(record);
-            return QualityRules.DishStars(records);
+            // Called every frame by the star overlay: no allocation.
+            int sum = 0;
+            int counted = 0;
+            for (int i = 0; i < ingredientQualities.Count; i++)
+            {
+                QualityRecord record = ingredientQualities[i];
+                if (record.Count == 0)
+                    continue;
+                sum += record.Stars;
+                counted++;
+            }
+            return counted == 0 ? 0 : QualityRules.RoundHalfUp((float)sum / counted);
         }
     }
 

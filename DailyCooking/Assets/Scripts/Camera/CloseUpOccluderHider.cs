@@ -1,12 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// During a close-up, hides (on this device only) any avatar standing between the close-up camera
-// and its tool, the local player's own avatar included, and shows it again afterwards.
+// Hides avatars (on this device only) that would block the view:
+// - in a close-up, any avatar standing between the close-up camera and its tool, the local
+//   player's own avatar included;
+// - in the walking view, the local avatar when the camera has been pulled in right behind its
+//   head (e.g. against a wall) and would fill the screen.
+// The food an avatar is holding is hidden with it. Everything comes back when it stops blocking.
 public class CloseUpOccluderHider : MonoBehaviour
 {
-    private const float AvatarChestHeight = 1f;
+    private static readonly float[] AvatarSampleHeights = { 1.0f, 1.7f }; // chest, head
     private const float AvatarRadius = 0.6f;
+    private const float WalkHeadHeight = 1.2f;
+    private const float WalkTooCloseDistance = 1.2f;
 
     private readonly Dictionary<PlayerStateMachine, List<Renderer>> hidden = new Dictionary<PlayerStateMachine, List<Renderer>>();
     private readonly List<PlayerStateMachine> toRestore = new List<PlayerStateMachine>();
@@ -14,23 +20,32 @@ public class CloseUpOccluderHider : MonoBehaviour
     private void LateUpdate()
     {
         CameraModeController cameraMode = CameraModeController.Instance;
-        bool inCloseUp = cameraMode != null && cameraMode.Mode == CameraMode.CloseUp && cameraMode.CloseUpCameraTransform != null;
 
         toRestore.Clear();
         foreach (PlayerStateMachine avatar in hidden.Keys)
         {
-            if (avatar == null || !inCloseUp || !Blocks(cameraMode, avatar))
+            if (avatar == null || !ShouldHide(cameraMode, avatar))
                 toRestore.Add(avatar);
         }
         foreach (PlayerStateMachine avatar in toRestore)
             Restore(avatar);
 
-        if (!inCloseUp)
+        if (cameraMode == null)
             return;
         foreach (PlayerStateMachine avatar in PlayerStateMachine.All)
         {
-            if (avatar != null && !hidden.ContainsKey(avatar) && Blocks(cameraMode, avatar))
-                Hide(avatar);
+            if (avatar == null || !ShouldHide(cameraMode, avatar))
+                continue;
+            if (!hidden.TryGetValue(avatar, out List<Renderer> turnedOff))
+            {
+                turnedOff = new List<Renderer>();
+                hidden[avatar] = turnedOff;
+                TurnOff(avatar.GetComponentsInChildren<Renderer>(), turnedOff);
+            }
+            // Food picked up while hidden is hidden too.
+            KitchenObject held = avatar.GetKitchenObject();
+            if (held != null)
+                TurnOff(held.GetComponentsInChildren<Renderer>(), turnedOff);
         }
     }
 
@@ -40,23 +55,39 @@ public class CloseUpOccluderHider : MonoBehaviour
             Restore(avatar);
     }
 
-    private static bool Blocks(CameraModeController cameraMode, PlayerStateMachine avatar)
+    private static bool ShouldHide(CameraModeController cameraMode, PlayerStateMachine avatar)
     {
-        return SegmentProximity.IsNear(cameraMode.CloseUpCameraTransform.position, cameraMode.CloseUpLookAt,
-            avatar.transform.position + Vector3.up * AvatarChestHeight, AvatarRadius);
+        if (cameraMode == null)
+            return false;
+        if (cameraMode.Mode == CameraMode.CloseUp && cameraMode.CloseUpCameraTransform != null)
+        {
+            Vector3 cameraPosition = cameraMode.CloseUpCameraTransform.position;
+            foreach (float height in AvatarSampleHeights)
+            {
+                if (SegmentProximity.IsNear(cameraPosition, cameraMode.CloseUpLookAt,
+                        avatar.transform.position + Vector3.up * height, AvatarRadius))
+                    return true;
+            }
+            return false;
+        }
+        if (cameraMode.Mode == CameraMode.Walk && avatar == PlayerStateMachine.LocalInstance)
+        {
+            Camera camera = Camera.main;
+            return camera != null && Vector3.Distance(camera.transform.position,
+                avatar.transform.position + Vector3.up * WalkHeadHeight) < WalkTooCloseDistance;
+        }
+        return false;
     }
 
-    private void Hide(PlayerStateMachine avatar)
+    private static void TurnOff(Renderer[] renderers, List<Renderer> turnedOff)
     {
-        var turnedOff = new List<Renderer>();
-        foreach (Renderer renderer in avatar.GetComponentsInChildren<Renderer>())
+        foreach (Renderer renderer in renderers)
         {
             if (!renderer.enabled)
                 continue;
             renderer.enabled = false;
             turnedOff.Add(renderer);
         }
-        hidden[avatar] = turnedOff;
     }
 
     // Re-enables exactly the renderers this component turned off, nothing else.

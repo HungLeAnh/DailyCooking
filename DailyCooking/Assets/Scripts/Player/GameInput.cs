@@ -22,6 +22,7 @@ public class GameInput : PersistentSingleton<GameInput>
     // Pixels moved this frame by the finger (or right-mouse drag) that turns the walking camera.
     public event EventHandler<Vector2> OnLookDelta;
     private readonly LookTouchTracker lookTouchTracker = new LookTouchTracker();
+    private bool rightDragStartedOnUI;
     private readonly System.Collections.Generic.List<RaycastResult> uiRaycastResults = new System.Collections.Generic.List<RaycastResult>();
     private PointerEventData uiRaycastPointer;
 
@@ -197,9 +198,13 @@ public class GameInput : PersistentSingleton<GameInput>
                 }
             }
         }
-        else if (Mouse.current != null && Mouse.current.rightButton.isPressed)
+        if (Mouse.current != null && !lookTouchTracker.HasLookFinger)
         {
-            delta = Mouse.current.delta.ReadValue();
+            var right = Mouse.current.rightButton;
+            if (right.wasPressedThisFrame)
+                rightDragStartedOnUI = IsScreenPointOverUI(Mouse.current.position.ReadValue());
+            if (right.isPressed && !rightDragStartedOnUI)
+                delta += Mouse.current.delta.ReadValue();
         }
         if (delta != Vector2.zero)
             OnLookDelta?.Invoke(this, delta);

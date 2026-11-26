@@ -41,9 +41,11 @@ public class CloseUpPointer : MonoBehaviour
             return;
         }
 
+        // Touch first; the mouse is polled too (touch laptops, Device Simulator) whenever no
+        // finger owns the press.
         if (Touchscreen.current != null)
             PollTouch();
-        else if (Mouse.current != null)
+        if (Mouse.current != null && touchId < 0 && Touch.activeTouches.Count == 0)
             PollMouse();
     }
 
@@ -68,12 +70,21 @@ public class CloseUpPointer : MonoBehaviour
 
     private void PollMouse()
     {
+        var button = Mouse.current.leftButton;
         Vector2 position = Mouse.current.position.ReadValue();
-        if (Mouse.current.leftButton.wasPressedThisFrame && press == PressKind.None)
+        if (button.wasPressedThisFrame && press == PressKind.None)
+        {
             Begin(position);
-        else if (Mouse.current.leftButton.isPressed && press != PressKind.None)
+            // A click can press and release within one frame: end it here too.
+            if (!button.isPressed && press != PressKind.None)
+                End(position);
+            return;
+        }
+        if (press == PressKind.None)
+            return;
+        if (button.isPressed)
             Move(position);
-        else if (Mouse.current.leftButton.wasReleasedThisFrame && press != PressKind.None)
+        else
             End(position);
     }
 
@@ -104,11 +115,12 @@ public class CloseUpPointer : MonoBehaviour
             MoveGhost(position);
             return;
         }
-        if (pressStartedOnFood && IsNearFood(pressStart, out KitchenObject food) &&
-            Vector2.Distance(position, pressStart) > Screen.height * FoodPickRadius)
+        // The food ghost only shows while a drag from the food heads for the slot, so cuts and
+        // stirs that start on the food do not look like take-outs.
+        if (pressStartedOnFood && IsNearSlot(position) && IsNearFood(pressStart, out KitchenObject food))
             ShowGhost(food.GetKitchenObjectSO(), position);
-        else
-            MoveGhost(position);
+        else if (press == PressKind.Gesture && dragGhost != null)
+            dragGhost.gameObject.SetActive(false);
         OnDrag?.Invoke(position);
     }
 
@@ -120,6 +132,15 @@ public class CloseUpPointer : MonoBehaviour
         CookingToolCounterController controller = CurrentController;
         if (controller == null || LocalPlayer == null)
             return;
+
+        // Released on a HUD button (BACK, joystick...): never drop or take anything there, but a
+        // running gesture (e.g. a pour hold) still ends.
+        if (!IsOverSlot(position) && IsOverScreenUI(position))
+        {
+            if (ended == PressKind.Gesture)
+                OnUp?.Invoke(position);
+            return;
+        }
 
         if (ended == PressKind.SlotDrag)
         {
@@ -183,6 +204,16 @@ public class CloseUpPointer : MonoBehaviour
     {
         return heldItemSlot != null && heldItemSlot.gameObject.activeInHierarchy &&
                RectTransformUtility.RectangleContainsScreenPoint(heldItemSlot, position, null);
+    }
+
+    private bool IsNearSlot(Vector2 position)
+    {
+        if (IsOverSlot(position))
+            return true;
+        if (heldItemSlot == null || !heldItemSlot.gameObject.activeInHierarchy)
+            return false;
+        Vector2 slotCentre = RectTransformUtility.WorldToScreenPoint(null, heldItemSlot.position);
+        return Vector2.Distance(position, slotCentre) <= Screen.height * 0.25f;
     }
 
     private static bool IsNearFood(Vector2 position, out KitchenObject food)

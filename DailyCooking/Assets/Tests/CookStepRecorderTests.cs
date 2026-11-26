@@ -52,6 +52,17 @@ public class CookStepRecorderTests
         Assert.AreEqual(2, recorder.StepStars(GestureFamily.Cut, 0));
     }
 
+    [Test] public void UndoLastSwipe_DropsOnlyTheLastOne()
+    {
+        recorder.RecordSwipe(0.9f);
+        recorder.RecordSwipe(0.1f);
+        recorder.UndoLastSwipe();
+        Assert.AreEqual(3, recorder.StepStars(GestureFamily.Cut, 0));
+        recorder.UndoLastSwipe();
+        recorder.UndoLastSwipe(); // nothing left: no error
+        Assert.AreEqual(1, recorder.StepStars(GestureFamily.Cut, 0));
+    }
+
     [Test] public void Pour_InBand_Three()
     {
         Assert.IsTrue(recorder.RecordPour(0.9f, 0.85f));

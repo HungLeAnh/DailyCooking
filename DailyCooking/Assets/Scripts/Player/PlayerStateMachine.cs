@@ -16,8 +16,6 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     public static IReadOnlyList<PlayerStateMachine> All => all;
 
     public event EventHandler OnPickedSomething;
-    public event EventHandler<Transform> OnObjectHighlighted;
-    public event EventHandler<Transform> OnSelectInteractable;
     public enum EPlayerState
     {
         Idle, 
@@ -178,6 +176,9 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     public void PressInteract()
     {
         if (!IsOwner || Context == null || Context.IsDisableInput)
+            return;
+        // Building: the USE button is hidden; keyboard F must not act on the kitchen either.
+        if (CameraModeController.Instance != null && CameraModeController.Instance.Mode == CameraMode.Build)
             return;
         IInteractable target = Context.InteractTarget;
         if (target == null)
@@ -354,13 +355,6 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
             transform.forward = Vector3.Slerp(transform.forward, moveDir, rotateSpeed * Time.deltaTime);
         }
     }
-    private void SetInteractableObject(IInteractable interactable,Transform transform)
-    {
-        Context.SelectedInteractableObject = interactable;
-        if (interactable != null)
-            OnSelectInteractable?.Invoke(this, transform);
-    }
-
     public NetworkObject GetNetworkObject()
     {
         return NetworkObject;

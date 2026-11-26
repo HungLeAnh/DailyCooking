@@ -149,7 +149,7 @@ public class CloseUpGestureController : MonoBehaviour
                     Report(GestureFamily.Cut, centredness);
                 return;
             case GestureFamily.Flip:
-                if (flippedThisCook || tool.CurrentState != CookingTool.State.Cooking)
+                if (flippedThisCook || tool.HasBeenFlipped || tool.CurrentState != CookingTool.State.Cooking)
                     return;
                 bool quick = Time.unscaledTime - downTime <= FlipMaxSeconds;
                 bool rose = position.y - downPosition.y >= Screen.height * FlipMinRise;
@@ -186,6 +186,10 @@ public class CloseUpGestureController : MonoBehaviour
         if (!pouring)
             return;
         pouring = false;
+        // A manual-start press the server refused leaves the tool Idle: nothing was poured, so
+        // the player can simply press again.
+        if (tool.CurrentState == CookingTool.State.Idle)
+            return;
         pouredThisCook = true;
         Report(GestureFamily.Pour, CurrentPourLevel);
     }
@@ -207,7 +211,7 @@ public class CloseUpGestureController : MonoBehaviour
                     prompt.Hide();
                 break;
             case GestureFamily.Flip:
-                if (state == CookingTool.State.Cooking && !flippedThisCook)
+                if (state == CookingTool.State.Cooking && !flippedThisCook && !tool.HasBeenFlipped)
                     prompt.Show("Flick up to flip in the green", true, tool.CookFraction,
                         GestureScoring.FlipWindowStart, GestureScoring.FlipWindowEnd);
                 else

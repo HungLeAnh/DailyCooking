@@ -27,11 +27,11 @@ public class QualityStarsOverlay : MonoBehaviour
             {
                 if (food == null)
                     continue;
-                int stars = food is TablewareKitchenObject plate ? plate.DishStars : food.Quality.Stars;
-                if (stars <= 0)
-                    continue;
                 Vector3 world = food.transform.position + Vector3.up * heightOffset;
                 if ((world - cameraPosition).sqrMagnitude > maxDistance * maxDistance)
+                    continue;
+                int stars = food is TablewareKitchenObject plate ? plate.DishStars : food.Quality.Stars;
+                if (stars <= 0)
                     continue;
                 Vector3 screen = camera.WorldToScreenPoint(world);
                 if (screen.z <= 0f)
