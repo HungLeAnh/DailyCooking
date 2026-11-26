@@ -37,6 +37,8 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     private readonly RecipeResolver _resolver = new RecipeResolver();
     private readonly CookingClock _clock = new CookingClock();
     private readonly CookingPresenter _presenter = new CookingPresenter();
+    // Server: gesture reports for the current cook (reset whenever the cook timer resets).
+    private readonly CookStepRecorder _steps = new CookStepRecorder();
 
     private bool _configResolved;
     private readonly List<KitchenObject> _hiddenFoods = new List<KitchenObject>();
@@ -44,6 +46,15 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     public event Action OnDestroySelf;
 
     public event Action OnCut;
+    public event Action OnFlipped;
+
+    public GestureFamily GestureFamily => cookingToolConfig != null ? cookingToolConfig.gestureFamily : GestureFamily.None;
+    // Cook progress 0-1 (readable on every peer).
+    public float CookFraction => CookingTimeMax > 0f ? Mathf.Clamp01(_netCookingTimer.Value / CookingTimeMax) : 0f;
+    // How far into the burn time a cooked item is, 0-1.
+    public float BurnFraction => BurningTimeMax > 0f ? Mathf.Clamp01(_netBurningTimer.Value / BurningTimeMax) : 0f;
+    public int CurrentStirPromptIndex => Mathf.FloorToInt(_netCookingTimer.Value / GestureScoring.StirIntervalSeconds);
+    public int ExpectedStirPrompts => Mathf.FloorToInt(CookingTimeMax / GestureScoring.StirIntervalSeconds);
 
     public State CurrentState => _netState.Value;
     public float CookingTimer => _netCookingTimer.Value;
@@ -459,8 +470,12 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
                 _presenter.Reset();
                 return;
             }
+            QualityRecord cutQuality = current.Quality.WithStep(_steps.StepStars(GestureFamily.Cut, 0));
             current.DestroySelf();
-            KitchenObject.SpawnKitchenObject(output, this);
+            KitchenObject cutOutput = KitchenObject.SpawnKitchenObject(output, this);
+            if (cutOutput != null)
+                cutOutput.SetQuality(cutQuality);
+            _steps.Reset();
             _netCookingTimer.Value = 0f;
             _clock.Reset(0f, 0f);
             _presenter.Reset();
@@ -501,6 +516,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
         }
         _netCookingTimer.Value = 0f;
         _netBurningTimer.Value = 0f;
+        _steps.Reset();
         _clock.Reset(0f, 0f);
         _presenter.Reset();
         _netState.Value = state;
@@ -589,7 +605,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
                         _presenter.Reset();
                         break;
                     }
-                    ConsumeInputsAndSpawnOutput(output);
+                    ConsumeInputsAndSpawnOutput(output, burned: false);
                     _netState.Value = State.Cooked;
                     _netBurningTimer.Value = 0f;
                     _clock.Reset(_clock.LocalCook, 0f);
@@ -613,7 +629,7 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
                     KitchenObjectSO output = _resolver.BurningOutput;
                     if (output == null || !_slot.HasFood)
                         break;
-                    ConsumeInputsAndSpawnOutput(output);
+                    ConsumeInputsAndSpawnOutput(output, burned: true);
                     _netState.Value = State.Burned;
                 }
                 break;
@@ -623,12 +639,72 @@ public class CookingTool : NetworkBehaviour, IHasProgress, IKitchenObjectParent,
     }
 
     // Server only. Replaces every input with the finished item (the Blender eats all of them).
-    private void ConsumeInputsAndSpawnOutput(KitchenObjectSO output)
+    // The output carries the inputs' stars plus this step's: the gesture's stars when it finished
+    // cooking (Watch is scored at take-out instead), or one 1-star step when it burned.
+    private void ConsumeInputsAndSpawnOutput(KitchenObjectSO output, bool burned)
     {
         List<KitchenObject> inputs = _slot.CopyFoods();
+        QualityRecord quality = QualityRecord.None;
+        for (int i = 0; i < inputs.Count; i++)
+            if (inputs[i] != null) quality = quality.Plus(inputs[i].Quality);
+        if (burned)
+            quality = quality.WithStep(1);
+        else if (GestureFamily != GestureFamily.Watch)
+            quality = quality.WithStep(_steps.StepStars(GestureFamily, ExpectedStirPrompts));
         for (int i = 0; i < inputs.Count; i++)
             if (inputs[i] != null) inputs[i].DestroySelf();
-        KitchenObject.SpawnKitchenObject(output, this);
+        KitchenObject spawned = KitchenObject.SpawnKitchenObject(output, this);
+        if (spawned != null)
+            spawned.SetQuality(quality);
+    }
+
+    // Report value that means "pressed down to start" for manual-start pour tools.
+    public const float PourStartSignal = -2f;
+
+    // Server: one gesture report from the actor in this tool's close-up. Returns false when the
+    // report does not fit this tool or its current state.
+    public bool ApplyGesture(PlayerStateMachine actor, GestureFamily family, float value)
+    {
+        if (!IsServer || family == GestureFamily.None || family != GestureFamily)
+            return false;
+        switch (family)
+        {
+            case GestureFamily.Cut:
+                if (!_slot.HasFood || !IsCuttingActive || !_steps.RecordSwipe(value))
+                    return false;
+                Cut(actor);
+                return true;
+            case GestureFamily.Flip:
+                if (_netState.Value != State.Cooking || !_steps.RecordFlip(value, CookFraction))
+                    return false;
+                FlipFeedbackClientRpc();
+                return true;
+            case GestureFamily.Stir:
+                return _netState.Value == State.Cooking && _steps.RecordStir((int)value, CurrentStirPromptIndex);
+            case GestureFamily.Pour:
+                if (value <= PourStartSignal)
+                    return RequiresManualStart && TryStartCooking();
+                // A manual-start pour fills with the cook timer; a self-starting tool's pour is
+                // timed by the client alone, so there is nothing on the server to compare it with.
+                return _netState.Value == State.Cooking &&
+                       _steps.RecordPour(value, RequiresManualStart ? CookFraction : value);
+            default:
+                return false;
+        }
+    }
+
+    // Server: a Watch tool's cooked food is being taken out; score the moment it left.
+    public void ApplyWatchStepOnTakeOut(KitchenObject food)
+    {
+        if (!IsServer || food == null || GestureFamily != GestureFamily.Watch || _netState.Value != State.Cooked)
+            return;
+        food.SetQuality(food.Quality.WithStep(GestureScoring.WatchStars(BurnFraction)));
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void FlipFeedbackClientRpc()
+    {
+        OnFlipped?.Invoke();
     }
 
     private void UpdateUI()

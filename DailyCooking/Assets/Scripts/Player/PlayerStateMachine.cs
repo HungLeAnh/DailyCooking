@@ -500,6 +500,26 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         controller.StartCooking();
     }
 
+    // Client (owner): report one finished gesture in a cooking tool's close-up.
+    public void ReportGesture(CookingToolCounterController target, GestureFamily family, float value)
+    {
+        if (!IsOwner || target == null || !target.IsSpawned)
+            return;
+        ReportGestureServerRpc(target, family, value);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ReportGestureServerRpc(NetworkBehaviourReference targetReference, GestureFamily family, float value, RpcParams rpcParams = default)
+    {
+        if (rpcParams.Receive.SenderClientId != OwnerClientId)
+            return;
+        if (!targetReference.TryGet(out NetworkBehaviour target) || !(target is CookingToolCounterController controller))
+            return;
+        if (!IsInInteractRange(target))
+            return;
+        controller.ApplyGesture(this, family, value);
+    }
+
     [Rpc(SendTo.Server)]
     private void InteractServerRpc(NetworkBehaviourReference targetReference, bool alternate, RpcParams rpcParams = default)
     {

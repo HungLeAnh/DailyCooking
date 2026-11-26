@@ -13,10 +13,15 @@ MonoBehaviour:
   m_Name: IceCreamMachine
   m_EditorClassIdentifier: Scripts::CookingToolConfigSO
   toolTypes: 03000000i
+  gestureFamily: 4
   supportsOptionMenu: 0
   supportsBurning: 0
   maxFoodSlots: 2
   requiresManualStart: 1
+  hidesContents: 0
+  commitsInputs: 0
+  outputVessel: {fileID: 0}
+  canBoilWater: 0
   allowedIngredients:
   - {fileID: 11400000, guid: d73c2bd56342c8f4c92bdbfc0597b268, type: 2}
   - {fileID: 11400000, guid: 102c3b4b941d83f41bf96af3815a1ff6, type: 2}

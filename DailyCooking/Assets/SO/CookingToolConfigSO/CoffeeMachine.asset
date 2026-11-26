@@ -13,9 +13,14 @@ MonoBehaviour:
   m_Name: CoffeeMachine
   m_EditorClassIdentifier: Scripts::CookingToolConfigSO
   toolTypes: 03000000i
+  gestureFamily: 4
   supportsOptionMenu: 0
   supportsBurning: 0
   maxFoodSlots: 1
   requiresManualStart: 0
+  hidesContents: 0
+  commitsInputs: 0
+  outputVessel: {fileID: 0}
+  canBoilWater: 0
   allowedIngredients:
   - {fileID: 11400000, guid: af7b7cc11a405be4080b073505e58f0e, type: 2}

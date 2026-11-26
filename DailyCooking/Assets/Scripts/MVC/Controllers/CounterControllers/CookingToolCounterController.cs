@@ -155,6 +155,7 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
             if (heldObject.TryGetTableware(out TablewareKitchenObject plateKitchenObject))
             {
                 if (_cookingTool.TryGetFirstFood(out KitchenObject food, out _) &&
+                    ScoreTakeOut(food) &&
                     plateKitchenObject.TryAddIngredient(food.GetKitchenObjectSO(), food.Quality))
                 {
                     food.DestroySelf();
@@ -170,9 +171,23 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
 
         if (_cookingTool.TryGetFirstFood(out KitchenObject firstFood, out _))
         {
+            ScoreTakeOut(firstFood);
             firstFood.SetKitchenObjectParent(playerStateMachine);
             _cookingTool.UpdateCookingState(CookingTool.State.Idle);
         }
+    }
+
+    // Server: a Watch tool scores the moment its cooked food leaves. Always true (chains in &&).
+    private bool ScoreTakeOut(KitchenObject food)
+    {
+        _cookingTool.ApplyWatchStepOnTakeOut(food);
+        return true;
+    }
+
+    // Server: a gesture report from the actor in this tool's close-up.
+    public bool ApplyGesture(PlayerStateMachine actor, GestureFamily family, float value)
+    {
+        return TryResolveTool() && _cookingTool.ApplyGesture(actor, family, value);
     }
 
     private static void ShowAlert(string message)

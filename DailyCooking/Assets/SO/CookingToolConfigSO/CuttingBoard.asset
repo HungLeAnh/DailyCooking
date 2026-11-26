@@ -12,8 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfbc97da426fa5b438fc0bd8cf7b5fdd, type: 3}
   m_Name: CuttingBoard
   m_EditorClassIdentifier: Scripts::CookingToolConfigSO
-  toolTypes: 05000000
+  toolTypes: 05000000i
+  gestureFamily: 1
   supportsOptionMenu: 0
   supportsBurning: 1
   maxFoodSlots: 1
   requiresManualStart: 0
+  hidesContents: 0
+  commitsInputs: 0
+  outputVessel: {fileID: 0}
+  canBoilWater: 0
+  allowedIngredients: []

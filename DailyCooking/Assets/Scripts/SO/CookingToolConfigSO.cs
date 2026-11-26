@@ -23,6 +23,10 @@ public class CookingToolConfigSO : ScriptableObject
         return toolTypes != null && toolTypes.Contains(type);
     }
 
+    [Header("Gesture (close-up)")]
+    [Tooltip("The one gesture this tool uses in its close-up; decides how its cooking step is scored.")]
+    public GestureFamily gestureFamily = GestureFamily.None;
+
     [Header("Option Menu (Combine)")]
     [Tooltip("True when this tool uses the option-menu flow (Combine/Pot).")]
     public bool supportsOptionMenu;

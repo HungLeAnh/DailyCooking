@@ -13,7 +13,13 @@ MonoBehaviour:
   m_Name: Grill
   m_EditorClassIdentifier: Scripts::CookingToolConfigSO
   toolTypes: 00000000i
+  gestureFamily: 2
   supportsOptionMenu: 0
   supportsBurning: 1
   maxFoodSlots: 1
   requiresManualStart: 0
+  hidesContents: 0
+  commitsInputs: 0
+  outputVessel: {fileID: 0}
+  canBoilWater: 0
+  allowedIngredients: []
