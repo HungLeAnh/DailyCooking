@@ -14,6 +14,13 @@ public class UISettingsPopup : UIPopup
     [SerializeField] private Button closeButton;
     [SerializeField] private Button guideButton;
     [SerializeField] private Button quitButton;
+    [Header("Graphics / FPS (MobilePerformanceManager)")]
+    [SerializeField] private Button graphicsPrevButton;
+    [SerializeField] private Button graphicsNextButton;
+    [SerializeField] private TMP_Text graphicsValueText;
+    [SerializeField] private Button fpsPrevButton;
+    [SerializeField] private Button fpsNextButton;
+    [SerializeField] private TMP_Text fpsValueText;
 #if UNITY_EDITOR
     [Header("Cheat")]
     [SerializeField] private Transform cheatTransform;
@@ -70,6 +77,47 @@ public class UISettingsPopup : UIPopup
             GameManager.Instance.SwitchState(new MainMenuState(GameManager.Instance));
             HidePopup();
         });
+
+        AddClick(graphicsPrevButton, () => ChangeGraphics(GraphicsPreferencesRules.Previous));
+        AddClick(graphicsNextButton, () => ChangeGraphics(GraphicsPreferencesRules.Next));
+        AddClick(fpsPrevButton, ToggleFps);
+        AddClick(fpsNextButton, ToggleFps);
+    }
+    private static void AddClick(Button button, UnityEngine.Events.UnityAction action)
+    {
+        if (button != null)
+            button.onClick.AddListener(action);
+    }
+    private void ChangeGraphics(Func<GraphicsMode, GraphicsMode> step)
+    {
+        var manager = MobilePerformanceManager.Instance;
+        if (manager == null)
+            return;
+        GraphicsPreferences p = manager.Preferences;
+        p.Mode = step(p.Mode);
+        manager.SetPreferences(p);
+        UpdatePerformanceVisual();
+    }
+    // Two values only: either arrow picks the other one, and the choice becomes fixed.
+    private void ToggleFps()
+    {
+        var manager = MobilePerformanceManager.Instance;
+        if (manager == null)
+            return;
+        GraphicsPreferences p = manager.Preferences;
+        p.ChosenFps = GraphicsPreferencesRules.ToggleFps(DisplayedFps(manager));
+        manager.SetPreferences(p);
+        UpdatePerformanceVisual();
+    }
+    private static int DisplayedFps(MobilePerformanceManager manager) =>
+        manager.Preferences.ChosenFps != 0 ? manager.Preferences.ChosenFps : manager.CurrentFps;
+    private void UpdatePerformanceVisual()
+    {
+        var manager = MobilePerformanceManager.Instance;
+        if (graphicsValueText != null)
+            graphicsValueText.text = (manager != null ? manager.Preferences.Mode : GraphicsMode.Auto).ToString();
+        if (fpsValueText != null)
+            fpsValueText.text = (manager != null ? DisplayedFps(manager) : 60).ToString();
     }
     public override void ShowPopup(object param = null)
     {
@@ -85,6 +133,7 @@ public class UISettingsPopup : UIPopup
     {
         soundEffectsSlider.value = SoundManager.Instance.GetVolume();
         musicSlider.value = MusicManager.Instance.GetVolume();
+        UpdatePerformanceVisual();
 
     }
 }
