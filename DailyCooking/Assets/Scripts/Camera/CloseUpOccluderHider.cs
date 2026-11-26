@@ -55,7 +55,8 @@ public class CloseUpOccluderHider : MonoBehaviour
             }
             // Food picked up while hidden is hidden too.
             KitchenObject held = avatar.GetKitchenObject();
-            if (held != entry.Held)
+            // ReferenceEquals: Unity's == says a destroyed cached object equals null and would keep the stale array.
+            if (!ReferenceEquals(held, entry.Held))
             {
                 entry.Held = held;
                 entry.HeldRenderers = held != null ? held.GetComponentsInChildren<Renderer>() : null;
@@ -95,11 +96,12 @@ public class CloseUpOccluderHider : MonoBehaviour
         return false;
     }
 
-    private static void TurnOff(Renderer[] renderers, List<Renderer> turnedOff)
+    public static void TurnOff(Renderer[] renderers, List<Renderer> turnedOff)
     {
         foreach (Renderer renderer in renderers)
         {
-            if (!renderer.enabled)
+            // A cached held-food array can outlive the food: skip destroyed renderers.
+            if (renderer == null || !renderer.enabled)
                 continue;
             renderer.enabled = false;
             turnedOff.Add(renderer);

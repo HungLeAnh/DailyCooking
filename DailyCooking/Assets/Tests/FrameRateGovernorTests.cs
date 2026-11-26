@@ -88,6 +88,15 @@ public class FrameRateGovernorTests
         CollectionAssert.IsEmpty(Run(g, 10f, Good * 1.1f));
     }
 
+    [Test] public void LongFrame_AfterResume_Ignored()
+    {
+        // Coming back from background / an ad: one frame carries the paused time.
+        var g = new FrameRateGovernor(MobileTier.High, 60, false);
+        Assert.AreEqual(GovernorDecision.None, g.Feed(30f));
+        CollectionAssert.IsEmpty(Run(g, 5f, Bad));
+        Assert.AreEqual(MobileTier.High, g.Tier);
+    }
+
     [Test] public void At30Target_JudgesAgainst30()
     {
         // A session restored at 30 FPS on Low is judged against 30, not 60.

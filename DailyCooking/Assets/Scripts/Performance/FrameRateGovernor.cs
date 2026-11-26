@@ -14,6 +14,8 @@ public sealed class FrameRateGovernor
     public const float OnTargetRatio = 0.85f;
     public const float Tolerance = 1.15f;
     public const int FailedWindowsToAct = 2;
+    // A frame this long is a resume from background/an ad or a load, not the phone's pace: skipped.
+    public const float MaxFrameSeconds = 0.5f;
 
     // Absorbs float rounding so a window of exactly 5 s of frames closes on its last frame.
     private const double WindowEpsilon = 1e-4;
@@ -40,7 +42,7 @@ public sealed class FrameRateGovernor
 
     public GovernorDecision Feed(float unscaledDt)
     {
-        if (Finished || unscaledDt <= 0f)
+        if (Finished || unscaledDt <= 0f || unscaledDt > MaxFrameSeconds)
             return GovernorDecision.None;
 
         windowElapsed += unscaledDt;

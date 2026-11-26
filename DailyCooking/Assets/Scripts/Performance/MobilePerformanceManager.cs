@@ -26,6 +26,8 @@ public class MobilePerformanceManager : MonoBehaviour
     private FrameRateGovernor governor;
     private MobileTier devicePick;
     private int startLevel;
+    private int startVSyncCount;
+    private int startTargetFrameRate;
     private float ignoreUntil;
     private bool ranAutoThisSession;
     private bool downgradedThisSession;
@@ -63,6 +65,8 @@ public class MobilePerformanceManager : MonoBehaviour
         }
         Instance = this;
         startLevel = QualitySettings.GetQualityLevel();
+        startVSyncCount = QualitySettings.vSyncCount;
+        startTargetFrameRate = Application.targetFrameRate;
         devicePick = PickDevice();
         Preferences = PerfPrefs.LoadPreferences();
 
@@ -81,12 +85,8 @@ public class MobilePerformanceManager : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    // Play Mode must not leave the Editor on a Mobile level.
-    private void OnApplicationQuit()
-    {
-        if (QualitySettings.GetQualityLevel() != startLevel)
-            QualitySettings.SetQualityLevel(startLevel, true);
-    }
+    // Play Mode must not leave the Editor on a Mobile level, or its own level without vSync.
+    private void OnApplicationQuit() => RestoreStartState();
 #endif
 
     public void SetPreferences(GraphicsPreferences p)
@@ -120,22 +120,18 @@ public class MobilePerformanceManager : MonoBehaviour
             Debug.Log(Log + "governor: nothing left to lower, stopped");
     }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) => IgnoreFromNow();
+
+    // Leaving and coming back (background, an ad) both reset; the first seconds back are ignored
+    // like after a scene load, since resume hitches say nothing about the phone.
+    private void OnApplicationPause(bool paused) => IgnoreFromNow();
+
+    private void OnApplicationFocus(bool focused) => IgnoreFromNow();
+
+    private void IgnoreFromNow()
     {
         ignoreUntil = Time.unscaledTime + IgnoreAfterSceneLoadSeconds;
         governor?.ResetWindow();
-    }
-
-    private void OnApplicationPause(bool paused)
-    {
-        if (paused)
-            governor?.ResetWindow();
-    }
-
-    private void OnApplicationFocus(bool focused)
-    {
-        if (!focused)
-            governor?.ResetWindow();
     }
 
     // Counts the previous Auto session toward the retry (or not, if it downgraded), then starts fresh.
@@ -172,11 +168,18 @@ public class MobilePerformanceManager : MonoBehaviour
                 PerfPrefs.SaveSession(true, downgradedThisSession);
             }
         }
-        else
+        else if (GraphicsPreferencesRules.AppliesFrameRate(Preferences, autoAllowed))
         {
             ApplyLevel(startLevel);
             SetTier(null);
             ApplyFps(GraphicsPreferencesRules.StartFps(Preferences, DefaultFps));
+        }
+        else
+        {
+            // Editor/PC in Auto: exactly as the app started.
+            RestoreStartState();
+            SetTier(null);
+            CurrentFps = DefaultFps;
         }
 
         Debug.Log(Log + $"{reason}: device RAM {SystemInfo.systemMemorySize} MB, GPU {SystemInfo.graphicsMemorySize} MB, " +
@@ -198,6 +201,13 @@ public class MobilePerformanceManager : MonoBehaviour
         }
         ApplyLevel(index);
         SetTier(tier);
+    }
+
+    private void RestoreStartState()
+    {
+        ApplyLevel(startLevel);
+        QualitySettings.vSyncCount = startVSyncCount;
+        Application.targetFrameRate = startTargetFrameRate;
     }
 
     private static void ApplyLevel(int index)

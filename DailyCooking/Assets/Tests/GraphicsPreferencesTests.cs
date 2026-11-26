@@ -33,6 +33,14 @@ public class GraphicsPreferencesTests
 
     [Test] public void NotAutoAllowed_GovernorOff() => Assert.IsFalse(GraphicsPreferencesRules.GovernorRuns(P(GraphicsMode.Auto), true, false));
 
+    [Test] public void FrameRate_LeftAloneOnEditorAndPcAuto()
+    {
+        Assert.IsFalse(GraphicsPreferencesRules.AppliesFrameRate(P(GraphicsMode.Auto, 0), false));
+        Assert.IsTrue(GraphicsPreferencesRules.AppliesFrameRate(P(GraphicsMode.Auto, 0), true));
+        Assert.IsTrue(GraphicsPreferencesRules.AppliesFrameRate(P(GraphicsMode.Auto, 30), false));
+        Assert.IsTrue(GraphicsPreferencesRules.AppliesFrameRate(P(GraphicsMode.Medium, 0), false));
+    }
+
     [Test] public void ChosenFps_IsLocked()
     {
         Assert.IsTrue(GraphicsPreferencesRules.FpsLocked(P(GraphicsMode.Auto, 60)));

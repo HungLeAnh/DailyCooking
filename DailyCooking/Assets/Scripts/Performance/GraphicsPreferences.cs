@@ -45,6 +45,10 @@ public static class GraphicsPreferencesRules
 
     public static bool FpsLocked(GraphicsPreferences p) => p.ChosenFps != 0;
 
+    // Editor/PC in Auto keep their own frame rate and vSync; any choice, or a phone, sets them.
+    public static bool AppliesFrameRate(GraphicsPreferences p, bool autoAllowed) =>
+        p.Mode != GraphicsMode.Auto || autoAllowed || FpsLocked(p);
+
     public static int StartFps(GraphicsPreferences p, int managedFps) => FpsLocked(p) ? p.ChosenFps : managedFps;
 
     public static GraphicsMode Next(GraphicsMode m) => (GraphicsMode)(((int)m + 1) % ModeCount);
