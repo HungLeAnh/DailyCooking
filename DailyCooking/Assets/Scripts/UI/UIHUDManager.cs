@@ -18,6 +18,7 @@ public enum UIHUDElements
     // Appended only: values are serialized as ints in GameScene.
     Interact,
     Back,
+    HeldItem,
 }
 [Serializable]
 struct SerializableKeyValuePair<T1, T2>
@@ -63,12 +64,13 @@ public class UIHUDManager : Singleton<UIHUDManager>
             CameraModeController.Instance.OnModeChanged -= ApplyCameraModeVisibility;
     }
 
-    // Interact: walking view only. Back: close-up only. Rotate: build mode only.
+    // Interact: walking view only. Back and the held-item slot: close-up only. Rotate: build mode only.
     private void ApplyCameraModeVisibility(CameraMode mode)
     {
         // In a close-up everything is done by dragging and gestures, so USE is walking-view only.
         SetElementVisible(UIHUDElements.Interact, mode == CameraMode.Walk);
         SetElementVisible(UIHUDElements.Back, mode == CameraMode.CloseUp);
+        SetElementVisible(UIHUDElements.HeldItem, mode == CameraMode.CloseUp);
         SetElementVisible(UIHUDElements.Rotate, mode == CameraMode.Build);
     }
 

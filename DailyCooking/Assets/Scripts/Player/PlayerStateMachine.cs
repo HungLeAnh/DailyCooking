@@ -505,6 +505,15 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         controller.StartCooking();
     }
 
+    // Client (owner): a drag in the close-up put the held item into the tool or took the food out.
+    // Same server path and rules as pressing USE at the tool used to be.
+    public void RequestInteractFromCloseUp(CookingToolCounterController target)
+    {
+        if (!IsOwner || target == null || !target.IsSpawned)
+            return;
+        InteractServerRpc(target, false);
+    }
+
     // Client (owner): report one finished gesture in a cooking tool's close-up.
     public void ReportGesture(CookingToolCounterController target, GestureFamily family, float value)
     {
