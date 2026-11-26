@@ -28,12 +28,22 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     [SerializeField] private NetworkManager networkManager;
 
     private string playerName;
+    private const float SNAPSHOT_TIMEOUT_SECONDS = 15f;
+    private const float HOST_CLOSING_DELAY_SECONDS = 0.2f;
+    private const string ROOM_FULL_REASON = "Room full";
+    private const string LOG = "[Net] ";
+
     private NetworkList<PlayerData> playerDataNetworkList;
     private bool isSinglePlayerMode = false;
     private int nextSnapshotId;
-    private int receivingSnapshotId = -1;
-    private byte[][] receivingSnapshotChunks;
+    private readonly SnapshotAssembler snapshotAssembler = new SnapshotAssembler();
+    private Coroutine snapshotTimeout;
+    private string pendingEndMessage;
     public bool IsSinglePlayerMode => isSinglePlayerMode;
+    // This machine's session; reaching Ended runs the single exit (RunExit).
+    public SessionStateMachine Session { get; } = new SessionStateMachine();
+    // The Relay code of the session this machine is in (host or client); null outside a session.
+    public string CurrentJoinCode { get; private set; }
     public string GetPlayerName()
     {
         return playerName;
@@ -44,7 +54,137 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         playerName = "PlayerName" + UnityEngine.Random.Range(100, 1000);
         playerDataNetworkList = new NetworkList<PlayerData>();
         playerDataNetworkList.OnListChanged += PlayerDataNetworkList_OnListChanged;
+        Session.OnChanged += Session_OnChanged;
+        SceneManager.sceneLoaded += SceneManager_sceneLoaded;
     }
+
+    #region Session lifecycle
+    // Player-initiated leave. The host first tells clients it is closing so they show
+    // "The restaurant has closed" instead of "Connection lost".
+    public void LeaveSession()
+    {
+        NetworkManager nm = NetworkManager.Singleton;
+        if (Session.State == SessionState.Idle || Session.State == SessionState.Ended)
+        {
+            RunExit(SessionEndReason.Quit);
+            return;
+        }
+        if (nm != null && nm.IsServer && nm.IsListening && !isSinglePlayerMode && nm.ConnectedClientsIds.Count > 1)
+        {
+            SessionEndingRpc();
+            StartCoroutine(QuitAfterDelay());
+            return;
+        }
+        Session.UserQuit();
+    }
+
+    private System.Collections.IEnumerator QuitAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(HOST_CLOSING_DELAY_SECONDS);
+        Session.UserQuit();
+    }
+
+    [Rpc(SendTo.NotServer)]
+    private void SessionEndingRpc()
+    {
+        Debug.Log(LOG + "host is closing the session");
+        Session.HostClosing();
+    }
+
+    private void Session_OnChanged(SessionState state)
+    {
+        Debug.Log(LOG + $"session -> {state}" + (state == SessionState.Ended ? $" ({Session.EndReason})" : ""));
+        switch (state)
+        {
+            case SessionState.Syncing:
+                if (snapshotTimeout != null) StopCoroutine(snapshotTimeout);
+                snapshotTimeout = StartCoroutine(SnapshotTimeout());
+                break;
+            case SessionState.Reconnecting:
+                BeginReconnect();
+                break;
+            case SessionState.Ended:
+                RunExit(Session.EndReason);
+                break;
+        }
+    }
+
+    private System.Collections.IEnumerator SnapshotTimeout()
+    {
+        yield return new WaitForSecondsRealtime(SNAPSHOT_TIMEOUT_SECONDS);
+        snapshotTimeout = null;
+        if (Session.State == SessionState.Syncing)
+        {
+            Debug.Log(LOG + "snapshot did not arrive in time");
+            Session.SnapshotTimedOut();
+        }
+    }
+
+    // Until the reconnect loop exists, a lost client ends the session at once.
+    private void BeginReconnect()
+    {
+        Session.RetryWindowOver();
+    }
+
+    // The one way out of a session, whatever ended it.
+    private void RunExit(SessionEndReason reason)
+    {
+        if (snapshotTimeout != null)
+        {
+            StopCoroutine(snapshotTimeout);
+            snapshotTimeout = null;
+        }
+        pendingEndMessage = SessionEndText.Message(reason);
+        if (reason == SessionEndReason.HostConnectionLost && GameManager.Instance != null)
+            GameManager.Instance.SaveGameImmediate();
+        ShutdownAndReset();
+        CurrentJoinCode = null;
+        snapshotAssembler.Reset();
+        Session.Reset();
+        if (UIPopupManager.Instance != null)
+            UIPopupManager.Instance.HidePopup(UIPopupType.UISettingPopup);
+        Loader.Load(Loader.Scene.MainMenuScene);
+        if (GameManager.Instance != null)
+            GameManager.Instance.SwitchState(new MainMenuState(GameManager.Instance));
+    }
+
+    private void SceneManager_sceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (pendingEndMessage == null || scene.name != Loader.Scene.MainMenuScene.ToString())
+            return;
+        string message = pendingEndMessage;
+        pendingEndMessage = null;
+        UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameNotiPopup,
+            new UIGameNotiPopup.Param { Title = "Session ended", Message = message });
+    }
+
+    private void SubscribeTransportEvents()
+    {
+        NetworkManager.Singleton.OnClientStopped -= NetworkManager_OnClientStopped;
+        NetworkManager.Singleton.OnTransportFailure -= NetworkManager_OnTransportFailure;
+        NetworkManager.Singleton.OnClientStopped += NetworkManager_OnClientStopped;
+        NetworkManager.Singleton.OnTransportFailure += NetworkManager_OnTransportFailure;
+    }
+
+    private void UnsubscribeTransportEvents()
+    {
+        if (NetworkManager.Singleton == null) return;
+        NetworkManager.Singleton.OnClientStopped -= NetworkManager_OnClientStopped;
+        NetworkManager.Singleton.OnTransportFailure -= NetworkManager_OnTransportFailure;
+    }
+
+    private void NetworkManager_OnClientStopped(bool wasHost)
+    {
+        Debug.Log(LOG + $"network stopped (host {wasHost})");
+        Session.TransportLost();
+    }
+
+    private void NetworkManager_OnTransportFailure()
+    {
+        Debug.Log(LOG + "transport failure");
+        Session.TransportLost();
+    }
+    #endregion
     private void Start()
     {
 
@@ -92,12 +232,21 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     }
     private void NetworkManager_Client_OnClientDisconnectCallback(ulong clientId)
     {
+        NetworkManager nm = NetworkManager.Singleton;
+        if (nm != null && clientId != nm.LocalClientId && nm.IsConnectedClient) return;
+        string reason = nm != null ? nm.DisconnectReason : null;
+        Debug.Log(LOG + $"disconnected from host" + (string.IsNullOrEmpty(reason) ? "" : $": {reason}"));
+        if (reason == ROOM_FULL_REASON)
+            Session.Refused(SessionEndReason.RoomFull);
+        else
+            Session.TransportLost();
         OnFailedToJoinGame?.Invoke(this, EventArgs.Empty);
     }
     private void NetworkManager_Client_OnClientConnectCallback(ulong clientId)
     {
         // Only this local client's own connection starts the handshake.
         if (clientId != NetworkManager.Singleton.LocalClientId) return;
+        Session.Connected();
         SetplayerNameServerRpc(GetPlayerName());
         SetplayerIdServerRpc(AuthenticationService.Instance.PlayerId);
         SyncDataToNewClientServerRpc();
@@ -129,22 +278,8 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     [Rpc(SendTo.SpecifiedInParams)]
     private void ReceiveGameDataChunkClientRpc(int snapshotId, int chunkIndex, int chunkCount, byte[] chunk, RpcParams rpcParams = default)
     {
-        if (chunkCount <= 0 || chunkIndex < 0 || chunkIndex >= chunkCount) return;
-        if (snapshotId != receivingSnapshotId || receivingSnapshotChunks == null || receivingSnapshotChunks.Length != chunkCount)
-        {
-            receivingSnapshotId = snapshotId;
-            receivingSnapshotChunks = new byte[chunkCount][];
-        }
-        receivingSnapshotChunks[chunkIndex] = chunk;
-        foreach (byte[] received in receivingSnapshotChunks)
-        {
-            if (received == null) return;
-        }
-
-        byte[][] chunks = receivingSnapshotChunks;
-        receivingSnapshotChunks = null;
-        receivingSnapshotId = -1;
-        LoadGameDataFromHost(chunks);
+        if (snapshotAssembler.Add(snapshotId, chunkIndex, chunkCount, chunk, out byte[][] chunks))
+            LoadGameDataFromHost(chunks);
     }
     private void LoadGameDataFromHost(byte[][] chunks)
     {
@@ -160,6 +295,7 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             GameManager.Instance.ReplaceGameDataFromHost(snapshotHandler.LoadFromJson(jsonData));
             if (GameManager.Instance.GameData == null) return;
             OnDataSyncToNewClient?.Invoke(this, EventArgs.Empty);
+            Session.SnapshotApplied();
         }
         catch (Exception e)
         {
@@ -247,10 +383,13 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         // Use the single player transport when starting a single player session.
         networkManager.NetworkConfig.NetworkTransport = singlePlayerTransport;
         isSinglePlayerMode = true;
+        if (Session.State != SessionState.Idle) Session.Reset();
         if (!networkManager.StartHost())
         {
             NetworkLog.LogError("Failed to start single player session!");
+            return;
         }
+        Session.StartHosting();
     }
 
     public async Task<string> StartHostSessionAsync()
@@ -269,13 +408,18 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Server_OnClientConnectedCallback;
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Server_OnClientDisconnectCallback;
 
+            if (Session.State != SessionState.Idle) Session.Reset();
             string joinCode = await SessionManager.Instance.StartHostWithRelay(MAX_PLAYER_AMOUNT, "dtls");
 
             if (string.IsNullOrEmpty(joinCode))
             {
                 NetworkLog.LogError("Failed to start host with Relay");
+                return joinCode;
             }
 
+            CurrentJoinCode = joinCode;
+            SubscribeTransportEvents();
+            Session.StartHosting();
             return joinCode;
         }
         catch (Exception e)
@@ -304,7 +448,14 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Client_OnClientConnectCallback;
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Client_OnClientDisconnectCallback;
 
-            return await SessionManager.Instance.StartClientWithRelay(joinCode, "dtls");
+            if (Session.State == SessionState.Ended) Session.Reset();
+            CurrentJoinCode = joinCode;
+            Session.StartJoining();
+            SubscribeTransportEvents();
+            bool started = await SessionManager.Instance.StartClientWithRelay(joinCode, "dtls");
+            if (!started)
+                Session.Refused(SessionEndReason.JoinFailed);
+            return started;
         }
         catch (Exception e)
         {
@@ -319,6 +470,9 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         // Flush the host's save while it is still the server, then detach the file.
         if (GameManager.Instance != null)
             GameManager.Instance.ClearActiveSave(discardData: false);
+
+        // A deliberate shutdown is not a lost connection.
+        UnsubscribeTransportEvents();
 
         if (NetworkManager.Singleton != null)
         {
