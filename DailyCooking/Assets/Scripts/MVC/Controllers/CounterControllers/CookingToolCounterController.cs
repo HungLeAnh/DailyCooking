@@ -150,6 +150,16 @@ public class CookingToolCounterController : ClearCounterController, IHasOptional
         if (_cookingTool.CurrentState == CookingTool.State.Cooking && _cookingTool.IsBeverageTool)
             return;
 
+        // A half-cut ingredient stays on the board until it is fully cut: no taking it back into
+        // the hand or onto a plate once the first cut is made.
+        bool takingOut = heldObject == null || heldObject.TryGetTableware(out _);
+        if (takingOut && _cookingTool.IsCuttingActive && _cookingTool.CookingTimer > 0f)
+        {
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowAlert(playerStateMachine, "Finish cutting first.");
+            return;
+        }
+
         if (heldObject != null)
         {
             if (heldObject.TryGetTableware(out TablewareKitchenObject plateKitchenObject))
