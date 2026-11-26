@@ -31,6 +31,9 @@ public class KitchenObject : NetworkBehaviour
     private readonly NetworkVariable<QualityRecord> quality = new NetworkVariable<QualityRecord>(
         default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public event Action<QualityRecord> OnQualityChanged;
+    // Every spawned food/plate on this peer (e.g. for drawing quality stars).
+    private static readonly System.Collections.Generic.List<KitchenObject> spawned = new System.Collections.Generic.List<KitchenObject>();
+    public static System.Collections.Generic.IReadOnlyList<KitchenObject> Spawned => spawned;
     public QualityRecord Quality => quality.Value;
     private IKitchenObjectParent kitchenObjectParent;
     private int kitchenObjectParentIndex;
@@ -45,12 +48,15 @@ public class KitchenObject : NetworkBehaviour
         base.OnNetworkSpawn();
         parentSlot.OnValueChanged += ParentSlot_OnValueChanged;
         quality.OnValueChanged += Quality_OnValueChanged;
+        if (!spawned.Contains(this))
+            spawned.Add(this);
         ApplyParentSlot(parentSlot.Value);
     }
     public override void OnNetworkDespawn()
     {
         parentSlot.OnValueChanged -= ParentSlot_OnValueChanged;
         quality.OnValueChanged -= Quality_OnValueChanged;
+        spawned.Remove(this);
         DetachFromLocalParent();
         base.OnNetworkDespawn();
     }

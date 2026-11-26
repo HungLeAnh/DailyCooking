@@ -42,6 +42,13 @@ NetworkVariables/NetworkLists, spawns, or `SendTo.NotServer` mirror RPCs.
   `RpcTarget.Single`, so the player class holds no UI calls. A choice in the option menu comes
   back through `UIManager.RequestOption`; the server takes the sender's avatar as the actor,
   checks range, and the target's `IHasOptionalSO.ApplyOption(actor, index)` validates the index.
+- Cooking tools: USE only opens the local close-up (no RPC). In the close-up, a drag in or out sends
+  the same `InteractServerRpc`, and each finished gesture sends
+  `PlayerStateMachine.ReportGestureServerRpc(tool counter, GestureFamily, value)` (owner + range
+  checked). The server's `CookingTool.ApplyGesture` rejects reports for the wrong family, the wrong
+  state, duplicates, and flip/manual-pour values more than 0.2 away from its own cook fraction, then
+  records them in `CookStepRecorder`. Stars are computed and written only on the server
+  (`KitchenObject.quality`, a server-written NetworkVariable).
 
 ## 4. Kitchen objects
 
@@ -76,7 +83,9 @@ All in `GameManager.Economy.cs` (a partial of `GameManager`, split from `GameMan
 `ExchangeCurrencyServerRpc`, `UnlockDishServerRpc`, `PurchaseUpgradeServerRpc`,
 `UnlockCosmeticServerRpc`, `ClaimDailyFreeServerRpc` — and the server checks level, price and
 balance, then debits and grants in one step. Customer payments are computed on the server when a
-customer finishes eating and collected once when a player picks up the plate. Level-up rewards are
+customer finishes eating and collected once when a player picks up the plate. The payment is
+`QualityRules.Payment(price, wait-time tip, plate.DishStars)`: the plate's dish stars (average of the
+gesture-made ingredients) add +10 % (2 stars) or +25 % (3 stars) of the price. Level-up rewards are
 granted by the server (`ServerAddExp`); reward popups are display only. Skill upgrades apply to
 the player who bought them. Gem packs (IAP) can only be bought by the host.
 
