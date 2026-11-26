@@ -39,9 +39,35 @@ public class KitchenObject : NetworkBehaviour
     private int kitchenObjectParentIndex;
     private bool isParentPending;
     private FollowTransform kitchenObjectFollowTransform;
+    // Small props stop casting shadows on Mobile Low/Medium (see MobileTiers.PropShadowsOn).
+    private MobilePerformanceManager perfManager;
+    private Renderer[] propRenderers;
+    private UnityEngine.Rendering.ShadowCastingMode[] authoredShadowModes;
     protected virtual void Awake()
     {
         kitchenObjectFollowTransform = GetComponent<FollowTransform>();
+    }
+    private void PerfManager_OnTierChanged(MobileTier? tier)
+    {
+        ApplyPropShadows(!tier.HasValue || MobileTiers.PropShadowsOn(tier.Value));
+    }
+    // Off: every renderer stops casting; on: back to the authored modes (cached on first switch-off).
+    public void ApplyPropShadows(bool on)
+    {
+        if (propRenderers == null)
+        {
+            if (on)
+                return; // never switched off: already authored
+            propRenderers = GetComponentsInChildren<Renderer>(true);
+            authoredShadowModes = new UnityEngine.Rendering.ShadowCastingMode[propRenderers.Length];
+            for (int i = 0; i < propRenderers.Length; i++)
+                authoredShadowModes[i] = propRenderers[i].shadowCastingMode;
+        }
+        for (int i = 0; i < propRenderers.Length; i++)
+        {
+            if (propRenderers[i] != null)
+                propRenderers[i].shadowCastingMode = on ? authoredShadowModes[i] : UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
     }
     public override void OnNetworkSpawn()
     {
@@ -50,12 +76,21 @@ public class KitchenObject : NetworkBehaviour
         quality.OnValueChanged += Quality_OnValueChanged;
         if (!spawned.Contains(this))
             spawned.Add(this);
+        perfManager = MobilePerformanceManager.Instance;
+        if (perfManager != null)
+        {
+            perfManager.OnTierChanged += PerfManager_OnTierChanged;
+            PerfManager_OnTierChanged(perfManager.CurrentTier);
+        }
         ApplyParentSlot(parentSlot.Value);
     }
     public override void OnNetworkDespawn()
     {
         parentSlot.OnValueChanged -= ParentSlot_OnValueChanged;
         quality.OnValueChanged -= Quality_OnValueChanged;
+        if (perfManager != null)
+            perfManager.OnTierChanged -= PerfManager_OnTierChanged;
+        perfManager = null;
         spawned.Remove(this);
         DetachFromLocalParent();
         base.OnNetworkDespawn();
