@@ -153,6 +153,41 @@ public class AdsManager : PersistentSingleton<AdsManager>
             interstitialAd.ShowAd(placementName);
         }
     }
+    // Outcome-reporting shows, for the ad hand-over (LevelPlayAdProvider).
+    private Action<AdOutcome> rewardedDone;
+    private Action<AdOutcome> interstitialDone;
+    private bool rewardEarned;
+    public bool IsShowingAd => rewardedDone != null || interstitialDone != null;
+
+    public void ShowRewarded(string placementName, Action<AdOutcome> done)
+    {
+        if (!IsRewardedAdsLoaded() || IsShowingAd) { done?.Invoke(AdOutcome.NoAd); return; }
+        rewardEarned = false;
+        rewardedDone = done ?? (o => { });
+        rewardedAd.ShowAd(placementName);
+    }
+
+    public void ShowInterstitial(string placementName, Action<AdOutcome> done)
+    {
+        if (!IsInterstitialAdsLoaded() || IsShowingAd) { done?.Invoke(AdOutcome.NoAd); return; }
+        interstitialDone = done ?? (o => { });
+        interstitialAd.ShowAd(placementName);
+    }
+
+    private void FinishRewarded(AdOutcome outcome)
+    {
+        var done = rewardedDone;
+        rewardedDone = null;
+        done?.Invoke(outcome);
+    }
+
+    private void FinishInterstitial(AdOutcome outcome)
+    {
+        var done = interstitialDone;
+        interstitialDone = null;
+        done?.Invoke(outcome);
+    }
+
     public void ShowRewardedAds(string placementName = "", Action callback = null)
     {
         if (IsRewardedAdsLoaded())
@@ -174,15 +209,20 @@ public class AdsManager : PersistentSingleton<AdsManager>
         Invoke(nameof(LoadRewardAds), (float)retryDelay);
     }
     private void RewardedOnAdDisplayedEvent(LevelPlayAdInfo adInfo) { }
-    private void RewardedOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError error) { }
+    private void RewardedOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError error)
+    {
+        FinishRewarded(AdOutcome.FailedOrClosedEarly);
+    }
     private void RewardedOnAdRewardedEvent(LevelPlayAdInfo adInfo, LevelPlayReward adReward)
     {
+        rewardEarned = true;
         var callback = callBackAction;
         callBackAction = null;
         callback?.Invoke();
     }
-    private void RewardedOnAdClosedEvent(LevelPlayAdInfo adInfo) 
+    private void RewardedOnAdClosedEvent(LevelPlayAdInfo adInfo)
     {
+        FinishRewarded(rewardEarned ? AdOutcome.Completed : AdOutcome.FailedOrClosedEarly);
         rewardedAd.LoadAd();
     }
     private void RewardedOnAdClickedEvent(LevelPlayAdInfo adInfo) { }
@@ -200,10 +240,14 @@ public class AdsManager : PersistentSingleton<AdsManager>
         Invoke(nameof(LoadIntertitialAds), (float)retryDelay);
     }
     private void InterstitialOnAdDisplayedEvent(LevelPlayAdInfo adInfo) { }
-    private void InterstitialOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError error) { }
-    private void InterstitialOnAdClickedEvent(LevelPlayAdInfo adInfo) { }
-    private void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo) 
+    private void InterstitialOnAdDisplayFailedEvent(LevelPlayAdInfo adInfo, LevelPlayAdError error)
     {
+        FinishInterstitial(AdOutcome.FailedOrClosedEarly);
+    }
+    private void InterstitialOnAdClickedEvent(LevelPlayAdInfo adInfo) { }
+    private void InterstitialOnAdClosedEvent(LevelPlayAdInfo adInfo)
+    {
+        FinishInterstitial(AdOutcome.Completed);
         interstitialAd.LoadAd();
     }
     private void InterstitialOnAdInfoChangedEvent(LevelPlayAdInfo adInfo) { }
