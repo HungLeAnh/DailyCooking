@@ -50,6 +50,7 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
     public SeatRegistry Seats { get; } = new SeatRegistry();
     private readonly Dictionary<ulong, string> playerIdByClient = new Dictionary<ulong, string>();
     private readonly Dictionary<ulong, string> approvedPlayerIds = new Dictionary<ulong, string>();
+    private readonly HashSet<string> leavingPlayers = new HashSet<string>();
     // Server: the player id a connection was approved with (null if unknown).
     public string PlayerIdFor(ulong clientId) =>
         playerIdByClient.TryGetValue(clientId, out string id) ? id : null;
@@ -84,7 +85,23 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
             StartCoroutine(QuitAfterDelay());
             return;
         }
+        if (nm != null && nm.IsConnectedClient && !nm.IsServer)
+        {
+            // Leaving on purpose: the host frees the seat at once instead of holding it 60 s.
+            LeavingServerRpc();
+            StartCoroutine(QuitAfterDelay());
+            return;
+        }
         Session.UserQuit();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void LeavingServerRpc(RpcParams rpcParams = default)
+    {
+        string playerId = PlayerIdFor(rpcParams.Receive.SenderClientId);
+        if (playerId == null) return;
+        Debug.Log(LOG + $"{playerId} is leaving on purpose");
+        leavingPlayers.Add(playerId);
     }
 
     private System.Collections.IEnumerator QuitAfterDelay()
@@ -235,6 +252,11 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         {
             Debug.Log(LOG + $"client {clientId} dropped ({playerId}), seat held {SeatRegistry.HoldSeconds:0} s");
             OnPlayerAway?.Invoke(playerId);
+            if (leavingPlayers.Remove(playerId) && Seats.Release(playerId))
+            {
+                Debug.Log(LOG + $"{playerId} left on purpose: seat freed now");
+                OnSeatExpired?.Invoke(playerId);
+            }
         }
     }
     private void RemovePlayerData(ulong clientId)
@@ -499,6 +521,7 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         Seats.Clear();
         playerIdByClient.Clear();
         approvedPlayerIds.Clear();
+        leavingPlayers.Clear();
         PrepareConnection(SessionManager.Instance != null && SessionManager.Instance.IsSignedIn()
             ? AuthenticationService.Instance.PlayerId : null);
         NetworkManager.Singleton.ConnectionApprovalCallback = NetworkManager_ConnectionApprovalCallback;
@@ -592,6 +615,7 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         Seats.Clear();
         playerIdByClient.Clear();
         approvedPlayerIds.Clear();
+        leavingPlayers.Clear();
         ResetHeartbeat();
 
         if (NetworkManager.Singleton != null)

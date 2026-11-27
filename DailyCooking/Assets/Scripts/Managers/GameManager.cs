@@ -65,10 +65,13 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
         // Gem purchases wait for a hosted restaurant to credit; pick up any left pending.
         if (IsServer && gameData != null && IAPManager.Instance != null)
             IAPManager.Instance.RetryPendingPurchases();
+        if (IsServer)
+            SubscribeSessionEvents();
     }
 
     public override void OnDestroy()
     {
+        UnsubscribeSessionEvents();
         if (MultiplayerManager.Instance != null)
             MultiplayerManager.Instance.OnPlayerDataNetworkListChanged -= Instance_OnPlayerDataNetworkListChanged;
         UnsubscribeSaveEvents();
@@ -111,13 +114,31 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
         ExecutePlayerSpawn(rpcParams.Receive.SenderClientId);
     }
 
-    // One avatar per client: a repeated request (e.g. from a re-run initialization) is ignored.
+    // One avatar per player: a player whose avatar was kept while away gets it back (with whatever
+    // it holds); a repeated request (e.g. from a re-run initialization) is ignored.
     private void ExecutePlayerSpawn(ulong clientId)
     {
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out NetworkClient client) && client.PlayerObject != null)
+        string playerId = MultiplayerManager.Instance != null ? MultiplayerManager.Instance.PlayerIdFor(clientId) : null;
+        PlayerStateMachine kept = PlayerStateMachine.FindByPlayerId(playerId);
+        if (kept != null)
+        {
+            if (kept.OwnerClientId != clientId)
+            {
+                kept.NetworkObject.ChangeOwnership(clientId);
+                Debug.Log($"[Net] avatar of {playerId} handed back to client {clientId}");
+            }
+            kept.ServerSetAway(false);
+            OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+        if (PlayerStateMachine.FindForClient(clientId) != null)
             return;
         playerGameObject = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
-        playerGameObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+        playerGameObject.GetComponent<PlayerStateMachine>().ServerSetIdentity(playerId);
+        NetworkObject playerNetworkObject = playerGameObject.GetComponent<NetworkObject>();
+        // Kept by the server when its player drops, so it can be handed back within the seat hold.
+        playerNetworkObject.DontDestroyWithOwner = true;
+        playerNetworkObject.SpawnAsPlayerObject(clientId);
         OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
     }
 

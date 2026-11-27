@@ -15,6 +15,49 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     private static readonly List<PlayerStateMachine> all = new List<PlayerStateMachine>();
     public static IReadOnlyList<PlayerStateMachine> All => all;
 
+    // Server-written identity: the player this avatar belongs to, kept while its player is away
+    // (dropped or quiet) and the avatar is owned by the server.
+    private readonly NetworkVariable<Unity.Collections.FixedString64Bytes> avatarPlayerId =
+        new NetworkVariable<Unity.Collections.FixedString64Bytes>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<bool> isAway =
+        new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private AwayLabel awayLabel;
+    public string AvatarPlayerId => avatarPlayerId.Value.ToString();
+    public bool IsAway => isAway.Value;
+    // This peer's own, playable avatar. Not an away avatar the host happens to own.
+    public bool IsLocalAvatar
+    {
+        get
+        {
+            if (!IsOwner || IsAway) return false;
+            if (avatarPlayerId.Value.IsEmpty || SessionManager.Instance == null) return true;
+            return AvatarPlayerId == SessionManager.Instance.PlayerId;
+        }
+    }
+
+    // Server, before spawn.
+    public void ServerSetIdentity(string playerId)
+    {
+        avatarPlayerId.Value = string.IsNullOrEmpty(playerId) ? default : new Unity.Collections.FixedString64Bytes(playerId);
+    }
+
+    public void ServerSetAway(bool away)
+    {
+        if (!IsServer || isAway.Value == away) return;
+        isAway.Value = away;
+    }
+
+    public static PlayerStateMachine FindByPlayerId(string playerId)
+    {
+        if (string.IsNullOrEmpty(playerId)) return null;
+        for (int i = 0; i < all.Count; i++)
+        {
+            if (all[i] != null && all[i].AvatarPlayerId == playerId)
+                return all[i];
+        }
+        return null;
+    }
+
     public event EventHandler OnPickedSomething;
     public enum EPlayerState
     {
@@ -124,7 +167,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     }
     private void Update()
     {
-        if (!IsOwner) return;
+        if (!IsLocalAvatar) return;
 
         _stateManager.Update();
 
@@ -175,7 +218,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     // Interacting with an installed cooking tool also glides the local camera into its close-up.
     public void PressInteract()
     {
-        if (!IsOwner || Context == null || Context.IsDisableInput)
+        if (!IsLocalAvatar || Context == null || Context.IsDisableInput)
             return;
         // Building: the USE button is hidden; keyboard F must not act on the kitchen either.
         if (CameraModeController.Instance != null && CameraModeController.Instance.Mode == CameraMode.Build)
@@ -367,11 +410,18 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     // Server: the avatar of a connected client, e.g. to send feedback for one of its RPCs.
     public static PlayerStateMachine FindForClient(ulong clientId)
     {
+        // By owner, not PlayerObject: an avatar handed back with ChangeOwnership is not its owner's
+        // PlayerObject, and an away avatar owned by the server belongs to nobody.
         NetworkManager networkManager = NetworkManager.Singleton;
-        if (networkManager == null || !networkManager.IsServer ||
-            !networkManager.ConnectedClients.TryGetValue(clientId, out NetworkClient client) || client.PlayerObject == null)
+        if (networkManager == null || !networkManager.IsServer)
             return null;
-        return client.PlayerObject.GetComponent<PlayerStateMachine>();
+        for (int i = 0; i < all.Count; i++)
+        {
+            PlayerStateMachine avatar = all[i];
+            if (avatar != null && avatar.IsSpawned && !avatar.IsAway && avatar.OwnerClientId == clientId)
+                return avatar;
+        }
+        return null;
     }
 
     public override void OnNetworkSpawn()
@@ -379,8 +429,11 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         base.OnNetworkSpawn();
         if (!all.Contains(this))
             all.Add(this);
-        if (IsOwner)
+        if (IsLocalAvatar)
             LocalInstance = this;
+        isAway.OnValueChanged += IsAway_OnValueChanged;
+        avatarPlayerId.OnValueChanged += AvatarPlayerId_OnValueChanged;
+        RefreshAwayLabel();
         if (MultiplayerManager.Instance != null)
             MultiplayerManager.Instance.OnPlayerDataNetworkListChanged += MultiplayerManager_OnPlayerDataNetworkListChanged;
         SubscribeToOwnerStats();
@@ -392,6 +445,8 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
         all.Remove(this);
         if (LocalInstance == this)
             LocalInstance = null;
+        isAway.OnValueChanged -= IsAway_OnValueChanged;
+        avatarPlayerId.OnValueChanged -= AvatarPlayerId_OnValueChanged;
         if (MultiplayerManager.Instance != null)
             MultiplayerManager.Instance.OnPlayerDataNetworkListChanged -= MultiplayerManager_OnPlayerDataNetworkListChanged;
         UnsubscribeFromOwnerStats();
@@ -452,9 +507,48 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
             SetCharacterMesh();
     }
 
-    // Account id of the player who owns this avatar (not necessarily the local player).
+    public override void OnGainedOwnership()
+    {
+        base.OnGainedOwnership();
+        if (IsLocalAvatar)
+            LocalInstance = this;
+    }
+
+    public override void OnLostOwnership()
+    {
+        base.OnLostOwnership();
+        if (LocalInstance == this)
+            LocalInstance = null;
+    }
+
+    private void IsAway_OnValueChanged(bool previous, bool current)
+    {
+        RefreshAwayLabel();
+        if (!current && IsLocalAvatar)
+            LocalInstance = this;
+        else if (current && LocalInstance == this)
+            LocalInstance = null;
+    }
+
+    private void AvatarPlayerId_OnValueChanged(Unity.Collections.FixedString64Bytes previous, Unity.Collections.FixedString64Bytes current)
+    {
+        UnsubscribeFromOwnerStats();
+        RetryOwnerStats();
+    }
+
+    private void RefreshAwayLabel()
+    {
+        if (awayLabel == null)
+            awayLabel = gameObject.AddComponent<AwayLabel>();
+        awayLabel.SetVisible(IsAway);
+    }
+
+    // Account id of the player who owns this avatar (not necessarily the local player). The
+    // server-written id wins: an away avatar is owned by the server but still belongs to its player.
     public string GetOwnerPlayerId()
     {
+        if (!avatarPlayerId.Value.IsEmpty)
+            return AvatarPlayerId;
         if (IsOwner && SessionManager.Instance != null)
             return SessionManager.Instance.PlayerId;
         if (MultiplayerManager.Instance == null)
@@ -490,7 +584,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     [Rpc(SendTo.Server)]
     private void StartCookingServerRpc(NetworkBehaviourReference targetReference, RpcParams rpcParams = default)
     {
-        if (rpcParams.Receive.SenderClientId != OwnerClientId)
+        if (rpcParams.Receive.SenderClientId != OwnerClientId || IsAway)
             return;
         if (!targetReference.TryGet(out NetworkBehaviour target) || !(target is CookingToolCounterController controller))
             return;
@@ -503,7 +597,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     // Same server path and rules as pressing USE at the tool used to be.
     public void RequestInteractFromCloseUp(CookingToolCounterController target)
     {
-        if (!IsOwner || target == null || !target.IsSpawned)
+        if (!IsLocalAvatar || target == null || !target.IsSpawned)
             return;
         InteractServerRpc(target, false);
     }
@@ -511,7 +605,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     // Client (owner): report one finished gesture in a cooking tool's close-up.
     public void ReportGesture(CookingToolCounterController target, GestureFamily family, float value)
     {
-        if (!IsOwner || target == null || !target.IsSpawned)
+        if (!IsLocalAvatar || target == null || !target.IsSpawned)
             return;
         ReportGestureServerRpc(target, family, value);
     }
@@ -519,7 +613,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     [Rpc(SendTo.Server)]
     private void ReportGestureServerRpc(NetworkBehaviourReference targetReference, GestureFamily family, float value, RpcParams rpcParams = default)
     {
-        if (rpcParams.Receive.SenderClientId != OwnerClientId)
+        if (rpcParams.Receive.SenderClientId != OwnerClientId || IsAway)
             return;
         if (!targetReference.TryGet(out NetworkBehaviour target) || !(target is CookingToolCounterController controller))
             return;
@@ -531,7 +625,7 @@ public class PlayerStateMachine : NetworkBehaviour, IKitchenObjectParent
     [Rpc(SendTo.Server)]
     private void InteractServerRpc(NetworkBehaviourReference targetReference, bool alternate, RpcParams rpcParams = default)
     {
-        if (rpcParams.Receive.SenderClientId != OwnerClientId)
+        if (rpcParams.Receive.SenderClientId != OwnerClientId || IsAway)
             return;
         if (!targetReference.TryGet(out NetworkBehaviour target) || !(target is IInteractable interactable))
             return;

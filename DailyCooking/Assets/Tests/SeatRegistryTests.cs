@@ -91,6 +91,16 @@ public class SeatRegistryTests
         Assert.AreEqual(9UL, s.LiveClient("p1"));
     }
 
+    [Test] public void Release_FreesHeldSeatAtOnce()
+    {
+        var s = WithLive(4);
+        s.Disconnected("p2", 2, 0f);
+        Assert.IsTrue(s.Release("p2"));
+        Assert.IsFalse(s.IsHeld("p2"));
+        Assert.AreEqual(3, s.TakenSeats);
+        Assert.IsFalse(s.Release("p2"), "nothing left to release");
+    }
+
     [Test] public void Clear_EmptiesEverything()
     {
         var s = WithLive(3);

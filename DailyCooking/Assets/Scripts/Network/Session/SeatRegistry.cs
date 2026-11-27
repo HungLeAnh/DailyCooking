@@ -40,6 +40,9 @@ public sealed class SeatRegistry
         heldUntil[playerId] = now + HoldSeconds;
     }
 
+    // A player who left on purpose: free the held seat now instead of after 60 s.
+    public bool Release(string playerId) => !string.IsNullOrEmpty(playerId) && heldUntil.Remove(playerId);
+
     public bool IsHeld(string playerId) => !string.IsNullOrEmpty(playerId) && heldUntil.ContainsKey(playerId);
 
     public ulong? LiveClient(string playerId) =>
