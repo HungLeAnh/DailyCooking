@@ -30,6 +30,39 @@ NetworkVariables/NetworkLists, spawns, or `SendTo.NotServer` mirror RPCs.
    initialize and the player is spawned (`RequestSpawnPlayerServerRpc`, once per sender).
 5. Everything spawned in the scene (counters, kitchen objects, bots) reaches the late joiner with
    its current NetworkVariable state.
+6. **Approval by player id.** Each machine sends its player id in the connection payload
+   (`ConnectionPayload`, `NetworkConfig.ConnectionApproval = true`, set in code on both ends). The
+   host's `SeatRegistry` counts live players plus seats held for 60 s after a drop against the
+   4-player limit; a known player is always let back in, and one that reconnects while its old
+   connection lingers replaces it.
+7. **Session lifecycle.** `SessionStateMachine` (Idle → Joining → Syncing → InGame →
+   Reconnecting → Ended, host: Hosting → Ended) is fed by transport events; every end goes through
+   one exit (`MultiplayerManager.RunExit`: save if the host lost its connection, shut down, main
+   menu, a popup with the reason). A host that quits sends `SessionEndingRpc` first so clients show
+   "The restaurant has closed".
+8. **Heartbeat and reconnect.** A 1 s unreliable beat each way: 5 s without one shows
+   "Reconnecting…" on the client and "Away" over that avatar on the host. The transport timeout is
+   60 s. A client that loses the host retries the same join code every 3 s for 60 s through the
+   normal join path; the host keeps its avatar (`DontDestroyWithOwner`, `PlayerStateMachine.IsAway`,
+   server-written `avatarPlayerId`) and hands it back with `ChangeOwnership`, still holding its food.
+   After 60 s the food goes to the nearest free clear counter (or is destroyed) and the avatar is
+   removed. A client that quits on purpose frees its seat at once.
+9. **Mirrors send totals.** Coins, gems, level/EXP, inventory counts, the post-box list, daily-free
+   counts and upgraded stats reach clients as resulting values, never as "+X".
+
+## 2b. Host ads watched by a client
+
+With other players in the room, the host's ads don't freeze the restaurant
+(`GameManager.AdDelegation.cs`, rules in `AdDelegationRules`):
+
+- **Rewarded (daily free item):** the host picks a client in "Who watches?"; the client accepts
+  within 15 s or declines (60 s cooldown before it can be asked again). When nobody is left to ask
+  (refused, cooling down, or no ad) the host may press "Force a random player" (switch:
+  `Assets/Resources/AdDelegationConfig.asset`), or watch it itself ("Me — the restaurant pauses").
+  The server grants through `ServerGrantDailyFree`; one open request at a time, 2 min expiry.
+- **Interstitials:** the host's `Break_Time` rotates through the clients (in addition to their own,
+  never within 90 s of a phone's previous one, at a safe moment); the host's `Level_Up` is skipped.
+- Ads go through `IAdProvider` (`LevelPlayAdProvider` on devices, `FakeAdProvider` in the Editor).
 
 ## 3. Player interactions
 
@@ -100,6 +133,12 @@ the player who bought them. Gem packs (IAP) can only be bought by the host.
 ## 8. Known remaining risks
 
 - Rewarded-ad completion is reported by the client and cannot be verified by the host.
+- **Forced rewarded ads (owner-accepted risk):** "Force a random player" shows a rewarded ad to a
+  client who did not opt in. Rewarded ads are normally opt-in under ad-network policy
+  (LevelPlay/AdMob — to be checked); turn it off with `ForceWatchWhenAllDecline` in
+  `Assets/Resources/AdDelegationConfig.asset`.
+- How long Unity Relay keeps a suspended phone (an ad) connected is unmeasured; the 60 s transport
+  timeout and the 60 s reconnect assume it is at least that long.
 - Daily reward resets use the host's clock.
 - Receipt validation needs the generated `GooglePlayTangle` (IAP Receipt Validation Obfuscator).
 - Ads consent is deny-by-default (`AdsManager`: no personalised ads, CCPA opt-out on) and only
