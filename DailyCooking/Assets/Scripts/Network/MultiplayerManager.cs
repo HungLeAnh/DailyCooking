@@ -164,9 +164,13 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
     // the normal join path (fresh snapshot, the kept avatar handed back).
     private void BeginReconnect()
     {
-        ReconnectingOverlay.SetVisible(true);
         if (reconnectLoop != null)
-            return; // back here from a failed rejoin: the window keeps running
+        {
+            // Back here from a failed rejoin: the window keeps running behind the full-screen panel.
+            ReconnectingOverlay.ShowBlocking();
+            return;
+        }
+        ReconnectingOverlay.SetVisible(true);
         if (string.IsNullOrEmpty(CurrentJoinCode))
         {
             Session.RetryWindowOver();
@@ -194,10 +198,20 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         while (Time.unscaledTime - started < RETRY_WINDOW_SECONDS
                && (Session.State == SessionState.Reconnecting || Session.State == SessionState.Syncing))
         {
-            if (Session.State == SessionState.Reconnecting && !rejoinInFlight
-                && NetworkManager.Singleton != null && !NetworkManager.Singleton.ShutdownInProgress
-                && !NetworkManager.Singleton.IsListening)
-                TryRejoin(joinCode);
+            NetworkManager nm = NetworkManager.Singleton;
+            if (nm != null)
+            {
+                switch (ReconnectStep.Next(Session.State, nm.IsListening, nm.ShutdownInProgress, rejoinInFlight))
+                {
+                    case ReconnectAction.StartAttempt:
+                        TryRejoin(joinCode);
+                        break;
+                    case ReconnectAction.DropStaleConnection:
+                        Debug.Log(LOG + "rejoin connected but got no snapshot: dropping it to retry");
+                        nm.Shutdown();
+                        break;
+                }
+            }
             yield return new WaitForSecondsRealtime(RETRY_INTERVAL_SECONDS);
         }
         // reconnectLoop stays set until here so BeginReconnect can't start a second window.
