@@ -35,6 +35,32 @@ public static class PerfScenarios
         Debug.Log("[Perf] local host up (join code LOCAL)");
     }
 
+    // Ends the first-time tutorial the way finishing it does: closing the open panel runs
+    // TutorialManager's own close handlers (the last one unlocks the starting area, spawns the
+    // default counters, marks the tutorial played and shows the HUD).
+    [MenuItem("Tools/Profiling/Skip tutorial")]
+    public static void SkipTutorial()
+    {
+        RunInRestaurant(() =>
+        {
+            int closed = 0;
+            for (int round = 0; round < 5; round++)
+            {
+                bool any = false;
+                foreach (var panel in UnityEngine.Object.FindObjectsByType<TutorialPanel>(
+                             FindObjectsInactive.Include, FindObjectsSortMode.None))
+                {
+                    if (!panel.gameObject.activeInHierarchy) continue;
+                    panel.CloseTutorial();
+                    closed++;
+                    any = true;
+                }
+                if (!any) break;
+            }
+            Debug.Log($"[Perf] tutorial skipped ({closed} panel(s) closed), played={GameManager.Instance.GameData.TutorialData.HasPlayedFirstTime}");
+        });
+    }
+
     [MenuItem("Tools/Profiling/S5 - Open Shop popup")]
     public static void S5_OpenShop()
     {
