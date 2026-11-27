@@ -12,7 +12,7 @@ using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
+public partial class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
 {
     public event EventHandler OnTryingToJoinGame;
     public event EventHandler OnFailedToJoinGame;
@@ -44,6 +44,15 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     public SessionStateMachine Session { get; } = new SessionStateMachine();
     // The Relay code of the session this machine is in (host or client); null outside a session.
     public string CurrentJoinCode { get; private set; }
+    // Both ends tolerate a silent phone (an ad) for this long before calling the connection lost.
+    private const int DISCONNECT_TIMEOUT_MS = 60000;
+    // Server: seats by player id (live + held for 60 s after a drop).
+    public SeatRegistry Seats { get; } = new SeatRegistry();
+    private readonly Dictionary<ulong, string> playerIdByClient = new Dictionary<ulong, string>();
+    private readonly Dictionary<ulong, string> approvedPlayerIds = new Dictionary<ulong, string>();
+    // Server: the player id a connection was approved with (null if unknown).
+    public string PlayerIdFor(ulong clientId) =>
+        playerIdByClient.TryGetValue(clientId, out string id) ? id : null;
     public string GetPlayerName()
     {
         return playerName;
@@ -196,39 +205,89 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
     private void NetworkManager_Server_OnClientConnectedCallback(ulong clientId)
     {
         var playerData = new PlayerData { clientId = clientId };
-        // The host's own entry is filled in directly; remote clients send theirs (SetplayerIdServerRpc).
+        // The player id comes from the approval payload; the host's own name is filled in directly.
+        approvedPlayerIds.TryGetValue(clientId, out string playerId);
+        approvedPlayerIds.Remove(clientId);
         if (clientId == NetworkManager.Singleton.LocalClientId)
         {
-            playerData.playerId = AuthenticationService.Instance.PlayerId;
+            playerId = AuthenticationService.Instance.PlayerId;
             playerData.playerName = GetPlayerName();
         }
+        if (!string.IsNullOrEmpty(playerId))
+        {
+            playerData.playerId = playerId;
+            playerIdByClient[clientId] = playerId;
+            Seats.Connected(playerId, clientId);
+        }
         playerDataNetworkList.Add(playerData);
+        StartHearing(clientId);
+        Debug.Log(LOG + $"client {clientId} connected ({playerId}), seats taken {Seats.TakenSeats}");
     }
     private void NetworkManager_Server_OnClientDisconnectCallback(ulong clientId)
     {
-        for (int i = 0; i < playerDataNetworkList.Count; i++)
+        RemovePlayerData(clientId);
+        StopHearing(clientId);
+        approvedPlayerIds.Remove(clientId);
+        if (!playerIdByClient.TryGetValue(clientId, out string playerId)) return;
+        playerIdByClient.Remove(clientId);
+        Seats.Disconnected(playerId, clientId, Time.unscaledTime);
+        if (Seats.IsHeld(playerId))
         {
-            PlayerData playerData = playerDataNetworkList[i];
-            if (playerData.clientId == clientId)
-            {
-                //Disconnected
-                playerDataNetworkList.RemoveAt(i);
-            }
+            Debug.Log(LOG + $"client {clientId} dropped ({playerId}), seat held {SeatRegistry.HoldSeconds:0} s");
+            OnPlayerAway?.Invoke(playerId);
         }
     }
+    private void RemovePlayerData(ulong clientId)
+    {
+        for (int i = playerDataNetworkList.Count - 1; i >= 0; i--)
+        {
+            if (playerDataNetworkList[i].clientId == clientId)
+                playerDataNetworkList.RemoveAt(i);
+        }
+    }
+    // Host-authoritative gate by player id: held seats count as taken, a known player always gets
+    // back in, and a player who reconnects while its old connection lingers replaces it.
     private void NetworkManager_ConnectionApprovalCallback(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
     {
-        // Host-authoritative gate: capacity + duplicate-client guard.
-        // Payload validation (PlayerId) happens in SetplayerIdServerRpc via SenderClientId.
-        if (playerDataNetworkList.Count >= MAX_PLAYER_AMOUNT)
+        ulong clientId = connectionApprovalRequest.ClientNetworkId;
+        string playerId = ConnectionPayload.Decode(connectionApprovalRequest.Payload);
+        connectionApprovalResponse.CreatePlayerObject = false;
+        if (clientId == NetworkManager.ServerClientId)
         {
-            connectionApprovalResponse.Approved = false;
-            connectionApprovalResponse.Reason = "Room full";
-            connectionApprovalResponse.CreatePlayerObject = false;
+            connectionApprovalResponse.Approved = true;
             return;
         }
+        SeatRegistry.ApprovalResult result = Seats.Approve(playerId, MAX_PLAYER_AMOUNT);
+        if (result == SeatRegistry.ApprovalResult.RoomFull)
+        {
+            Debug.Log(LOG + $"refused {playerId}: room full");
+            connectionApprovalResponse.Approved = false;
+            connectionApprovalResponse.Reason = ROOM_FULL_REASON;
+            return;
+        }
+        if (result == SeatRegistry.ApprovalResult.ApprovedReplaceLive)
+        {
+            ulong? oldClient = Seats.LiveClient(playerId);
+            if (oldClient.HasValue && oldClient.Value != clientId)
+                StartCoroutine(ReplaceLiveConnection(oldClient.Value, playerId));
+        }
+        if (playerId != null)
+            approvedPlayerIds[clientId] = playerId;
+        Debug.Log(LOG + $"approved {playerId} as client {clientId} ({result})");
         connectionApprovalResponse.Approved = true;
-        connectionApprovalResponse.CreatePlayerObject = false;
+    }
+    // The same player is back on a new connection: drop the old one (next frame, outside approval).
+    private System.Collections.IEnumerator ReplaceLiveConnection(ulong oldClientId, string playerId)
+    {
+        yield return null;
+        NetworkManager nm = NetworkManager.Singleton;
+        if (nm == null || !nm.IsServer) yield break;
+        Debug.Log(LOG + $"replaced live connection {oldClientId} of {playerId}");
+        if (playerIdByClient.TryGetValue(oldClientId, out string oldId) && oldId == playerId)
+            playerIdByClient.Remove(oldClientId);
+        RemovePlayerData(oldClientId);
+        if (nm.ConnectedClients.ContainsKey(oldClientId))
+            nm.DisconnectClient(oldClientId);
     }
     private void NetworkManager_Client_OnClientDisconnectCallback(ulong clientId)
     {
@@ -295,6 +354,7 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             GameManager.Instance.ReplaceGameDataFromHost(snapshotHandler.LoadFromJson(jsonData));
             if (GameManager.Instance.GameData == null) return;
             OnDataSyncToNewClient?.Invoke(this, EventArgs.Empty);
+            hostSilence.Reset(Time.unscaledTime);
             Session.SnapshotApplied();
         }
         catch (Exception e)
@@ -337,6 +397,8 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
         if (string.IsNullOrEmpty(playerId) || playerId.Length > 128) return;
         int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
         if (playerDataIndex < 0 || playerDataIndex >= playerDataNetworkList.Count) return;
+        // Set from the approval payload already; a different id later is ignored.
+        if (!playerDataNetworkList[playerDataIndex].playerId.IsEmpty) return;
         // Prevent duplicate PlayerIds (one account, one slot).
         for (int i = 0; i < playerDataNetworkList.Count; i++)
         {
@@ -422,8 +484,23 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
             return null;
         }
     }
+    // Both ends set the same connection settings before starting (approval is part of NGO's config check).
+    private void PrepareConnection(string playerId)
+    {
+        NetworkConfig config = NetworkManager.Singleton.NetworkConfig;
+        config.ConnectionApproval = true;
+        config.ConnectionData = ConnectionPayload.Encode(playerId);
+        unityTransport.DisconnectTimeoutMS = DISCONNECT_TIMEOUT_MS;
+        ResetHeartbeat();
+    }
+
     private void PrepareHostCallbacks()
     {
+        Seats.Clear();
+        playerIdByClient.Clear();
+        approvedPlayerIds.Clear();
+        PrepareConnection(SessionManager.Instance != null && SessionManager.Instance.IsSignedIn()
+            ? AuthenticationService.Instance.PlayerId : null);
         NetworkManager.Singleton.ConnectionApprovalCallback = NetworkManager_ConnectionApprovalCallback;
         // Remove first: a failed or repeated attempt must not leave the handlers attached twice.
         NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Server_OnClientConnectedCallback;
@@ -481,6 +558,7 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
 
             if (Session.State == SessionState.Ended) Session.Reset();
             CurrentJoinCode = joinCode;
+            PrepareConnection(AuthenticationService.Instance.PlayerId);
             Session.StartJoining();
             SubscribeTransportEvents();
             bool started;
@@ -511,6 +589,10 @@ public class MultiplayerManager : NetworkPersistentSingleton<MultiplayerManager>
 
         // A deliberate shutdown is not a lost connection.
         UnsubscribeTransportEvents();
+        Seats.Clear();
+        playerIdByClient.Clear();
+        approvedPlayerIds.Clear();
+        ResetHeartbeat();
 
         if (NetworkManager.Singleton != null)
         {
