@@ -158,6 +158,7 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
     private const float RETRY_WINDOW_SECONDS = 60f;
     private Coroutine reconnectLoop;
     private bool rejoinInFlight;
+    private float lastRejoinAttemptAt;
     private readonly RejoinGate rejoinGate = new RejoinGate();
 
     // A client lost the host while playing: retry the same join code every 3 s for 60 s through
@@ -185,15 +186,8 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         Debug.Log(LOG + $"reconnecting to {joinCode} for {RETRY_WINDOW_SECONDS:0} s");
         if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
             NetworkManager.Singleton.Shutdown();
-        // The host's snapshot replaces GameData on rejoin.
-        if (GameManager.Instance != null)
-            GameManager.Instance.ClearActiveSave();
-        snapshotAssembler.Reset();
-        // Leave the emptied GameScene behind a blocking panel: NGO keeps a scene that is already
-        // active, so the rejoin must start from another scene to load GameScene fresh, like a first join.
-        ReconnectingOverlay.ShowBlocking();
-        if (SceneManager.GetActiveScene().name != Loader.Scene.MainMenuScene.ToString())
-            SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
+        PrepareRejoin();
+        bool needsFreshStart = false;
 
         while (Time.unscaledTime - started < RETRY_WINDOW_SECONDS
                && (Session.State == SessionState.Reconnecting || Session.State == SessionState.Syncing))
@@ -201,15 +195,25 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
             NetworkManager nm = NetworkManager.Singleton;
             if (nm != null)
             {
-                switch (ReconnectStep.Next(Session.State, nm.IsListening, nm.ShutdownInProgress, rejoinInFlight))
+                ReconnectAction action = ReconnectStep.Next(Session.State, nm.IsListening, nm.IsConnectedClient,
+                    nm.ShutdownInProgress, rejoinInFlight, Time.unscaledTime - lastRejoinAttemptAt);
+                if (action == ReconnectAction.StartAttempt && needsFreshStart)
                 {
-                    case ReconnectAction.StartAttempt:
-                        TryRejoin(joinCode);
-                        break;
-                    case ReconnectAction.DropStaleConnection:
-                        Debug.Log(LOG + "rejoin connected but got no snapshot: dropping it to retry");
-                        nm.Shutdown();
-                        break;
+                    // The dropped attempt has shut down: back to a fresh scene before the next one.
+                    PrepareRejoin();
+                    needsFreshStart = false;
+                }
+                else if (action == ReconnectAction.StartAttempt)
+                {
+                    TryRejoin(joinCode);
+                }
+                else if (action == ReconnectAction.DropStaleConnection)
+                {
+                    Debug.Log(LOG + (nm.IsConnectedClient
+                        ? "rejoin connected but got no snapshot: dropping it to retry"
+                        : "rejoin handshake stuck: dropping it to retry"));
+                    nm.Shutdown();
+                    needsFreshStart = true;
                 }
             }
             yield return new WaitForSecondsRealtime(RETRY_INTERVAL_SECONDS);
@@ -225,9 +229,22 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         reconnectLoop = null;
     }
 
+    // Every rejoin starts like a first join: no old GameData or snapshot chunks, and from another
+    // scene behind a blocking panel (NGO keeps a scene that is already active).
+    private void PrepareRejoin()
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.ClearActiveSave();
+        snapshotAssembler.Reset();
+        ReconnectingOverlay.ShowBlocking();
+        if (SceneManager.GetActiveScene().name != Loader.Scene.MainMenuScene.ToString())
+            SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
+    }
+
     private async void TryRejoin(string joinCode)
     {
         rejoinInFlight = true;
+        lastRejoinAttemptAt = Time.unscaledTime;
         int attempt = rejoinGate.Begin();
         try
         {
