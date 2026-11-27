@@ -19,5 +19,6 @@ public enum UIPopupType
     UIRewardPopup,
     UISettingPopup,
     UIShopPopup,
-    UIUpgradePopup
+    UIUpgradePopup,
+    UIAdWatcherPopup
 }

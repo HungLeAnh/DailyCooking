@@ -67,11 +67,13 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
             IAPManager.Instance.RetryPendingPurchases();
         if (IsServer)
             SubscribeSessionEvents();
+        SubscribeAdEvents();
     }
 
     public override void OnDestroy()
     {
         UnsubscribeSessionEvents();
+        UnsubscribeAdEvents();
         if (MultiplayerManager.Instance != null)
             MultiplayerManager.Instance.OnPlayerDataNetworkListChanged -= Instance_OnPlayerDataNetworkListChanged;
         UnsubscribeSaveEvents();
@@ -82,6 +84,7 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
     {
         currentState?.Update();
         FlushPendingSave();
+        TickAdDelegation();
     }
 
     private void OnApplicationPause(bool pauseStatus)

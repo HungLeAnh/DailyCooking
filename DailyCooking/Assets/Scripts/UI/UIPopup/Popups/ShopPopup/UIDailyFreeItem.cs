@@ -52,6 +52,9 @@ public class UIDailyFreeItem : MonoBehaviour
             UIManager.Instance.ShowAlertMessage("Ads is Unavailable");
             return;
         }
+        // A host with other players in the room picks a client to watch it instead.
+        if (GameManager.Instance != null && GameManager.Instance.RequestRewardedFor(configItem.Id))
+            return;
         if (!AdsManager.Instance.IsRewardedAdsLoaded())
         {
             UIManager.Instance.ShowAlertMessage("Ads is Unavailable");

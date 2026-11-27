@@ -71,7 +71,14 @@ public class UILevelUpPopup : UIPopup
     public void OnCloseButtonClicked()
     {
         HidePopup();
-        AdsManager.Instance.ShowInterstitialAds("Level_Up");
+        // Every client shows its own Level_Up ad; a host with others in the room skips its own.
+        if (GameManager.Instance != null && GameManager.Instance.HostShouldDelegateInterstitials)
+            return;
+        if (AdsManager.Instance.IsInterstitialAdsLoaded())
+        {
+            AdsManager.Instance.ShowInterstitialAds("Level_Up");
+            GameManager.NoteLocalInterstitialShown();
+        }
     }
     
 }

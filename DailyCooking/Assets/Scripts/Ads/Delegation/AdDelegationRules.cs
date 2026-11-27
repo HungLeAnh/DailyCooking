@@ -77,7 +77,8 @@ public sealed class AdDelegationRules
         return AdResult.Reopen;
     }
 
-    // Every client refused or is cooling down, and someone has an ad: the host may force one.
+    // Nobody is left to ask (every client refused, is cooling down, or has no ad) and someone has
+    // an ad: the host may force one.
     public bool CanForce(IReadOnlyCollection<ulong> clients, Func<ulong, bool> hasAd, float now, bool forceEnabled)
     {
         if (!forceEnabled || forcedThisChain || HasOpenRequest(now) || clients == null || clients.Count == 0)
@@ -85,8 +86,9 @@ public sealed class AdDelegationRules
         bool anyAd = false;
         foreach (ulong client in clients)
         {
-            if (CanAsk(client, now)) return false;
-            if (hasAd(client)) anyAd = true;
+            bool clientHasAd = hasAd(client);
+            if (clientHasAd && CanAsk(client, now)) return false;
+            if (clientHasAd) anyAd = true;
         }
         return anyAd;
     }

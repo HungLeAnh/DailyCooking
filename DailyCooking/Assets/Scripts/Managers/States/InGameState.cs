@@ -44,8 +44,16 @@ public class InGameState : GameManagerBaseState
             return;
 
         interstitialCounter = interstitialInterval;
-        if (AdsManager.Instance != null)
+        // A host with other players in the room hands its Break_Time to a client instead.
+        if (gameManager.HostShouldDelegateInterstitials)
+        {
+            gameManager.SendInterstitialToClient();
+        }
+        else if (AdsManager.Instance != null && AdsManager.Instance.IsInterstitialAdsLoaded())
+        {
             AdsManager.Instance.ShowInterstitialAds("Break_Time");
+            GameManager.NoteLocalInterstitialShown();
+        }
     }
     public override void Exit()
     {

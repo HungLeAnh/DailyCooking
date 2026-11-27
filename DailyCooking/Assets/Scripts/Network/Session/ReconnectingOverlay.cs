@@ -9,14 +9,19 @@ public class ReconnectingOverlay : MonoBehaviour
     private const string Text = "Reconnecting…";
     private static ReconnectingOverlay instance;
     private GameObject panel;
+    private TextMeshProUGUI label;
 
-    public static void SetVisible(bool visible)
+    public static void SetVisible(bool visible) => SetVisible(visible, Text);
+
+    // Also used for other short notices ("The host is watching an ad…").
+    public static void SetVisible(bool visible, string text)
     {
         if (instance == null)
         {
             if (!visible) return;
             instance = Create();
         }
+        if (visible) instance.label.text = text;
         instance.panel.SetActive(visible);
     }
 
@@ -59,6 +64,7 @@ public class ReconnectingOverlay : MonoBehaviour
 
         var overlay = root.AddComponent<ReconnectingOverlay>();
         overlay.panel = panel;
+        overlay.label = tmp;
         return overlay;
     }
 }

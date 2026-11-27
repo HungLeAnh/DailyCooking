@@ -283,15 +283,23 @@ public partial class GameManager
     [Rpc(SendTo.Server)]
     public void ClaimDailyFreeServerRpc(ShopItemType rewardType, RpcParams rpcParams = default)
     {
-        if (GameData == null || ShopManager.Instance == null) return;
+        ServerGrantDailyFree(rewardType, rpcParams.Receive.SenderClientId, out _);
+    }
+
+    // Server: one daily-free reward to the restaurant (also when a client watched the host's ad).
+    // False, with an alert to notifyClient, when today's count is used up.
+    public bool ServerGrantDailyFree(ShopItemType rewardType, ulong notifyClient, out int amount)
+    {
+        amount = 0;
+        if (!IsServer || GameData == null || ShopManager.Instance == null) return false;
         DailyFreeCurrency offer = ShopManager.Instance.DailyFreeCurrency.Find(x => x.Id == rewardType);
-        if (offer == null || !int.TryParse(offer.Reward, out int amount) || amount <= 0) return;
+        if (offer == null || !int.TryParse(offer.Reward, out amount) || amount <= 0) return false;
 
         GameData.ShopData.RefreshDailyShopOffer();
         if (GameData.GetShopDailyFreeWatchCount(rewardType) >= offer.Count)
         {
-            AlertClient(rpcParams.Receive.SenderClientId, "No free rewards left today.");
-            return;
+            AlertClient(notifyClient, "No free rewards left today.");
+            return false;
         }
         GameData.IncreaseShopDailyFreeWatchCount(rewardType);
         SetDailyFreeCountsClientRpc(GameData.ShopData.DailyFreeItemCoinCount, GameData.ShopData.DailyFreeItemGemCount);
@@ -300,6 +308,7 @@ public partial class GameManager
             ApplyCoins(amount);
         else if (rewardType == ShopItemType.Gem)
             ApplyGems(amount);
+        return true;
     }
 
     [Rpc(SendTo.NotServer)]

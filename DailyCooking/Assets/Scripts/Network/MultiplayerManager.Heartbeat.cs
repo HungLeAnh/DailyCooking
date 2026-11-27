@@ -109,7 +109,8 @@ public partial class MultiplayerManager
         if (stale == hostLooksStale) return;
         hostLooksStale = stale;
         if (stale) Debug.Log(LOG + "no word from the host for 5 s");
-        if (Session.State != SessionState.Reconnecting)
+        // The host's "watching an ad" notice explains the silence already.
+        if (Session.State != SessionState.Reconnecting && !GameManager.HostAdNoticeShown)
             ReconnectingOverlay.SetVisible(stale);
     }
 

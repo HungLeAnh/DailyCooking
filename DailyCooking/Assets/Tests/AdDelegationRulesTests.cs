@@ -92,6 +92,14 @@ public class AdDelegationRulesTests
         Assert.IsTrue(r.CanForce(Clients, AllHaveAds, 4f, true));
     }
 
+    [Test] public void CanForce_ClientWithoutAdDoesNotBlock()
+    {
+        var r = new AdDelegationRules();
+        r.Report(Open(r, 1, 0f), 1, AdOutcome.Declined, 1f);
+        // Client 2 was never asked but has no ad: it can't watch, so it doesn't hold back a force.
+        Assert.IsTrue(r.CanForce(Clients, c => c == 1, 2f, true));
+    }
+
     [Test] public void CanForce_FalseWhenNoAdAnywhere()
     {
         var r = new AdDelegationRules();
