@@ -32,6 +32,7 @@ public partial class GameManager
     private Coroutine adForcedRoutine;
     private Coroutine adInterstitialRoutine;
     private bool adConsentPopupOpen;
+    private int askedRequestId = -1;
     private AdDelegationConfigSO adDelegationConfig;
     private static float localLastInterstitialAt = float.NegativeInfinity;
 
@@ -200,6 +201,7 @@ public partial class GameManager
     private void AskWatchClientRpc(int requestId, int amount, bool forced, RpcParams rpcParams = default)
     {
         if (!InPlayingSession()) return;
+        askedRequestId = requestId;
         if (forced)
             adForcedRoutine = StartCoroutine(ForcedWatch(requestId));
         else
@@ -355,7 +357,11 @@ public partial class GameManager
         {
             // The asked client went quiet: stop waiting after 20 s, as if it had not answered.
             if (adRules.TryGetOverdue(Time.unscaledTime, out int overdueId, out ulong overdueClient))
+            {
                 HandleAdReport(overdueId, overdueClient, AdOutcome.Timeout);
+                // Its late Yes would play an ad for nothing: take the question back.
+                WithdrawAskClientRpc(overdueId, RpcTarget.Single(overdueClient, RpcTargetUse.Temp));
+            }
             return;
         }
         if (!IsSpawned || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsConnectedClient) return;
@@ -433,16 +439,33 @@ public partial class GameManager
     // Host: Cancel in "Who watches?". While waiting it withdraws the request (a late answer grants nothing).
     private void CancelAdWatcher()
     {
-        if (!adRules.HasOpenRequest(Time.unscaledTime))
+        if (!adRules.TryGetOpen(Time.unscaledTime, out int openId, out ulong openClient, out bool forced))
         {
             adRules.EndChain();
             return;
         }
+        // A forced ad is already on its way: Cancel only closes the popup and the reward still comes.
+        if (forced) return;
         adRules.CancelOpen();
+        WithdrawAskClientRpc(openId, RpcTarget.Single(openClient, RpcTargetUse.Temp));
         adRequestRewards.Remove(openAdRequestId);
         Debug.Log(AD_LOG + $"request {openAdRequestId} cancelled by the host");
         openAdRequestId = -1;
         UIManager.Instance.ShowAlertMessage("Request cancelled");
+    }
+
+    // Client: the host cancelled or stopped waiting; drop that question if it is still on screen.
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void WithdrawAskClientRpc(int requestId, RpcParams rpcParams = default)
+    {
+        if (askedRequestId != requestId) return;
+        if (adConsentRoutine != null) StopCoroutine(adConsentRoutine);
+        adConsentRoutine = null;
+        if (adConsentPopupOpen && UIPopupManager.Instance != null)
+            UIPopupManager.Instance.HidePopup(UIPopupType.UIGameConfirmPopup);
+        adConsentPopupOpen = false;
+        askedRequestId = -1;
+        UIManager.Instance.ShowAlertMessage("The host no longer needs the ad");
     }
 
     [Rpc(SendTo.Server)]

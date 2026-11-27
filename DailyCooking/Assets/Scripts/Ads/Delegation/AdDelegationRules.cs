@@ -80,6 +80,15 @@ public sealed class AdDelegationRules
         return AdResult.Reopen;
     }
 
+    public bool TryGetOpen(float now, out int requestId, out ulong client, out bool forced)
+    {
+        ExpireOpen(now);
+        requestId = open != null ? open.Id : 0;
+        client = open != null ? open.Client : 0;
+        forced = open != null && open.Forced;
+        return open != null;
+    }
+
     // The asked client said yes and is watching: no answer deadline any more (only the 2 min expiry).
     public void MarkAccepted(int requestId, ulong sender)
     {

@@ -196,6 +196,22 @@ public class AdDelegationRulesTests
         Assert.IsTrue(r.TryOpen(2, Coin, 6f, out _));
     }
 
+    [Test] public void OpenRequest_TellsIfForced()
+    {
+        var r = new AdDelegationRules();
+        int id = Open(r, 1, 0f);
+        Assert.IsTrue(r.TryGetOpen(1f, out int openId, out ulong client, out bool forced));
+        Assert.AreEqual(id, openId);
+        Assert.AreEqual(1UL, client);
+        Assert.IsFalse(forced);
+        r.Report(id, 1, AdOutcome.Declined, 2f);
+        r.Report(Open(r, 2, 2f), 2, AdOutcome.Declined, 3f);
+        r.TryForce(Clients, AllHaveAds, Coin, new Random(1), 4f, out _, out _);
+        Assert.IsTrue(r.TryGetOpen(5f, out _, out _, out bool nowForced));
+        Assert.IsTrue(nowForced);
+        Assert.IsFalse(new AdDelegationRules().TryGetOpen(0f, out _, out _, out _));
+    }
+
     [Test] public void HostLeaves_CancelsOpenRequest()
     {
         var r = new AdDelegationRules();
