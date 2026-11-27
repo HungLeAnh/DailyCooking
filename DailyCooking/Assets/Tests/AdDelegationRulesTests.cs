@@ -150,6 +150,52 @@ public class AdDelegationRulesTests
         Assert.AreEqual(AdDelegationRules.AdResult.Grant, r.Report(id, picked, AdOutcome.Completed, 30f));
     }
 
+    [Test] public void Overdue_NotAnsweredIn20s()
+    {
+        var r = new AdDelegationRules();
+        int id = Open(r, 1, 0f);
+        Assert.IsFalse(r.TryGetOverdue(19.9f, out _, out _));
+        Assert.IsTrue(r.TryGetOverdue(20.1f, out int overdueId, out ulong client));
+        Assert.AreEqual(id, overdueId);
+        Assert.AreEqual(1UL, client);
+    }
+
+    [Test] public void Accepted_NotOverdueAt20s()
+    {
+        // Watching a long ad after accepting is not "not answering".
+        var r = new AdDelegationRules();
+        int id = Open(r, 1, 0f);
+        r.MarkAccepted(id, 1);
+        Assert.IsFalse(r.TryGetOverdue(60f, out _, out _));
+    }
+
+    [Test] public void MarkAccepted_WrongSender_Ignored()
+    {
+        var r = new AdDelegationRules();
+        int id = Open(r, 1, 0f);
+        r.MarkAccepted(id, 2);
+        Assert.IsTrue(r.TryGetOverdue(21f, out _, out _));
+    }
+
+    [Test] public void Forced_NeverOverdue()
+    {
+        var r = new AdDelegationRules();
+        r.Report(Open(r, 1, 0f), 1, AdOutcome.Declined, 1f);
+        r.Report(Open(r, 2, 1f), 2, AdOutcome.Declined, 2f);
+        r.TryForce(Clients, AllHaveAds, Coin, new Random(1), 3f, out _, out _);
+        Assert.IsFalse(r.TryGetOverdue(60f, out _, out _));
+    }
+
+    [Test] public void CancelOpen_LateReportRejected()
+    {
+        var r = new AdDelegationRules();
+        int id = Open(r, 1, 0f);
+        r.CancelOpen();
+        Assert.AreEqual(AdDelegationRules.AdResult.Rejected, r.Report(id, 1, AdOutcome.Completed, 5f));
+        Assert.IsTrue(r.CanAsk(1, 5f), "a cancel is not the client's refusal");
+        Assert.IsTrue(r.TryOpen(2, Coin, 6f, out _));
+    }
+
     [Test] public void HostLeaves_CancelsOpenRequest()
     {
         var r = new AdDelegationRules();

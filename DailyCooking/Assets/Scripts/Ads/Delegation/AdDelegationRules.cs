@@ -12,6 +12,8 @@ public sealed class AdDelegationRules
     public const float AskCooldownSeconds = 60f;
     public const float RequestExpirySeconds = 120f;
     public const float InterstitialGapSeconds = 90f;
+    // The client's own consent timer is 15 s; the host stops waiting for an answer 5 s after that.
+    public const float AnswerDeadlineSeconds = 20f;
 
     public enum AdResult { Grant, Reopen, Ended, Rejected }
 
@@ -22,6 +24,7 @@ public sealed class AdDelegationRules
         public int RewardType;
         public float CreatedAt;
         public bool Forced;
+        public bool Accepted;
     }
 
     private readonly Dictionary<ulong, float> cooldownUntil = new Dictionary<ulong, float>();
@@ -75,6 +78,32 @@ public sealed class AdDelegationRules
         if (outcome == AdOutcome.Declined || outcome == AdOutcome.NoAd || outcome == AdOutcome.Timeout)
             cooldownUntil[request.Client] = now + AskCooldownSeconds;
         return AdResult.Reopen;
+    }
+
+    // The asked client said yes and is watching: no answer deadline any more (only the 2 min expiry).
+    public void MarkAccepted(int requestId, ulong sender)
+    {
+        if (open != null && open.Id == requestId && open.Client == sender)
+            open.Accepted = true;
+    }
+
+    // A non-forced request nobody answered within 20 s (the client went quiet): the host treats it as a timeout.
+    public bool TryGetOverdue(float now, out int requestId, out ulong client)
+    {
+        requestId = 0;
+        client = 0;
+        if (open == null || open.Forced || open.Accepted || now - open.CreatedAt <= AnswerDeadlineSeconds)
+            return false;
+        requestId = open.Id;
+        client = open.Client;
+        return true;
+    }
+
+    // The host cancelled while waiting: the request closes, nobody gets a cooldown, the chain ends.
+    public void CancelOpen()
+    {
+        open = null;
+        EndChain();
     }
 
     // Nobody is left to ask (every client refused, is cooling down, or has no ad) and someone has

@@ -74,10 +74,7 @@ public partial class GameManager
         {
             Title = "Who watches?",
             Status = waiting ? $"Waiting for {NameOf(openAdRequestClient)}…" : status,
-            OnCancel = () =>
-            {
-                if (!adRules.HasOpenRequest(Time.unscaledTime)) adRules.EndChain();
-            },
+            OnCancel = CancelAdWatcher,
         };
         clients.Sort((a, b) => (lastAdPick == a ? 0 : 1).CompareTo(lastAdPick == b ? 0 : 1));
         foreach (ulong client in clients)
@@ -93,7 +90,7 @@ public partial class GameManager
                 OnPick = () => AskClientToWatch(target),
             });
         }
-        if (!waiting && adRules.CanForce(clients, ClientHasRewarded, now, ForceWatchEnabled))
+        if (!waiting && adRules.CanForce(clients, CanBeForced, now, ForceWatchEnabled))
             param.Options.Add(new UIAdWatcherPopup.Option { Label = "Force a random player", OnPick = ForceRandomWatcher });
         param.Options.Add(new UIAdWatcherPopup.Option { Label = "Me — the restaurant pauses", Enabled = !waiting, OnPick = HostWatchesItself });
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIAdWatcherPopup, param);
@@ -115,7 +112,7 @@ public partial class GameManager
 
     private void ForceRandomWatcher()
     {
-        if (!adRules.TryForce(OtherClients(), ClientHasRewarded, (int)pendingHostReward, adRandom, Time.unscaledTime,
+        if (!adRules.TryForce(OtherClients(), CanBeForced, (int)pendingHostReward, adRandom, Time.unscaledTime,
                 out ulong client, out int requestId))
         {
             ShowAdWatcherPopup("Nobody can watch right now");
@@ -217,7 +214,13 @@ public partial class GameManager
         {
             Title = "Watch an ad?",
             Message = $"The host asks you to watch an ad for +{amount}",
-            YesAction = () => { answered = true; adConsentPopupOpen = false; WatchAndReport(requestId); },
+            YesAction = () =>
+            {
+                answered = true;
+                adConsentPopupOpen = false;
+                if (InPlayingSession()) AdAcceptedServerRpc(requestId);
+                WatchAndReport(requestId);
+            },
             NoAction = () => { answered = true; adConsentPopupOpen = false; ReportAdIfPlaying(requestId, AdOutcome.Declined); },
         });
         float until = Time.unscaledTime + AdDelegationRules.ConsentSeconds;
@@ -348,7 +351,14 @@ public partial class GameManager
     // Called from Update: clients tell the host whether they have an ad and when they last showed one.
     private void TickAdDelegation()
     {
-        if (!IsSpawned || IsServer || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsConnectedClient) return;
+        if (IsSpawned && IsServer)
+        {
+            // The asked client went quiet: stop waiting after 20 s, as if it had not answered.
+            if (adRules.TryGetOverdue(Time.unscaledTime, out int overdueId, out ulong overdueClient))
+                HandleAdReport(overdueId, overdueClient, AdOutcome.Timeout);
+            return;
+        }
+        if (!IsSpawned || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsConnectedClient) return;
         if (Time.unscaledTime < nextAdStateReportAt) return;
         nextAdStateReportAt = Time.unscaledTime + AD_STATE_REPORT_SECONDS;
         float since = Mathf.Min(Time.unscaledTime - localLastInterstitialAt, 100000f);
@@ -419,6 +429,30 @@ public partial class GameManager
         if (HostAdNoticeShown) ReconnectingOverlay.SetVisible(false);
         HostAdNoticeShown = false;
     }
+
+    // Host: Cancel in "Who watches?". While waiting it withdraws the request (a late answer grants nothing).
+    private void CancelAdWatcher()
+    {
+        if (!adRules.HasOpenRequest(Time.unscaledTime))
+        {
+            adRules.EndChain();
+            return;
+        }
+        adRules.CancelOpen();
+        adRequestRewards.Remove(openAdRequestId);
+        Debug.Log(AD_LOG + $"request {openAdRequestId} cancelled by the host");
+        openAdRequestId = -1;
+        UIManager.Instance.ShowAlertMessage("Request cancelled");
+    }
+
+    [Rpc(SendTo.Server)]
+    private void AdAcceptedServerRpc(int requestId, RpcParams rpcParams = default)
+    {
+        adRules.MarkAccepted(requestId, rpcParams.Receive.SenderClientId);
+    }
+
+    private bool CanBeForced(ulong client) =>
+        AdCandidates.CanWatch(ClientHasRewarded(client), PlayerStateMachine.FindForClient(client) == null);
 
     private bool ClientHasRewarded(ulong client) => clientHasRewarded.TryGetValue(client, out bool has) && has;
 
