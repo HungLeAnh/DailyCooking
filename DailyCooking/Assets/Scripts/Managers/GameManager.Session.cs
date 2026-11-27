@@ -71,7 +71,7 @@ public partial class GameManager
         float bestDistance = float.MaxValue;
         foreach (ClearCounterController counter in Object.FindObjectsByType<ClearCounterController>(FindObjectsSortMode.None))
         {
-            if (counter == null || !counter.IsSpawned || counter.HasKitchenObject()) continue;
+            if (!AvatarRules.AcceptsExpiredFood(counter) || !counter.IsSpawned || counter.HasKitchenObject()) continue;
             float distance = (counter.transform.position - from).sqrMagnitude;
             if (distance < bestDistance)
             {

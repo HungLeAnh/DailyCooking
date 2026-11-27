@@ -139,8 +139,9 @@ public partial class GameManager : NetworkPersistentSingleton<GameManager>, IGam
         playerGameObject = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
         playerGameObject.GetComponent<PlayerStateMachine>().ServerSetIdentity(playerId);
         NetworkObject playerNetworkObject = playerGameObject.GetComponent<NetworkObject>();
-        // Kept by the server when its player drops, so it can be handed back within the seat hold.
-        playerNetworkObject.DontDestroyWithOwner = true;
+        // Kept by the server when its player drops, so it can be handed back within the seat hold
+        // (only for a known player: an avatar without an id has no seat to come back to).
+        playerNetworkObject.DontDestroyWithOwner = AvatarRules.KeepWhenOwnerLeaves(playerId);
         playerNetworkObject.SpawnAsPlayerObject(clientId);
         OnPlayerSpawned?.Invoke(this, EventArgs.Empty);
     }
