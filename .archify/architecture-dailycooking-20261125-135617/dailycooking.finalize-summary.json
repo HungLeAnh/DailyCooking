@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "D:\\UnityProject\\DailyCooking\\.archify\\architecture-dailycooking-20261125-135617\\candidate.json",
+    "sha256": "03cea61eeef7afb7143318f52f1797136c75fb5953c55ccb8b53eaa3e42623ae",
+    "bytes": 10496
+  },
+  "artifact": {
+    "path": "D:\\UnityProject\\DailyCooking\\.archify\\architecture-dailycooking-20261125-135617\\dailycooking.html",
+    "sha256": "263a67ac22ab3a840a9494d2a28a265d9ddb16927e538b1b84e7e913f7e9496a",
+    "bytes": 867253
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "D:\\UnityProject\\DailyCooking\\.archify\\architecture-dailycooking-20261125-135617\\dailycooking.finalize.json",
+    "summaryReceipt": "D:\\UnityProject\\DailyCooking\\.archify\\architecture-dailycooking-20261125-135617\\dailycooking.finalize-summary.json",
+    "browserCheckReceipt": "D:\\UnityProject\\DailyCooking\\.archify\\architecture-dailycooking-20261125-135617\\dailycooking.browser-check.json"
+  },
+  "update": {
+    "status": "update_available",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.3.1",
+    "releaseNotes": "https://github.com/tt-a1i/archify/releases/tag/v3.3.1",
+    "severity": "normal",
+    "summary": "Polishes automatic Architecture layout, spine labels, crossing reduction, and Classic styling, and deduplicates cited Explainer files.",
+    "checkedAt": "2026-11-25T06:57:29.670Z",
+    "source": "network",
+    "noticeRequired": true,
+    "noticeText": "Archify update: 3.2.0 → 3.3.1. A newer release is available. Release notes: https://github.com/tt-a1i/archify/releases/tag/v3.3.1. Would you like me to update Archify?",
+    "eventKey": "archify@sha256:b92b4d55446966fd74e5338a45d6de9a7a1b194420cd5eb14d2cdc39f1053b80"
+  },
+  "visualReview": "not-requested",
+  "durationMs": 2602,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  }
+}

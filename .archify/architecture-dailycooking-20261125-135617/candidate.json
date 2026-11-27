@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "DailyCooking — How the Game Fits Together",
+    "output": ".archify/architecture-dailycooking-20261125-135617/dailycooking.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "git@github.com:HungLeAnh/DailyCooking.git",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "87c2ae736060f7e652d7f2801b224b0c136badc3"
+    }
+  },
+  "components": [
+    { "id": "player", "type": "external", "label": "Player", "sublabel": "Android touch", "pos": [40, 40], "size": [150, 64], "icon": "person" },
+    { "id": "gameInput", "type": "frontend", "label": "GameInput", "sublabel": "Input System wrapper", "pos": [330, 40], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Player/GameInput.cs", "line": 15, "end_line": 21, "label": "input events" },
+                   { "path": "DailyCooking/Assets/Scripts/Player/GameInput.cs", "line": 53, "end_line": 54, "label": "click handlers" } ] },
+    { "id": "playerSM", "type": "frontend", "label": "PlayerStateMachine", "sublabel": "avatar FSM · raycast pick", "pos": [580, 40], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Player/PlayerStateMachine.cs", "line": 183, "end_line": 220, "label": "pick target" },
+                   { "path": "DailyCooking/Assets/Scripts/Player/PlayerStateMachine.cs", "line": 462, "end_line": 504, "label": "InteractServerRpc" } ] },
+    { "id": "config", "type": "database", "label": "ScriptableObject data", "sublabel": "recipes · foods · shop", "pos": [830, 40], "size": [150, 64], "tag": "GUID-keyed",
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/SO/RecipeDatabase/RecipeDatabaseSO.cs", "line": 6, "end_line": 39, "label": "RecipeDatabaseSO" },
+                   { "path": "DailyCooking/Assets/Scripts/Managers/ConfigManager.cs", "line": 1, "end_line": 19, "label": "ConfigManager" } ] },
+
+    { "id": "grid", "type": "backend", "label": "GridBuildingSystem", "sublabel": "place · pick up · NavMesh", "pos": [330, 200], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/GridBuildingSystem/GridSystem/GridBuildingSystem.cs", "line": 367, "end_line": 388, "label": "PlaceObjectServerRpc" },
+                   { "path": "DailyCooking/Assets/Scripts/GridBuildingSystem/GridSystem/GridBuildingSystem.cs", "line": 163, "end_line": 175, "label": "NavMesh rebuild" } ] },
+    { "id": "counters", "type": "backend", "label": "Counters & Tools", "sublabel": "MVC controllers · cooking", "pos": [580, 200], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Counters/CookingTool.cs", "line": 563, "end_line": 632, "label": "cook / burn timers" },
+                   { "path": "DailyCooking/Assets/Scripts/KitchenObject/TablewareKitchenObject.cs", "line": 99, "end_line": 111, "label": "collect payment" } ] },
+    { "id": "kitchenGM", "type": "backend", "label": "KitchenGameManager", "sublabel": "open/close · item spawns", "pos": [830, 200], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Counters/KitchenGameManager.cs", "line": 50, "end_line": 70, "label": "init + start bots" },
+                   { "path": "DailyCooking/Assets/Scripts/Counters/KitchenGameManager.cs", "line": 154, "end_line": 175, "label": "SpawnKitchenObject" } ] },
+    { "id": "bots", "type": "backend", "label": "BotManager", "sublabel": "pooled customer FSMs", "pos": [1070, 200], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Bot/BotManager.cs", "line": 110, "end_line": 119, "label": "StartSpawnBot" },
+                   { "path": "DailyCooking/Assets/Scripts/Bot/BotManager.cs", "line": 175, "end_line": 195, "label": "pool + spawn" },
+                   { "path": "DailyCooking/Assets/Scripts/Bot/BotCustomerController.cs", "line": 285, "end_line": 300, "label": "order from menu" } ] },
+
+    { "id": "ui", "type": "frontend", "label": "Popups & Build UI", "sublabel": "UIPopupManager · menus", "pos": [40, 360], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/UI/UIPopup/Popups/UIMainMenuPopup.cs", "line": 20, "end_line": 75, "label": "new / load / join" },
+                   { "path": "DailyCooking/Assets/Scripts/UI/UIPopup/UIPopupManager.cs", "line": 34, "end_line": 65, "label": "popup lookup" },
+                   { "path": "DailyCooking/Assets/Scripts/GridBuildingSystem/GridSystem/BuildingPlacementManager.cs", "line": 40, "end_line": 56, "label": "build mode" } ] },
+    { "id": "gameManager", "type": "backend", "label": "GameManager", "sublabel": "game FSM · economy · save", "pos": [580, 360], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Managers/GameManager.cs", "line": 41, "end_line": 122, "label": "states + player spawn" },
+                   { "path": "DailyCooking/Assets/Scripts/Managers/GameManager.Economy.cs", "line": 84, "end_line": 141, "label": "economy ServerRpcs" },
+                   { "path": "DailyCooking/Assets/Scripts/Managers/GameManager.Save.cs", "line": 172, "end_line": 217, "label": "host-only save" } ] },
+    { "id": "saveFile", "type": "database", "label": "Save file", "sublabel": "JSON · temp + .bak", "pos": [830, 360], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Managers/SaveJson.cs", "line": 35, "end_line": 59, "label": "WriteAtomic" },
+                   { "path": "DailyCooking/Assets/Scripts/Managers/FileDataHandler.cs", "line": 18, "end_line": 37, "label": "load / save" } ] },
+
+    { "id": "multiplayer", "type": "backend", "label": "MultiplayerManager", "sublabel": "sessions · join sync", "pos": [40, 520], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Network/MultiplayerManager.cs", "line": 97, "end_line": 168, "label": "join snapshot" },
+                   { "path": "DailyCooking/Assets/Scripts/Network/MultiplayerManager.cs", "line": 256, "end_line": 308, "label": "host / client start" } ] },
+    { "id": "monetization", "type": "external", "label": "Ads & IAP", "sublabel": "LevelPlay · Unity IAP", "pos": [830, 520], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Store/IAPManager.cs", "line": 136, "end_line": 165, "label": "grant gems" },
+                   { "path": "DailyCooking/Assets/Scripts/Ads/AdsManager.cs", "line": 66, "end_line": 78, "label": "LevelPlay init" },
+                   { "path": "DailyCooking/Assets/Scripts/Managers/States/InGameState.cs", "line": 36, "end_line": 49, "label": "interstitial timer" } ] },
+
+    { "id": "session", "type": "security", "label": "SessionManager", "sublabel": "UGS auth · Play Games", "pos": [40, 680], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Network/SessionManager.cs", "line": 35, "end_line": 58, "label": "services init" },
+                   { "path": "DailyCooking/Assets/Scripts/Network/SessionManager.cs", "line": 350, "end_line": 378, "label": "Relay host / join" } ] },
+    { "id": "relay", "type": "cloud", "label": "Unity Relay", "sublabel": "join code · DTLS", "pos": [330, 680], "size": [150, 64],
+      "sources": [ { "path": "DailyCooking/Assets/Scripts/Network/SessionManager.cs", "line": 358, "end_line": 363, "label": "CreateAllocation" } ] }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "Host authority — runs on the server, replicated by Netcode", "wraps": ["grid", "counters", "kitchenGM", "bots", "gameManager", "saveFile"] }
+  ],
+  "connections": [
+    { "id": "touch", "from": "player", "to": "gameInput", "label": "touch" },
+    { "id": "clicks", "from": "gameInput", "to": "playerSM", "label": "click / tap" },
+    { "id": "menus", "from": "player", "to": "ui", "label": "menus" },
+    { "id": "interact", "from": "playerSM", "to": "counters", "label": "InteractServerRpc", "variant": "emphasis" },
+    { "id": "spawn-item", "from": "counters", "to": "kitchenGM", "label": "spawn item" },
+    { "id": "customers", "from": "kitchenGM", "to": "bots", "label": "customers" },
+    { "id": "recipes", "from": "kitchenGM", "to": "config", "label": "RecipeDatabase" },
+    { "id": "collect-cash", "from": "counters", "to": "gameManager", "label": "CollectCash", "variant": "emphasis" },
+    { "id": "intents", "from": "ui", "to": "gameManager", "label": "new/load · buy RPCs" },
+    { "id": "place", "from": "ui", "to": "grid", "label": "place item" },
+    { "id": "save", "from": "gameManager", "to": "saveFile", "label": "WriteAtomic" },
+    { "id": "host-join", "from": "ui", "to": "multiplayer", "label": "host / join" },
+    { "id": "snapshot", "from": "multiplayer", "to": "gameManager", "label": "join snapshot", "variant": "dashed" },
+    { "id": "gems", "from": "monetization", "to": "gameManager", "label": "gems (host)" },
+    { "id": "relay-start", "from": "multiplayer", "to": "session", "label": "start Relay" },
+    { "id": "allocate", "from": "session", "to": "relay", "label": "allocation" }
+  ],
+  "cards": [
+    { "dot": "rose", "title": "The one rule: host decides, clients ask", "items": [
+      "Every gameplay change is a ServerRpc intent; the host checks the sender owns the avatar and is in range",
+      "State reaches clients through NetworkVariables / NetworkLists, spawns and SendTo.NotServer mirror RPCs",
+      "UIManager sends alerts and option menus only to the acting client (RpcTarget.Single)"
+    ] },
+    { "dot": "emerald", "title": "Core gameplay loop", "items": [
+      "BotManager spawns pooled customers; each orders a random dish from the menu",
+      "Players carry ingredients to counters and tools; CookingTool runs cook → cooked → burned timers",
+      "Picking up an eaten plate collects cash + EXP into GameManager"
+    ] },
+    { "dot": "cyan", "title": "Hosting and joining", "items": [
+      "Host: NewGame/LoadGame → Relay allocation → NetworkManager loads GameScene",
+      "Client: join code → Relay → host sends GameData gzipped in 4 KB chunks",
+      "Single-player uses a local transport via StartSinglePlayer"
+    ] },
+    { "dot": "amber", "title": "Data and persistence", "items": [
+      "Content lives in ScriptableObjects referenced by asset GUID in saves and RPCs",
+      "Only the host saves: dirty flag, max once per second, immediate on pause/quit",
+      "Rewarded ads are client-reported; interstitials fire every 5 min from InGameState"
+    ] }
+  ]
+}
