@@ -156,6 +156,7 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
     private const float RETRY_WINDOW_SECONDS = 60f;
     private Coroutine reconnectLoop;
     private bool rejoinInFlight;
+    private readonly RejoinGate rejoinGate = new RejoinGate();
 
     // A client lost the host while playing: retry the same join code every 3 s for 60 s through
     // the normal join path (fresh snapshot, the kept avatar handed back).
@@ -182,6 +183,11 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         if (GameManager.Instance != null)
             GameManager.Instance.ClearActiveSave();
         snapshotAssembler.Reset();
+        // Leave the emptied GameScene behind a blocking panel: NGO keeps a scene that is already
+        // active, so the rejoin must start from another scene to load GameScene fresh, like a first join.
+        ReconnectingOverlay.ShowBlocking();
+        if (SceneManager.GetActiveScene().name != Loader.Scene.MainMenuScene.ToString())
+            SceneManager.LoadScene(Loader.Scene.MainMenuScene.ToString());
 
         while (Time.unscaledTime - started < RETRY_WINDOW_SECONDS
                && (Session.State == SessionState.Reconnecting || Session.State == SessionState.Syncing))
@@ -206,10 +212,12 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
     private async void TryRejoin(string joinCode)
     {
         rejoinInFlight = true;
+        int attempt = rejoinGate.Begin();
         try
         {
             Debug.Log(LOG + "rejoin attempt");
-            bool started = await StartClientTransport(joinCode);
+            bool started = await StartClientTransport(joinCode,
+                () => rejoinGate.IsCurrent(attempt) && Session.State == SessionState.Reconnecting);
             if (!started)
                 Debug.Log(LOG + "rejoin attempt failed to start");
         }
@@ -225,6 +233,7 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
 
     private void StopReconnect()
     {
+        rejoinGate.Cancel();
         if (reconnectLoop != null)
         {
             StopCoroutine(reconnectLoop);
@@ -385,10 +394,9 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         yield return null;
         NetworkManager nm = NetworkManager.Singleton;
         if (nm == null || !nm.IsServer) yield break;
-        Debug.Log(LOG + $"replaced live connection {oldClientId} of {playerId}");
-        if (playerIdByClient.TryGetValue(oldClientId, out string oldId) && oldId == playerId)
-            playerIdByClient.Remove(oldClientId);
-        RemovePlayerData(oldClientId);
+        Debug.Log(LOG + $"replacing live connection {oldClientId} of {playerId}");
+        // The normal disconnect then holds the seat and marks the avatar away until the new
+        // connection reclaims them, or the 60 s hold expires if the new one fails too.
         if (nm.ConnectedClients.ContainsKey(oldClientId))
             nm.DisconnectClient(oldClientId);
     }
@@ -680,14 +688,15 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         }
     }
     // Starts the client side of a join (first join or a rejoin) with this player's id in the payload.
-    private async Task<bool> StartClientTransport(string joinCode)
+    // stillWanted is checked after the (slow) Relay allocation, right before the client starts.
+    private async Task<bool> StartClientTransport(string joinCode, Func<bool> stillWanted = null)
     {
         PrepareConnection(AuthenticationService.Instance.PlayerId);
 #if UNITY_EDITOR
         if (joinCode == LOCAL_JOIN_CODE)
-            return StartLocalClient();
+            return (stillWanted == null || stillWanted()) && StartLocalClient();
 #endif
-        return await SessionManager.Instance.StartClientWithRelay(joinCode, "dtls");
+        return await SessionManager.Instance.StartClientWithRelay(joinCode, "dtls", stillWanted);
     }
 
     public void ShutdownAndReset()

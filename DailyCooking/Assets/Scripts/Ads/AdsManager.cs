@@ -163,6 +163,7 @@ public class AdsManager : PersistentSingleton<AdsManager>
     {
         if (!IsRewardedAdsLoaded() || IsShowingAd) { done?.Invoke(AdOutcome.NoAd); return; }
         rewardEarned = false;
+        callBackAction = null; // a stale claim from an earlier ad must not fire for this one
         rewardedDone = done ?? (o => { });
         rewardedAd.ShowAd(placementName);
     }

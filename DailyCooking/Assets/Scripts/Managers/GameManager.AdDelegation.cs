@@ -27,6 +27,11 @@ public partial class GameManager
     private ShopItemType pendingHostReward;
     private bool interstitialRetried;
     private float nextAdStateReportAt;
+    // Client: the ad prompts/coroutines of the current session, torn down when it ends or drops.
+    private Coroutine adConsentRoutine;
+    private Coroutine adForcedRoutine;
+    private Coroutine adInterstitialRoutine;
+    private bool adConsentPopupOpen;
     private AdDelegationConfigSO adDelegationConfig;
     private static float localLastInterstitialAt = float.NegativeInfinity;
 
@@ -197,29 +202,34 @@ public partial class GameManager
     [Rpc(SendTo.SpecifiedInParams)]
     private void AskWatchClientRpc(int requestId, int amount, bool forced, RpcParams rpcParams = default)
     {
+        if (!InPlayingSession()) return;
         if (forced)
-            StartCoroutine(ForcedWatch(requestId));
+            adForcedRoutine = StartCoroutine(ForcedWatch(requestId));
         else
-            StartCoroutine(AskConsent(requestId, amount));
+            adConsentRoutine = StartCoroutine(AskConsent(requestId, amount));
     }
 
     private IEnumerator AskConsent(int requestId, int amount)
     {
         bool answered = false;
+        adConsentPopupOpen = true;
         UIPopupManager.Instance.ShowPopup(UIPopupType.UIGameConfirmPopup, new UIGameConfirmPopup.Param
         {
             Title = "Watch an ad?",
             Message = $"The host asks you to watch an ad for +{amount}",
-            YesAction = () => { answered = true; WatchAndReport(requestId); },
-            NoAction = () => { answered = true; ReportAdServerRpc(requestId, AdOutcome.Declined); },
+            YesAction = () => { answered = true; adConsentPopupOpen = false; WatchAndReport(requestId); },
+            NoAction = () => { answered = true; adConsentPopupOpen = false; ReportAdIfPlaying(requestId, AdOutcome.Declined); },
         });
         float until = Time.unscaledTime + AdDelegationRules.ConsentSeconds;
         while (!answered && Time.unscaledTime < until)
             yield return null;
+        adConsentRoutine = null;
         if (!answered)
         {
-            UIPopupManager.Instance.HidePopup(UIPopupType.UIGameConfirmPopup);
-            ReportAdServerRpc(requestId, AdOutcome.Timeout);
+            if (adConsentPopupOpen)
+                UIPopupManager.Instance.HidePopup(UIPopupType.UIGameConfirmPopup);
+            adConsentPopupOpen = false;
+            ReportAdIfPlaying(requestId, AdOutcome.Timeout);
         }
     }
 
@@ -228,19 +238,30 @@ public partial class GameManager
         ReconnectingOverlay.SetVisible(true, FORCED_NOTICE);
         yield return new WaitForSecondsRealtime(FORCED_NOTICE_SECONDS);
         ReconnectingOverlay.SetVisible(false);
+        adForcedRoutine = null;
         WatchAndReport(requestId);
     }
 
+    // Only for the session that asked: never an ad (that rewards nobody) after it ended or dropped.
     private void WatchAndReport(int requestId)
     {
+        if (!InPlayingSession()) return;
         IAdProvider ads = AdProviders.Current;
         if (!ads.HasRewarded)
         {
             ReportAdServerRpc(requestId, AdOutcome.NoAd);
             return;
         }
-        ads.ShowRewarded("Host_Reward", outcome => ReportAdServerRpc(requestId, outcome));
+        ads.ShowRewarded("Host_Reward", outcome => ReportAdIfPlaying(requestId, outcome));
     }
+
+    private void ReportAdIfPlaying(int requestId, AdOutcome outcome)
+    {
+        if (InPlayingSession()) ReportAdServerRpc(requestId, outcome);
+    }
+
+    private bool InPlayingSession() =>
+        IsSpawned && MultiplayerManager.Instance != null && MultiplayerManager.Instance.Session.State == SessionState.InGame;
 
     [Rpc(SendTo.NotServer)]
     private void HostAdPauseClientRpc(bool paused)
@@ -276,7 +297,8 @@ public partial class GameManager
     [Rpc(SendTo.SpecifiedInParams)]
     private void ShowInterstitialClientRpc(RpcParams rpcParams = default)
     {
-        StartCoroutine(ShowInterstitialWhenSafe());
+        if (!InPlayingSession()) return;
+        adInterstitialRoutine = StartCoroutine(ShowInterstitialWhenSafe());
     }
 
     // Client: at a safe moment (no popup, not in a cooking close-up, 90 s since its last one), within 60 s.
@@ -285,7 +307,9 @@ public partial class GameManager
         float until = Time.unscaledTime + INTERSTITIAL_SAFE_WAIT_SECONDS;
         while (Time.unscaledTime < until && !IsSafeForInterstitial())
             yield return null;
+        adInterstitialRoutine = null;
         IAdProvider ads = AdProviders.Current;
+        if (!InPlayingSession()) yield break;
         if (!IsSafeForInterstitial() || !ads.HasInterstitial)
         {
             InterstitialResultServerRpc(false);
@@ -294,7 +318,7 @@ public partial class GameManager
         ads.ShowInterstitial("Break_Time_Host", outcome =>
         {
             NoteLocalInterstitialShown();
-            InterstitialResultServerRpc(outcome == AdOutcome.Completed);
+            if (InPlayingSession()) InterstitialResultServerRpc(outcome == AdOutcome.Completed);
         });
     }
 
@@ -367,6 +391,8 @@ public partial class GameManager
 
     private void AdDelegation_OnSessionChanged(SessionState state)
     {
+        if (state != SessionState.Ended && state != SessionState.Reconnecting) return;
+        TearDownAdPrompts();
         if (state != SessionState.Ended) return;
         adRules.CancelAll();
         adRequestRewards.Clear();
@@ -374,6 +400,23 @@ public partial class GameManager
         clientLastInterstitialAt.Clear();
         openAdRequestId = -1;
         lastAdPick = null;
+        HostAdNoticeShown = false;
+    }
+
+    // The session ended or dropped: no popup, prompt or pending ad of it may outlive it.
+    private void TearDownAdPrompts()
+    {
+        if (adConsentRoutine != null) StopCoroutine(adConsentRoutine);
+        if (adForcedRoutine != null) StopCoroutine(adForcedRoutine);
+        if (adInterstitialRoutine != null) StopCoroutine(adInterstitialRoutine);
+        adConsentRoutine = adForcedRoutine = adInterstitialRoutine = null;
+        if (UIPopupManager.Instance != null)
+        {
+            if (adConsentPopupOpen) UIPopupManager.Instance.HidePopup(UIPopupType.UIGameConfirmPopup);
+            UIPopupManager.Instance.HidePopup(UIPopupType.UIAdWatcherPopup);
+        }
+        adConsentPopupOpen = false;
+        if (HostAdNoticeShown) ReconnectingOverlay.SetVisible(false);
         HostAdNoticeShown = false;
     }
 

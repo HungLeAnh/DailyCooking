@@ -362,7 +362,9 @@ public class SessionManager : PersistentSingleton<SessionManager>
         var joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
         return NetworkManager.Singleton.StartHost() ? joinCode : null;
     }
-    public async Task<bool> StartClientWithRelay(string joinCode, string connectionType)
+    // stillWanted (optional) is checked after the allocation join, right before StartClient: a
+    // reconnect attempt can outlive its session while Relay answers.
+    public async Task<bool> StartClientWithRelay(string joinCode, string connectionType, System.Func<bool> stillWanted = null)
     {
         if (!AuthenticationService.Instance.IsSignedIn)
         {
@@ -374,6 +376,8 @@ public class SessionManager : PersistentSingleton<SessionManager>
         var unityTransport = NetworkManager.Singleton.GetComponent<UnityTransport>();
         NetworkManager.Singleton.NetworkConfig.NetworkTransport = unityTransport;
         unityTransport.SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
+        if (stillWanted != null && !stillWanted())
+            return false;
         return !string.IsNullOrEmpty(joinCode) && NetworkManager.Singleton.StartClient();
     }
     #endregion
