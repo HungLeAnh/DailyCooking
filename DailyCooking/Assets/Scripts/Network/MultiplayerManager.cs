@@ -31,6 +31,8 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
     private const float SNAPSHOT_TIMEOUT_SECONDS = 15f;
     private const float HOST_CLOSING_DELAY_SECONDS = 0.2f;
     private const string ROOM_FULL_REASON = "Room full";
+    // Sent to a connection the same player replaced from another device: it ends instead of retrying.
+    public const string REPLACED_REASON = "Replaced by another device";
     private const string LOG = "[Net] ";
 
     private NetworkList<PlayerData> playerDataNetworkList;
@@ -403,7 +405,7 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         // The normal disconnect then holds the seat and marks the avatar away until the new
         // connection reclaims them, or the 60 s hold expires if the new one fails too.
         if (nm.ConnectedClients.ContainsKey(oldClientId))
-            nm.DisconnectClient(oldClientId);
+            nm.DisconnectClient(oldClientId, REPLACED_REASON);
     }
     private void NetworkManager_Client_OnClientDisconnectCallback(ulong clientId)
     {
@@ -411,7 +413,9 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         if (nm != null && clientId != nm.LocalClientId && nm.IsConnectedClient) return;
         string reason = nm != null ? nm.DisconnectReason : null;
         Debug.Log(LOG + $"disconnected from host" + (string.IsNullOrEmpty(reason) ? "" : $": {reason}"));
-        if (reason == ROOM_FULL_REASON)
+        if (reason == REPLACED_REASON)
+            Session.Kicked(SessionEndReason.Replaced);
+        else if (reason == ROOM_FULL_REASON)
             Session.Refused(SessionEndReason.RoomFull);
         else
             Session.TransportLost();

@@ -2,7 +2,7 @@ using System;
 
 public enum SessionState { Idle, Joining, Syncing, InGame, Reconnecting, Hosting, Ended }
 
-public enum SessionEndReason { None, Quit, HostClosed, ConnectionLost, HostConnectionLost, RoomFull, JoinFailed }
+public enum SessionEndReason { None, Quit, HostClosed, ConnectionLost, HostConnectionLost, RoomFull, JoinFailed, Replaced }
 
 // Where this machine's network session is, and why it ended. Pure: MultiplayerManager feeds it
 // transport/handshake events and runs the single exit when it reaches Ended.
@@ -69,6 +69,15 @@ public sealed class SessionStateMachine
     public void Refused(SessionEndReason reason)
     {
         if (State == SessionState.Joining || State == SessionState.Syncing || State == SessionState.Reconnecting)
+            End(reason);
+    }
+
+    // The host ended this client's connection on purpose (e.g. the same player joined from another
+    // device): end at once, never retry.
+    public void Kicked(SessionEndReason reason)
+    {
+        if (State == SessionState.Joining || State == SessionState.Syncing
+            || State == SessionState.InGame || State == SessionState.Reconnecting)
             End(reason);
     }
 

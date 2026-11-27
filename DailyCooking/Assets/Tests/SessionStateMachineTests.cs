@@ -143,6 +143,30 @@ public class SessionStateMachineTests
         Assert.AreEqual(SessionEndReason.None, m.EndReason);
     }
 
+    [Test] public void Replaced_InGame_EndsReplaced()
+    {
+        var m = InGame();
+        m.Kicked(SessionEndReason.Replaced);
+        Assert.AreEqual(SessionState.Ended, m.State);
+        Assert.AreEqual(SessionEndReason.Replaced, m.EndReason);
+    }
+
+    [Test] public void Kicked_Reconnecting_EndsWithReason()
+    {
+        var m = InGame();
+        m.TransportLost();
+        m.Kicked(SessionEndReason.Replaced);
+        Assert.AreEqual(SessionEndReason.Replaced, m.EndReason);
+    }
+
+    [Test] public void Kicked_Hosting_Ignored()
+    {
+        var m = new SessionStateMachine();
+        m.StartHosting();
+        m.Kicked(SessionEndReason.Replaced);
+        Assert.AreEqual(SessionState.Hosting, m.State);
+    }
+
     [Test] public void OnChanged_FiresOncePerTransition()
     {
         var m = new SessionStateMachine();

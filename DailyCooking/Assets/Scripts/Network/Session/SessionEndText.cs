@@ -10,6 +10,7 @@ public static class SessionEndText
             case SessionEndReason.HostConnectionLost: return "Connection lost — your restaurant is saved";
             case SessionEndReason.RoomFull: return "Room full";
             case SessionEndReason.JoinFailed: return "Could not join the restaurant";
+            case SessionEndReason.Replaced: return "You joined from another device";
             default: return null;
         }
     }
