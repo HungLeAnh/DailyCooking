@@ -129,7 +129,13 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
             case SessionState.Reconnecting:
                 BeginReconnect();
                 break;
+            case SessionState.InGame:
+                StopReconnect();
+                ReconnectingOverlay.SetVisible(false);
+                break;
             case SessionState.Ended:
+                StopReconnect();
+                ReconnectingOverlay.SetVisible(false);
                 RunExit(Session.EndReason);
                 break;
         }
@@ -146,10 +152,85 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         }
     }
 
-    // Until the reconnect loop exists, a lost client ends the session at once.
+    private const float RETRY_INTERVAL_SECONDS = 3f;
+    private const float RETRY_WINDOW_SECONDS = 60f;
+    private Coroutine reconnectLoop;
+    private bool rejoinInFlight;
+
+    // A client lost the host while playing: retry the same join code every 3 s for 60 s through
+    // the normal join path (fresh snapshot, the kept avatar handed back).
     private void BeginReconnect()
     {
-        Session.RetryWindowOver();
+        ReconnectingOverlay.SetVisible(true);
+        if (reconnectLoop != null)
+            return; // back here from a failed rejoin: the window keeps running
+        if (string.IsNullOrEmpty(CurrentJoinCode))
+        {
+            Session.RetryWindowOver();
+            return;
+        }
+        reconnectLoop = StartCoroutine(ReconnectLoop(CurrentJoinCode));
+    }
+
+    private System.Collections.IEnumerator ReconnectLoop(string joinCode)
+    {
+        float started = Time.unscaledTime;
+        Debug.Log(LOG + $"reconnecting to {joinCode} for {RETRY_WINDOW_SECONDS:0} s");
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+            NetworkManager.Singleton.Shutdown();
+        // The host's snapshot replaces GameData on rejoin.
+        if (GameManager.Instance != null)
+            GameManager.Instance.ClearActiveSave();
+        snapshotAssembler.Reset();
+
+        while (Time.unscaledTime - started < RETRY_WINDOW_SECONDS
+               && (Session.State == SessionState.Reconnecting || Session.State == SessionState.Syncing))
+        {
+            if (Session.State == SessionState.Reconnecting && !rejoinInFlight
+                && NetworkManager.Singleton != null && !NetworkManager.Singleton.ShutdownInProgress
+                && !NetworkManager.Singleton.IsListening)
+                TryRejoin(joinCode);
+            yield return new WaitForSecondsRealtime(RETRY_INTERVAL_SECONDS);
+        }
+        // reconnectLoop stays set until here so BeginReconnect can't start a second window.
+        if (Session.State == SessionState.Syncing)
+            Session.SnapshotTimedOut(); // a rejoin still syncing: back to Reconnecting...
+        if (Session.State == SessionState.Reconnecting)
+        {
+            Debug.Log(LOG + "reconnect window over");
+            Session.RetryWindowOver(); // ...and out: "Connection lost"
+        }
+        reconnectLoop = null;
+    }
+
+    private async void TryRejoin(string joinCode)
+    {
+        rejoinInFlight = true;
+        try
+        {
+            Debug.Log(LOG + "rejoin attempt");
+            bool started = await StartClientTransport(joinCode);
+            if (!started)
+                Debug.Log(LOG + "rejoin attempt failed to start");
+        }
+        catch (Exception e)
+        {
+            Debug.Log(LOG + $"rejoin attempt failed: {e.Message}");
+        }
+        finally
+        {
+            rejoinInFlight = false;
+        }
+    }
+
+    private void StopReconnect()
+    {
+        if (reconnectLoop != null)
+        {
+            StopCoroutine(reconnectLoop);
+            reconnectLoop = null;
+        }
+        rejoinInFlight = false;
     }
 
     // The one way out of a session, whatever ended it.
@@ -327,7 +408,10 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
     {
         // Only this local client's own connection starts the handshake.
         if (clientId != NetworkManager.Singleton.LocalClientId) return;
-        Session.Connected();
+        if (Session.State == SessionState.Reconnecting)
+            Session.RejoinSucceeded();
+        else
+            Session.Connected();
         SetplayerNameServerRpc(GetPlayerName());
         SetplayerIdServerRpc(AuthenticationService.Instance.PlayerId);
         SyncDataToNewClientServerRpc();
@@ -581,16 +665,9 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
 
             if (Session.State == SessionState.Ended) Session.Reset();
             CurrentJoinCode = joinCode;
-            PrepareConnection(AuthenticationService.Instance.PlayerId);
             Session.StartJoining();
             SubscribeTransportEvents();
-            bool started;
-#if UNITY_EDITOR
-            if (joinCode == LOCAL_JOIN_CODE)
-                started = StartLocalClient();
-            else
-#endif
-            started = await SessionManager.Instance.StartClientWithRelay(joinCode, "dtls");
+            bool started = await StartClientTransport(joinCode);
             if (!started)
                 Session.Refused(SessionEndReason.JoinFailed);
             return started;
@@ -602,6 +679,17 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
             return false;
         }
     }
+    // Starts the client side of a join (first join or a rejoin) with this player's id in the payload.
+    private async Task<bool> StartClientTransport(string joinCode)
+    {
+        PrepareConnection(AuthenticationService.Instance.PlayerId);
+#if UNITY_EDITOR
+        if (joinCode == LOCAL_JOIN_CODE)
+            return StartLocalClient();
+#endif
+        return await SessionManager.Instance.StartClientWithRelay(joinCode, "dtls");
+    }
+
     public void ShutdownAndReset()
     {
         bool wasServer = NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer;
