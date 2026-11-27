@@ -6,7 +6,7 @@ using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
 
-// Editor-only drivers for the profiling scenarios in docs/plans/13-profiler-baseline.md.
+// Editor-only drivers for the profiling scenarios in docs/optimization-log.md (mục 13).
 // They replay the exact code path the MainMenu buttons run (UIMainMenuPopup.cs:20-39), so the
 // work the profiler sees matches production instead of a shortcut.
 // Never part of a build: lives under Assets/Editor/.

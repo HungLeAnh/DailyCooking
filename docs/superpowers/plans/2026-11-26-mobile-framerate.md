@@ -112,9 +112,9 @@
 
 ### Task 8: GC cleanup and docs
 
-**Files:** Modify `Scripts/UI/QualityStarsOverlay.cs`, `Scripts/Camera/CloseUpOccluderHider.cs`, `docs/project_overview.md`, `docs/optimization_plan.md`
+**Files:** Modify `Scripts/UI/QualityStarsOverlay.cs`, `Scripts/Camera/CloseUpOccluderHider.cs`, `docs/project_overview.md`, `docs/optimization-log.md`
 
 - [ ] **Step 1:** Index loops over `KitchenObject.Spawned` / `PlayerStateMachine.All`; cache the held object's renderer array in the hider (refresh only when the held object changes).
 - [ ] **Step 2:** Play Mode busy kitchen: `GC Allocated In Frame` not above the ≈1.4 KB/frame baseline with a hidden avatar holding food.
-- [ ] **Step 3:** Docs: overview paragraph "Mobile performance"; `optimization_plan.md` section with the 2026-11-26 measurements and what remains for on-device testing.
+- [ ] **Step 3:** Docs: overview paragraph "Mobile performance"; `optimization-log.md` section with the 2026-11-26 measurements and what remains for on-device testing.
 - [ ] **Step 4: Run EditMode → all pass. Commit** `perf: no per-frame garbage in the star overlay and avatar hider; docs`

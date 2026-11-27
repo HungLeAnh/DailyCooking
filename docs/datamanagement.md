@@ -165,7 +165,7 @@ Resolved — the `propertyPath: upgradeDataList` prefab modification is no longe
 ### 4.7 Mixed Counter Data Pattern
 
 Counter biết "mình chứa gì" theo **một trong hai** cách. Đây là **quy ước có chủ đích**, không phải
-nợ kỹ thuật — đã điều tra đầy đủ ở `docs/plans/10-counter-data-pattern.md`.
+nợ kỹ thuật — đã điều tra đầy đủ ở `docs/optimization-log.md` mục 10.
 
 **A. Resolve theo GUID** — `PlacedObjectView.GetPlacedObjectTypeSOGuid()` → tra
 `KitchenGameManager.KitchenObjectSODic` / `ContainerDataSerializable`, state đi qua
@@ -215,7 +215,7 @@ if (_tablewareKitchenObjectSO == null)
 2. Dùng B → thêm guard null + `LogError` như trên; ghi 1 dòng comment trong class nói rõ
    "fixed-content, baked on purpose" để người sau không tưởng là thiếu sót.
 3. Dùng A → nhớ rằng GUID là **Unity asset GUID** (`PlacedObjectTypeSO.Guid`), không phải id số;
-   xem §4.2 về ba nguồn dữ liệu và mục 12 trong `docs/plans/`.
+   xem §4.2 về ba nguồn dữ liệu và mục 12 trong `docs/optimization-log.md`.
 
 ### 4.8 Content Registration Burden
 

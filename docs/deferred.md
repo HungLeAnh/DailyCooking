@@ -2,8 +2,8 @@
 
 Tổng hợp từ các tài liệu trong `docs/`. Cập nhật lần cuối: **2026-11-14**.
 
-Nguồn: `optimization_plan.md` §3, `plans/README.md`, `datamanagement.md` §4–5,
-`project_analysis.md` §11–12, `dataflow.md` §8, `phases.md`, `phase5_summary.md`.
+Nguồn: `optimization-log.md` (gộp từ `optimization_plan.md` + `plans/*`), `datamanagement.md` §4–5,
+`dataflow.md` §8, `phases.md` (và `project_analysis.md`, `phase5_summary.md` — đã xoá, nội dung đã chép vào đây).
 
 Quy ước trạng thái:
 
@@ -19,7 +19,7 @@ Quy ước trạng thái:
 
 ## 1. Mạng & hiệu năng
 
-Nhóm A trong `plans/README.md` là **đề xuất của agent, chưa được chủ dự án xác nhận** —
+Nhóm A trong `optimization-log.md` §4 là **đề xuất của agent, chưa được chủ dự án xác nhận** —
 có thể kéo lại làm bất cứ lúc nào.
 
 | Mục | Việc còn lại | Trạng thái |
@@ -35,7 +35,7 @@ có thể kéo lại làm bất cứ lúc nào.
 | 09 Bước 3 | Guard lúc build cho `ShopItemCategory` (số ghim ≠ thứ tự asset → `LogError`) | ⏸ Chưa làm (Bước 2 `[InspectorName]` đã có) |
 | 15 | `InteractAlternateEvent` của `TablewareKitchenObject` và `PostBox` không tới được vì thiếu `IHasProgress` | ⏸ Chưa sửa — chưa xác định hành vi mong muốn |
 
-Chi tiết từng mục: `docs/plans/01-…` → `docs/plans/12-…`, `docs/plans/15-…`.
+Chi tiết từng mục: `docs/optimization-log.md` §2 (mục 01–12, 15).
 
 ## 2. Chưa kiểm được / chặn môi trường
 
@@ -54,14 +54,14 @@ Chi tiết từng mục: `docs/plans/01-…` → `docs/plans/12-…`, `docs/plan
 |---|---|---|
 | `datamanagement.md` §4.2 | Shop GUID trùng lặp ở 3 lookup (`ConfigShop`, `PlacedObjectDatabase`, `KitchenObjectSODic`) | ⏸ Open — 3 dictionary trên cùng không gian GUID |
 | `datamanagement.md` Tier 2 #2 | Spawned kitchen object đọc SO từ field baked (gộp với mục 11) | ⏸ Hoãn tới Addressables |
-| `datamanagement.md` Tier 2 #4 | Chuẩn hoá mọi counter về GUID-resolved | ❌ Không nên làm — `plans/10` kết luận 2 pattern là đúng |
+| `datamanagement.md` Tier 2 #4 | Chuẩn hoá mọi counter về GUID-resolved | ❌ Không nên làm — `optimization-log.md` mục 10 kết luận 2 pattern là đúng |
 | `datamanagement.md` Tier 3 #1, #2 | Pool kitchen object + tách `PrefabSpawnService` | ❌ Đã revert — xung đột `NetworkObject` lifetime |
 | `datamanagement.md` Tier 3 #3 | Addressables cho content streaming | ⏸ Future consideration |
 | `datamanagement.md` §4.8 | Thêm food/counter phải sửa 4 chỗ (SO, prefab, list scene, `DefaultNetworkPrefabs`) | ⏸ Nợ quy trình — chưa có tool hỗ trợ |
 
 ## 4. Nợ kỹ thuật & rủi ro (ưu tiên giảm dần)
 
-Nguồn: `project_analysis.md` §11–12, `dataflow.md` §8.
+Nguồn: `dataflow.md` §8 (và `project_analysis.md` §11–12, đã xoá).
 
 | Ưu tiên | Việc |
 |---|---|
@@ -86,7 +86,7 @@ Nguồn: `project_analysis.md` §11–12, `dataflow.md` §8.
 
 | Việc | Trạng thái |
 |---|---|
-| `FoodCompleteVisual` cho 14 món mới trên `plate.prefab` / `cup.prefab` (`phases.md`, `phase5_summary.md`) | ⏳ `plate.prefab` + `bowl.prefab` đã có `FoodCompleteVisual`; **`cup.prefab` chưa có** |
+| `FoodCompleteVisual` cho 14 món mới trên `plate.prefab` / `cup.prefab` (`phases.md`) | ⏳ `plate.prefab` + `bowl.prefab` đã có `FoodCompleteVisual`; **`cup.prefab` chưa có** |
 
 Serving/completion không phụ thuộc phần này — `BotCustomerController` so sánh
 `foodSO.kitchenObjectSOList` với `GetKitchenObjectSOList()` của tableware.
@@ -97,6 +97,6 @@ Serving/completion không phụ thuộc phần này — `BotCustomerController` 
 
 | Doc | Chỗ sửa | Bằng chứng |
 |---|---|---|
-| `optimization_plan.md` §3 mục 5 | Từ "17 `Camera.main` còn lại" → ✅ đã cache hết | `Assets/Scripts` chỉ còn 4 chỗ: `UtilsClass.cs:32`, `Window_QuestPointer.cs:32`, `LookAtCamera.cs:17` (cache) và `CameraController.cs:142` (comment) |
+| `optimization-log.md` mục 05 | Từ "17 `Camera.main` còn lại" → ✅ đã cache hết | `Assets/Scripts` chỉ còn 4 chỗ: `UtilsClass.cs:32`, `Window_QuestPointer.cs:32`, `LookAtCamera.cs:17` (cache) và `CameraController.cs:142` (comment) |
 | `datamanagement.md` §4.3 | Enum int thô `⏳ Pending` → ✅ Fixed | `ShopItemCategory.cs` ghim số + `None = 9999`; plan 09 đã migrate `ConfigShopSO.asset` |
 | `datamanagement.md` §4.2 + Tier 3 #4 | `UIShopItem` linear `Find` `⏳ Open` → ✅ Fixed | `UIShopItem.cs:112,130` dùng `GetValueOrDefault`; plan 12 đã đóng |
