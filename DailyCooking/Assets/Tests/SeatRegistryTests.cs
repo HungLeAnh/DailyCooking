@@ -15,13 +15,13 @@ public class SeatRegistryTests
     [Test] public void NewPlayer_FreeSeat_Approved()
     {
         var s = WithLive(2);
-        Assert.AreEqual(SeatRegistry.ApprovalResult.Approved, s.Approve("new", Max));
+        Assert.AreEqual(SeatRegistry.ApprovalResult.Approved, s.Approve("new", 99, Max, 0f));
     }
 
     [Test] public void Full_NewPlayer_RoomFull()
     {
         var s = WithLive(4);
-        Assert.AreEqual(SeatRegistry.ApprovalResult.RoomFull, s.Approve("new", Max));
+        Assert.AreEqual(SeatRegistry.ApprovalResult.RoomFull, s.Approve("new", 99, Max, 0f));
     }
 
     [Test] public void HeldSeat_CountsAsTaken()
@@ -30,13 +30,13 @@ public class SeatRegistryTests
         s.Disconnected("p3", 3, 0f);
         Assert.IsTrue(s.IsHeld("p3"));
         Assert.AreEqual(4, s.TakenSeats);
-        Assert.AreEqual(SeatRegistry.ApprovalResult.RoomFull, s.Approve("new", Max));
+        Assert.AreEqual(SeatRegistry.ApprovalResult.RoomFull, s.Approve("new", 99, Max, 0f));
     }
 
     [Test] public void KnownLive_ApprovedReplaceLive()
     {
         var s = WithLive(4);
-        Assert.AreEqual(SeatRegistry.ApprovalResult.ApprovedReplaceLive, s.Approve("p2", Max));
+        Assert.AreEqual(SeatRegistry.ApprovalResult.ApprovedReplaceLive, s.Approve("p2", 99, Max, 0f));
         Assert.AreEqual(2UL, s.LiveClient("p2"));
     }
 
@@ -44,14 +44,14 @@ public class SeatRegistryTests
     {
         var s = WithLive(4);
         s.Disconnected("p1", 1, 0f);
-        Assert.AreEqual(SeatRegistry.ApprovalResult.ApprovedReclaimHeld, s.Approve("p1", Max));
+        Assert.AreEqual(SeatRegistry.ApprovalResult.ApprovedReclaimHeld, s.Approve("p1", 99, Max, 0f));
     }
 
     [Test] public void EmptyId_TreatedAsNewPlayer()
     {
         var s = WithLive(4);
-        Assert.AreEqual(SeatRegistry.ApprovalResult.RoomFull, s.Approve("", Max));
-        Assert.AreEqual(SeatRegistry.ApprovalResult.Approved, WithLive(1).Approve(null, Max));
+        Assert.AreEqual(SeatRegistry.ApprovalResult.RoomFull, s.Approve("", 99, Max, 0f));
+        Assert.AreEqual(SeatRegistry.ApprovalResult.Approved, WithLive(1).Approve(null, 99, Max, 0f));
     }
 
     [Test] public void Expire_After60s_ReleasesSeat()
@@ -61,7 +61,7 @@ public class SeatRegistryTests
         CollectionAssert.AreEqual(new[] { "p0" }, s.Expire(70f));
         Assert.IsFalse(s.IsHeld("p0"));
         Assert.AreEqual(3, s.TakenSeats);
-        Assert.AreEqual(SeatRegistry.ApprovalResult.Approved, s.Approve("new", Max));
+        Assert.AreEqual(SeatRegistry.ApprovalResult.Approved, s.Approve("new", 99, Max, 0f));
     }
 
     [Test] public void Expire_Before60s_Keeps()
@@ -99,6 +99,57 @@ public class SeatRegistryTests
         Assert.IsFalse(s.IsHeld("p2"));
         Assert.AreEqual(3, s.TakenSeats);
         Assert.IsFalse(s.Release("p2"), "nothing left to release");
+    }
+
+    [Test] public void TwoPendingJoins_SecondRefusedWhenOneSeatLeft()
+    {
+        var s = WithLive(3);
+        Assert.AreEqual(SeatRegistry.ApprovalResult.Approved, s.Approve("a", 7, Max, 0f));
+        Assert.AreEqual(SeatRegistry.ApprovalResult.RoomFull, s.Approve("b", 8, Max, 0f));
+    }
+
+    [Test] public void PendingClearedOnConnect()
+    {
+        var s = WithLive(2);
+        s.Approve("a", 7, Max, 0f);
+        Assert.AreEqual(3, s.TakenSeats);
+        s.Connected("a", 7);
+        Assert.AreEqual(3, s.TakenSeats);
+    }
+
+    [Test] public void PendingClearedOnDropBeforeConnect()
+    {
+        var s = WithLive(3);
+        s.Approve("a", 7, Max, 0f);
+        s.DroppedBeforeConnect(7);
+        Assert.AreEqual(3, s.TakenSeats);
+        Assert.AreEqual(SeatRegistry.ApprovalResult.Approved, s.Approve("b", 8, Max, 1f));
+    }
+
+    [Test] public void PendingExpiresAfter30s()
+    {
+        var s = WithLive(3);
+        s.Approve("a", 7, Max, 0f);
+        CollectionAssert.IsEmpty(s.Expire(29.9f));
+        Assert.AreEqual(4, s.TakenSeats);
+        CollectionAssert.IsEmpty(s.Expire(30.1f));
+        Assert.AreEqual(3, s.TakenSeats);
+    }
+
+    [Test] public void ReclaimHeld_DoesNotDoubleCount()
+    {
+        var s = WithLive(4);
+        s.Disconnected("p1", 1, 0f);
+        Assert.AreEqual(SeatRegistry.ApprovalResult.ApprovedReclaimHeld, s.Approve("p1", 9, Max, 1f));
+        Assert.AreEqual(4, s.TakenSeats);
+    }
+
+    [Test] public void PendingWithoutId_ClearedOnConnect()
+    {
+        var s = WithLive(1);
+        s.Approve(null, 7, Max, 0f);
+        s.Connected(null, 7);
+        Assert.AreEqual(1, s.TakenSeats);
     }
 
     [Test] public void Clear_EmptiesEverything()

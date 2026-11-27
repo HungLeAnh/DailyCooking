@@ -335,7 +335,12 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
         RemovePlayerData(clientId);
         StopHearing(clientId);
         approvedPlayerIds.Remove(clientId);
-        if (!playerIdByClient.TryGetValue(clientId, out string playerId)) return;
+        if (!playerIdByClient.TryGetValue(clientId, out string playerId))
+        {
+            // Never finished connecting: give its pending seat back.
+            Seats.DroppedBeforeConnect(clientId);
+            return;
+        }
         playerIdByClient.Remove(clientId);
         Seats.Disconnected(playerId, clientId, Time.unscaledTime);
         if (Seats.IsHeld(playerId))
@@ -369,7 +374,7 @@ public partial class MultiplayerManager : NetworkPersistentSingleton<Multiplayer
             connectionApprovalResponse.Approved = true;
             return;
         }
-        SeatRegistry.ApprovalResult result = Seats.Approve(playerId, MAX_PLAYER_AMOUNT);
+        SeatRegistry.ApprovalResult result = Seats.Approve(playerId, clientId, MAX_PLAYER_AMOUNT, Time.unscaledTime);
         if (result == SeatRegistry.ApprovalResult.RoomFull)
         {
             Debug.Log(LOG + $"refused {playerId}: room full");
